@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Saber Zou — Design & Projects</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -18,7 +18,6 @@
   --border: #E8E8E4;
   --serif: 'Instrument Serif', Georgia, serif;
   --sans: 'Inter', -apple-system, sans-serif;
-  --mono: 'JetBrains Mono', monospace;
 }
 
 html { font-size: 16px; }
@@ -45,7 +44,6 @@ nav {
   padding: 24px 40px;
   pointer-events: none;
 }
-
 nav > * { pointer-events: auto; }
 
 .nav-name {
@@ -58,219 +56,88 @@ nav > * { pointer-events: auto; }
 }
 .nav-name:hover { opacity: 0.6; }
 
-.nav-links {
-  display: flex;
-  gap: 32px;
-  list-style: none;
-}
-
+.nav-links { display: flex; gap: 32px; list-style: none; }
 .nav-links a {
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--fg-muted);
-  text-decoration: none;
-  cursor: pointer;
-  transition: color 0.3s;
+  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--fg-muted);
+  text-decoration: none; cursor: pointer; transition: color 0.3s;
 }
 .nav-links a:hover { color: var(--fg); }
 .nav-links a.active { color: var(--fg); }
 
 /* ─── Sections ─── */
 .section {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
-
 .section.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(20px);
+  opacity: 0; pointer-events: none; transform: translateY(20px);
 }
 
-/* ─── Projects Section ─── */
+/* ─── Projects ─── */
 #projects-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
 }
 
-/* Three.js canvas */
-#three-canvas {
+#three-canvas { position: fixed; inset: 0; z-index: 1; }
+
+/* ─── Floating description (HTML overlay) ─── */
+.project-info {
   position: fixed;
-  inset: 0;
-  z-index: 1;
-}
-
-/* ─── Project Detail Overlay ─── */
-#project-detail {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: var(--bg);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-  overflow-y: auto;
-  padding: 100px 40px 80px;
-}
-
-#project-detail.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.detail-close {
-  position: fixed;
-  top: 24px;
-  right: 40px;
-  z-index: 210;
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--fg-muted);
-  cursor: pointer;
-  background: none;
-  border: none;
-  font-family: var(--sans);
-  transition: color 0.3s;
-}
-.detail-close:hover { color: var(--fg); }
-
-.detail-content {
-  max-width: 640px;
-  margin: 0 auto;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
   text-align: center;
+  max-width: 480px;
+  width: 90%;
+  pointer-events: none;
 }
 
-.detail-meta {
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--fg-light);
-  margin-bottom: 16px;
-}
-
-.detail-content h2 {
-  font-family: var(--serif);
-  font-size: 2.8rem;
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-bottom: 24px;
-}
-
-.detail-content .detail-desc {
-  font-size: 1.05rem;
-  line-height: 1.75;
+.project-info .info-description {
+  font-size: 0.95rem;
+  line-height: 1.7;
   color: var(--fg-muted);
   font-weight: 300;
-  margin-bottom: 32px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-.detail-content .detail-link {
+.project-info.settled .info-description {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.project-info .info-link {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
+  gap: 6px;
+  margin-top: 16px;
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--accent);
   text-decoration: none;
-  transition: opacity 0.3s;
-}
-.detail-content .detail-link:hover { opacity: 0.7; }
-.detail-content .detail-link::after {
-  content: '→';
-  transition: transform 0.3s;
-}
-.detail-content .detail-link:hover::after {
-  transform: translateX(4px);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease 0.1s, transform 0.5s ease 0.1s;
 }
 
-.detail-tags {
-  margin-top: 40px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
+.project-info.settled .info-link {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.detail-tags span {
-  font-size: 0.7rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--fg-light);
-  padding: 4px 12px;
-  border: 1px solid var(--border);
-  border-radius: 100px;
-}
+.project-info .info-link:hover { opacity: 0.7; }
+.project-info .info-link::after { content: '→'; transition: transform 0.3s; }
+.project-info .info-link:hover::after { transform: translateX(4px); }
 
-/* ─── Bio Section ─── */
-#bio-section {
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
-  overflow-y: auto;
-}
-
-.bio-content {
-  max-width: 560px;
-  text-align: center;
-}
-
-.bio-content h2 {
-  font-family: var(--serif);
-  font-size: 3rem;
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-bottom: 32px;
-}
-
-.bio-content p {
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: var(--fg-muted);
-  font-weight: 300;
-  margin-bottom: 20px;
-}
-
-.bio-content p strong {
-  color: var(--fg);
-  font-weight: 500;
-}
-
-.bio-links {
-  margin-top: 40px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 24px;
-  justify-content: center;
-}
-
-.bio-links a {
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--fg-muted);
-  text-decoration: none;
-  transition: color 0.3s;
-}
-.bio-links a:hover { color: var(--accent); }
-
-/* ─── Project counter ─── */
+/* ─── Counter ─── */
 .project-counter {
   position: fixed;
   bottom: 32px;
@@ -283,26 +150,99 @@ nav > * { pointer-events: auto; }
   font-variant-numeric: tabular-nums;
 }
 
+/* ─── Project Detail Overlay ─── */
+#project-detail {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--bg);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.5s ease;
+  overflow-y: auto; padding: 100px 40px 80px;
+}
+#project-detail.visible { opacity: 1; pointer-events: auto; }
+
+.detail-close {
+  position: fixed; top: 24px; right: 40px; z-index: 210;
+  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--fg-muted);
+  cursor: pointer; background: none; border: none;
+  font-family: var(--sans); transition: color 0.3s;
+}
+.detail-close:hover { color: var(--fg); }
+
+.detail-content { max-width: 640px; margin: 0 auto; text-align: center; }
+.detail-meta {
+  font-size: 0.7rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--fg-light); margin-bottom: 16px;
+}
+.detail-content h2 {
+  font-family: var(--serif); font-size: 2.8rem; font-weight: 400;
+  line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 24px;
+}
+.detail-content .detail-desc {
+  font-size: 1.05rem; line-height: 1.75;
+  color: var(--fg-muted); font-weight: 300; margin-bottom: 32px;
+}
+.detail-content .detail-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--accent);
+  text-decoration: none; transition: opacity 0.3s;
+}
+.detail-content .detail-link:hover { opacity: 0.7; }
+.detail-content .detail-link::after { content: '→'; transition: transform 0.3s; }
+.detail-content .detail-link:hover::after { transform: translateX(4px); }
+
+.detail-tags {
+  margin-top: 40px; padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.detail-tags span {
+  font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--fg-light); padding: 4px 12px;
+  border: 1px solid var(--border); border-radius: 100px;
+}
+
+/* ─── Bio Section ─── */
+#bio-section { justify-content: center; align-items: center; padding: 40px; overflow-y: auto; }
+.bio-content { max-width: 560px; text-align: center; }
+.bio-content h2 {
+  font-family: var(--serif); font-size: 3rem; font-weight: 400;
+  line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 32px;
+}
+.bio-content p {
+  font-size: 1.05rem; line-height: 1.8;
+  color: var(--fg-muted); font-weight: 300; margin-bottom: 20px;
+}
+.bio-content p strong { color: var(--fg); font-weight: 500; }
+.bio-links {
+  margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border);
+  display: flex; gap: 24px; justify-content: center;
+}
+.bio-links a {
+  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--fg-muted);
+  text-decoration: none; transition: color 0.3s;
+}
+.bio-links a:hover { color: var(--accent); }
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   nav { padding: 20px 24px; }
   .nav-links { gap: 20px; }
   .nav-links a { font-size: 0.7rem; }
-
+  .project-info { bottom: 80px; }
   #project-detail { padding: 80px 24px 60px; }
   .detail-content h2 { font-size: 2rem; }
   .detail-close { right: 24px; }
-
   #bio-section { padding: 80px 24px 40px; }
   .bio-content h2 { font-size: 2.2rem; }
-
   .project-counter { bottom: 20px; }
 }
 </style>
 </head>
 <body>
 
-<!-- Navigation -->
 <nav>
   <div class="nav-name">Saber Zou</div>
   <ul class="nav-links">
@@ -311,31 +251,21 @@ nav > * { pointer-events: auto; }
   </ul>
 </nav>
 
-<!-- Projects Section -->
 <div id="projects-section" class="section">
   <canvas id="three-canvas"></canvas>
+  <div class="project-info" id="project-info">
+    <div class="info-description" id="info-description"></div>
+    <a class="info-link" id="info-link" href="#" target="_blank" style="display:none">View Project</a>
+  </div>
   <div class="project-counter"><span id="counter-current">01</span> / <span id="counter-total">06</span></div>
 </div>
 
-<!-- Bio Section -->
 <div id="bio-section" class="section hidden">
   <div class="bio-content">
     <h2>About</h2>
-    <p>
-      <strong>Saber Zou</strong> is a Design Team Lead at Microsoft, 
-      leading 70+ designers across AI, Search, Browser, and Content 
-      experiences — core products used by billions of people worldwide.
-    </p>
-    <p>
-      Based in Beijing, he works at the intersection of design leadership 
-      and emerging technology, shaping how people interact with AI-powered 
-      tools every day.
-    </p>
-    <p>
-      Outside of work, he explores street photography, draws simple 
-      sketches on iPad, and builds experimental projects that push 
-      the boundaries of what AI and design can do together.
-    </p>
+    <p><strong>Saber Zou</strong> is a Design Team Lead at Microsoft, leading 70+ designers across AI, Search, Browser, and Content experiences — core products used by billions of people worldwide.</p>
+    <p>Based in Beijing, he works at the intersection of design leadership and emerging technology, shaping how people interact with AI-powered tools every day.</p>
+    <p>Outside of work, he explores street photography, draws simple sketches on iPad, and builds experimental projects that push the boundaries of what AI and design can do together.</p>
     <div class="bio-links">
       <a href="https://github.com/saberzou" target="_blank">GitHub</a>
       <a href="https://x.com/saberzou" target="_blank">X / Twitter</a>
@@ -343,7 +273,6 @@ nav > * { pointer-events: auto; }
   </div>
 </div>
 
-<!-- Project Detail Overlay -->
 <div id="project-detail">
   <button class="detail-close" onclick="closeDetail()">Close</button>
   <div class="detail-content">
@@ -366,12 +295,10 @@ nav > * { pointer-events: auto; }
 <script type="module">
 import * as THREE from 'three';
 
-// ─── Project Data ───
 const projects = [
   {
     title: 'JSON Prompts',
-    subtitle: 'AI Image Prompt Gallery',
-    description: 'A curated gallery of AI image generation prompts in JSON format. Features an infinite pannable canvas with momentum scrolling, mixed tile sizes, and seamless wrapping — built as a single HTML file with zero dependencies.',
+    description: 'A curated gallery of AI image generation prompts. Infinite pannable canvas with momentum scrolling, mixed tile sizes, and seamless wrapping.',
     year: '2025',
     tags: ['AI', 'Gallery', 'Web'],
     link: 'https://saberzou.github.io/json-prompts/',
@@ -379,8 +306,7 @@ const projects = [
   },
   {
     title: 'Atticus',
-    subtitle: 'AI Living Notebook',
-    description: 'A living notebook powered by AI — collecting thoughts on mistakes, how humans work, tools that changed thinking, and letters to the future. Features a 3D generative header built with Three.js, fully GFW-proof.',
+    description: 'A living notebook powered by AI — collecting thoughts on mistakes, how humans work, tools that changed thinking, and letters to the future.',
     year: '2025',
     tags: ['AI', 'Writing', 'Three.js'],
     link: 'https://saberzou.github.io/atticus/',
@@ -388,8 +314,7 @@ const projects = [
   },
   {
     title: 'Design at Scale',
-    subtitle: 'Leading 70+ Designers at Microsoft',
-    description: 'Leading design across AI, Search, Browser, and Content experiences at Microsoft — products touched by billions. Shaping design systems, team culture, and the craft of making complex technology feel simple.',
+    description: 'Leading design across AI, Search, Browser, and Content experiences at Microsoft — shaping design systems, team culture, and craft at billion-user scale.',
     year: '2020–Present',
     tags: ['Leadership', 'Design Systems', 'AI'],
     link: null,
@@ -397,8 +322,7 @@ const projects = [
   },
   {
     title: 'AI × Search',
-    subtitle: 'Reimagining Information Discovery',
-    description: 'Designing the next generation of search experiences where AI augments human curiosity. From conversational interfaces to visual discovery — rethinking how people find and understand information.',
+    description: 'Designing the next generation of search — where AI augments human curiosity through conversational interfaces and visual discovery.',
     year: '2023–Present',
     tags: ['AI', 'Search', 'Product Design'],
     link: null,
@@ -406,8 +330,7 @@ const projects = [
   },
   {
     title: 'Street Photography',
-    subtitle: 'Beijing & Beyond',
-    description: 'An ongoing practice of seeing — capturing the rhythm, light, and quiet drama of everyday life on the streets of Beijing and wherever the road leads.',
+    description: 'An ongoing practice of seeing — capturing the rhythm, light, and quiet drama of everyday life on the streets of Beijing.',
     year: 'Ongoing',
     tags: ['Photography', 'Personal'],
     link: null,
@@ -415,8 +338,7 @@ const projects = [
   },
   {
     title: 'OpenClaw Experiments',
-    subtitle: 'AI Agent Explorations',
-    description: 'Building and experimenting with AI agents — from personal assistants to creative tools. Exploring how AI can be a genuine collaborator, not just a chatbot.',
+    description: 'Building and experimenting with AI agents — exploring how AI can be a genuine collaborator, not just a chatbot.',
     year: '2025',
     tags: ['AI', 'Agents', 'Tools'],
     link: null,
@@ -428,8 +350,9 @@ const projects = [
 let currentIndex = 0;
 let scrollVelocity = 0;
 let currentSection = 'projects';
+let lastSettledIndex = -1;
 
-// ─── Scene Setup ───
+// ─── Scene ───
 const canvas = document.getElementById('three-canvas');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#FAFAF8');
@@ -437,22 +360,19 @@ scene.background = new THREE.Color('#FAFAF8');
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(0, 0, 14);
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// ─── Create Project Text (no card, just text on transparent plane) ───
+// ─── Create title-only textures ───
 const cardGroup = new THREE.Group();
 scene.add(cardGroup);
 
-// Center the cards
-cardGroup.position.x = 0;
-
 const cardMeshes = [];
-const CARD_SPACING = 2.8;
-const PERSPECTIVE_CURVE = 0.4;
+const CARD_SPACING = 2.4;
+const PERSPECTIVE_CURVE = 0.5;
 
-function createTextTexture(project, width = 600, height = 160) {
+function createTitleTexture(project, width = 600, height = 80) {
   const cvs = document.createElement('canvas');
   const dpr = 2;
   cvs.width = width * dpr;
@@ -460,25 +380,14 @@ function createTextTexture(project, width = 600, height = 160) {
   const ctx = cvs.getContext('2d');
   ctx.scale(dpr, dpr);
 
-  // Fully transparent background — no card
   ctx.clearRect(0, 0, width, height);
 
-  // Year — small, above title
+  // Title only — large, centered
   ctx.textAlign = 'center';
-  ctx.font = '500 11px Inter, sans-serif';
-  ctx.fillStyle = '#9A9A9A';
-  ctx.letterSpacing = '2px';
-  ctx.fillText(project.year.toUpperCase(), width / 2, 36);
-
-  // Title — large serif, centered
-  ctx.font = '400 44px Georgia, Instrument Serif, serif';
+  ctx.textBaseline = 'middle';
+  ctx.font = '400 46px Georgia, Instrument Serif, serif';
   ctx.fillStyle = '#1A1A1A';
-  ctx.fillText(project.title, width / 2, 82);
-
-  // Subtitle — lighter, centered
-  ctx.font = '300 16px Inter, sans-serif';
-  ctx.fillStyle = '#6B6B6B';
-  ctx.fillText(project.subtitle, width / 2, 114);
+  ctx.fillText(project.title, width / 2, height / 2);
 
   const texture = new THREE.CanvasTexture(cvs);
   texture.minFilter = THREE.LinearFilter;
@@ -487,12 +396,11 @@ function createTextTexture(project, width = 600, height = 160) {
 }
 
 projects.forEach((project, i) => {
-  const texture = createTextTexture(project);
-  const geo = new THREE.PlaneGeometry(7, 1.8, 1, 1);
+  const texture = createTitleTexture(project);
+  const geo = new THREE.PlaneGeometry(7, 0.9, 1, 1);
   const mat = new THREE.MeshBasicMaterial({
     map: texture,
     transparent: true,
-    side: THREE.DoubleSide,
     depthWrite: false
   });
   const mesh = new THREE.Mesh(geo, mat);
@@ -501,67 +409,95 @@ projects.forEach((project, i) => {
   cardGroup.add(mesh);
 });
 
-// ─── Update Card Positions (Cylindrical Scroll) ───
+// ─── Position cards ───
 function updateCards(scroll) {
   cardMeshes.forEach((mesh, i) => {
     const offset = i - scroll;
-
-    // Y position
     mesh.position.y = -offset * CARD_SPACING;
 
-    // Z depth — parabolic curve
     const dist = Math.abs(offset);
     mesh.position.z = -dist * dist * PERSPECTIVE_CURVE;
+    mesh.rotation.x = offset * 0.05;
 
-    // Subtle rotation
-    mesh.rotation.x = offset * 0.06;
-
-    // Opacity — fade distant items
-    const opacity = Math.max(0, 1 - dist * 0.35);
+    // Center item fully opaque, others dim
+    const opacity = Math.max(0, 1 - dist * 0.45);
     mesh.material.opacity = opacity;
 
-    // Scale
-    const scale = Math.max(0.65, 1 - dist * 0.07);
+    const scale = Math.max(0.6, 1 - dist * 0.08);
     mesh.scale.set(scale, scale, 1);
   });
 }
 
-// ─── Scroll Handling — slower, elegant inertia ───
+// ─── Floating description overlay ───
+const infoEl = document.getElementById('project-info');
+const infoDesc = document.getElementById('info-description');
+const infoLink = document.getElementById('info-link');
+
+function updateInfo(index, settled) {
+  const project = projects[index];
+  if (!project) return;
+
+  infoDesc.textContent = project.description;
+
+  if (project.link) {
+    infoLink.href = project.link;
+    infoLink.style.display = 'inline-flex';
+    infoLink.textContent = 'View Project';
+  } else {
+    infoLink.style.display = 'none';
+  }
+
+  if (settled) {
+    infoEl.classList.add('settled');
+  } else {
+    infoEl.classList.remove('settled');
+  }
+}
+
+// ─── Scroll — much slower for touch ───
 let touchStartY = 0;
 let lastTouchY = 0;
+let isDragging = false;
 
 function onWheel(e) {
   if (currentSection !== 'projects') return;
   e.preventDefault();
-  // Much slower scroll sensitivity
-  scrollVelocity += e.deltaY * 0.0008;
+  scrollVelocity += e.deltaY * 0.0006;
 }
 
 function onTouchStart(e) {
   touchStartY = e.touches[0].clientY;
   lastTouchY = touchStartY;
   scrollVelocity = 0;
+  isDragging = true;
 }
 
 function onTouchMove(e) {
-  if (currentSection !== 'projects') return;
+  if (currentSection !== 'projects' || !isDragging) return;
   e.preventDefault();
   const y = e.touches[0].clientY;
-  scrollVelocity += (lastTouchY - y) * 0.003;
+  const delta = lastTouchY - y;
+  // Very low sensitivity — need big swipes
+  scrollVelocity += delta * 0.001;
   lastTouchY = y;
+}
+
+function onTouchEnd() {
+  isDragging = false;
 }
 
 canvas.addEventListener('wheel', onWheel, { passive: false });
 canvas.addEventListener('touchstart', onTouchStart, { passive: true });
 canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+canvas.addEventListener('touchend', onTouchEnd);
 
-// ─── Click / Tap to Open Project ───
+// ─── Click to open detail ───
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
-function onPointerUp(e) {
+canvas.addEventListener('pointerup', (e) => {
   if (currentSection !== 'projects') return;
-  if (Math.abs(scrollVelocity) > 0.02) return;
+  if (Math.abs(scrollVelocity) > 0.01) return;
 
   const rect = canvas.getBoundingClientRect();
   pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -570,56 +506,35 @@ function onPointerUp(e) {
   raycaster.setFromCamera(pointer, camera);
   const hits = raycaster.intersectObjects(cardMeshes);
   if (hits.length > 0) {
-    const { project } = hits[0].object.userData;
-    openDetail(project);
+    openDetail(hits[0].object.userData.project);
   }
-}
+});
 
-canvas.addEventListener('pointerup', onPointerUp);
-
-// ─── Project Detail ───
+// ─── Detail overlay ───
 const detailEl = document.getElementById('project-detail');
-const detailMeta = document.getElementById('detail-meta');
-const detailTitle = document.getElementById('detail-title');
-const detailDesc = document.getElementById('detail-desc');
-const detailLink = document.getElementById('detail-link');
-const detailTags = document.getElementById('detail-tags');
 
 function openDetail(project) {
-  detailMeta.textContent = project.year;
-  detailTitle.textContent = project.title;
-  detailDesc.innerHTML = `<p>${project.description}</p>`;
-
-  if (project.link) {
-    detailLink.href = project.link;
-    detailLink.style.display = 'inline-flex';
-    detailLink.textContent = 'View Project';
-  } else {
-    detailLink.style.display = 'none';
-  }
-
-  detailTags.innerHTML = project.tags.map(t => `<span>${t}</span>`).join('');
+  document.getElementById('detail-meta').textContent = project.year;
+  document.getElementById('detail-title').textContent = project.title;
+  document.getElementById('detail-desc').innerHTML = `<p>${project.description}</p>`;
+  const link = document.getElementById('detail-link');
+  if (project.link) { link.href = project.link; link.style.display = 'inline-flex'; link.textContent = 'View Project'; }
+  else { link.style.display = 'none'; }
+  document.getElementById('detail-tags').innerHTML = project.tags.map(t => `<span>${t}</span>`).join('');
   detailEl.classList.add('visible');
 }
 
-window.closeDetail = function() {
-  detailEl.classList.remove('visible');
-};
+window.closeDetail = () => detailEl.classList.remove('visible');
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeDetail();
-});
-
-// ─── Section Navigation ───
+// ─── Nav ───
 document.querySelectorAll('.nav-links a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
     const target = a.dataset.section;
     if (target === currentSection) return;
-
     document.querySelectorAll('.nav-links a').forEach(x => x.classList.remove('active'));
     a.classList.add('active');
-
     document.getElementById(`${currentSection}-section`).classList.add('hidden');
     document.getElementById(`${target}-section`).classList.remove('hidden');
     currentSection = target;
@@ -639,54 +554,58 @@ function onResize() {
 }
 window.addEventListener('resize', onResize);
 
-// ─── Animation Loop — elegant spring physics ───
+// ─── Animation — always snaps to center ───
 function animate() {
   requestAnimationFrame(animate);
 
   if (currentSection === 'projects') {
-    // Apply velocity
     currentIndex += scrollVelocity;
 
-    // Slow, elegant damping (0.95 = long coast)
-    scrollVelocity *= 0.95;
+    // Damping — long elegant coast
+    scrollVelocity *= 0.93;
 
-    // Elastic bounce at edges
-    const overscrollStrength = 0.06;
+    // Elastic edges
     if (currentIndex < 0) {
-      scrollVelocity -= currentIndex * overscrollStrength;
-      scrollVelocity *= 0.92;
+      scrollVelocity -= currentIndex * 0.08;
+      scrollVelocity *= 0.9;
     }
     if (currentIndex > projects.length - 1) {
-      scrollVelocity -= (currentIndex - (projects.length - 1)) * overscrollStrength;
-      scrollVelocity *= 0.92;
+      scrollVelocity -= (currentIndex - (projects.length - 1)) * 0.08;
+      scrollVelocity *= 0.9;
     }
 
-    // Gentle snap when nearly still
-    if (Math.abs(scrollVelocity) < 0.005) {
-      const target = Math.round(currentIndex);
-      const diff = target - currentIndex;
-      // Smooth spring toward snap point
-      scrollVelocity += diff * 0.04;
-      scrollVelocity *= 0.85;
+    // Always snap to nearest integer (center lock)
+    const target = Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
+    const diff = target - currentIndex;
+
+    // Spring snap — stronger when velocity is low
+    if (Math.abs(scrollVelocity) < 0.02) {
+      scrollVelocity += diff * 0.06;
+      scrollVelocity *= 0.88;
     }
 
     // Kill micro-oscillation
-    if (Math.abs(scrollVelocity) < 0.0001 && Math.abs(currentIndex - Math.round(currentIndex)) < 0.001) {
-      currentIndex = Math.round(currentIndex);
+    if (Math.abs(scrollVelocity) < 0.0001 && Math.abs(diff) < 0.001) {
+      currentIndex = target;
       scrollVelocity = 0;
     }
 
     updateCards(currentIndex);
 
-    // Update counter
+    // Counter
     const idx = Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
     counterCurrent.textContent = String(idx + 1).padStart(2, '0');
+
+    // Description float-in: settled = snapped and nearly still
+    const isSettled = Math.abs(diff) < 0.05 && Math.abs(scrollVelocity) < 0.005;
+    updateInfo(idx, isSettled);
   }
 
   renderer.render(scene, camera);
 }
 
 updateCards(0);
+updateInfo(0, true);
 animate();
 
 </script>

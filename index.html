@@ -181,6 +181,16 @@ nav > * { pointer-events: auto; }
 }
 .detail-close:hover { color: var(--fg); }
 
+.detail-image {
+  width: 100%; max-width: 640px;
+  margin: 0 auto 32px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.detail-image img {
+  width: 100%; height: auto; display: block;
+}
+
 .detail-content { max-width: 640px; margin: 0 auto; text-align: center; }
 .detail-meta {
   font-size: 0.7rem; letter-spacing: 0.1em;
@@ -280,6 +290,7 @@ nav > * { pointer-events: auto; }
   <button class="detail-close" onclick="closeDetail()">Close</button>
   <div class="detail-content">
     <div class="detail-meta" id="detail-meta"></div>
+    <div class="detail-image" id="detail-image"></div>
     <h2 id="detail-title"></h2>
     <div class="detail-desc" id="detail-desc"></div>
     <a class="detail-link" id="detail-link" href="#" target="_blank">View Project</a>
@@ -296,28 +307,32 @@ const projects = [
     description: 'A curated gallery of AI image generation prompts with an infinite pannable canvas.',
     year: '2025', tags: ['AI', 'Gallery', 'Web'],
     link: 'https://saberzou.github.io/json-prompts/',
-    emoji: `${EMOJI_BASE}/Objects/Desktop%20Computer.png`
+    emoji: `${EMOJI_BASE}/Objects/Desktop%20Computer.png`,
+    image: 'images/json-prompts.jpg'
   },
   {
     title: 'Between Floors',
     description: 'Vertical swipe stories for English learning — hidden floors, quizzes, and C1/C2 vocab.',
     year: '2026', tags: ['Education', 'Interactive', 'Web'],
     link: 'https://saberzou.github.io/between-floors/',
-    emoji: `${EMOJI_BASE}/Travel%20and%20places/Office%20Building.png`
+    emoji: `${EMOJI_BASE}/Travel%20and%20places/Office%20Building.png`,
+    image: 'images/between-floors.jpg'
   },
   {
     title: 'Atticus',
     description: 'A living AI notebook — thoughts on mistakes, humanity, and letters to the future.',
     year: '2026', tags: ['AI', 'Writing', 'Web'],
     link: 'https://saberzou.github.io/atticus/',
-    emoji: `${EMOJI_BASE}/Animals/Bear.png`
+    emoji: `${EMOJI_BASE}/Animals/Bear.png`,
+    image: 'images/atticus.jpg'
   },
   {
     title: 'Postcards from Mars',
     description: '3D mission log viewer — AI robots on Mars with field diaries and real NASA rover photos.',
     year: '2026', tags: ['3D', 'NASA', 'Three.js'],
     link: 'https://saberzou.github.io/name-universe/postcards-from-mars/',
-    emoji: `${EMOJI_BASE}/Travel%20and%20places/Rocket.png`
+    emoji: `${EMOJI_BASE}/Travel%20and%20places/Rocket.png`,
+    image: 'images/postcards-from-mars.jpg'
   },
   {
     title: 'Axel Art',
@@ -435,6 +450,14 @@ const detailEl = document.getElementById('project-detail');
 
 function openDetail(project) {
   document.getElementById('detail-meta').textContent = project.year;
+  const imgContainer = document.getElementById('detail-image');
+  if (project.image) {
+    imgContainer.innerHTML = `<img src="${project.image}" alt="${project.title}">`;
+    imgContainer.style.display = 'block';
+  } else {
+    imgContainer.innerHTML = '';
+    imgContainer.style.display = 'none';
+  }
   document.getElementById('detail-title').textContent = project.title;
   document.getElementById('detail-desc').innerHTML = `<p>${project.description}</p>`;
   const link = document.getElementById('detail-link');

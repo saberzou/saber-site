@@ -470,25 +470,26 @@ function animate() {
   if (currentSection !== 'projects') return;
 
   currentIndex += scrollVelocity;
-  scrollVelocity *= 0.93;
+  scrollVelocity *= 0.92;
 
-  // Elastic edges
+  // Soft edges — no bounce, just resistance
   if (currentIndex < 0) {
-    scrollVelocity -= currentIndex * 0.08;
-    scrollVelocity *= 0.9;
+    currentIndex *= 0.9;
+    scrollVelocity *= 0.8;
   }
   if (currentIndex > projects.length - 1) {
-    scrollVelocity -= (currentIndex - (projects.length - 1)) * 0.08;
-    scrollVelocity *= 0.9;
+    const over = currentIndex - (projects.length - 1);
+    currentIndex = (projects.length - 1) + over * 0.9;
+    scrollVelocity *= 0.8;
   }
 
-  // Snap
+  // Smooth snap — gentle ease into position
   const target = Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
   const diff = target - currentIndex;
 
-  if (Math.abs(scrollVelocity) < 0.02) {
-    scrollVelocity += diff * 0.06;
-    scrollVelocity *= 0.88;
+  if (Math.abs(scrollVelocity) < 0.015) {
+    scrollVelocity += diff * 0.04;
+    scrollVelocity *= 0.85;
   }
 
   if (Math.abs(scrollVelocity) < 0.0001 && Math.abs(diff) < 0.001) {

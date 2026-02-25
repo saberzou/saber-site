@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saber Zou — Design & Projects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #FAFAF8;
+  --fg: #1A1A1A;
+  --fg-muted: #6B6B6B;
+  --fg-light: #9A9A9A;
+  --accent: #C45D3E;
+  --border: #E8E8E4;
+  --card-bg: #FFFFFF;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'Inter', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--fg);
+  overflow: hidden;
+  height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Navigation ─── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 40px;
+  pointer-events: none;
+}
+
+nav > * { pointer-events: auto; }
+
+.nav-name {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+.nav-name:hover { opacity: 0.6; }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.nav-links a:hover { color: var(--fg); }
+.nav-links a.active { color: var(--fg); }
+
+/* ─── Sections ─── */
+.section {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.section.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+}
+
+/* ─── Hero / Projects Section ─── */
+#projects-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-title {
+  position: fixed;
+  top: 50%;
+  left: 40px;
+  transform: translateY(-50%);
+  z-index: 10;
+  pointer-events: none;
+  max-width: 320px;
+}
+
+.hero-title h1 {
+  font-family: var(--serif);
+  font-size: 3.5rem;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--fg);
+}
+
+.hero-title p {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--fg-muted);
+  font-weight: 300;
+}
+
+.hero-title .scroll-hint {
+  margin-top: 24px;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scroll-hint::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 1px;
+  background: var(--fg-light);
+}
+
+/* Three.js canvas */
+#three-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+/* ─── Project Detail Overlay ─── */
+#project-detail {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  overflow-y: auto;
+  padding: 100px 40px 80px;
+}
+
+#project-detail.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.detail-close {
+  position: fixed;
+  top: 24px;
+  right: 40px;
+  z-index: 210;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--sans);
+  transition: color 0.3s;
+}
+.detail-close:hover { color: var(--fg); }
+
+.detail-content {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.detail-meta {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-light);
+  margin-bottom: 16px;
+}
+
+.detail-content h2 {
+  font-family: var(--serif);
+  font-size: 2.8rem;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+
+.detail-content .detail-desc {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--fg-muted);
+  font-weight: 300;
+  margin-bottom: 32px;
+}
+
+.detail-content .detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.3s;
+}
+.detail-content .detail-link:hover { opacity: 0.7; }
+.detail-content .detail-link::after {
+  content: '→';
+  transition: transform 0.3s;
+}
+.detail-content .detail-link:hover::after {
+  transform: translateX(4px);
+}
+
+.detail-tags {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.detail-tags span {
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fg-light);
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+}
+
+/* ─── Bio Section ─── */
+#bio-section {
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.bio-content {
+  max-width: 560px;
+  text-align: left;
+}
+
+.bio-content h2 {
+  font-family: var(--serif);
+  font-size: 3rem;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+}
+
+.bio-content p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--fg-muted);
+  font-weight: 300;
+  margin-bottom: 20px;
+}
+
+.bio-content p strong {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.bio-links {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 24px;
+}
+
+.bio-links a {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.bio-links a:hover { color: var(--accent); }
+
+/* ─── Project counter ─── */
+.project-counter {
+  position: fixed;
+  bottom: 32px;
+  right: 40px;
+  z-index: 10;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--fg-light);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  nav { padding: 20px 24px; }
+  .nav-links { gap: 20px; }
+  .nav-links a { font-size: 0.7rem; }
+
+  .hero-title {
+    position: fixed;
+    top: auto;
+    bottom: 60px;
+    left: 24px;
+    right: 24px;
+    transform: none;
+    max-width: none;
+  }
+
+  .hero-title h1 { font-size: 2.2rem; }
+
+  #project-detail { padding: 80px 24px 60px; }
+  .detail-content h2 { font-size: 2rem; }
+  .detail-close { right: 24px; }
+
+  #bio-section { padding: 80px 24px 40px; }
+  .bio-content h2 { font-size: 2.2rem; }
+
+  .project-counter { bottom: 20px; right: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-name">Saber Zou</div>
+  <ul class="nav-links">
+    <li><a href="#" class="active" data-section="projects">Projects</a></li>
+    <li><a href="#" data-section="bio">Bio</a></li>
+  </ul>
+</nav>
+
+<!-- Projects Section -->
+<div id="projects-section" class="section">
+  <div class="hero-title">
+    <h1>Selected<br>Works</h1>
+    <p>Design leadership, tools, and experiments at the intersection of AI and human creativity.</p>
+    <div class="scroll-hint">Scroll to explore</div>
+  </div>
+  <canvas id="three-canvas"></canvas>
+  <div class="project-counter"><span id="counter-current">01</span> / <span id="counter-total">06</span></div>
+</div>
+
+<!-- Bio Section -->
+<div id="bio-section" class="section hidden">
+  <div class="bio-content">
+    <h2>About</h2>
+    <p>
+      <strong>Saber Zou</strong> is a Design Team Lead at Microsoft, 
+      leading 70+ designers across AI, Search, Browser, and Content 
+      experiences — core products used by billions of people worldwide.
+    </p>
+    <p>
+      Based in Beijing, he works at the intersection of design leadership 
+      and emerging technology, shaping how people interact with AI-powered 
+      tools every day.
+    </p>
+    <p>
+      Outside of work, he explores street photography, draws simple 
+      sketches on iPad, and builds experimental projects that push 
+      the boundaries of what AI and design can do together.
+    </p>
+    <div class="bio-links">
+      <a href="https://github.com/saberzou" target="_blank">GitHub</a>
+      <a href="https://x.com/saberzou" target="_blank">X / Twitter</a>
+    </div>
+  </div>
+</div>
+
+<!-- Project Detail Overlay -->
+<div id="project-detail">
+  <button class="detail-close" onclick="closeDetail()">Close</button>
+  <div class="detail-content">
+    <div class="detail-meta" id="detail-meta"></div>
+    <h2 id="detail-title"></h2>
+    <div class="detail-desc" id="detail-desc"></div>
+    <a class="detail-link" id="detail-link" href="#" target="_blank">View Project</a>
+    <div class="detail-tags" id="detail-tags"></div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+// ─── Project Data ───
+const projects = [
+  {
+    title: 'JSON Prompts',
+    subtitle: 'AI Image Prompt Gallery',
+    description: 'A curated gallery of AI image generation prompts in JSON format. Features an infinite pannable canvas with momentum scrolling, mixed tile sizes, and seamless wrapping — built as a single HTML file with zero dependencies.',
+    year: '2025',
+    tags: ['AI', 'Gallery', 'Web'],
+    link: 'https://saberzou.github.io/json-prompts/',
+    color: '#C45D3E'
+  },
+  {
+    title: 'Atticus',
+    subtitle: 'AI Living Notebook',
+    description: 'A living notebook powered by AI — collecting thoughts on mistakes, how humans work, tools that changed thinking, and letters to the future. Features a 3D generative header built with Three.js, fully GFW-proof.',
+    year: '2025',
+    tags: ['AI', 'Writing', 'Three.js'],
+    link: 'https://saberzou.github.io/atticus/',
+    color: '#E8734A'
+  },
+  {
+    title: 'Design at Scale',
+    subtitle: 'Leading 70+ Designers at Microsoft',
+    description: 'Leading design across AI, Search, Browser, and Content experiences at Microsoft — products touched by billions. Shaping design systems, team culture, and the craft of making complex technology feel simple.',
+    year: '2020–Present',
+    tags: ['Leadership', 'Design Systems', 'AI'],
+    link: null,
+    color: '#3D7EC7'
+  },
+  {
+    title: 'AI × Search',
+    subtitle: 'Reimagining Information Discovery',
+    description: 'Designing the next generation of search experiences where AI augments human curiosity. From conversational interfaces to visual discovery — rethinking how people find and understand information.',
+    year: '2023–Present',
+    tags: ['AI', 'Search', 'Product Design'],
+    link: null,
+    color: '#5B8C5A'
+  },
+  {
+    title: 'Street Photography',
+    subtitle: 'Beijing & Beyond',
+    description: 'An ongoing practice of seeing — capturing the rhythm, light, and quiet drama of everyday life on the streets of Beijing and wherever the road leads.',
+    year: 'Ongoing',
+    tags: ['Photography', 'Personal'],
+    link: null,
+    color: '#8B7355'
+  },
+  {
+    title: 'OpenClaw Experiments',
+    subtitle: 'AI Agent Explorations',
+    description: 'Building and experimenting with AI agents — from personal assistants to creative tools. Exploring how AI can be a genuine collaborator, not just a chatbot.',
+    year: '2025',
+    tags: ['AI', 'Agents', 'Tools'],
+    link: null,
+    color: '#7B68AE'
+  }
+];
+
+// ─── State ───
+let currentIndex = 0;
+let targetIndex = 0;
+let scrollVelocity = 0;
+let isAnimating = false;
+let currentSection = 'projects';
+
+// ─── Scene Setup ───
+const canvas = document.getElementById('three-canvas');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#FAFAF8');
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 0, 12);
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+// ─── Create Project Cards ───
+const cardGroup = new THREE.Group();
+scene.add(cardGroup);
+
+// Position cards on right side
+cardGroup.position.x = 3;
+
+const cardMeshes = [];
+const CARD_SPACING = 2.6;  // vertical spacing between cards
+const PERSPECTIVE_CURVE = 0.35; // how much cards curve away
+
+function createTextTexture(project, width = 512, height = 160) {
+  const cvs = document.createElement('canvas');
+  cvs.width = width * 2;
+  cvs.height = height * 2;
+  const ctx = cvs.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.roundRect(0, 0, cvs.width, cvs.height, 16);
+  ctx.fill();
+
+  // Left accent bar
+  ctx.fillStyle = project.color;
+  ctx.fillRect(0, 0, 8, cvs.height);
+
+  // Year
+  ctx.font = '500 22px Inter, sans-serif';
+  ctx.fillStyle = '#9A9A9A';
+  ctx.fillText(project.year, 48, 56);
+
+  // Title
+  ctx.font = '400 52px Georgia, serif';
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillText(project.title, 48, 120);
+
+  // Subtitle
+  ctx.font = '300 28px Inter, sans-serif';
+  ctx.fillStyle = '#6B6B6B';
+  ctx.fillText(project.subtitle, 48, 170);
+
+  // Arrow
+  ctx.font = '300 40px Inter, sans-serif';
+  ctx.fillStyle = '#C45D3E';
+  ctx.fillText('→', cvs.width - 80, 120);
+
+  // Subtle border
+  ctx.strokeStyle = '#E8E8E4';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(1, 1, cvs.width - 2, cvs.height - 2, 16);
+  ctx.stroke();
+
+  const texture = new THREE.CanvasTexture(cvs);
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  return texture;
+}
+
+projects.forEach((project, i) => {
+  const texture = createTextTexture(project);
+  const geo = new THREE.PlaneGeometry(6, 1.8, 1, 1);
+  const mat = new THREE.MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    side: THREE.DoubleSide
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.userData = { index: i, project };
+  cardMeshes.push(mesh);
+  cardGroup.add(mesh);
+});
+
+// ─── Update Card Positions (Cylindrical Scroll) ───
+function updateCards(scroll) {
+  cardMeshes.forEach((mesh, i) => {
+    const offset = i - scroll;
+
+    // Y position — linear spacing
+    mesh.position.y = -offset * CARD_SPACING;
+
+    // Z position — curve away from center (depth)
+    const dist = Math.abs(offset);
+    mesh.position.z = -dist * dist * PERSPECTIVE_CURVE;
+
+    // Rotation — tilt based on offset
+    mesh.rotation.x = offset * 0.08;
+
+    // Opacity — fade distant cards
+    const opacity = Math.max(0, 1 - dist * 0.3);
+    mesh.material.opacity = opacity;
+
+    // Scale — slightly smaller when far
+    const scale = Math.max(0.7, 1 - dist * 0.06);
+    mesh.scale.set(scale, scale, 1);
+  });
+}
+
+// ─── Scroll Handling ───
+let touchStartY = 0;
+let lastTouchY = 0;
+
+function onWheel(e) {
+  if (currentSection !== 'projects') return;
+  e.preventDefault();
+  scrollVelocity += e.deltaY * 0.003;
+}
+
+function onTouchStart(e) {
+  touchStartY = e.touches[0].clientY;
+  lastTouchY = touchStartY;
+  scrollVelocity = 0;
+}
+
+function onTouchMove(e) {
+  if (currentSection !== 'projects') return;
+  e.preventDefault();
+  const y = e.touches[0].clientY;
+  scrollVelocity += (lastTouchY - y) * 0.008;
+  lastTouchY = y;
+}
+
+canvas.addEventListener('wheel', onWheel, { passive: false });
+canvas.addEventListener('touchstart', onTouchStart, { passive: true });
+canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+
+// ─── Click / Tap to Open Project ───
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+
+function onPointerUp(e) {
+  if (currentSection !== 'projects') return;
+  if (Math.abs(scrollVelocity) > 0.05) return; // don't click while scrolling
+
+  const rect = canvas.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(cardMeshes);
+  if (hits.length > 0) {
+    const { project } = hits[0].object.userData;
+    openDetail(project);
+  }
+}
+
+canvas.addEventListener('pointerup', onPointerUp);
+
+// ─── Project Detail ───
+const detailEl = document.getElementById('project-detail');
+const detailMeta = document.getElementById('detail-meta');
+const detailTitle = document.getElementById('detail-title');
+const detailDesc = document.getElementById('detail-desc');
+const detailLink = document.getElementById('detail-link');
+const detailTags = document.getElementById('detail-tags');
+
+function openDetail(project) {
+  detailMeta.textContent = project.year;
+  detailTitle.textContent = project.title;
+  detailDesc.innerHTML = `<p>${project.description}</p>`;
+
+  if (project.link) {
+    detailLink.href = project.link;
+    detailLink.style.display = 'inline-flex';
+    detailLink.textContent = 'View Project';
+  } else {
+    detailLink.style.display = 'none';
+  }
+
+  detailTags.innerHTML = project.tags.map(t => `<span>${t}</span>`).join('');
+  detailEl.classList.add('visible');
+}
+
+window.closeDetail = function() {
+  detailEl.classList.remove('visible');
+};
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDetail();
+});
+
+// ─── Section Navigation ───
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = a.dataset.section;
+    if (target === currentSection) return;
+
+    document.querySelectorAll('.nav-links a').forEach(x => x.classList.remove('active'));
+    a.classList.add('active');
+
+    document.getElementById(`${currentSection}-section`).classList.add('hidden');
+    document.getElementById(`${target}-section`).classList.remove('hidden');
+    currentSection = target;
+  });
+});
+
+// ─── Counter ───
+const counterCurrent = document.getElementById('counter-current');
+const counterTotal = document.getElementById('counter-total');
+counterTotal.textContent = String(projects.length).padStart(2, '0');
+
+// ─── Resize ───
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  // Adjust card group position based on screen width
+  if (window.innerWidth < 768) {
+    cardGroup.position.x = 0;
+    document.querySelector('.hero-title').style.textAlign = 'center';
+  } else {
+    cardGroup.position.x = 3;
+  }
+}
+window.addEventListener('resize', onResize);
+onResize();
+
+// ─── Animation Loop ───
+function animate() {
+  requestAnimationFrame(animate);
+
+  if (currentSection === 'projects') {
+    // Apply velocity with damping
+    currentIndex += scrollVelocity;
+    scrollVelocity *= 0.9;
+
+    // Clamp
+    if (currentIndex < 0) {
+      currentIndex *= 0.8;
+      scrollVelocity *= 0.5;
+    }
+    if (currentIndex > projects.length - 1) {
+      currentIndex = projects.length - 1 + (currentIndex - (projects.length - 1)) * 0.8;
+      scrollVelocity *= 0.5;
+    }
+
+    // Snap to nearest when velocity is low
+    if (Math.abs(scrollVelocity) < 0.01) {
+      const target = Math.round(currentIndex);
+      currentIndex += (target - currentIndex) * 0.12;
+    }
+
+    updateCards(currentIndex);
+
+    // Update counter
+    const idx = Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
+    counterCurrent.textContent = String(idx + 1).padStart(2, '0');
+  }
+
+  renderer.render(scene, camera);
+}
+
+updateCards(0);
+animate();
+
+</script>
+</body>
+</html>

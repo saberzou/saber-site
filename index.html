@@ -490,21 +490,76 @@ document.querySelectorAll('.nav-links a').forEach(a => {
 // (counter removed)
 
 // ─── Resize ───
-function getResponsiveScale() {
-  // At 1200px+ width, scale=1. At 375px, scale~0.45
-  return Math.min(1, window.innerWidth / 900);
-}
-
 function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  const s = getResponsiveScale();
-  cardGroup.scale.set(s, s, s);
+  // Rebuild textures at responsive sizes
+  rebuildTextures();
 }
 window.addEventListener('resize', onResize);
-onResize();
+
+function getTextSizes() {
+  const w = window.innerWidth;
+  if (w < 480) return { titleFont: 28, descFont: 14, canvasW: 340, titleH: 50, descH: 60, planeW: 4.2, descPlaneW: 4.2, descLineH: 20 };
+  if (w < 768) return { titleFont: 36, descFont: 16, canvasW: 460, titleH: 60, descH: 70, planeW: 5.5, descPlaneW: 5.5, descLineH: 22 };
+  return { titleFont: 46, descFont: 20, canvasW: 600, titleH: 80, descH: 70, planeW: 7, descPlaneW: 7, descLineH: 26 };
+}
+
+function rebuildTextures() {
+  const sizes = getTextSizes();
+
+  cardMeshes.forEach((mesh, i) => {
+    const project = projects[i];
+
+    // Rebuild title texture
+    const cvs = document.createElement('canvas');
+    const dpr = 2;
+    cvs.width = sizes.canvasW * dpr;
+    cvs.height = sizes.titleH * dpr;
+    const ctx = cvs.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, sizes.canvasW, sizes.titleH);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `400 ${sizes.titleFont}px Georgia, Instrument Serif, serif`;
+    ctx.fillStyle = '#1A1A1A';
+    ctx.fillText(project.title, sizes.canvasW / 2, sizes.titleH / 2);
+    mesh.material.map.dispose();
+    const tex = new THREE.CanvasTexture(cvs);
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    mesh.material.map = tex;
+    mesh.material.needsUpdate = true;
+    mesh.geometry.dispose();
+    mesh.geometry = new THREE.PlaneGeometry(sizes.planeW, 0.9, 1, 1);
+
+    // Rebuild desc texture with word wrap
+    const desc = descMeshes[i];
+    const dcvs = document.createElement('canvas');
+    dcvs.width = sizes.canvasW * dpr;
+    dcvs.height = sizes.descH * dpr;
+    const dctx = dcvs.getContext('2d');
+    dctx.scale(dpr, dpr);
+    dctx.clearRect(0, 0, sizes.canvasW, sizes.descH);
+    dctx.textAlign = 'center';
+    dctx.font = `300 ${sizes.descFont}px Inter, sans-serif`;
+    dctx.fillStyle = '#6B6B6B';
+    wrapText(dctx, project.description, sizes.canvasW / 2, sizes.descLineH, sizes.canvasW * 0.9, sizes.descLineH);
+    desc.material.map.dispose();
+    const dtex = new THREE.CanvasTexture(dcvs);
+    dtex.minFilter = THREE.LinearFilter;
+    dtex.magFilter = THREE.LinearFilter;
+    desc.material.map = dtex;
+    desc.material.needsUpdate = true;
+    desc.geometry.dispose();
+    desc.geometry = new THREE.PlaneGeometry(sizes.descPlaneW, 0.8, 1, 1);
+  });
+}
+
+// Initial build
+rebuildTextures();
 
 // ─── Animation — always snaps to center ───
 function animate() {

@@ -83,72 +83,7 @@ nav > * { pointer-events: auto; }
 
 #three-canvas { position: fixed; inset: 0; z-index: 1; }
 
-/* ─── Floating description (HTML overlay) ─── */
-.project-info {
-  position: fixed;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  text-align: center;
-  max-width: 480px;
-  width: 90%;
-  pointer-events: none;
-}
-
-.project-info .info-description {
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: var(--fg-muted);
-  font-weight: 300;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.project-info.settled .info-description {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.project-info .info-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 16px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--accent);
-  text-decoration: none;
-  pointer-events: auto;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.5s ease 0.1s, transform 0.5s ease 0.1s;
-}
-
-.project-info.settled .info-link {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.project-info .info-link:hover { opacity: 0.7; }
-.project-info .info-link::after { content: '→'; transition: transform 0.3s; }
-.project-info .info-link:hover::after { transform: translateX(4px); }
-
-/* ─── Counter ─── */
-.project-counter {
-  position: fixed;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  color: var(--fg-light);
-  font-variant-numeric: tabular-nums;
-}
+/* counter and floating info removed — description is inline in 3D */
 
 /* ─── Project Detail Overlay ─── */
 #project-detail {
@@ -231,13 +166,8 @@ nav > * { pointer-events: auto; }
   nav { padding: 20px 24px; }
   .nav-links { gap: 20px; }
   .nav-links a { font-size: 0.7rem; }
-  .project-info { bottom: 80px; }
-  #project-detail { padding: 80px 24px 60px; }
-  .detail-content h2 { font-size: 2rem; }
-  .detail-close { right: 24px; }
   #bio-section { padding: 80px 24px 40px; }
   .bio-content h2 { font-size: 2.2rem; }
-  .project-counter { bottom: 20px; }
 }
 </style>
 </head>
@@ -253,11 +183,7 @@ nav > * { pointer-events: auto; }
 
 <div id="projects-section" class="section">
   <canvas id="three-canvas"></canvas>
-  <div class="project-info" id="project-info">
-    <div class="info-description" id="info-description"></div>
-    <a class="info-link" id="info-link" href="#" target="_blank" style="display:none">View Project</a>
-  </div>
-  <div class="project-counter"><span id="counter-current">01</span> / <span id="counter-total">06</span></div>
+  <!-- description rendered inline in 3D -->
 </div>
 
 <div id="bio-section" class="section hidden">
@@ -369,7 +295,8 @@ const cardGroup = new THREE.Group();
 scene.add(cardGroup);
 
 const cardMeshes = [];
-const CARD_SPACING = 2.4;
+const descMeshes = [];
+const CARD_SPACING = 2.8;
 const PERSPECTIVE_CURVE = 0.5;
 
 function createTitleTexture(project, width = 600, height = 80) {
@@ -379,16 +306,47 @@ function createTitleTexture(project, width = 600, height = 80) {
   cvs.height = height * dpr;
   const ctx = cvs.getContext('2d');
   ctx.scale(dpr, dpr);
-
   ctx.clearRect(0, 0, width, height);
-
-  // Title only — large, centered
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.font = '400 46px Georgia, Instrument Serif, serif';
   ctx.fillStyle = '#1A1A1A';
   ctx.fillText(project.title, width / 2, height / 2);
+  const texture = new THREE.CanvasTexture(cvs);
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  return texture;
+}
 
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+  let cy = y;
+  for (const word of words) {
+    const test = line + word + ' ';
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line.trim(), x, cy);
+      line = word + ' ';
+      cy += lineHeight;
+    } else {
+      line = test;
+    }
+  }
+  ctx.fillText(line.trim(), x, cy);
+}
+
+function createDescTexture(project, width = 500, height = 100) {
+  const cvs = document.createElement('canvas');
+  const dpr = 2;
+  cvs.width = width * dpr;
+  cvs.height = height * dpr;
+  const ctx = cvs.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, width, height);
+  ctx.textAlign = 'center';
+  ctx.font = '300 15px Inter, sans-serif';
+  ctx.fillStyle = '#6B6B6B';
+  wrapText(ctx, project.description, width / 2, 24, width * 0.85, 22);
   const texture = new THREE.CanvasTexture(cvs);
   texture.minFilter = THREE.LinearFilter;
   texture.magFilter = THREE.LinearFilter;
@@ -396,63 +354,50 @@ function createTitleTexture(project, width = 600, height = 80) {
 }
 
 projects.forEach((project, i) => {
-  const texture = createTitleTexture(project);
-  const geo = new THREE.PlaneGeometry(7, 0.9, 1, 1);
-  const mat = new THREE.MeshBasicMaterial({
-    map: texture,
-    transparent: true,
-    depthWrite: false
-  });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.userData = { index: i, project };
-  cardMeshes.push(mesh);
-  cardGroup.add(mesh);
+  // Title mesh
+  const titleTex = createTitleTexture(project);
+  const titleGeo = new THREE.PlaneGeometry(7, 0.9, 1, 1);
+  const titleMat = new THREE.MeshBasicMaterial({ map: titleTex, transparent: true, depthWrite: false });
+  const titleMesh = new THREE.Mesh(titleGeo, titleMat);
+  titleMesh.userData = { index: i, project };
+  cardMeshes.push(titleMesh);
+  cardGroup.add(titleMesh);
+
+  // Description mesh — sits below title
+  const descTex = createDescTexture(project);
+  const descGeo = new THREE.PlaneGeometry(5.5, 1.1, 1, 1);
+  const descMat = new THREE.MeshBasicMaterial({ map: descTex, transparent: true, depthWrite: false, opacity: 0 });
+  const descMesh = new THREE.Mesh(descGeo, descMat);
+  descMeshes.push(descMesh);
+  cardGroup.add(descMesh);
 });
 
 // ─── Position cards ───
+let descTargetOpacities = projects.map(() => 0);
+let descCurrentOpacities = projects.map(() => 0);
+
 function updateCards(scroll) {
   cardMeshes.forEach((mesh, i) => {
     const offset = i - scroll;
     mesh.position.y = -offset * CARD_SPACING;
-
     const dist = Math.abs(offset);
     mesh.position.z = -dist * dist * PERSPECTIVE_CURVE;
     mesh.rotation.x = offset * 0.05;
-
-    // Center item fully opaque, others dim
     const opacity = Math.max(0, 1 - dist * 0.45);
     mesh.material.opacity = opacity;
-
     const scale = Math.max(0.6, 1 - dist * 0.08);
     mesh.scale.set(scale, scale, 1);
+
+    // Description follows title, offset below
+    const desc = descMeshes[i];
+    desc.position.y = mesh.position.y - 1.0;
+    desc.position.z = mesh.position.z;
+    desc.rotation.x = mesh.rotation.x;
+    desc.scale.set(scale, scale, 1);
   });
 }
 
-// ─── Floating description overlay ───
-const infoEl = document.getElementById('project-info');
-const infoDesc = document.getElementById('info-description');
-const infoLink = document.getElementById('info-link');
-
-function updateInfo(index, settled) {
-  const project = projects[index];
-  if (!project) return;
-
-  infoDesc.textContent = project.description;
-
-  if (project.link) {
-    infoLink.href = project.link;
-    infoLink.style.display = 'inline-flex';
-    infoLink.textContent = 'View Project';
-  } else {
-    infoLink.style.display = 'none';
-  }
-
-  if (settled) {
-    infoEl.classList.add('settled');
-  } else {
-    infoEl.classList.remove('settled');
-  }
-}
+// (description is in 3D scene, no HTML overlay needed)
 
 // ─── Scroll — much slower for touch ───
 let touchStartY = 0;
@@ -541,10 +486,7 @@ document.querySelectorAll('.nav-links a').forEach(a => {
   });
 });
 
-// ─── Counter ───
-const counterCurrent = document.getElementById('counter-current');
-const counterTotal = document.getElementById('counter-total');
-counterTotal.textContent = String(projects.length).padStart(2, '0');
+// (counter removed)
 
 // ─── Resize ───
 function onResize() {
@@ -592,13 +534,19 @@ function animate() {
 
     updateCards(currentIndex);
 
-    // Counter
-    const idx = Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
-    counterCurrent.textContent = String(idx + 1).padStart(2, '0');
-
-    // Description float-in: settled = snapped and nearly still
-    const isSettled = Math.abs(diff) < 0.05 && Math.abs(scrollVelocity) < 0.005;
-    updateInfo(idx, isSettled);
+    // Animate description opacity — only visible when centered
+    const isSettled = Math.abs(diff) < 0.08 && Math.abs(scrollVelocity) < 0.008;
+    descMeshes.forEach((desc, i) => {
+      const dist = Math.abs(i - currentIndex);
+      // Target: fully visible only when this item is centered and settled
+      descTargetOpacities[i] = (i === target && isSettled && dist < 0.1) ? 1 : 0;
+      // Smooth lerp
+      descCurrentOpacities[i] += (descTargetOpacities[i] - descCurrentOpacities[i]) * 0.08;
+      if (descCurrentOpacities[i] < 0.01) descCurrentOpacities[i] = 0;
+      desc.material.opacity = descCurrentOpacities[i];
+      // Slight upward float-in
+      desc.position.y = cardMeshes[i].position.y - 1.0 + (1 - descCurrentOpacities[i]) * 0.15;
+    });
   }
 
   renderer.render(scene, camera);

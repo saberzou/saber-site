@@ -224,7 +224,7 @@ import * as THREE from 'three';
 const projects = [
   {
     title: 'JSON Prompts',
-    description: 'A curated gallery of AI image generation prompts. Infinite pannable canvas with momentum scrolling, mixed tile sizes, and seamless wrapping.',
+    description: 'A curated gallery of AI image generation prompts with an infinite pannable canvas.',
     year: '2025',
     tags: ['AI', 'Gallery', 'Web'],
     link: 'https://saberzou.github.io/json-prompts/',
@@ -232,7 +232,7 @@ const projects = [
   },
   {
     title: 'Atticus',
-    description: 'A living notebook powered by AI — collecting thoughts on mistakes, how humans work, tools that changed thinking, and letters to the future.',
+    description: 'A living AI notebook collecting thoughts on mistakes, humanity, and letters to the future.',
     year: '2025',
     tags: ['AI', 'Writing', 'Three.js'],
     link: 'https://saberzou.github.io/atticus/',
@@ -240,7 +240,7 @@ const projects = [
   },
   {
     title: 'Design at Scale',
-    description: 'Leading design across AI, Search, Browser, and Content experiences at Microsoft — shaping design systems, team culture, and craft at billion-user scale.',
+    description: 'Leading 70+ designers shaping AI, Search, and Browser experiences at Microsoft.',
     year: '2020–Present',
     tags: ['Leadership', 'Design Systems', 'AI'],
     link: null,
@@ -248,7 +248,7 @@ const projects = [
   },
   {
     title: 'AI × Search',
-    description: 'Designing the next generation of search — where AI augments human curiosity through conversational interfaces and visual discovery.',
+    description: 'Reimagining how people find and understand information through AI-powered discovery.',
     year: '2023–Present',
     tags: ['AI', 'Search', 'Product Design'],
     link: null,
@@ -256,7 +256,7 @@ const projects = [
   },
   {
     title: 'Street Photography',
-    description: 'An ongoing practice of seeing — capturing the rhythm, light, and quiet drama of everyday life on the streets of Beijing.',
+    description: 'Capturing the rhythm, light, and quiet drama of everyday life in Beijing.',
     year: 'Ongoing',
     tags: ['Photography', 'Personal'],
     link: null,
@@ -264,7 +264,7 @@ const projects = [
   },
   {
     title: 'OpenClaw Experiments',
-    description: 'Building and experimenting with AI agents — exploring how AI can be a genuine collaborator, not just a chatbot.',
+    description: 'Exploring how AI agents can be genuine collaborators, not just chatbots.',
     year: '2025',
     tags: ['AI', 'Agents', 'Tools'],
     link: null,
@@ -335,7 +335,7 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   ctx.fillText(line.trim(), x, cy);
 }
 
-function createDescTexture(project, width = 500, height = 100) {
+function createDescTexture(project, width = 600, height = 60) {
   const cvs = document.createElement('canvas');
   const dpr = 2;
   cvs.width = width * dpr;
@@ -344,9 +344,10 @@ function createDescTexture(project, width = 500, height = 100) {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, width, height);
   ctx.textAlign = 'center';
-  ctx.font = '300 15px Inter, sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.font = '300 20px Inter, sans-serif';
   ctx.fillStyle = '#6B6B6B';
-  wrapText(ctx, project.description, width / 2, 24, width * 0.85, 22);
+  ctx.fillText(project.description, width / 2, height / 2);
   const texture = new THREE.CanvasTexture(cvs);
   texture.minFilter = THREE.LinearFilter;
   texture.magFilter = THREE.LinearFilter;
@@ -365,7 +366,7 @@ projects.forEach((project, i) => {
 
   // Description mesh — sits below title
   const descTex = createDescTexture(project);
-  const descGeo = new THREE.PlaneGeometry(5.5, 1.1, 1, 1);
+  const descGeo = new THREE.PlaneGeometry(7, 0.7, 1, 1);
   const descMat = new THREE.MeshBasicMaterial({ map: descTex, transparent: true, depthWrite: false, opacity: 0 });
   const descMesh = new THREE.Mesh(descGeo, descMat);
   descMeshes.push(descMesh);

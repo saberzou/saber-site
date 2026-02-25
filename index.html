@@ -356,7 +356,7 @@ function updateItems(scroll) {
   // Scroll intro away
   const introEl = document.getElementById('scroll-intro');
   if (introEl) {
-    const introY = -scroll * ITEM_SPACING - 80;
+    const introY = -scroll * ITEM_SPACING - ITEM_SPACING;
     const introOpacity = Math.max(0, 1 - scroll * 0.8);
     introEl.style.transform = `translateY(${centerY + introY}px)`;
     introEl.style.opacity = introOpacity;

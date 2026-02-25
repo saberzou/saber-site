@@ -33,26 +33,16 @@ body {
 
 /* ─── Navigation ─── */
 nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px 40px;
-  pointer-events: none;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 24px 40px; pointer-events: none;
 }
 nav > * { pointer-events: auto; }
 
 .nav-name {
-  font-family: var(--serif);
-  font-size: 1.25rem;
-  letter-spacing: -0.02em;
-  color: var(--fg);
-  cursor: pointer;
-  transition: opacity 0.3s;
+  font-family: var(--serif); font-size: 1.25rem;
+  letter-spacing: -0.02em; color: var(--fg);
+  cursor: pointer; transition: opacity 0.3s;
 }
 .nav-name:hover { opacity: 0.6; }
 
@@ -75,15 +65,63 @@ nav > * { pointer-events: auto; }
   opacity: 0; pointer-events: none; transform: translateY(20px);
 }
 
-/* ─── Projects ─── */
+/* ─── 3D Scroll Container ─── */
 #projects-section {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center;
+  perspective: 1200px;
 }
 
-#three-canvas { position: fixed; inset: 0; z-index: 1; }
+.scroll-stage {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: 100dvh;
+  transform-style: preserve-3d;
+}
 
-/* counter and floating info removed — description is inline in 3D */
+/* ─── Project Items ─── */
+.project-item {
+  position: absolute;
+  left: 0; right: 0;
+  text-align: center;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  cursor: pointer;
+  padding: 0 24px;
+}
+
+.project-item .project-title {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  transition: color 0.3s;
+}
+
+.project-item:hover .project-title {
+  color: var(--accent);
+}
+
+.project-item .project-desc {
+  font-size: clamp(0.95rem, 2vw, 1.25rem);
+  line-height: 1.6;
+  color: var(--fg-muted);
+  font-weight: 300;
+  margin-top: 12px;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.project-item.centered .project-desc {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* ─── Project Detail Overlay ─── */
 #project-detail {
@@ -182,8 +220,7 @@ nav > * { pointer-events: auto; }
 </nav>
 
 <div id="projects-section" class="section">
-  <canvas id="three-canvas"></canvas>
-  <!-- description rendered inline in 3D -->
+  <div class="scroll-stage" id="scroll-stage"></div>
 </div>
 
 <div id="bio-section" class="section hidden">
@@ -210,200 +247,102 @@ nav > * { pointer-events: auto; }
   </div>
 </div>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
-  }
-}
-</script>
-<script type="module">
-import * as THREE from 'three';
-
+<script>
 const projects = [
   {
     title: 'JSON Prompts',
     description: 'A curated gallery of AI image generation prompts with an infinite pannable canvas.',
-    year: '2025',
-    tags: ['AI', 'Gallery', 'Web'],
-    link: 'https://saberzou.github.io/json-prompts/',
-    color: '#C45D3E'
+    year: '2025', tags: ['AI', 'Gallery', 'Web'],
+    link: 'https://saberzou.github.io/json-prompts/'
   },
   {
     title: 'Atticus',
     description: 'A living AI notebook collecting thoughts on mistakes, humanity, and letters to the future.',
-    year: '2025',
-    tags: ['AI', 'Writing', 'Three.js'],
-    link: 'https://saberzou.github.io/atticus/',
-    color: '#E8734A'
+    year: '2025', tags: ['AI', 'Writing', 'Three.js'],
+    link: 'https://saberzou.github.io/atticus/'
   },
   {
     title: 'Design at Scale',
     description: 'Leading 70+ designers shaping AI, Search, and Browser experiences at Microsoft.',
-    year: '2020–Present',
-    tags: ['Leadership', 'Design Systems', 'AI'],
-    link: null,
-    color: '#3D7EC7'
+    year: '2020–Present', tags: ['Leadership', 'Design Systems', 'AI'],
+    link: null
   },
   {
     title: 'AI × Search',
     description: 'Reimagining how people find and understand information through AI-powered discovery.',
-    year: '2023–Present',
-    tags: ['AI', 'Search', 'Product Design'],
-    link: null,
-    color: '#5B8C5A'
+    year: '2023–Present', tags: ['AI', 'Search', 'Product Design'],
+    link: null
   },
   {
     title: 'Street Photography',
     description: 'Capturing the rhythm, light, and quiet drama of everyday life in Beijing.',
-    year: 'Ongoing',
-    tags: ['Photography', 'Personal'],
-    link: null,
-    color: '#8B7355'
+    year: 'Ongoing', tags: ['Photography', 'Personal'],
+    link: null
   },
   {
     title: 'OpenClaw Experiments',
     description: 'Exploring how AI agents can be genuine collaborators, not just chatbots.',
-    year: '2025',
-    tags: ['AI', 'Agents', 'Tools'],
-    link: null,
-    color: '#7B68AE'
+    year: '2025', tags: ['AI', 'Agents', 'Tools'],
+    link: null
   }
 ];
+
+// ─── Build DOM ───
+const stage = document.getElementById('scroll-stage');
+const items = [];
+
+projects.forEach((p, i) => {
+  const el = document.createElement('div');
+  el.className = 'project-item';
+  el.innerHTML = `
+    <div class="project-title">${p.title}</div>
+    <div class="project-desc">${p.description}</div>
+  `;
+  el.addEventListener('click', () => openDetail(p));
+  stage.appendChild(el);
+  items.push(el);
+});
 
 // ─── State ───
 let currentIndex = 0;
 let scrollVelocity = 0;
 let currentSection = 'projects';
-let lastSettledIndex = -1;
+const ITEM_SPACING = 140; // px between items
 
-// ─── Scene ───
-const canvas = document.getElementById('three-canvas');
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('#FAFAF8');
+// ─── Position items with CSS 3D transforms ───
+function updateItems(scroll) {
+  const centerY = window.innerHeight / 2;
 
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 0, 14);
-
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-// ─── Create title-only textures ───
-const cardGroup = new THREE.Group();
-scene.add(cardGroup);
-
-const cardMeshes = [];
-const descMeshes = [];
-const CARD_SPACING = 2.8;
-const PERSPECTIVE_CURVE = 0.5;
-
-function createTitleTexture(project, width = 600, height = 80) {
-  const cvs = document.createElement('canvas');
-  const dpr = 2;
-  cvs.width = width * dpr;
-  cvs.height = height * dpr;
-  const ctx = cvs.getContext('2d');
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, width, height);
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = '400 46px Georgia, Instrument Serif, serif';
-  ctx.fillStyle = '#1A1A1A';
-  ctx.fillText(project.title, width / 2, height / 2);
-  const texture = new THREE.CanvasTexture(cvs);
-  texture.minFilter = THREE.LinearFilter;
-  texture.magFilter = THREE.LinearFilter;
-  return texture;
-}
-
-function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
-  const words = text.split(' ');
-  let line = '';
-  let cy = y;
-  for (const word of words) {
-    const test = line + word + ' ';
-    if (ctx.measureText(test).width > maxWidth && line) {
-      ctx.fillText(line.trim(), x, cy);
-      line = word + ' ';
-      cy += lineHeight;
-    } else {
-      line = test;
-    }
-  }
-  ctx.fillText(line.trim(), x, cy);
-}
-
-function createDescTexture(project, width = 600, height = 60) {
-  const cvs = document.createElement('canvas');
-  const dpr = 2;
-  cvs.width = width * dpr;
-  cvs.height = height * dpr;
-  const ctx = cvs.getContext('2d');
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, width, height);
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = '300 20px Inter, sans-serif';
-  ctx.fillStyle = '#6B6B6B';
-  ctx.fillText(project.description, width / 2, height / 2);
-  const texture = new THREE.CanvasTexture(cvs);
-  texture.minFilter = THREE.LinearFilter;
-  texture.magFilter = THREE.LinearFilter;
-  return texture;
-}
-
-projects.forEach((project, i) => {
-  // Title mesh
-  const titleTex = createTitleTexture(project);
-  const titleGeo = new THREE.PlaneGeometry(7, 0.9, 1, 1);
-  const titleMat = new THREE.MeshBasicMaterial({ map: titleTex, transparent: true, depthWrite: false });
-  const titleMesh = new THREE.Mesh(titleGeo, titleMat);
-  titleMesh.userData = { index: i, project };
-  cardMeshes.push(titleMesh);
-  cardGroup.add(titleMesh);
-
-  // Description mesh — sits below title
-  const descTex = createDescTexture(project);
-  const descGeo = new THREE.PlaneGeometry(7, 0.7, 1, 1);
-  const descMat = new THREE.MeshBasicMaterial({ map: descTex, transparent: true, depthWrite: false, opacity: 0 });
-  const descMesh = new THREE.Mesh(descGeo, descMat);
-  descMeshes.push(descMesh);
-  cardGroup.add(descMesh);
-});
-
-// ─── Position cards ───
-let descTargetOpacities = projects.map(() => 0);
-let descCurrentOpacities = projects.map(() => 0);
-
-function updateCards(scroll) {
-  cardMeshes.forEach((mesh, i) => {
+  items.forEach((el, i) => {
     const offset = i - scroll;
-    mesh.position.y = -offset * CARD_SPACING;
+    const y = offset * ITEM_SPACING;
     const dist = Math.abs(offset);
-    mesh.position.z = -dist * dist * PERSPECTIVE_CURVE;
-    mesh.rotation.x = offset * 0.05;
-    const opacity = Math.max(0, 1 - dist * 0.45);
-    mesh.material.opacity = opacity;
-    const scale = Math.max(0.6, 1 - dist * 0.08);
-    mesh.scale.set(scale, scale, 1);
 
-    // Description follows title, offset below
-    const desc = descMeshes[i];
-    desc.position.y = mesh.position.y - 1.0;
-    desc.position.z = mesh.position.z;
-    desc.rotation.x = mesh.rotation.x;
-    desc.scale.set(scale, scale, 1);
+    // Depth — push away from center
+    const z = -dist * dist * 60;
+
+    // Rotation
+    const rotX = offset * 3;
+
+    // Opacity
+    const opacity = Math.max(0, 1 - dist * 0.4);
+
+    // Scale
+    const scale = Math.max(0.7, 1 - dist * 0.06);
+
+    el.style.top = `${centerY}px`;
+    el.style.transform = `translateY(${y - 40}px) translateZ(${z}px) rotateX(${rotX}deg) scale(${scale})`;
+    el.style.opacity = opacity;
+
+    // Centered class for description float-in
+    const isCentered = dist < 0.08 && Math.abs(scrollVelocity) < 0.005;
+    el.classList.toggle('centered', isCentered);
   });
 }
 
-// (description is in 3D scene, no HTML overlay needed)
-
-// ─── Scroll — much slower for touch ───
-let touchStartY = 0;
-let lastTouchY = 0;
+// ─── Scroll handling ───
 let isDragging = false;
+let lastTouchY = 0;
 
 function onWheel(e) {
   if (currentSection !== 'projects') return;
@@ -412,8 +351,7 @@ function onWheel(e) {
 }
 
 function onTouchStart(e) {
-  touchStartY = e.touches[0].clientY;
-  lastTouchY = touchStartY;
+  lastTouchY = e.touches[0].clientY;
   scrollVelocity = 0;
   isDragging = true;
 }
@@ -422,39 +360,17 @@ function onTouchMove(e) {
   if (currentSection !== 'projects' || !isDragging) return;
   e.preventDefault();
   const y = e.touches[0].clientY;
-  const delta = lastTouchY - y;
-  // Very low sensitivity — need big swipes
-  scrollVelocity += delta * 0.001;
+  scrollVelocity += (lastTouchY - y) * 0.001;
   lastTouchY = y;
 }
 
-function onTouchEnd() {
-  isDragging = false;
-}
+function onTouchEnd() { isDragging = false; }
 
-canvas.addEventListener('wheel', onWheel, { passive: false });
-canvas.addEventListener('touchstart', onTouchStart, { passive: true });
-canvas.addEventListener('touchmove', onTouchMove, { passive: false });
-canvas.addEventListener('touchend', onTouchEnd);
-
-// ─── Click to open detail ───
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
-
-canvas.addEventListener('pointerup', (e) => {
-  if (currentSection !== 'projects') return;
-  if (Math.abs(scrollVelocity) > 0.01) return;
-
-  const rect = canvas.getBoundingClientRect();
-  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-  raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObjects(cardMeshes);
-  if (hits.length > 0) {
-    openDetail(hits[0].object.userData.project);
-  }
-});
+const projectsEl = document.getElementById('projects-section');
+projectsEl.addEventListener('wheel', onWheel, { passive: false });
+projectsEl.addEventListener('touchstart', onTouchStart, { passive: true });
+projectsEl.addEventListener('touchmove', onTouchMove, { passive: false });
+projectsEl.addEventListener('touchend', onTouchEnd);
 
 // ─── Detail overlay ───
 const detailEl = document.getElementById('project-detail');
@@ -487,139 +403,46 @@ document.querySelectorAll('.nav-links a').forEach(a => {
   });
 });
 
-// (counter removed)
-
-// ─── Resize ───
-function onResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  // Rebuild textures at responsive sizes
-  rebuildTextures();
-}
-window.addEventListener('resize', onResize);
-
-function getTextSizes() {
-  const w = window.innerWidth;
-  if (w < 480) return { titleFont: 36, descFont: 18, canvasW: 380, titleH: 60, descH: 70, planeW: 5, descPlaneW: 5, descLineH: 24 };
-  if (w < 768) return { titleFont: 44, descFont: 20, canvasW: 500, titleH: 70, descH: 80, planeW: 6, descPlaneW: 6, descLineH: 26 };
-  return { titleFont: 56, descFont: 24, canvasW: 700, titleH: 90, descH: 80, planeW: 8, descPlaneW: 8, descLineH: 30 };
-}
-
-function rebuildTextures() {
-  const sizes = getTextSizes();
-
-  cardMeshes.forEach((mesh, i) => {
-    const project = projects[i];
-
-    // Rebuild title texture
-    const cvs = document.createElement('canvas');
-    const dpr = 2;
-    cvs.width = sizes.canvasW * dpr;
-    cvs.height = sizes.titleH * dpr;
-    const ctx = cvs.getContext('2d');
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, sizes.canvasW, sizes.titleH);
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = `400 ${sizes.titleFont}px Georgia, Instrument Serif, serif`;
-    ctx.fillStyle = '#1A1A1A';
-    ctx.fillText(project.title, sizes.canvasW / 2, sizes.titleH / 2);
-    mesh.material.map.dispose();
-    const tex = new THREE.CanvasTexture(cvs);
-    tex.minFilter = THREE.LinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-    mesh.material.map = tex;
-    mesh.material.needsUpdate = true;
-    mesh.geometry.dispose();
-    mesh.geometry = new THREE.PlaneGeometry(sizes.planeW, 0.9, 1, 1);
-
-    // Rebuild desc texture with word wrap
-    const desc = descMeshes[i];
-    const dcvs = document.createElement('canvas');
-    dcvs.width = sizes.canvasW * dpr;
-    dcvs.height = sizes.descH * dpr;
-    const dctx = dcvs.getContext('2d');
-    dctx.scale(dpr, dpr);
-    dctx.clearRect(0, 0, sizes.canvasW, sizes.descH);
-    dctx.textAlign = 'center';
-    dctx.font = `300 ${sizes.descFont}px Inter, sans-serif`;
-    dctx.fillStyle = '#6B6B6B';
-    wrapText(dctx, project.description, sizes.canvasW / 2, sizes.descLineH, sizes.canvasW * 0.9, sizes.descLineH);
-    desc.material.map.dispose();
-    const dtex = new THREE.CanvasTexture(dcvs);
-    dtex.minFilter = THREE.LinearFilter;
-    dtex.magFilter = THREE.LinearFilter;
-    desc.material.map = dtex;
-    desc.material.needsUpdate = true;
-    desc.geometry.dispose();
-    desc.geometry = new THREE.PlaneGeometry(sizes.descPlaneW, 0.8, 1, 1);
-  });
-}
-
-// Initial build
-rebuildTextures();
-
-// ─── Animation — always snaps to center ───
+// ─── Animation ───
 function animate() {
   requestAnimationFrame(animate);
 
-  if (currentSection === 'projects') {
-    currentIndex += scrollVelocity;
+  if (currentSection !== 'projects') return;
 
-    // Damping — long elegant coast
-    scrollVelocity *= 0.93;
+  currentIndex += scrollVelocity;
+  scrollVelocity *= 0.93;
 
-    // Elastic edges
-    if (currentIndex < 0) {
-      scrollVelocity -= currentIndex * 0.08;
-      scrollVelocity *= 0.9;
-    }
-    if (currentIndex > projects.length - 1) {
-      scrollVelocity -= (currentIndex - (projects.length - 1)) * 0.08;
-      scrollVelocity *= 0.9;
-    }
-
-    // Always snap to nearest integer (center lock)
-    const target = Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
-    const diff = target - currentIndex;
-
-    // Spring snap — stronger when velocity is low
-    if (Math.abs(scrollVelocity) < 0.02) {
-      scrollVelocity += diff * 0.06;
-      scrollVelocity *= 0.88;
-    }
-
-    // Kill micro-oscillation
-    if (Math.abs(scrollVelocity) < 0.0001 && Math.abs(diff) < 0.001) {
-      currentIndex = target;
-      scrollVelocity = 0;
-    }
-
-    updateCards(currentIndex);
-
-    // Animate description opacity — only visible when centered
-    const isSettled = Math.abs(diff) < 0.08 && Math.abs(scrollVelocity) < 0.008;
-    descMeshes.forEach((desc, i) => {
-      const dist = Math.abs(i - currentIndex);
-      // Target: fully visible only when this item is centered and settled
-      descTargetOpacities[i] = (i === target && isSettled && dist < 0.1) ? 1 : 0;
-      // Smooth lerp
-      descCurrentOpacities[i] += (descTargetOpacities[i] - descCurrentOpacities[i]) * 0.08;
-      if (descCurrentOpacities[i] < 0.01) descCurrentOpacities[i] = 0;
-      desc.material.opacity = descCurrentOpacities[i];
-      // Slight upward float-in
-      desc.position.y = cardMeshes[i].position.y - 1.0 + (1 - descCurrentOpacities[i]) * 0.15;
-    });
+  // Elastic edges
+  if (currentIndex < 0) {
+    scrollVelocity -= currentIndex * 0.08;
+    scrollVelocity *= 0.9;
+  }
+  if (currentIndex > projects.length - 1) {
+    scrollVelocity -= (currentIndex - (projects.length - 1)) * 0.08;
+    scrollVelocity *= 0.9;
   }
 
-  renderer.render(scene, camera);
+  // Snap
+  const target = Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
+  const diff = target - currentIndex;
+
+  if (Math.abs(scrollVelocity) < 0.02) {
+    scrollVelocity += diff * 0.06;
+    scrollVelocity *= 0.88;
+  }
+
+  if (Math.abs(scrollVelocity) < 0.0001 && Math.abs(diff) < 0.001) {
+    currentIndex = target;
+    scrollVelocity = 0;
+  }
+
+  updateItems(currentIndex);
 }
 
-updateCards(0);
+updateItems(0);
+// Trigger initial centered state after a frame
+requestAnimationFrame(() => { items[0].classList.add('centered'); });
 animate();
-
 </script>
 </body>
 </html>

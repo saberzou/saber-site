@@ -36,7 +36,7 @@ body {
 /* ─── Navigation ─── */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  display: flex; justify-content: flex-start; align-items: center;
+  display: flex; justify-content: space-between; align-items: center;
   padding: 24px 40px; pointer-events: none;
 }
 nav > * { pointer-events: auto; }
@@ -55,13 +55,24 @@ nav > * { pointer-events: auto; }
 
 .nav-name {
   font-family: var(--sans);
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 400;
-  letter-spacing: -0.02em; color: var(--fg);
-  cursor: pointer; transition: opacity 0.3s;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer; transition: color 0.3s;
   text-decoration: none;
 }
-.nav-name:hover { opacity: 0.6; }
+.nav-name:hover { color: var(--fg-muted); }
+
+.nav-right {
+  font-family: var(--sans);
+  font-size: 0.8rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--fg); cursor: pointer;
+  text-decoration: none; transition: color 0.3s;
+}
+.nav-right:hover { color: var(--fg-muted); }
 
 /* ─── Sections ─── */
 .section {
@@ -223,6 +234,7 @@ nav > * { pointer-events: auto; }
 <nav>
   <a class="nav-name" id="nav-name-link">Saber Zou</a>
   <div class="nav-avatar"><img src="avatar.jpg" alt="Saber Zou"></div>
+  <a class="nav-right" id="nav-projects-link">Projects</a>
 </nav>
 
 <div id="projects-section" class="section">
@@ -403,10 +415,17 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(
 // ─── Nav ───
 document.getElementById('nav-name-link').addEventListener('click', e => {
   e.preventDefault();
-  const target = currentSection === 'projects' ? 'bio' : 'projects';
+  if (currentSection === 'bio') return;
   document.getElementById(`${currentSection}-section`).classList.add('hidden');
-  document.getElementById(`${target}-section`).classList.remove('hidden');
-  currentSection = target;
+  document.getElementById('bio-section').classList.remove('hidden');
+  currentSection = 'bio';
+});
+document.getElementById('nav-projects-link').addEventListener('click', e => {
+  e.preventDefault();
+  if (currentSection === 'projects') return;
+  document.getElementById(`${currentSection}-section`).classList.add('hidden');
+  document.getElementById('projects-section').classList.remove('hidden');
+  currentSection = 'projects';
 });
 
 // ─── Animation ───

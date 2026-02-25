@@ -12,7 +12,7 @@
 :root {
   --bg: #FFD445;
   --fg: #2D2A27;
-  --fg-muted: #5C5955;
+  --fg-muted: #3D3A37;
   --fg-light: #8A8783;
   --accent: #FA6A42;
   --border: #E4E0DA;
@@ -182,7 +182,7 @@ nav > * { pointer-events: auto; }
 
 /* ─── Bio Section ─── */
 #bio-section { justify-content: center; align-items: center; padding: 40px; overflow-y: auto; }
-.bio-content { max-width: 560px; text-align: center; }
+.bio-content { max-width: 560px; text-align: left; }
 .bio-content h2 {
   font-family: var(--sans); font-size: 3rem; font-weight: 600;
   line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 32px;
@@ -195,7 +195,7 @@ nav > * { pointer-events: auto; }
 .bio-content p strong { color: var(--fg); font-weight: 500; }
 .bio-links {
   margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border);
-  display: flex; gap: 24px; justify-content: center;
+  display: flex; gap: 24px; justify-content: flex-start;
 }
 .bio-links a {
   font-size: 0.8rem; font-weight: 500; letter-spacing: 0.05em;
@@ -230,7 +230,6 @@ nav > * { pointer-events: auto; }
 
 <div id="bio-section" class="section hidden">
   <div class="bio-content">
-    <h2>About</h2>
     <p><strong>Saber Zou</strong> is a Design Team Lead at Microsoft, leading 70+ designers across AI, Search, Browser, and Content experiences — core products used by billions of people worldwide.</p>
     <p>Based in Beijing, he works at the intersection of design leadership and emerging technology, shaping how people interact with AI-powered tools every day.</p>
     <p>Outside of work, he explores street photography, draws simple sketches on iPad, and builds experimental projects that push the boundaries of what AI and design can do together.</p>

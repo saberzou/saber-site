@@ -122,6 +122,12 @@ nav > * { pointer-events: auto; }
   padding: 0 24px;
 }
 
+.project-item .project-emoji {
+  width: 48px; height: 48px;
+  margin: 0 auto 8px;
+  display: block;
+}
+
 .project-item .project-title {
   font-family: var(--sans);
   font-size: clamp(2rem, 5vw, 3.5rem);
@@ -282,48 +288,57 @@ nav > * { pointer-events: auto; }
 </div>
 
 <script>
+const EMOJI_BASE = 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis';
+
 const projects = [
   {
     title: 'JSON Prompts',
     description: 'A curated gallery of AI image generation prompts with an infinite pannable canvas.',
     year: '2025', tags: ['AI', 'Gallery', 'Web'],
-    link: 'https://saberzou.github.io/json-prompts/'
+    link: 'https://saberzou.github.io/json-prompts/',
+    emoji: `${EMOJI_BASE}/Activities/Artist%20Palette.png`
   },
   {
     title: 'Between Floors',
     description: 'Vertical swipe stories for English learning — hidden floors, quizzes, and C1/C2 vocab.',
     year: '2026', tags: ['Education', 'Interactive', 'Web'],
-    link: 'https://saberzou.github.io/between-floors/'
+    link: 'https://saberzou.github.io/between-floors/',
+    emoji: `${EMOJI_BASE}/Objects/Books.png`
   },
   {
     title: 'Atticus',
     description: 'A living AI notebook — thoughts on mistakes, humanity, and letters to the future.',
     year: '2026', tags: ['AI', 'Writing', 'Web'],
-    link: 'https://saberzou.github.io/atticus/'
+    link: 'https://saberzou.github.io/atticus/',
+    emoji: `${EMOJI_BASE}/Objects/Memo.png`
   },
   {
     title: 'Postcards from Mars',
     description: '3D mission log viewer — AI robots on Mars with field diaries and real NASA rover photos.',
     year: '2026', tags: ['3D', 'NASA', 'Three.js'],
-    link: 'https://saberzou.github.io/name-universe/postcards-from-mars/'
+    link: 'https://saberzou.github.io/name-universe/postcards-from-mars/',
+    emoji: `${EMOJI_BASE}/Travel%20and%20places/Rocket.png`
   },
   {
     title: 'Name Universe',
     description: 'Type a name, get a unique procedural 3D universe — stars, planets, constellations, and sound.',
     year: '2026', tags: ['3D', 'Generative', 'Three.js'],
-    link: 'https://saberzou.github.io/name-universe/'
+    link: 'https://saberzou.github.io/name-universe/',
+    emoji: `${EMOJI_BASE}/Travel%20and%20places/Glowing%20Star.png`
   },
   {
     title: 'Axel Art',
     description: 'ASCII art gallery with a stacked card deck interface and warm coral aesthetic.',
     year: '2026', tags: ['Art', 'Design', 'Web'],
-    link: 'https://saberzou.github.io/axel-art/'
+    link: 'https://saberzou.github.io/axel-art/',
+    emoji: `${EMOJI_BASE}/Activities/Performing%20Arts.png`
   },
   {
     title: 'Littlebook',
     description: 'Daily reading companion — wallpaper, quote, book recommendation, and calendar.',
     year: '2026', tags: ['Reading', 'Daily', 'Web'],
-    link: 'https://saberzou.github.io/Littlebook'
+    link: 'https://saberzou.github.io/Littlebook',
+    emoji: `${EMOJI_BASE}/Objects/Open%20Book.png`
   }
 ];
 
@@ -335,6 +350,7 @@ projects.forEach((p, i) => {
   const el = document.createElement('div');
   el.className = 'project-item';
   el.innerHTML = `
+    <img class="project-emoji" src="${p.emoji}" alt="">
     <div class="project-title">${p.title}</div>
     <div class="project-desc">${p.description}</div>
   `;

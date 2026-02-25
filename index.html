@@ -36,7 +36,7 @@ body {
 /* ─── Navigation ─── */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex; justify-content: flex-start; align-items: center;
   padding: 24px 40px; pointer-events: none;
 }
 nav > * { pointer-events: auto; }
@@ -54,20 +54,14 @@ nav > * { pointer-events: auto; }
 }
 
 .nav-name {
-  font-family: var(--sans); font-size: 1.25rem;
+  font-family: var(--sans);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 400;
   letter-spacing: -0.02em; color: var(--fg);
   cursor: pointer; transition: opacity 0.3s;
+  text-decoration: none;
 }
 .nav-name:hover { opacity: 0.6; }
-
-.nav-links { display: flex; gap: 32px; list-style: none; }
-.nav-links a {
-  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--fg-muted);
-  text-decoration: none; cursor: pointer; transition: color 0.3s;
-}
-.nav-links a:hover { color: var(--fg); }
-.nav-links a.active { color: var(--fg); }
 
 /* ─── Sections ─── */
 .section {
@@ -219,8 +213,6 @@ nav > * { pointer-events: auto; }
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   nav { padding: 20px 24px; }
-  .nav-links { gap: 20px; }
-  .nav-links a { font-size: 0.7rem; }
   #bio-section { padding: 80px 24px 40px; }
   .bio-content h2 { font-size: 2.2rem; }
 }
@@ -229,12 +221,8 @@ nav > * { pointer-events: auto; }
 <body>
 
 <nav>
-  <div class="nav-name">Saber Zou</div>
+  <a class="nav-name" id="nav-name-link">Saber Zou</a>
   <div class="nav-avatar"><img src="avatar.jpg" alt="Saber Zou"></div>
-  <ul class="nav-links">
-    <li><a href="#" class="active" data-section="projects">Projects</a></li>
-    <li><a href="#" data-section="bio">Bio</a></li>
-  </ul>
 </nav>
 
 <div id="projects-section" class="section">
@@ -413,17 +401,12 @@ window.closeDetail = () => detailEl.classList.remove('visible');
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 
 // ─── Nav ───
-document.querySelectorAll('.nav-links a').forEach(a => {
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    const target = a.dataset.section;
-    if (target === currentSection) return;
-    document.querySelectorAll('.nav-links a').forEach(x => x.classList.remove('active'));
-    a.classList.add('active');
-    document.getElementById(`${currentSection}-section`).classList.add('hidden');
-    document.getElementById(`${target}-section`).classList.remove('hidden');
-    currentSection = target;
-  });
+document.getElementById('nav-name-link').addEventListener('click', e => {
+  e.preventDefault();
+  const target = currentSection === 'projects' ? 'bio' : 'projects';
+  document.getElementById(`${currentSection}-section`).classList.add('hidden');
+  document.getElementById(`${target}-section`).classList.remove('hidden');
+  currentSection = target;
 });
 
 // ─── Animation ───

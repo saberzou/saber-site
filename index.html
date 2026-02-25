@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Saber Zou — Design & Projects</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -16,8 +16,8 @@
   --fg-light: #9A9A9A;
   --accent: #C45D3E;
   --border: #E8E8E4;
-  --serif: 'Instrument Serif', Georgia, serif;
-  --sans: 'Inter', -apple-system, sans-serif;
+  --serif: 'PT Serif', Georgia, serif;
+  --sans: 'Sora', -apple-system, sans-serif;
 }
 
 html { font-size: 16px; }
@@ -40,7 +40,7 @@ nav {
 nav > * { pointer-events: auto; }
 
 .nav-name {
-  font-family: var(--serif); font-size: 1.25rem;
+  font-family: var(--sans); font-size: 1.25rem;
   letter-spacing: -0.02em; color: var(--fg);
   cursor: pointer; transition: opacity 0.3s;
 }
@@ -91,9 +91,9 @@ nav > * { pointer-events: auto; }
 }
 
 .project-item .project-title {
-  font-family: var(--serif);
+  font-family: var(--sans);
   font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.02em;
   color: var(--fg);
@@ -105,6 +105,7 @@ nav > * { pointer-events: auto; }
 }
 
 .project-item .project-desc {
+  font-family: var(--serif);
   font-size: clamp(0.95rem, 2vw, 1.25rem);
   line-height: 1.6;
   color: var(--fg-muted);
@@ -148,10 +149,11 @@ nav > * { pointer-events: auto; }
   text-transform: uppercase; color: var(--fg-light); margin-bottom: 16px;
 }
 .detail-content h2 {
-  font-family: var(--serif); font-size: 2.8rem; font-weight: 400;
+  font-family: var(--sans); font-size: 2.8rem; font-weight: 600;
   line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 24px;
 }
 .detail-content .detail-desc {
+  font-family: var(--serif);
   font-size: 1.05rem; line-height: 1.75;
   color: var(--fg-muted); font-weight: 300; margin-bottom: 32px;
 }
@@ -180,10 +182,11 @@ nav > * { pointer-events: auto; }
 #bio-section { justify-content: center; align-items: center; padding: 40px; overflow-y: auto; }
 .bio-content { max-width: 560px; text-align: center; }
 .bio-content h2 {
-  font-family: var(--serif); font-size: 3rem; font-weight: 400;
+  font-family: var(--sans); font-size: 3rem; font-weight: 600;
   line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 32px;
 }
 .bio-content p {
+  font-family: var(--serif);
   font-size: 1.05rem; line-height: 1.8;
   color: var(--fg-muted); font-weight: 300; margin-bottom: 20px;
 }

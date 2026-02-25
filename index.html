@@ -289,7 +289,6 @@ nav > * { pointer-events: auto; }
 <div id="project-detail">
   <button class="detail-close" onclick="closeDetail()">Close</button>
   <div class="detail-content">
-    <div class="detail-meta" id="detail-meta"></div>
     <div class="detail-image" id="detail-image"></div>
     <h2 id="detail-title"></h2>
     <div class="detail-desc" id="detail-desc"></div>
@@ -451,7 +450,6 @@ projectsEl.addEventListener('touchend', onTouchEnd);
 const detailEl = document.getElementById('project-detail');
 
 function openDetail(project) {
-  document.getElementById('detail-meta').textContent = project.year;
   const imgContainer = document.getElementById('detail-image');
   if (project.image) {
     imgContainer.innerHTML = `<img src="${project.image}" alt="${project.title}">`;

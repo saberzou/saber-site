@@ -502,9 +502,9 @@ window.addEventListener('resize', onResize);
 
 function getTextSizes() {
   const w = window.innerWidth;
-  if (w < 480) return { titleFont: 28, descFont: 14, canvasW: 340, titleH: 50, descH: 60, planeW: 4.2, descPlaneW: 4.2, descLineH: 20 };
-  if (w < 768) return { titleFont: 36, descFont: 16, canvasW: 460, titleH: 60, descH: 70, planeW: 5.5, descPlaneW: 5.5, descLineH: 22 };
-  return { titleFont: 46, descFont: 20, canvasW: 600, titleH: 80, descH: 70, planeW: 7, descPlaneW: 7, descLineH: 26 };
+  if (w < 480) return { titleFont: 36, descFont: 18, canvasW: 380, titleH: 60, descH: 70, planeW: 5, descPlaneW: 5, descLineH: 24 };
+  if (w < 768) return { titleFont: 44, descFont: 20, canvasW: 500, titleH: 70, descH: 80, planeW: 6, descPlaneW: 6, descLineH: 26 };
+  return { titleFont: 56, descFont: 24, canvasW: 700, titleH: 90, descH: 80, planeW: 8, descPlaneW: 8, descLineH: 30 };
 }
 
 function rebuildTextures() {

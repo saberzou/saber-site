@@ -16,7 +16,6 @@
   --fg-light: #9A9A9A;
   --accent: #C45D3E;
   --border: #E8E8E4;
-  --card-bg: #FFFFFF;
   --serif: 'Instrument Serif', Georgia, serif;
   --sans: 'Inter', -apple-system, sans-serif;
   --mono: 'JetBrains Mono', monospace;
@@ -93,58 +92,12 @@ nav > * { pointer-events: auto; }
   transform: translateY(20px);
 }
 
-/* ─── Hero / Projects Section ─── */
+/* ─── Projects Section ─── */
 #projects-section {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-
-.hero-title {
-  position: fixed;
-  top: 50%;
-  left: 40px;
-  transform: translateY(-50%);
-  z-index: 10;
-  pointer-events: none;
-  max-width: 320px;
-}
-
-.hero-title h1 {
-  font-family: var(--serif);
-  font-size: 3.5rem;
-  font-weight: 400;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  color: var(--fg);
-}
-
-.hero-title p {
-  margin-top: 16px;
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: var(--fg-muted);
-  font-weight: 300;
-}
-
-.hero-title .scroll-hint {
-  margin-top: 24px;
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--fg-light);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.scroll-hint::before {
-  content: '';
-  display: block;
-  width: 20px;
-  height: 1px;
-  background: var(--fg-light);
 }
 
 /* Three.js canvas */
@@ -193,6 +146,7 @@ nav > * { pointer-events: auto; }
 .detail-content {
   max-width: 640px;
   margin: 0 auto;
+  text-align: center;
 }
 
 .detail-meta {
@@ -248,6 +202,7 @@ nav > * { pointer-events: auto; }
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .detail-tags span {
@@ -270,7 +225,7 @@ nav > * { pointer-events: auto; }
 
 .bio-content {
   max-width: 560px;
-  text-align: left;
+  text-align: center;
 }
 
 .bio-content h2 {
@@ -301,6 +256,7 @@ nav > * { pointer-events: auto; }
   border-top: 1px solid var(--border);
   display: flex;
   gap: 24px;
+  justify-content: center;
 }
 
 .bio-links a {
@@ -318,7 +274,8 @@ nav > * { pointer-events: auto; }
 .project-counter {
   position: fixed;
   bottom: 32px;
-  right: 40px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
   font-size: 0.7rem;
   letter-spacing: 0.1em;
@@ -332,18 +289,6 @@ nav > * { pointer-events: auto; }
   .nav-links { gap: 20px; }
   .nav-links a { font-size: 0.7rem; }
 
-  .hero-title {
-    position: fixed;
-    top: auto;
-    bottom: 60px;
-    left: 24px;
-    right: 24px;
-    transform: none;
-    max-width: none;
-  }
-
-  .hero-title h1 { font-size: 2.2rem; }
-
   #project-detail { padding: 80px 24px 60px; }
   .detail-content h2 { font-size: 2rem; }
   .detail-close { right: 24px; }
@@ -351,7 +296,7 @@ nav > * { pointer-events: auto; }
   #bio-section { padding: 80px 24px 40px; }
   .bio-content h2 { font-size: 2.2rem; }
 
-  .project-counter { bottom: 20px; right: 24px; }
+  .project-counter { bottom: 20px; }
 }
 </style>
 </head>
@@ -368,11 +313,6 @@ nav > * { pointer-events: auto; }
 
 <!-- Projects Section -->
 <div id="projects-section" class="section">
-  <div class="hero-title">
-    <h1>Selected<br>Works</h1>
-    <p>Design leadership, tools, and experiments at the intersection of AI and human creativity.</p>
-    <div class="scroll-hint">Scroll to explore</div>
-  </div>
   <canvas id="three-canvas"></canvas>
   <div class="project-counter"><span id="counter-current">01</span> / <span id="counter-total">06</span></div>
 </div>
@@ -486,9 +426,7 @@ const projects = [
 
 // ─── State ───
 let currentIndex = 0;
-let targetIndex = 0;
 let scrollVelocity = 0;
-let isAnimating = false;
 let currentSection = 'projects';
 
 // ─── Scene Setup ───
@@ -497,65 +435,50 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color('#FAFAF8');
 
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 0, 12);
+camera.position.set(0, 0, 14);
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// ─── Create Project Cards ───
+// ─── Create Project Text (no card, just text on transparent plane) ───
 const cardGroup = new THREE.Group();
 scene.add(cardGroup);
 
-// Position cards on right side
-cardGroup.position.x = 3;
+// Center the cards
+cardGroup.position.x = 0;
 
 const cardMeshes = [];
-const CARD_SPACING = 2.6;  // vertical spacing between cards
-const PERSPECTIVE_CURVE = 0.35; // how much cards curve away
+const CARD_SPACING = 2.8;
+const PERSPECTIVE_CURVE = 0.4;
 
-function createTextTexture(project, width = 512, height = 160) {
+function createTextTexture(project, width = 600, height = 160) {
   const cvs = document.createElement('canvas');
-  cvs.width = width * 2;
-  cvs.height = height * 2;
+  const dpr = 2;
+  cvs.width = width * dpr;
+  cvs.height = height * dpr;
   const ctx = cvs.getContext('2d');
+  ctx.scale(dpr, dpr);
 
-  // Background
-  ctx.fillStyle = '#FFFFFF';
-  ctx.beginPath();
-  ctx.roundRect(0, 0, cvs.width, cvs.height, 16);
-  ctx.fill();
+  // Fully transparent background — no card
+  ctx.clearRect(0, 0, width, height);
 
-  // Left accent bar
-  ctx.fillStyle = project.color;
-  ctx.fillRect(0, 0, 8, cvs.height);
-
-  // Year
-  ctx.font = '500 22px Inter, sans-serif';
+  // Year — small, above title
+  ctx.textAlign = 'center';
+  ctx.font = '500 11px Inter, sans-serif';
   ctx.fillStyle = '#9A9A9A';
-  ctx.fillText(project.year, 48, 56);
+  ctx.letterSpacing = '2px';
+  ctx.fillText(project.year.toUpperCase(), width / 2, 36);
 
-  // Title
-  ctx.font = '400 52px Georgia, serif';
+  // Title — large serif, centered
+  ctx.font = '400 44px Georgia, Instrument Serif, serif';
   ctx.fillStyle = '#1A1A1A';
-  ctx.fillText(project.title, 48, 120);
+  ctx.fillText(project.title, width / 2, 82);
 
-  // Subtitle
-  ctx.font = '300 28px Inter, sans-serif';
+  // Subtitle — lighter, centered
+  ctx.font = '300 16px Inter, sans-serif';
   ctx.fillStyle = '#6B6B6B';
-  ctx.fillText(project.subtitle, 48, 170);
-
-  // Arrow
-  ctx.font = '300 40px Inter, sans-serif';
-  ctx.fillStyle = '#C45D3E';
-  ctx.fillText('→', cvs.width - 80, 120);
-
-  // Subtle border
-  ctx.strokeStyle = '#E8E8E4';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.roundRect(1, 1, cvs.width - 2, cvs.height - 2, 16);
-  ctx.stroke();
+  ctx.fillText(project.subtitle, width / 2, 114);
 
   const texture = new THREE.CanvasTexture(cvs);
   texture.minFilter = THREE.LinearFilter;
@@ -565,11 +488,12 @@ function createTextTexture(project, width = 512, height = 160) {
 
 projects.forEach((project, i) => {
   const texture = createTextTexture(project);
-  const geo = new THREE.PlaneGeometry(6, 1.8, 1, 1);
+  const geo = new THREE.PlaneGeometry(7, 1.8, 1, 1);
   const mat = new THREE.MeshBasicMaterial({
     map: texture,
     transparent: true,
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
+    depthWrite: false
   });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.userData = { index: i, project };
@@ -582,34 +506,35 @@ function updateCards(scroll) {
   cardMeshes.forEach((mesh, i) => {
     const offset = i - scroll;
 
-    // Y position — linear spacing
+    // Y position
     mesh.position.y = -offset * CARD_SPACING;
 
-    // Z position — curve away from center (depth)
+    // Z depth — parabolic curve
     const dist = Math.abs(offset);
     mesh.position.z = -dist * dist * PERSPECTIVE_CURVE;
 
-    // Rotation — tilt based on offset
-    mesh.rotation.x = offset * 0.08;
+    // Subtle rotation
+    mesh.rotation.x = offset * 0.06;
 
-    // Opacity — fade distant cards
-    const opacity = Math.max(0, 1 - dist * 0.3);
+    // Opacity — fade distant items
+    const opacity = Math.max(0, 1 - dist * 0.35);
     mesh.material.opacity = opacity;
 
-    // Scale — slightly smaller when far
-    const scale = Math.max(0.7, 1 - dist * 0.06);
+    // Scale
+    const scale = Math.max(0.65, 1 - dist * 0.07);
     mesh.scale.set(scale, scale, 1);
   });
 }
 
-// ─── Scroll Handling ───
+// ─── Scroll Handling — slower, elegant inertia ───
 let touchStartY = 0;
 let lastTouchY = 0;
 
 function onWheel(e) {
   if (currentSection !== 'projects') return;
   e.preventDefault();
-  scrollVelocity += e.deltaY * 0.003;
+  // Much slower scroll sensitivity
+  scrollVelocity += e.deltaY * 0.0008;
 }
 
 function onTouchStart(e) {
@@ -622,7 +547,7 @@ function onTouchMove(e) {
   if (currentSection !== 'projects') return;
   e.preventDefault();
   const y = e.touches[0].clientY;
-  scrollVelocity += (lastTouchY - y) * 0.008;
+  scrollVelocity += (lastTouchY - y) * 0.003;
   lastTouchY = y;
 }
 
@@ -636,7 +561,7 @@ const pointer = new THREE.Vector2();
 
 function onPointerUp(e) {
   if (currentSection !== 'projects') return;
-  if (Math.abs(scrollVelocity) > 0.05) return; // don't click while scrolling
+  if (Math.abs(scrollVelocity) > 0.02) return;
 
   const rect = canvas.getBoundingClientRect();
   pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -681,7 +606,6 @@ window.closeDetail = function() {
   detailEl.classList.remove('visible');
 };
 
-// Close on Escape
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeDetail();
 });
@@ -712,41 +636,44 @@ function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-
-  // Adjust card group position based on screen width
-  if (window.innerWidth < 768) {
-    cardGroup.position.x = 0;
-    document.querySelector('.hero-title').style.textAlign = 'center';
-  } else {
-    cardGroup.position.x = 3;
-  }
 }
 window.addEventListener('resize', onResize);
-onResize();
 
-// ─── Animation Loop ───
+// ─── Animation Loop — elegant spring physics ───
 function animate() {
   requestAnimationFrame(animate);
 
   if (currentSection === 'projects') {
-    // Apply velocity with damping
+    // Apply velocity
     currentIndex += scrollVelocity;
-    scrollVelocity *= 0.9;
 
-    // Clamp
+    // Slow, elegant damping (0.95 = long coast)
+    scrollVelocity *= 0.95;
+
+    // Elastic bounce at edges
+    const overscrollStrength = 0.06;
     if (currentIndex < 0) {
-      currentIndex *= 0.8;
-      scrollVelocity *= 0.5;
+      scrollVelocity -= currentIndex * overscrollStrength;
+      scrollVelocity *= 0.92;
     }
     if (currentIndex > projects.length - 1) {
-      currentIndex = projects.length - 1 + (currentIndex - (projects.length - 1)) * 0.8;
-      scrollVelocity *= 0.5;
+      scrollVelocity -= (currentIndex - (projects.length - 1)) * overscrollStrength;
+      scrollVelocity *= 0.92;
     }
 
-    // Snap to nearest when velocity is low
-    if (Math.abs(scrollVelocity) < 0.01) {
+    // Gentle snap when nearly still
+    if (Math.abs(scrollVelocity) < 0.005) {
       const target = Math.round(currentIndex);
-      currentIndex += (target - currentIndex) * 0.12;
+      const diff = target - currentIndex;
+      // Smooth spring toward snap point
+      scrollVelocity += diff * 0.04;
+      scrollVelocity *= 0.85;
+    }
+
+    // Kill micro-oscillation
+    if (Math.abs(scrollVelocity) < 0.0001 && Math.abs(currentIndex - Math.round(currentIndex)) < 0.001) {
+      currentIndex = Math.round(currentIndex);
+      scrollVelocity = 0;
     }
 
     updateCards(currentIndex);

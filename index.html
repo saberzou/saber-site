@@ -75,18 +75,16 @@ nav > * { pointer-events: auto; }
 .nav-right:hover { color: var(--fg-muted); }
 
 .scroll-intro {
-  position: fixed; top: 80px; left: 0; right: 0; z-index: 50;
+  position: absolute; top: 0; left: 0; right: 0; z-index: 50;
   text-align: center; padding: 0 24px;
+  will-change: transform, opacity;
+  transition: none;
 }
 .scroll-intro p {
   font-family: var(--serif);
   font-size: 1rem; line-height: 1.6;
   color: var(--fg-muted); font-weight: 400;
   max-width: 480px; margin: 0 auto;
-}
-.scroll-intro a {
-  color: var(--fg); text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 /* ─── Sections ─── */
@@ -253,8 +251,8 @@ nav > * { pointer-events: auto; }
 </nav>
 
 <div id="projects-section" class="section">
-  <div class="scroll-intro">
-    <p>Vibe-coded projects, built with AI. More coming — reach me at <a href="mailto:saberzou@gmail.com">saberzou@gmail.com</a></p>
+  <div class="scroll-intro" id="scroll-intro">
+    <p>All of these were vibe-coded with AI — and I'm just getting started.</p>
   </div>
   <div class="scroll-stage" id="scroll-stage"></div>
 </div>
@@ -354,6 +352,15 @@ const ITEM_SPACING = 140; // px between items
 // ─── Position items with CSS 3D transforms ───
 function updateItems(scroll) {
   const centerY = window.innerHeight / 2;
+
+  // Scroll intro away
+  const introEl = document.getElementById('scroll-intro');
+  if (introEl) {
+    const introY = -scroll * ITEM_SPACING - 80;
+    const introOpacity = Math.max(0, 1 - scroll * 0.8);
+    introEl.style.transform = `translateY(${centerY + introY}px)`;
+    introEl.style.opacity = introOpacity;
+  }
 
   items.forEach((el, i) => {
     const offset = i - scroll;

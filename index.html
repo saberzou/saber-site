@@ -490,12 +490,21 @@ document.querySelectorAll('.nav-links a').forEach(a => {
 // (counter removed)
 
 // ─── Resize ───
+function getResponsiveScale() {
+  // At 1200px+ width, scale=1. At 375px, scale~0.45
+  return Math.min(1, window.innerWidth / 900);
+}
+
 function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const s = getResponsiveScale();
+  cardGroup.scale.set(s, s, s);
 }
 window.addEventListener('resize', onResize);
+onResize();
 
 // ─── Animation — always snaps to center ───
 function animate() {

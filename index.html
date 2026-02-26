@@ -107,6 +107,7 @@ nav > * { pointer-events: auto; }
   position: relative;
   width: 100%;
   max-width: 800px;
+  margin: 0 auto;
   height: 100dvh;
   transform-style: preserve-3d;
 }
@@ -408,7 +409,7 @@ projects.forEach((p, i) => {
 let currentIndex = 0;
 let scrollVelocity = 0;
 let currentSection = 'projects';
-const ITEM_SPACING = 200; // px between items
+const ITEM_SPACING = window.innerWidth >= 768 ? 280 : 200; // px between items
 
 // ─── Position items with CSS 3D transforms ───
 function updateItems(scroll) {

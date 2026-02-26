@@ -5,9 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Saber Zou — Design & Projects</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+body.ready {
+  opacity: 1;
+}
 
 :root {
   --bg: #F5F3EF;
@@ -568,6 +577,13 @@ updateItems(0);
 // Trigger initial centered state after a frame
 requestAnimationFrame(() => { items[0].classList.add('centered'); });
 animate();
+
+// Page entrance — reveal once fonts + layout are ready
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => document.body.classList.add('ready'));
+} else {
+  window.addEventListener('load', () => document.body.classList.add('ready'));
+}
 </script>
 </body>
 </html>

@@ -200,6 +200,10 @@ nav > * { pointer-events: auto; }
 }
 .detail-image img {
   width: 100%; height: auto; display: block;
+  opacity: 0; transition: opacity 0.8s ease;
+}
+.detail-image img.loaded {
+  opacity: 1;
 }
 
 .detail-content { max-width: 640px; margin: 0 auto; text-align: center; }
@@ -489,7 +493,7 @@ const detailEl = document.getElementById('project-detail');
 function openDetail(project) {
   const imgContainer = document.getElementById('detail-image');
   if (project.image) {
-    imgContainer.innerHTML = `<img src="${project.image}" alt="${project.title}">`;
+    imgContainer.innerHTML = `<img src="${project.image}" alt="${project.title}" onload="this.classList.add('loaded')">`;
     imgContainer.style.display = 'block';
   } else {
     imgContainer.innerHTML = '';

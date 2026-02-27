@@ -556,16 +556,16 @@ function animate() {
     scrollVelocity *= 0.8;
   }
 
-  // Smooth snap — gentle ease into position
+  // Smooth snap — direct ease, no overshoot
   const target = Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
   const diff = target - currentIndex;
 
   if (Math.abs(scrollVelocity) < 0.015) {
-    scrollVelocity += diff * 0.04;
-    scrollVelocity *= 0.85;
+    currentIndex += diff * 0.08;
+    scrollVelocity = 0;
   }
 
-  if (Math.abs(scrollVelocity) < 0.0001 && Math.abs(diff) < 0.001) {
+  if (Math.abs(diff) < 0.001) {
     currentIndex = target;
     scrollVelocity = 0;
   }

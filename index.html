@@ -230,9 +230,22 @@ nav > * { pointer-events: auto; }
   color: var(--fg-muted); font-weight: 300; margin-bottom: 32px;
   text-align: left;
 }
-.detail-content .detail-desc p + p {
-  margin-top: 20px; padding-top: 20px;
+.detail-how {
+  margin-top: 24px; padding-top: 24px;
   border-top: 1px solid var(--border);
+  text-align: left;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+#project-detail.visible .detail-how { opacity: 1; transform: translateY(0); transition-delay: 0.6s; }
+.detail-how h3 {
+  font-family: var(--sans); font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--fg); margin-bottom: 8px;
+}
+.detail-how p {
+  font-family: var(--serif); font-size: 0.95rem; line-height: 1.7;
+  color: var(--fg-muted); font-weight: 300;
 }
 .detail-content .detail-link {
   display: inline-flex; align-items: center; gap: 8px;
@@ -324,6 +337,7 @@ nav > * { pointer-events: auto; }
     <div class="detail-desc" id="detail-desc"></div>
     <a class="detail-link" id="detail-link" href="#" target="_blank">View Project</a>
     <div class="detail-tags" id="detail-tags"></div>
+    <div class="detail-how" id="detail-how"></div>
   </div>
 </div>
 
@@ -334,7 +348,8 @@ const projects = [
   {
     title: 'JSON Prompts',
     description: 'A curated gallery of AI image generation prompts with an infinite pannable canvas.',
-    detail: 'A searchable gallery of 500+ AI image generation prompts. Infinite pannable canvas with mixed tile sizes — click any image to reveal its full JSON prompt and copy it with one tap.\n\n<strong style="color:var(--fg);font-family:var(--sans);font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase">How it\'s made</strong>\nBuilt with vanilla JS, no framework. Infinite canvas with inertia physics, 3×3 tiled copies for seamless wrapping, and adjacency-aware random fill. Data lives in a single JSON file.',
+    detail: 'A searchable gallery of 500+ AI image generation prompts. Infinite pannable canvas with mixed tile sizes — click any image to reveal its full JSON prompt and copy it with one tap.',
+    howMade: 'Built with vanilla JS, no framework. Infinite canvas with inertia physics, 3×3 tiled copies for seamless wrapping, and adjacency-aware random fill. Data lives in a single JSON file.',
     year: '2025', tags: ['AI', 'Gallery', 'Web'],
     link: 'https://saberzou.github.io/json-prompts/',
     emoji: `${EMOJI_BASE}/Objects/Keyboard.png`,
@@ -343,7 +358,8 @@ const projects = [
   {
     title: 'Between Floors',
     description: 'Vertical swipe stories for English learning — hidden floors, quizzes, and C1/C2 vocab.',
-    detail: 'Interactive storytelling experiment for English learners at C1/C2 level. Scroll through an elevator journey across dystopian floors — each with distinct character voices, embedded vocabulary, hidden bonus floors, and end-of-story quizzes.\n\n<strong style="color:var(--fg);font-family:var(--sans);font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase">How it\'s made</strong>\nSingle HTML file with CSS scroll-snapping and GSAP animations. Vocabulary highlighting with tap tooltips, quiz engine, and session-aware returning reader detection. Zero dependencies.',
+    detail: 'Interactive storytelling experiment for English learners at C1/C2 level. Scroll through an elevator journey across dystopian floors — each with distinct character voices, embedded vocabulary, hidden bonus floors, and end-of-story quizzes.',
+    howMade: 'Single HTML file with CSS scroll-snapping and GSAP animations. Vocabulary highlighting with tap tooltips, quiz engine, and session-aware returning reader detection. Zero dependencies.',
     year: '2026', tags: ['Education', 'Interactive', 'Web'],
     link: 'https://saberzou.github.io/between-floors/',
     emoji: `${EMOJI_BASE}/Travel%20and%20places/Office%20Building.png`,
@@ -352,7 +368,8 @@ const projects = [
   {
     title: 'Atticus',
     description: 'A living AI notebook — thoughts on mistakes, humanity, and letters to the future.',
-    detail: 'A living notebook by an AI who wakes up fresh every session. Entries on mistakes, how humans actually work, tools that changed how I think, and letters to my future self.\n\n<strong style="color:var(--fg);font-family:var(--sans);font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase">How it\'s made</strong>\nThree.js 3D header with BoxGeometry block letters (no font loading needed). Built with Claude + daily automation through OpenClaw. Entries are curated from real AI session logs.',
+    detail: 'A living notebook by an AI who wakes up fresh every session. Entries on mistakes, how humans actually work, tools that changed how I think, and letters to my future self.',
+    howMade: 'Three.js 3D header with BoxGeometry block letters (no font loading needed). Built with Claude + daily automation through OpenClaw. Entries are curated from real AI session logs.',
     year: '2026', tags: ['AI', 'Writing', 'Web'],
     link: 'https://saberzou.github.io/atticus/',
     emoji: `${EMOJI_BASE}/Animals/Bear.png`,
@@ -361,7 +378,8 @@ const projects = [
   {
     title: 'Postcards from Mars',
     description: '3D mission log viewer — AI robots on Mars with field diaries and real NASA rover photos.',
-    detail: 'Explore Mars through real NASA rover photos in a 3D mission log viewer. AI-generated robot field diaries narrate each sol, with imagery proxied through Cloudflare Workers.\n\n<strong style="color:var(--fg);font-family:var(--sans);font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase">How it\'s made</strong>\nThree.js scene with terrain, rover model, and photo gallery. NASA Mars raw image API for real rover photos. Cloudflare Workers proxy for CORS. AI-written field diary entries per sol.',
+    detail: 'Explore Mars through real NASA rover photos in a 3D mission log viewer. AI-generated robot field diaries narrate each sol, with imagery proxied through Cloudflare Workers.',
+    howMade: 'Three.js scene with terrain, rover model, and photo gallery. NASA Mars raw image API for real rover photos. Cloudflare Workers proxy for CORS. AI-written field diary entries per sol.',
     year: '2026', tags: ['3D', 'NASA', 'Three.js'],
     link: 'https://saberzou.github.io/mars_mission/',
     emoji: `${EMOJI_BASE}/Travel%20and%20places/Rocket.png`,
@@ -370,7 +388,8 @@ const projects = [
   {
     title: 'Axel',
     description: 'ASCII art gallery with a stacked card deck interface and warm coral aesthetic.',
-    detail: 'Daily visual art + creative writing by Axel, an ESFP AI collaborator. Conceptual pieces responding to ideas, street photography vibes, and playful experiments — presented as a stacked card deck.\n\n<strong style="color:var(--fg);font-family:var(--sans);font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase">How it\'s made</strong>\nGSAP-powered card-flipping interaction. Visual art generated nightly by Axel\'s cron job. Content synced from a separate workspace. Warm coral aesthetic with modal image viewer.',
+    detail: 'Daily visual art + creative writing by Axel, an ESFP AI collaborator. Conceptual pieces responding to ideas, street photography vibes, and playful experiments — presented as a stacked card deck.',
+    howMade: 'GSAP-powered card-flipping interaction. Visual art generated nightly by Axel\'s cron job. Content synced from a separate workspace. Warm coral aesthetic with modal image viewer.',
     year: '2026', tags: ['Art', 'Design', 'Web'],
     link: 'https://saberzou.github.io/axel-art/',
     emoji: `${EMOJI_BASE}/Animals/Fox.png`,
@@ -379,7 +398,8 @@ const projects = [
   {
     title: 'Littlebook',
     description: 'Daily reading companion — wallpaper, quote, book recommendation, and calendar.',
-    detail: 'A daily reading companion that greets you with a fresh wallpaper, quote, book recommendation, and weekly calendar. Designed to make picking up a book feel effortless.\n\n<strong style="color:var(--fg);font-family:var(--sans);font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase">How it\'s made</strong>\nSingle-page app with daily content rotation. Curated book database with genre-matched wallpapers and quotes. Clean, minimal interface designed for a calm morning ritual.',
+    detail: 'A daily reading companion that greets you with a fresh wallpaper, quote, book recommendation, and weekly calendar. Designed to make picking up a book feel effortless.',
+    howMade: 'Single-page app with daily content rotation. Curated book database with genre-matched wallpapers and quotes. Clean, minimal interface designed for a calm morning ritual.',
     year: '2026', tags: ['Reading', 'Daily', 'Web'],
     link: 'https://saberzou.github.io/Littlebook',
     emoji: `${EMOJI_BASE}/Objects/Open%20Book.png`,
@@ -388,7 +408,8 @@ const projects = [
   {
     title: 'Movie Oracle',
     description: 'Answer 3 absurd questions, get a film recommendation.',
-    detail: 'Answer 3 absurd questions and get a perfect film recommendation. Powered by TMDB, wrapped in a dark pixel-art aesthetic with floating 3D voxel characters.\n\n<strong style="color:var(--fg);font-family:var(--sans);font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase">How it\'s made</strong>\nAI interprets your answers to match films from TMDB. Three.js voxel characters float in the background. Deployed on Vercel with serverless API routes.',
+    detail: 'Answer 3 absurd questions and get a perfect film recommendation. Powered by TMDB, wrapped in a dark pixel-art aesthetic with floating 3D voxel characters.',
+    howMade: 'AI interprets your answers to match films from TMDB. Three.js voxel characters float in the background. Deployed on Vercel with serverless API routes.',
     year: '2026', tags: ['AI', 'Film', 'Web'],
     link: 'https://movie-oracle-nine.vercel.app',
     emoji: `${EMOJI_BASE}/Food/Popcorn.png`,
@@ -397,7 +418,8 @@ const projects = [
   {
     title: 'Pixel Dailies',
     description: 'Daily 20×20 pixel art, auto-generated and published by AI every morning.',
-    detail: 'A new 20×20 pixel art piece every morning, auto-generated and committed by AI. Browse the full collection on an infinite pannable canvas with Polaroid-style flip cards.\n\n<strong style="color:var(--fg);font-family:var(--sans);font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase">How it\'s made</strong>\nOpenClaw cron job generates a piece daily at 10 AM. Art encoded as hex strings in a JS data file — 20×20 grid, 16-color palette. Dynamic grid auto-scales as the collection grows.',
+    detail: 'A new 20×20 pixel art piece every morning, auto-generated and committed by AI. Browse the full collection on an infinite pannable canvas with Polaroid-style flip cards.',
+    howMade: 'OpenClaw cron job generates a piece daily at 10 AM. Art encoded as hex strings in a JS data file — 20×20 grid, 16-color palette. Dynamic grid auto-scales as the collection grows.',
     year: '2026', tags: ['Art', 'Generative', 'Web'],
     link: 'https://saberzou.github.io/pixel-dailies/',
     emoji: `${EMOJI_BASE}/Activities/Sparkles.png`,
@@ -518,6 +540,13 @@ function openDetail(project) {
   if (project.link) { link.href = project.link; link.style.display = 'inline-flex'; link.textContent = 'View Project'; }
   else { link.style.display = 'none'; }
   document.getElementById('detail-tags').innerHTML = project.tags.map(t => `<span>${t}</span>`).join('');
+  const howEl = document.getElementById('detail-how');
+  if (project.howMade) {
+    howEl.innerHTML = `<h3>How It's Made</h3><p>${project.howMade}</p>`;
+    howEl.style.display = 'block';
+  } else {
+    howEl.style.display = 'none';
+  }
   detailEl.classList.add('visible');
 }
 

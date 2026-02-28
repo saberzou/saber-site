@@ -302,6 +302,9 @@ nav > * { pointer-events: auto; }
 </head>
 <body>
 
+<!-- Squares Background -->
+<canvas id="squares-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35;"></canvas>
+
 <nav>
   <a class="nav-name" id="nav-name-link">Saber Zou</a>
   <div class="nav-avatar"><img src="avatar.jpg" alt="Saber Zou"></div>
@@ -340,6 +343,44 @@ nav > * { pointer-events: auto; }
 </div>
 
 <script>
+// ─── Squares Background ───
+(function() {
+  const canvas = document.getElementById('squares-bg');
+  const ctx = canvas.getContext('2d');
+  const squareSize = 60;
+  const borderColor = 'rgba(228, 224, 218, 0.6)';
+  const speed = 0.15;
+  let offset = { x: 0, y: 0 };
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const startX = Math.floor(offset.x / squareSize) * squareSize;
+    const startY = Math.floor(offset.y / squareSize) * squareSize;
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 0.5;
+    for (let x = startX; x < canvas.width + squareSize; x += squareSize) {
+      for (let y = startY; y < canvas.height + squareSize; y += squareSize) {
+        ctx.strokeRect(
+          x - (offset.x % squareSize),
+          y - (offset.y % squareSize),
+          squareSize, squareSize
+        );
+      }
+    }
+    offset.x = (offset.x + speed) % squareSize;
+    offset.y = (offset.y + speed) % squareSize;
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
 const EMOJI_BASE = 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis';
 
 const projects = [

@@ -121,6 +121,35 @@ nav > * { pointer-events: auto; }
   transform-style: preserve-3d;
 }
 
+/* ─── Feature Preview Image (desktop only) ─── */
+@media (min-width: 768px) {
+  .feature-preview {
+    position: fixed;
+    right: 5vw;
+    top: 50%;
+    transform: translateY(-50%) rotate(3deg) scale(0.95);
+    width: 280px;
+    max-height: 360px;
+    border-radius: 12px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    z-index: 5;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .feature-preview.visible {
+    opacity: 1;
+    transform: translateY(-50%) rotate(2deg) scale(1);
+  }
+  .feature-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
 /* ─── Project Items ─── */
 .project-item {
   position: absolute;
@@ -316,6 +345,7 @@ nav > * { pointer-events: auto; }
     <p>I build experimental tools at the intersection of design + AI. Some are useful, all are weird, everything is open source.</p>
   </div>
   <div class="scroll-stage" id="scroll-stage"></div>
+  <div class="feature-preview" id="feature-preview"><img id="feature-preview-img" src="" alt=""></div>
 </div>
 
 <div id="bio-section" class="section hidden">
@@ -497,6 +527,10 @@ projects.forEach((p, i) => {
 let currentIndex = 0;
 let scrollVelocity = 0;
 let snapTarget = null;
+let lastPreviewSrc = '';
+const previewEl = document.getElementById('feature-preview');
+const previewImg = document.getElementById('feature-preview-img');
+const isDesktop = window.innerWidth >= 768;
 let currentSection = 'projects';
 const ITEM_SPACING = window.innerWidth >= 768 ? 280 : 200; // px between items
 
@@ -537,7 +571,26 @@ function updateItems(scroll) {
     // Centered class for description float-in
     const isCentered = dist < 0.08 && Math.abs(scrollVelocity) < 0.005;
     el.classList.toggle('centered', isCentered);
+
+    // Feature preview image (desktop only)
+    if (isDesktop && isCentered && projects[i].image) {
+      const src = projects[i].image;
+      if (src !== lastPreviewSrc) {
+        lastPreviewSrc = src;
+        previewImg.src = src;
+      }
+      previewEl.classList.add('visible');
+    } else if (isDesktop && isCentered && !projects[i].image) {
+      previewEl.classList.remove('visible');
+      lastPreviewSrc = '';
+    }
   });
+
+  // Hide preview when scrolling
+  if (isDesktop && Math.abs(scrollVelocity) >= 0.005) {
+    previewEl.classList.remove('visible');
+    lastPreviewSrc = '';
+  }
 }
 
 // ─── Scroll handling ───

@@ -478,7 +478,16 @@ projects.forEach((p, i) => {
     <div class="project-title">${p.title}</div>
     <div class="project-desc">${p.description}</div>
   `;
-  el.addEventListener('click', () => openDetail(p));
+  el.addEventListener('click', () => {
+    const idx = items.indexOf(el);
+    const dist = Math.abs(idx - currentIndex);
+    if (dist > 0.3) {
+      // Click non-focused item → animate to it
+      scrollVelocity = (idx - currentIndex) * 0.08;
+    } else {
+      openDetail(p);
+    }
+  });
   stage.appendChild(el);
   items.push(el);
 });

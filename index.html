@@ -482,8 +482,9 @@ projects.forEach((p, i) => {
     const idx = items.indexOf(el);
     const dist = Math.abs(idx - currentIndex);
     if (dist > 0.3) {
-      // Click non-focused item → animate to it
-      scrollVelocity = (idx - currentIndex) * 0.08;
+      // Click non-focused item → snap to it
+      snapTarget = idx;
+      scrollVelocity = 0;
     } else {
       openDetail(p);
     }
@@ -495,6 +496,7 @@ projects.forEach((p, i) => {
 // ─── State ───
 let currentIndex = 0;
 let scrollVelocity = 0;
+let snapTarget = null;
 let currentSection = 'projects';
 const ITEM_SPACING = window.innerWidth >= 768 ? 280 : 200; // px between items
 
@@ -545,12 +547,14 @@ let lastTouchY = 0;
 function onWheel(e) {
   if (currentSection !== 'projects') return;
   e.preventDefault();
-  scrollVelocity += e.deltaY * 0.0015;
+  snapTarget = null;
+  scrollVelocity += e.deltaY * 0.0008;
 }
 
 function onTouchStart(e) {
   lastTouchY = e.touches[0].clientY;
   scrollVelocity = 0;
+  snapTarget = null;
   isDragging = true;
 }
 
@@ -624,7 +628,7 @@ function animate() {
   if (currentSection !== 'projects') return;
 
   currentIndex += scrollVelocity;
-  scrollVelocity *= 0.96;
+  scrollVelocity *= 0.90;
 
   // Soft edges — no bounce, just resistance
   if (currentIndex < 0) {
@@ -637,18 +641,19 @@ function animate() {
     scrollVelocity *= 0.8;
   }
 
-  // Smooth snap — direct ease, no overshoot
-  const target = Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
+  // Snap to target (click-to-focus) or nearest item
+  const target = snapTarget != null ? snapTarget : Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
   const diff = target - currentIndex;
 
-  if (Math.abs(scrollVelocity) < 0.008) {
-    currentIndex += diff * 0.08;
+  if (Math.abs(scrollVelocity) < 0.01 || snapTarget != null) {
+    currentIndex += diff * 0.12;
     scrollVelocity = 0;
   }
 
   if (Math.abs(diff) < 0.001) {
     currentIndex = target;
     scrollVelocity = 0;
+    snapTarget = null;
   }
 
   updateItems(currentIndex);

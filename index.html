@@ -536,7 +536,7 @@ let lastTouchY = 0;
 function onWheel(e) {
   if (currentSection !== 'projects') return;
   e.preventDefault();
-  scrollVelocity += e.deltaY * 0.0006;
+  scrollVelocity += e.deltaY * 0.0015;
 }
 
 function onTouchStart(e) {
@@ -615,7 +615,7 @@ function animate() {
   if (currentSection !== 'projects') return;
 
   currentIndex += scrollVelocity;
-  scrollVelocity *= 0.92;
+  scrollVelocity *= 0.96;
 
   // Soft edges — no bounce, just resistance
   if (currentIndex < 0) {
@@ -632,7 +632,7 @@ function animate() {
   const target = Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
   const diff = target - currentIndex;
 
-  if (Math.abs(scrollVelocity) < 0.015) {
+  if (Math.abs(scrollVelocity) < 0.008) {
     currentIndex += diff * 0.08;
     scrollVelocity = 0;
   }

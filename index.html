@@ -521,7 +521,7 @@ function updateItems(scroll) {
   if (introEl) {
     const introY = -scroll * ITEM_SPACING - ITEM_SPACING * 0.55 - 40;
     const introOpacity = Math.max(0, 1 - scroll * 0.8);
-    introEl.style.transform = `translateY(${centerY + introY - 60}px)`;
+    introEl.style.transform = `translateY(${centerY + introY - 100}px)`;
     introEl.style.opacity = introOpacity;
   }
 

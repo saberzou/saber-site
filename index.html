@@ -308,7 +308,7 @@ nav > * { pointer-events: auto; }
 
 <nav>
   <a class="nav-name" id="nav-name-link">Saber Zou</a>
-  <div class="nav-avatar"><img src="avatar.jpg" alt="Saber Zou"></div>
+  <div class="nav-avatar" id="nav-avatar-link" style="cursor:pointer"><img src="avatar.jpg" alt="Saber Zou"></div>
   <a class="nav-right" id="nav-projects-link">Projects</a>
 </nav>
 
@@ -618,6 +618,14 @@ window.closeDetail = () => detailEl.classList.remove('visible');
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 
 // ─── Nav ───
+document.getElementById('nav-avatar-link').addEventListener('click', e => {
+  e.preventDefault();
+  closeDetail();
+  if (currentSection === 'projects') return;
+  document.getElementById(`${currentSection}-section`).classList.add('hidden');
+  document.getElementById('projects-section').classList.remove('hidden');
+  currentSection = 'projects';
+});
 document.getElementById('nav-name-link').addEventListener('click', e => {
   e.preventDefault();
   if (currentSection === 'bio') return;

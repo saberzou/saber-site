@@ -383,6 +383,7 @@ nav > * { pointer-events: auto; }
 })();
 
 const ICON_BASE = 'images/icons';
+const CACHE_BUST = 'v2';
 
 const projects = [
   {
@@ -392,8 +393,8 @@ const projects = [
     howMade: 'Pixel-art sprites and tilemap rendered on canvas. Agent states pulled from OpenClaw session data. Speech bubbles show real agent status. Built with vanilla JS and hand-drawn pixel art.',
     year: '2026', tags: ['AI', 'Pixel Art', 'Simulation'],
     link: 'https://saberzou.github.io/agent-terrarium/',
-    emoji: `${ICON_BASE}/agent-terrarium.png`,
-    image: 'images/agent-terrarium.jpg'
+    emoji: `${ICON_BASE}/agent-terrarium.png?${CACHE_BUST}`,
+    image: `images/agent-terrarium.jpg?${CACHE_BUST}`
   },
   {
     title: 'JSON Prompts',
@@ -402,8 +403,8 @@ const projects = [
     howMade: 'Built with vanilla JS, no framework. Infinite canvas with inertia physics, 3×3 tiled copies for seamless wrapping, and adjacency-aware random fill. Data lives in a single JSON file.',
     year: '2025', tags: ['AI', 'Gallery', 'Web'],
     link: 'https://saberzou.github.io/json-prompts/',
-    emoji: `${ICON_BASE}/json-prompts.png`,
-    image: 'images/json-prompts.jpg'
+    emoji: `${ICON_BASE}/json-prompts.png?${CACHE_BUST}`,
+    image: `images/json-prompts.jpg?${CACHE_BUST}`
   },
   {
     title: 'Between Floors',
@@ -412,8 +413,8 @@ const projects = [
     howMade: 'Single HTML file with CSS scroll-snapping and GSAP animations. Vocabulary highlighting with tap tooltips, quiz engine, and session-aware returning reader detection. Zero dependencies.',
     year: '2026', tags: ['Education', 'Interactive', 'Web'],
     link: 'https://saberzou.github.io/between-floors/',
-    emoji: `${ICON_BASE}/between-floors.png`,
-    image: 'images/between-floors.jpg'
+    emoji: `${ICON_BASE}/between-floors.png?${CACHE_BUST}`,
+    image: `images/between-floors.jpg?${CACHE_BUST}`
   },
   {
     title: 'Atticus',
@@ -422,8 +423,8 @@ const projects = [
     howMade: 'Three.js 3D header with BoxGeometry block letters (no font loading needed). Built with Claude + daily automation through OpenClaw. Entries are curated from real AI session logs.',
     year: '2026', tags: ['AI', 'Writing', 'Web'],
     link: 'https://saberzou.github.io/atticus/',
-    emoji: `${ICON_BASE}/atticus.png`,
-    image: 'images/atticus.jpg'
+    emoji: `${ICON_BASE}/atticus.png?${CACHE_BUST}`,
+    image: `images/atticus.jpg?${CACHE_BUST}`
   },
   {
     title: 'Postcards from Mars',
@@ -432,8 +433,8 @@ const projects = [
     howMade: 'Three.js scene with terrain, rover model, and photo gallery. NASA Mars raw image API for real rover photos. Cloudflare Workers proxy for CORS. AI-written field diary entries per sol.',
     year: '2026', tags: ['3D', 'NASA', 'Three.js'],
     link: 'https://saberzou.github.io/mars_mission/',
-    emoji: `${ICON_BASE}/postcards-from-mars.png`,
-    image: 'images/postcards-from-mars.jpg'
+    emoji: `${ICON_BASE}/postcards-from-mars.png?${CACHE_BUST}`,
+    image: `images/postcards-from-mars.jpg?${CACHE_BUST}`
   },
   {
     title: 'Axel',
@@ -442,8 +443,8 @@ const projects = [
     howMade: 'GSAP-powered stacked card interface with bilingual i18n toggle. Visual art generated nightly by Axel\'s cron job. DM Mono typography on a warm dotted-grid background. Content synced from a separate workspace.',
     year: '2026', tags: ['Art', 'Photography', 'Web'],
     link: 'https://saberzou.github.io/axel-art/',
-    emoji: `${ICON_BASE}/axel.png`,
-    image: 'images/axel.jpg'
+    emoji: `${ICON_BASE}/axel.png?${CACHE_BUST}`,
+    image: `images/axel.jpg?${CACHE_BUST}`
   },
   {
     title: 'Littlebook',
@@ -452,8 +453,8 @@ const projects = [
     howMade: 'Single-page app with daily content rotation. Curated book database with genre-matched wallpapers and quotes. Clean, minimal interface designed for a calm morning ritual.',
     year: '2026', tags: ['Reading', 'Daily', 'Web'],
     link: 'https://saberzou.github.io/Littlebook',
-    emoji: `${ICON_BASE}/littlebook.png`,
-    image: 'images/littlebook.jpg'
+    emoji: `${ICON_BASE}/littlebook.png?${CACHE_BUST}`,
+    image: `images/littlebook.jpg?${CACHE_BUST}`
   },
   {
     title: 'Movie Oracle',
@@ -462,8 +463,8 @@ const projects = [
     howMade: 'AI interprets your answers to match films from TMDB. Three.js voxel characters float in the background. Deployed on Vercel with serverless API routes.',
     year: '2026', tags: ['AI', 'Film', 'Web'],
     link: 'https://movie-oracle-nine.vercel.app',
-    emoji: `${ICON_BASE}/movie-oracle.png`,
-    image: 'images/movie-oracle.jpg'
+    emoji: `${ICON_BASE}/movie-oracle.png?${CACHE_BUST}`,
+    image: `images/movie-oracle.jpg?${CACHE_BUST}`
   },
   {
     title: 'Pixel Dailies',
@@ -472,8 +473,8 @@ const projects = [
     howMade: 'OpenClaw cron job generates a piece daily at 10 AM. Art encoded as hex strings in a JS data file — 20×20 grid, 16-color palette. Dynamic grid auto-scales as the collection grows.',
     year: '2026', tags: ['Art', 'Generative', 'Web'],
     link: 'https://saberzou.github.io/pixel-dailies/',
-    emoji: `${ICON_BASE}/pixel-dailies.png`,
-    image: 'images/pixel-dailies.jpg'
+    emoji: `${ICON_BASE}/pixel-dailies.png?${CACHE_BUST}`,
+    image: `images/pixel-dailies.jpg?${CACHE_BUST}`
   },
 ];
 

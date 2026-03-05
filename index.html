@@ -91,8 +91,8 @@ nav > * { pointer-events: auto; }
 }
 .scroll-intro p {
   font-family: var(--serif);
-  font-size: 1rem; line-height: 1.6;
-  color: var(--fg-muted); font-weight: 400;
+  font-size: clamp(0.95rem, 2vw, 1.25rem); line-height: 1.6;
+  color: var(--fg-muted); font-weight: 300;
   max-width: 480px; margin: 0 auto;
 }
 
@@ -508,7 +508,7 @@ function updateItems(scroll) {
   // Scroll intro away
   const introEl = document.getElementById('scroll-intro');
   if (introEl) {
-    const introY = -scroll * ITEM_SPACING - ITEM_SPACING;
+    const introY = -scroll * ITEM_SPACING - ITEM_SPACING * 0.55;
     const introOpacity = Math.max(0, 1 - scroll * 0.8);
     introEl.style.transform = `translateY(${centerY + introY - 60}px)`;
     introEl.style.opacity = introOpacity;

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Designer AI: Taste Over Tasks — Saber Zou</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #F5F3EF;
+  --fg: #2D2A27;
+  --fg-muted: #5C5955;
+  --fg-light: #8A8783;
+  --accent: #2D2A27;
+  --border: #E4E0DA;
+  --serif: 'PT Serif', Georgia, serif;
+  --sans: 'Bricolage Grotesque', -apple-system, sans-serif;
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+body.ready { opacity: 1; }
+
+/* ─── Navigation ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 24px 40px;
+  background: rgba(245, 243, 239, 0.9);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+
+.nav-left {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; text-decoration: none;
+}
+
+.nav-avatar-small {
+  width: 32px; height: 32px;
+  border-radius: 50%; overflow: hidden; flex-shrink: 0;
+}
+.nav-avatar-small img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.nav-name {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg);
+  transition: color 0.3s;
+  text-decoration: none;
+}
+.nav-left:hover .nav-name { color: var(--fg-muted); }
+
+.nav-right-group {
+  display: flex; align-items: center; gap: 28px;
+}
+
+.nav-right {
+  font-family: var(--sans);
+  font-size: 0.8rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--fg); cursor: pointer;
+  text-decoration: none; transition: color 0.3s;
+}
+.nav-right:hover { color: var(--fg-muted); }
+
+/* ─── Article ─── */
+.article-wrapper {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 120px 40px 80px;
+}
+
+.article-meta {
+  margin-bottom: 48px;
+}
+
+.article-date {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-light);
+  margin-bottom: 16px;
+}
+
+.article-title {
+  font-family: var(--sans);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 12px;
+}
+
+.article-author {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+}
+
+.article-body {
+  border-top: 1px solid var(--border);
+  padding-top: 40px;
+}
+
+.article-body p {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--fg-muted);
+  font-weight: 300;
+  margin-bottom: 1.5em;
+}
+
+.article-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  nav { padding: 20px 24px; }
+  .nav-right-group { gap: 16px; }
+  .article-wrapper { padding: 100px 24px 60px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-left" href="../index.html">
+    <div class="nav-avatar-small"><img src="../avatar.jpg" alt="Saber Zou"></div>
+    <span class="nav-name">Saber Zou</span>
+  </a>
+  <div class="nav-right-group">
+    <a class="nav-right" href="../index.html#about">About</a>
+    <a class="nav-right" href="../index.html#projects">Projects</a>
+    <a class="nav-right" href="../index.html#thoughts">Thoughts</a>
+  </div>
+</nav>
+
+<main class="article-wrapper">
+  <header class="article-meta">
+    <div class="article-date">March 9, 2026</div>
+    <h1 class="article-title">Designer AI: Taste Over Tasks</h1>
+    <div class="article-author">Saber Zou</div>
+  </header>
+
+  <div class="article-body">
+    <p>We've been naming AI the wrong way.</p>
+
+    <p>"AI writer." "AI designer." "AI engineer." These labels borrow human job titles and paste them onto something that doesn't share human limits. They describe AI by the shape of our org chart.</p>
+
+    <p>A better frame is Designer AI.</p>
+
+    <p>Not "AI designer" (a human who designs AI products). Designer AI: the noun is AI, and "designer" is the modifier. But it doesn't mean "an AI that does design work." It means an AI guided by designer values.</p>
+
+    <p>Most AI agents today are builder-first. You give them a task, they produce an output, and they move on. "Build me a website" yields a website. Whether it's coherent, elegant, or humane is optional. Something you prompt for after the fact.</p>
+
+    <p>Designer AI flips the order. Experience quality comes first; implementation follows.</p>
+
+    <p>This distinction matters because human roles exist for a reason. And it's not because those roles are ideal. We split "designer," "engineer," and "PM" because no single person can do all of it at an expert level at once. We're limited by time, attention, and years of practice. Specialization is a workaround for biological constraint.</p>
+
+    <p>AI doesn't share those constraints. It can critique a user flow and implement the fix without a handoff. It can reason about aesthetics and write the code in the same breath. When we force it into human-shaped boxes — "AI for designers," "AI for engineers" — we don't unlock what's different about it. We recreate our limits inside a machine.</p>
+
+    <p>So how do you build Designer AI?</p>
+
+    <p>There are two credible paths.</p>
+
+    <p>The first is bottom-up: assemble taste from components. Teach design skills directly. Feed it your design system, your product context, your best examples. Add evaluation loops that test "does this feel right?" not just "does this work?" Encode principles and sensibilities, not checklists.</p>
+
+    <p>The second is top-down, and it might be more powerful: capture a designer, not a toolkit.</p>
+
+    <p>A portfolio shows what someone made. Conversation shows how they think.</p>
+
+    <p>A designer's chat history contains their real judgment: the moment they say "this feels heavy," the way they push back on a feature because it breaks the flow, the language they use when something is almost right but not yet done. Meeting notes show prioritization. Critiques reveal what they notice first. Over time, those patterns become a map of taste.</p>
+
+    <p>This isn't theoretical. A designer in my team built a setup where Claude could access their Microsoft Teams chat history, meeting transcripts, and internal knowledge base. The AI replied through the designer's usual chat channel. Colleagues who work with this person every day couldn't reliably tell the difference.</p>
+
+    <p>That proves conversational data can reconstruct voice and judgment patterns convincingly.</p>
+
+    <p>The next frontier is whether the replica can design, not just sound like it can.</p>
+
+    <p>The right test is behavioral: give it briefs the original designer already solved, without access to the solution. Compare choices. Give it unfamiliar problems and see what transfers. Show it messy work-in-progress and see if it flags the same issues. The signal to watch for is when it makes a choice the designer never explicitly taught it — yet it still feels right.</p>
+
+    <p>If Designer AI becomes real, the implications are bigger than "faster mockups."</p>
+
+    <p>Design orgs get institutional memory that doesn't vanish when senior people leave. Critiques can run in parallel, revealing what great designers consistently agree on and where the interesting disagreements live. The profession shifts upstream: as production gets automated, human value concentrates in taste, judgment, and systems thinking.</p>
+
+    <p>The industry keeps asking: "What tasks can we automate?"</p>
+
+    <p>A better question is: "What kind of intelligence do we want to build?"</p>
+
+    <p>Designer AI is one answer: an AI that optimizes for care, taste, and human experience, then builds whatever that judgment demands.</p>
+  </div>
+</main>
+
+<script>
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => document.body.classList.add('ready'));
+} else {
+  window.addEventListener('load', () => document.body.classList.add('ready'));
+}
+</script>
+</body>
+</html>

@@ -50,16 +50,17 @@ nav {
 }
 nav > * { pointer-events: auto; }
 
-.nav-avatar {
-  position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  width: 48px; height: 48px;
-  border-radius: 50%; overflow: hidden;
-  pointer-events: auto;
+.nav-left {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; text-decoration: none;
 }
-.nav-avatar img {
-  width: 100%; height: 100%;
-  object-fit: cover;
+
+.nav-avatar-small {
+  width: 32px; height: 32px;
+  border-radius: 50%; overflow: hidden; flex-shrink: 0;
+}
+.nav-avatar-small img {
+  width: 100%; height: 100%; object-fit: cover;
 }
 
 .nav-name {
@@ -73,6 +74,11 @@ nav > * { pointer-events: auto; }
   text-decoration: none;
 }
 .nav-name:hover { color: var(--fg-muted); }
+.nav-left:hover .nav-name { color: var(--fg-muted); }
+
+.nav-right-group {
+  display: flex; align-items: center; gap: 28px;
+}
 
 .nav-right {
   font-family: var(--sans);
@@ -293,11 +299,44 @@ nav > * { pointer-events: auto; }
 }
 .bio-links a:hover { color: var(--accent); }
 
+/* ─── Thoughts Section ─── */
+#thoughts-section { justify-content: center; align-items: center; padding: 40px; overflow-y: auto; }
+.thoughts-content { max-width: 560px; width: 100%; text-align: left; }
+.thoughts-content h2 {
+  font-family: var(--sans); font-size: 3rem; font-weight: 400;
+  line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 32px;
+}
+.article-list { display: flex; flex-direction: column; gap: 0; }
+.article-card {
+  display: block; text-decoration: none; color: inherit;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  transition: opacity 0.2s;
+}
+.article-card:first-child { border-top: 1px solid var(--border); }
+.article-card:hover { opacity: 0.65; }
+.article-card-title {
+  font-family: var(--sans); font-size: 1.1rem; font-weight: 500;
+  letter-spacing: -0.01em; color: var(--fg); margin-bottom: 4px;
+}
+.article-card-date {
+  font-family: var(--sans); font-size: 0.72rem; font-weight: 400;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--fg-light); margin-bottom: 8px;
+}
+.article-card-excerpt {
+  font-family: var(--serif); font-size: 0.95rem; line-height: 1.65;
+  color: var(--fg-muted); font-weight: 300;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   nav { padding: 20px 24px; }
+  .nav-right-group { gap: 16px; }
   #bio-section { padding: 80px 24px 40px; }
   .bio-content h2 { font-size: 2.2rem; }
+  #thoughts-section { padding: 80px 24px 40px; }
+  .thoughts-content h2 { font-size: 2.2rem; }
 }
 </style>
 </head>
@@ -307,9 +346,15 @@ nav > * { pointer-events: auto; }
 <canvas id="squares-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35;"></canvas>
 
 <nav>
-  <a class="nav-name" id="nav-name-link">Saber Zou</a>
-  <div class="nav-avatar" id="nav-avatar-link" style="cursor:pointer"><img src="avatar.jpg" alt="Saber Zou"></div>
-  <a class="nav-right" id="nav-projects-link">Projects</a>
+  <a class="nav-left" id="nav-home-link">
+    <div class="nav-avatar-small"><img src="avatar.jpg" alt="Saber Zou"></div>
+    <span class="nav-name">Saber Zou</span>
+  </a>
+  <div class="nav-right-group">
+    <a class="nav-right" id="nav-about-link">About</a>
+    <a class="nav-right" id="nav-projects-link">Projects</a>
+    <a class="nav-right" id="nav-thoughts-link">Thoughts</a>
+  </div>
 </nav>
 
 <div id="projects-section" class="section">
@@ -327,6 +372,19 @@ nav > * { pointer-events: auto; }
       <a href="mailto:saberzou@gmail.com">Email</a>
       <a href="https://github.com/saberzou" target="_blank">GitHub</a>
       <a href="https://x.com/saberzou" target="_blank">X / Twitter</a>
+    </div>
+  </div>
+</div>
+
+<div id="thoughts-section" class="section hidden">
+  <div class="thoughts-content">
+    <h2>Thoughts</h2>
+    <div class="article-list">
+      <a class="article-card" href="thoughts/designer-ai-taste-over-tasks.html">
+        <div class="article-card-title">Designer AI: Taste Over Tasks</div>
+        <div class="article-card-date">March 9, 2026</div>
+        <div class="article-card-excerpt">We've been naming AI the wrong way. "AI writer." "AI designer." "AI engineer." These labels borrow human job titles and paste them onto something that doesn't share human limits.</div>
+      </a>
     </div>
   </div>
 </div>
@@ -628,28 +686,41 @@ window.closeDetail = () => detailEl.classList.remove('visible');
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 
 // ─── Nav ───
-document.getElementById('nav-avatar-link').addEventListener('click', e => {
+function showSection(name) {
+  if (currentSection === name) return;
+  document.getElementById(`${currentSection}-section`).classList.add('hidden');
+  document.getElementById(`${name}-section`).classList.remove('hidden');
+  currentSection = name;
+}
+
+document.getElementById('nav-home-link').addEventListener('click', e => {
   e.preventDefault();
   closeDetail();
-  if (currentSection === 'projects') return;
-  document.getElementById(`${currentSection}-section`).classList.add('hidden');
-  document.getElementById('projects-section').classList.remove('hidden');
-  currentSection = 'projects';
+  showSection('projects');
 });
-document.getElementById('nav-name-link').addEventListener('click', e => {
+document.getElementById('nav-about-link').addEventListener('click', e => {
   e.preventDefault();
-  if (currentSection === 'bio') return;
-  document.getElementById(`${currentSection}-section`).classList.add('hidden');
-  document.getElementById('bio-section').classList.remove('hidden');
-  currentSection = 'bio';
+  showSection('bio');
 });
 document.getElementById('nav-projects-link').addEventListener('click', e => {
   e.preventDefault();
-  if (currentSection === 'projects') return;
-  document.getElementById(`${currentSection}-section`).classList.add('hidden');
-  document.getElementById('projects-section').classList.remove('hidden');
-  currentSection = 'projects';
+  showSection('projects');
 });
+document.getElementById('nav-thoughts-link').addEventListener('click', e => {
+  e.preventDefault();
+  showSection('thoughts');
+});
+
+// ─── Hash-based navigation ───
+function handleHash() {
+  const hash = window.location.hash.slice(1);
+  if (hash === 'about') showSection('bio');
+  else if (hash === 'thoughts') showSection('thoughts');
+  else if (hash === 'projects') showSection('projects');
+}
+window.addEventListener('hashchange', handleHash);
+// Handle hash on initial load (after sections are set up)
+if (window.location.hash) handleHash();
 
 // ─── Animation ───
 function animate() {

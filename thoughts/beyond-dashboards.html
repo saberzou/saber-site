@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Dashboards: Designing Human Interfaces for the Agent Era — Saber Zou</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #F5F3EF;
+  --fg: #2D2A27;
+  --fg-muted: #5C5955;
+  --fg-light: #8A8783;
+  --accent: #2D2A27;
+  --border: #E4E0DA;
+  --serif: 'PT Serif', Georgia, serif;
+  --sans: 'Bricolage Grotesque', -apple-system, sans-serif;
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+body.ready { opacity: 1; }
+
+/* ─── Navigation ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 24px 40px;
+  background: rgba(245, 243, 239, 0.9);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+
+.nav-left {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; text-decoration: none;
+}
+
+.nav-avatar-small {
+  width: 32px; height: 32px;
+  border-radius: 50%; overflow: hidden; flex-shrink: 0;
+}
+.nav-avatar-small img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.nav-name {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg);
+  transition: color 0.3s;
+  text-decoration: none;
+}
+.nav-left:hover .nav-name { color: var(--fg-muted); }
+
+.nav-right-group {
+  display: flex; align-items: center; gap: 28px;
+}
+
+.nav-right {
+  font-family: var(--sans);
+  font-size: 0.8rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--fg); cursor: pointer;
+  text-decoration: none; transition: color 0.3s;
+}
+.nav-right:hover { color: var(--fg-muted); }
+
+/* ─── Cover Image ─── */
+.article-cover {
+  width: 100%;
+  margin-bottom: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.article-cover img {
+  width: 100%; height: auto; display: block;
+}
+
+/* ─── Article ─── */
+.article-wrapper {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 120px 40px 80px;
+}
+
+.article-meta {
+  margin-bottom: 48px;
+}
+
+.article-date {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-light);
+  margin-bottom: 16px;
+}
+
+.article-title {
+  font-family: var(--sans);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 12px;
+}
+
+.article-author {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+}
+
+.article-body {
+  border-top: 1px solid var(--border);
+  padding-top: 40px;
+}
+
+.article-body p {
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--fg-muted);
+  font-weight: 300;
+  margin-bottom: 1.5em;
+}
+
+.article-body p:last-child {
+  margin-bottom: 0;
+}
+
+.article-body h2 {
+  font-family: var(--sans);
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  margin: 2.5em 0 1em;
+}
+
+.article-body p.lede {
+  font-size: 1.1rem;
+  color: var(--fg-muted);
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  nav { padding: 20px 24px; }
+  .nav-right-group { gap: 16px; }
+  .article-wrapper { padding: 100px 24px 60px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-left" href="../index.html">
+    <div class="nav-avatar-small"><img src="../avatar.jpg" alt="Saber Zou"></div>
+    <span class="nav-name">Saber Zou</span>
+  </a>
+  <div class="nav-right-group">
+    <a class="nav-right" href="../index.html#about">About</a>
+    <a class="nav-right" href="../index.html#projects">Projects</a>
+    <a class="nav-right" href="../index.html#thoughts">Thoughts</a>
+  </div>
+</nav>
+
+<main class="article-wrapper">
+  <div class="article-cover">
+    <img src="../images/beyond-dashboards.jpg" alt="Beyond Dashboards">
+  </div>
+
+  <header class="article-meta">
+    <div class="article-date">March 10, 2026</div>
+    <h1 class="article-title">Beyond Dashboards: Designing Human Interfaces for the Agent Era</h1>
+    <div class="article-author">Saber Zou</div>
+  </header>
+
+  <div class="article-body">
+    <p class="lede">As AI agents become more autonomous, the way humans interact with software needs to fundamentally change. This is an exploration of spatial, narrative interfaces as the next evolution beyond traditional dashboards.</p>
+
+    <h2>The Two-Audience Problem</h2>
+
+    <p>Modern software has a split-brain problem. We've been designing interfaces that try to serve both machines and humans, but their needs are fundamentally different.</p>
+
+    <p>Agents don't need dashboards. They need APIs, structured data, exit codes. Give them JSON, not bar charts.</p>
+
+    <p>Humans struggling with dashboards is the real problem. We've been designing UIs as if "more data = better understanding" when actually it's just cognitive overload.</p>
+
+    <p>Now that agents have APIs, human UIs can finally optimize purely for human cognition. And human cognition is spatial (we remember places, not menus), narrative (we remember stories, not logs), emotional (we respond to vibes, not just facts), and pattern-based (we spot anomalies visually faster than numerically).</p>
+
+    <h2>From Control Panels to Observation Decks</h2>
+
+    <p>My team at Microsoft is experimenting with something different. We're transforming our internal code deployment dashboard into a spatial, game-like interface — think pixel art virtual office where each room represents a different part of the system.</p>
+
+    <p>This isn't just about making dashboards prettier. It's a fundamental rethinking of what human interfaces need to be when AI agents become the primary actors in our systems.</p>
+
+    <h2>Why Spatial Interfaces Work</h2>
+
+    <p>Spatial memory. You remember "the fireplace lodge" not "Pod Metrics Tab 3." Your brain is way better at spatial recall than navigating nested menus.</p>
+
+    <p>Ambient awareness. Glance at the screen → everything looks cozy → system's healthy. No need to parse numbers. If something's wrong, the visual disruption would be immediate.</p>
+
+    <p>Natural hierarchy. Different rooms = different services or teams. Instant mental model.</p>
+
+    <p>Persistent world feeling. Checking deployment status feels like visiting a place, not opening a tool. Way less friction for frequent checks.</p>
+
+    <h2>Designing for Agent Behavior, Not Agent Control</h2>
+
+    <p>As AI agents become more ubiquitous, more people will need to orchestrate them and monitor their work. But if the only interface is technical dashboards, we've just created a new gatekeeping layer where technical people become the priest class interpreting agent behavior for everyone else.</p>
+
+    <p>Spatial and visual interfaces solve this because they use a universal language. Characters moving between rooms means workflow progression. Two characters talking means agents coordinating. A character looking confused means an agent is stuck. Room color changing means status change.</p>
+
+    <p>No technical knowledge required. No training manual. Just watch and understand.</p>
+
+    <h2>Agent Relationships Become Visible</h2>
+
+    <p>Instead of reading logs, you see interactions. DeployAgent walks over to SecurityAgent's desk, they chat, SecurityAgent nods, DeployAgent proceeds to the deployment room. The interaction is the information.</p>
+
+    <p>Five agents working simultaneously? In logs, that's chaos. In a spatial world, you just see five characters in different rooms doing their thing. Your brain handles it instantly.</p>
+
+    <h2>The Democratization Play</h2>
+
+    <p>Right now, "working with AI agents" means reading logs, understanding APIs, parsing JSON responses, debugging error codes. That's fine for engineers. But if agents become infrastructure, everyone needs to orchestrate them.</p>
+
+    <p>Marketing teams need to monitor content agents researching competitors, writing agents drafting variations, SEO agents optimizing. Sales teams need to understand outreach agents contacting leads, qualification agents scoring them, scheduler agents finding meeting slots. Operations teams need to watch data agents finding anomalies, analysis agents identifying root causes, alert agents triaging severity.</p>
+
+    <p>If the only interface is technical dashboards, you've created a future where only technical people have AI leverage. Non-technical workers become order-takers for AI, not orchestrators.</p>
+
+    <p>But if you crack this — if you make agent orchestration as intuitive as walking through rooms — then suddenly every knowledge worker can manage their own agent team. Small businesses can compete with enterprises. AI becomes truly democratized, not just technically available.</p>
+
+    <h2>The Risks and Trade-offs</h2>
+
+    <p>The "toy software" stigma. Pixel art plus playful equals not serious, especially in enterprise. The visual language has to thread the needle between approachable and professional.</p>
+
+    <p>Information density versus comprehension. Dashboards pack everything into one screen. A spatial world spreads it across rooms. That's great for focus, but what if you need to compare two things at once? The best version is probably hybrid: spatial world for ambient awareness, traditional views for deep work.</p>
+
+    <p>Urgency without breaking the metaphor. When prod is on fire, do you want calm pixel art? Or red flashing alerts? Actually, games are really good at showing urgency through graduated signals: screen shake, character expressions changing from calm to concerned to panicked, room lighting shifts, movement speed increases. The advantage over traditional alerts is graduated urgency, not just binary green or red.</p>
+
+    <h2>Where This Goes</h2>
+
+    <p>If this pattern works, we might see software as places, not tools. You don't "open Slack," you "go to the office." Internal tools become a virtual campus.</p>
+
+    <p>We might see role-specific worlds. Engineers see the technical office. PMs see the strategy war room. Same data, different spatial metaphors.</p>
+
+    <p>We might see AI as world-builder. Instead of designing one UI, you train an AI to generate personalized worlds based on how each person thinks.</p>
+
+    <p>We might see multi-system orchestration. Multiple agent systems become multiple buildings in your world. Walk between them.</p>
+
+    <h2>The Core Insight</h2>
+
+    <p>This works because it matches how we actually think about systems. When devs talk about their infrastructure, they use spatial language anyway: "upstream," "downstream," "the backend," "the edge." We're just making that mental model literal.</p>
+
+    <p>As software becomes more autonomous, human interfaces need to shift from control panels to observation decks. We're not managing systems anymore. We're supervising agents. The interface should reflect that.</p>
+
+    <p>The next productivity revolution isn't about better tools. It's about better comprehension.</p>
+  </div>
+</main>
+
+<script>
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => document.body.classList.add('ready'));
+} else {
+  window.addEventListener('load', () => document.body.classList.add('ready'));
+}
+</script>
+</body>
+</html>

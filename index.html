@@ -333,10 +333,61 @@ nav > * { pointer-events: auto; }
   color: var(--fg-muted); font-weight: 300;
 }
 
+/* ─── Mobile Menu Button (2-line indicator, SJA style) ─── */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  width: 28px; height: 28px;
+  cursor: pointer; background: none; border: none;
+  padding: 0; z-index: 310;
+  position: relative;
+}
+.menu-toggle span {
+  display: block; width: 100%; height: 1.5px;
+  background: var(--fg); transition: transform 0.4s ease, opacity 0.3s ease;
+  transform-origin: center;
+}
+.menu-toggle.open span:first-child { transform: translateY(3.75px) rotate(45deg); }
+.menu-toggle.open span:last-child { transform: translateY(-3.75px) rotate(-45deg); }
+
+/* ─── Fullscreen Overlay Menu ─── */
+.mobile-menu-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 300;
+  background: var(--bg);
+  flex-direction: column; justify-content: center; align-items: center;
+  gap: 0;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.mobile-menu-overlay.open {
+  opacity: 1; pointer-events: auto;
+}
+.mobile-menu-overlay a {
+  font-family: var(--sans);
+  font-size: 1.5rem; font-weight: 400;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--fg); text-decoration: none;
+  padding: 16px 0;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.4s ease, transform 0.4s ease, color 0.3s;
+}
+.mobile-menu-overlay.open a {
+  opacity: 1; transform: translateY(0);
+}
+.mobile-menu-overlay.open a:nth-child(1) { transition-delay: 0.1s; }
+.mobile-menu-overlay.open a:nth-child(2) { transition-delay: 0.15s; }
+.mobile-menu-overlay.open a:nth-child(3) { transition-delay: 0.2s; }
+.mobile-menu-overlay a:hover { color: var(--fg-muted); }
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   nav { padding: 20px 24px; }
-  .nav-right-group { gap: 16px; }
+  .nav-right-group { display: none; }
+  .menu-toggle { display: flex; }
+  .mobile-menu-overlay { display: flex; }
   #bio-section { padding: 80px 24px 40px; }
   .bio-content h2 { font-size: 1.75rem; }
   #thoughts-section { padding: 80px 24px 40px; }
@@ -359,7 +410,16 @@ nav > * { pointer-events: auto; }
     <a class="nav-right" id="nav-projects-link">Projects</a>
     <a class="nav-right" id="nav-thoughts-link">Thoughts</a>
   </div>
+  <button class="menu-toggle" id="menu-toggle" aria-label="Menu">
+    <span></span><span></span>
+  </button>
 </nav>
+
+<div class="mobile-menu-overlay" id="mobile-menu-overlay">
+  <a href="#" data-section="projects">Projects</a>
+  <a href="#" data-section="bio">About</a>
+  <a href="#" data-section="thoughts">Thoughts</a>
+</div>
 
 <div id="projects-section" class="section">
   <div class="scroll-intro" id="scroll-intro">
@@ -769,6 +829,28 @@ updateItems(0);
 // Trigger initial centered state after a frame
 requestAnimationFrame(() => { items[0].classList.add('centered'); });
 animate();
+
+// ─── Mobile Menu ───
+const menuToggle = document.getElementById('menu-toggle');
+const menuOverlay = document.getElementById('mobile-menu-overlay');
+
+menuToggle.addEventListener('click', () => {
+  const isOpen = menuToggle.classList.toggle('open');
+  menuOverlay.classList.toggle('open', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+});
+
+menuOverlay.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const section = a.dataset.section;
+    menuToggle.classList.remove('open');
+    menuOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+    closeDetail();
+    showSection(section);
+  });
+});
 
 // Page entrance — reveal once fonts + layout are ready
 if (document.fonts && document.fonts.ready) {

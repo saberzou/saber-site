@@ -38,56 +38,8 @@ nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; justify-content: space-between; align-items: center;
   padding: 24px 40px;
-  background: transparent;
-}
-
-/* ─── Progressive blur under nav ─── */
-.nav-blur {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 140px;
-  z-index: 99;
-  pointer-events: none;
-  overflow: hidden;
-}
-.nav-blur::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(to bottom, var(--bg) 0%, transparent 70%);
-  opacity: 0.6;
-}
-.nav-blur-layer {
-  position: absolute; top: 0; left: -64px; right: -64px; bottom: 0;
-  pointer-events: none;
-}
-.nav-blur-layer:nth-child(1) {
-  backdrop-filter: blur(1px); -webkit-backdrop-filter: blur(1px);
-  mask-image: linear-gradient(to bottom, black 0%, transparent 20%);
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 20%);
-}
-.nav-blur-layer:nth-child(2) {
-  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
-  mask-image: linear-gradient(to bottom, transparent 5%, black 15%, transparent 35%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 15%, transparent 35%);
-}
-.nav-blur-layer:nth-child(3) {
-  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-  mask-image: linear-gradient(to bottom, transparent 15%, black 30%, transparent 50%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 15%, black 30%, transparent 50%);
-}
-.nav-blur-layer:nth-child(4) {
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  mask-image: linear-gradient(to bottom, transparent 25%, black 45%, transparent 65%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 25%, black 45%, transparent 65%);
-}
-.nav-blur-layer:nth-child(5) {
-  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  mask-image: linear-gradient(to bottom, transparent 40%, black 60%, transparent 80%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 40%, black 60%, transparent 80%);
-}
-.nav-blur-layer:nth-child(6) {
-  backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
-  mask-image: linear-gradient(to bottom, transparent 55%, black 75%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 55%, black 75%, transparent 100%);
+  background: rgba(245, 243, 239, 0.9);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
 }
 
 .nav-left {
@@ -221,14 +173,6 @@ nav {
 </head>
 <body>
 
-<div class="nav-blur">
-  <div class="nav-blur-layer"></div>
-  <div class="nav-blur-layer"></div>
-  <div class="nav-blur-layer"></div>
-  <div class="nav-blur-layer"></div>
-  <div class="nav-blur-layer"></div>
-  <div class="nav-blur-layer"></div>
-</div>
 <nav>
   <a class="nav-left" href="../index.html">
     <div class="nav-avatar-small"><img src="../avatar.jpg" alt="Saber Zou"></div>

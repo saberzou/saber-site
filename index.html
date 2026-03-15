@@ -737,7 +737,8 @@ projectsEl.addEventListener('touchend', onTouchEnd);
 // ─── Detail overlay ───
 const detailEl = document.getElementById('project-detail');
 
-function openDetail(project) {
+function openDetail(project, updateHash = true) {
+  if (updateHash) history.replaceState(null, '', '#project/' + slugify(project.title));
   const imgContainer = document.getElementById('detail-image');
   if (project.image) {
     imgContainer.innerHTML = `<img src="${project.image}" alt="${project.title}" onload="this.classList.add('loaded')">`;
@@ -762,15 +763,32 @@ function openDetail(project) {
   detailEl.classList.add('visible');
 }
 
-window.closeDetail = () => detailEl.classList.remove('visible');
+window.closeDetail = () => { detailEl.classList.remove('visible'); history.replaceState(null, '', '#projects'); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 
 // ─── Nav ───
-function showSection(name) {
+function showSection(name, updateHash = true) {
   if (currentSection === name) return;
   document.getElementById(`${currentSection}-section`).classList.add('hidden');
   document.getElementById(`${name}-section`).classList.remove('hidden');
   currentSection = name;
+  if (updateHash) {
+    const hashName = name === 'bio' ? 'about' : name;
+    history.replaceState(null, '', '#' + hashName);
+  }
+}
+
+function openDetailBySlug(slug) {
+  const project = projects.find(p => slugify(p.title) === slug);
+  if (project) {
+    showSection('projects', false);
+    openDetail(project, false);
+    history.replaceState(null, '', '#project/' + slug);
+  }
+}
+
+function slugify(str) {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
 document.getElementById('nav-home-link').addEventListener('click', e => {
@@ -794,9 +812,11 @@ document.getElementById('nav-thoughts-link').addEventListener('click', e => {
 // ─── Hash-based navigation ───
 function handleHash() {
   const hash = window.location.hash.slice(1);
-  if (hash === 'about') showSection('bio');
-  else if (hash === 'thoughts') showSection('thoughts');
-  else if (hash === 'projects') showSection('projects');
+  if (hash.startsWith('project/')) {
+    openDetailBySlug(hash.slice(8));
+  } else if (hash === 'about') showSection('bio', false);
+  else if (hash === 'thoughts') showSection('thoughts', false);
+  else if (hash === 'projects') { closeDetail(); showSection('projects', false); }
 }
 window.addEventListener('hashchange', handleHash);
 // Handle hash on initial load (after sections are set up)

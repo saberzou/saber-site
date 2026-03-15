@@ -833,14 +833,17 @@ document.getElementById('nav-home-link').addEventListener('click', e => {
 });
 document.getElementById('nav-about-link').addEventListener('click', e => {
   e.preventDefault();
+  closeDetail();
   showSection('bio');
 });
 document.getElementById('nav-projects-link').addEventListener('click', e => {
   e.preventDefault();
+  closeDetail();
   showSection('projects');
 });
 document.getElementById('nav-thoughts-link').addEventListener('click', e => {
   e.preventDefault();
+  closeDetail();
   showSection('thoughts');
 });
 

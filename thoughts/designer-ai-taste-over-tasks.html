@@ -89,9 +89,17 @@ nav > * { pointer-events: auto; }
 .mobile-menu-overlay.open a:nth-child(3) { transition-delay: 0.2s; }
 .mobile-menu-overlay a:hover { color: var(--fg-muted); }
 
+.nav-back {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.85rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--fg-muted); text-decoration: none;
+  cursor: pointer;
+}
+.nav-back:hover { color: var(--fg); }
+
 .nav-left {
-  display: flex; align-items: center; gap: 10px;
-  cursor: pointer; text-decoration: none;
+  display: none;
 }
 
 .nav-avatar-small {
@@ -208,6 +216,7 @@ nav > * { pointer-events: auto; }
 <body>
 
 <nav>
+  <a class="nav-back" href="../index.html#thoughts">← Back</a>
   <a class="nav-left" href="../index.html">
     <div class="nav-avatar-small"><img src="../avatar.jpg" alt="Saber Zou"></div>
     <span class="nav-name">Saber Zou</span>

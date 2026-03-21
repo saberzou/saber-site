@@ -168,10 +168,10 @@ nav.detail-mode .nav-left { display: none; }
 }
 .grid-cell:hover .cell-desc { opacity: 1; transform: translateY(0); }
 @media (max-width: 768px) {
-  .grid-cell { width: 160px; height: 160px; padding: 12px 8px; }
-  .grid-cell .cell-emoji { width: 40px; height: 40px; }
-  .grid-cell .cell-title { font-size: 0.65rem; }
-  .grid-cell .cell-desc { opacity: 1; transform: translateY(0); font-size: 0.6rem; }
+  .grid-cell { width: 200px; height: 200px; padding: 16px 12px; }
+  .grid-cell .cell-emoji { width: 48px; height: 48px; }
+  .grid-cell .cell-title { font-size: 0.75rem; }
+  .grid-cell .cell-desc { display: none; }
 }
 
 /* ─── Project Detail Overlay ─── */
@@ -587,7 +587,7 @@ const projects = [
 ];
 
 // ─── Infinite Grid ───
-const CELL = window.innerWidth <= 768 ? 160 : 200;
+const CELL = 200;
 const gridContainer = document.getElementById('grid-container');
 let panX = 0, panY = 0;
 let velX = 0, velY = 0;

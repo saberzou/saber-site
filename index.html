@@ -103,18 +103,6 @@ nav.detail-mode .nav-left { display: none; }
 }
 .nav-right:hover { color: var(--fg-muted); }
 
-.scroll-intro {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 50;
-  text-align: center; padding: 0 24px;
-  will-change: transform, opacity;
-  transition: none;
-}
-.scroll-intro p {
-  font-family: var(--serif);
-  font-size: 1rem; line-height: 1.7;
-  color: var(--fg-muted); font-weight: 300;
-  max-width: 480px; margin: 0 auto;
-}
 
 /* ─── Sections ─── */
 .section {
@@ -126,70 +114,64 @@ nav.detail-mode .nav-left { display: none; }
   opacity: 0; pointer-events: none; transform: translateY(20px);
 }
 
-/* ─── 3D Scroll Container ─── */
+/* ─── Infinite Grid ─── */
 #projects-section {
-  display: flex; align-items: center; justify-content: center;
-  perspective: 1200px;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 1;
 }
-
-.scroll-stage {
-  position: relative;
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  height: 100dvh;
-  transform-style: preserve-3d;
+#bio-section, #thoughts-section {
+  z-index: 2;
 }
-
-/* ─── Project Items ─── */
-.project-item {
+#projects-section:active { cursor: grabbing; }
+#projects-section .grid-container {
   position: absolute;
-  left: 0; right: 0;
+  inset: 0;
+}
+.grid-cell {
+  position: absolute;
+  width: 200px; height: 200px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 16px 12px;
   text-align: center;
-  transform-style: preserve-3d;
-  will-change: transform, opacity;
   cursor: pointer;
-  padding: 0 24px;
+  border-right: 0.5px solid var(--border);
+  border-bottom: 0.5px solid var(--border);
+  transition: background 0.2s;
 }
-
-.project-item .project-emoji {
-  width: 96px; height: 96px;
-  margin: 0 auto 12px;
-  display: block;
+.grid-cell:hover { background: rgba(0,0,0,0.02); }
+.grid-cell .cell-emoji {
+  width: 56px; height: 56px;
+  display: block; margin-bottom: 8px;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
-.project-item .project-title {
+.grid-cell .cell-emoji.pop-in { transform: scale(0); }
+.grid-cell .cell-title {
   font-family: var(--sans);
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.02em;
   color: var(--fg);
-  transition: color 0.3s;
+  line-height: 1.3;
 }
-
-.project-item:hover .project-title {
-  color: var(--accent);
-}
-
-.project-item .project-desc {
+.grid-cell .cell-desc {
   font-family: var(--serif);
-  font-size: 1rem;
-  line-height: 1.7;
+  font-size: 0.65rem; line-height: 1.4;
   color: var(--fg-muted);
-  font-weight: 300;
-  margin-top: 12px;
-  max-width: 540px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-top: 4px;
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transform: translateY(4px);
+  transition: opacity 0.3s, transform 0.3s;
+  max-height: 3em; overflow: hidden;
 }
-
-.project-item.centered .project-desc {
-  opacity: 1;
-  transform: translateY(0);
+.grid-cell:hover .cell-desc { opacity: 1; transform: translateY(0); }
+@media (max-width: 768px) {
+  .grid-cell { width: 160px; height: 160px; padding: 12px 8px; }
+  .grid-cell .cell-emoji { width: 40px; height: 40px; }
+  .grid-cell .cell-title { font-size: 0.65rem; }
+  .grid-cell .cell-desc { opacity: 1; transform: translateY(0); font-size: 0.6rem; }
 }
 
 /* ─── Project Detail Overlay ─── */
@@ -406,7 +388,7 @@ nav.detail-mode .nav-left { display: none; }
 <body>
 
 <!-- Squares Background -->
-<canvas id="squares-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35;"></canvas>
+<canvas id="squares-bg" style="display:none;"></canvas>
 
 <nav id="main-nav">
   <a class="nav-back" id="nav-back">← Back</a>
@@ -431,10 +413,7 @@ nav.detail-mode .nav-left { display: none; }
 </div>
 
 <div id="projects-section" class="section">
-  <div class="scroll-intro" id="scroll-intro">
-    <p>I build experimental tools at the intersection of design + AI. Some are useful, all are weird, everything is open source.</p>
-  </div>
-  <div class="scroll-stage" id="scroll-stage"></div>
+  <div class="grid-container" id="grid-container"></div>
 </div>
 
 <div id="bio-section" class="section hidden">
@@ -480,47 +459,10 @@ nav.detail-mode .nav-left { display: none; }
 </div>
 
 <script>
-// ─── Squares Background ───
-(function() {
-  const canvas = document.getElementById('squares-bg');
-  const ctx = canvas.getContext('2d');
-  const squareSize = 60;
-  const borderColor = 'rgba(228, 224, 218, 0.6)';
-  const speed = 0.15;
-  let offset = { x: 0, y: 0 };
-
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const startX = Math.floor(offset.x / squareSize) * squareSize;
-    const startY = Math.floor(offset.y / squareSize) * squareSize;
-    ctx.strokeStyle = borderColor;
-    ctx.lineWidth = 0.5;
-    for (let x = startX; x < canvas.width + squareSize; x += squareSize) {
-      for (let y = startY; y < canvas.height + squareSize; y += squareSize) {
-        ctx.strokeRect(
-          x - (offset.x % squareSize),
-          y - (offset.y % squareSize),
-          squareSize, squareSize
-        );
-      }
-    }
-    offset.x = (offset.x + speed) % squareSize;
-    offset.y = (offset.y + speed) % squareSize;
-    requestAnimationFrame(draw);
-  }
-  requestAnimationFrame(draw);
-})();
 
 const ICON_BASE = 'images/icons';
 const CACHE_BUST = 'v4';
-
+let currentSection = 'projects';
 const projects = [
   {
     title: 'Koi Pond',
@@ -644,114 +586,159 @@ const projects = [
   },
 ];
 
-// ─── Build DOM ───
-const stage = document.getElementById('scroll-stage');
-const items = [];
+// ─── Infinite Grid ───
+const CELL = window.innerWidth <= 768 ? 160 : 200;
+const gridContainer = document.getElementById('grid-container');
+let panX = 0, panY = 0;
+let velX = 0, velY = 0;
+let gridDragging = false;
+let dragStartX = 0, dragStartY = 0;
+let dragStartPanX = 0, dragStartPanY = 0;
+let dragMoved = false;
+let animatedCells = new Set();
+let gridInitialized = false;
 
-projects.forEach((p, i) => {
+// Deterministic project assignment avoiding adjacent duplicates
+function getProjectIndex(gx, gy) {
+  let h = ((gx * 2654435761) ^ (gy * 2246822519)) >>> 0;
+  let idx = h % projects.length;
+  for (let attempt = 0; attempt < projects.length; attempt++) {
+    const candidate = (idx + attempt) % projects.length;
+    const left = getProjectIndexRaw(gx - 1, gy);
+    const up = getProjectIndexRaw(gx, gy - 1);
+    if (candidate !== left && candidate !== up) return candidate;
+  }
+  return idx;
+}
+function getProjectIndexRaw(gx, gy) {
+  let h = ((gx * 2654435761) ^ (gy * 2246822519)) >>> 0;
+  return h % projects.length;
+}
+
+// Cell pool
+const cellPool = [];
+const activeCells = new Map(); // "gx,gy" -> element
+
+function getCellEl() {
+  if (cellPool.length > 0) return cellPool.pop();
   const el = document.createElement('div');
-  el.className = 'project-item';
-  el.innerHTML = `
-    <img class="project-emoji" src="${p.emoji}" alt="">
-    <div class="project-title">${p.title}</div>
-    <div class="project-desc">${p.description}</div>
-  `;
-  el.addEventListener('click', () => {
-    const idx = items.indexOf(el);
-    const dist = Math.abs(idx - currentIndex);
-    if (dist > 0.3) {
-      // Click non-focused item → snap to it
-      snapTarget = idx;
-      scrollVelocity = 0;
-    } else {
-      openDetail(p);
+  el.className = 'grid-cell';
+  el.innerHTML = '<img class="cell-emoji" src="" alt="" draggable="false"><div class="cell-title"></div><div class="cell-desc"></div>';
+  return el;
+}
+
+function recycleCellEl(el) {
+  el.remove();
+  cellPool.push(el);
+}
+
+function renderGrid() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const startGx = Math.floor(-panX / CELL) - 1;
+  const endGx = Math.ceil((-panX + w) / CELL) + 1;
+  const startGy = Math.floor(-panY / CELL) - 1;
+  const endGy = Math.ceil((-panY + h) / CELL) + 1;
+  const needed = new Set();
+  for (let gx = startGx; gx <= endGx; gx++) {
+    for (let gy = startGy; gy <= endGy; gy++) {
+      needed.add(gx + ',' + gy);
     }
-  });
-  stage.appendChild(el);
-  items.push(el);
+  }
+  for (const [key, el] of activeCells) {
+    if (!needed.has(key)) {
+      recycleCellEl(el);
+      activeCells.delete(key);
+    }
+  }
+  for (const key of needed) {
+    if (activeCells.has(key)) {
+      const el = activeCells.get(key);
+      const [gx, gy] = key.split(',').map(Number);
+      el.style.left = (gx * CELL + panX) + 'px';
+      el.style.top = (gy * CELL + panY) + 'px';
+      continue;
+    }
+    const [gx, gy] = key.split(',').map(Number);
+    const pIdx = getProjectIndex(gx, gy);
+    const p = projects[pIdx];
+    const el = getCellEl();
+    el.style.left = (gx * CELL + panX) + 'px';
+    el.style.top = (gy * CELL + panY) + 'px';
+    el.querySelector('.cell-emoji').src = p.emoji;
+    el.querySelector('.cell-title').textContent = p.title;
+    el.querySelector('.cell-desc').textContent = p.description;
+    el.onclick = () => { if (!dragMoved) openDetail(p); };
+    gridContainer.appendChild(el);
+    activeCells.set(key, el);
+    if (!gridInitialized && !animatedCells.has(key)) {
+      animatedCells.add(key);
+      const emoji = el.querySelector('.cell-emoji');
+      emoji.classList.add('pop-in');
+      const delay = Math.random() * 600;
+      setTimeout(() => emoji.classList.remove('pop-in'), delay);
+    }
+  }
+}
+
+setTimeout(() => { gridInitialized = true; }, 800);
+
+// Drag handlers
+const projectsEl = document.getElementById('projects-section');
+let lastPointerX = 0, lastPointerY = 0, lastPointerTime = 0;
+
+projectsEl.addEventListener('pointerdown', e => {
+  if (currentSection !== 'projects') return;
+  gridDragging = true;
+  dragMoved = false;
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+  dragStartPanX = panX;
+  dragStartPanY = panY;
+  velX = 0; velY = 0;
+  lastPointerX = e.clientX;
+  lastPointerY = e.clientY;
+  lastPointerTime = performance.now();
+  projectsEl.setPointerCapture(e.pointerId);
 });
 
-// ─── State ───
-let currentIndex = 0;
-let scrollVelocity = 0;
-let snapTarget = null;
-let currentSection = 'projects';
-const ITEM_SPACING = window.innerWidth >= 768 ? 340 : 260; // px between items
-
-// ─── Position items with CSS 3D transforms ───
-function updateItems(scroll) {
-  const centerY = window.innerHeight / 2;
-
-  // Scroll intro away
-  const introEl = document.getElementById('scroll-intro');
-  if (introEl) {
-    const introY = -scroll * ITEM_SPACING - ITEM_SPACING * 0.55 - 40;
-    const introOpacity = Math.max(0, 1 - scroll * 0.8);
-    introEl.style.transform = `translateY(${centerY + introY - 100}px)`;
-    introEl.style.opacity = introOpacity;
+projectsEl.addEventListener('pointermove', e => {
+  if (!gridDragging) return;
+  const dx = e.clientX - dragStartX;
+  const dy = e.clientY - dragStartY;
+  if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
+  const now = performance.now();
+  const dt = now - lastPointerTime;
+  if (dt > 0) {
+    velX = (e.clientX - lastPointerX) / dt * 16;
+    velY = (e.clientY - lastPointerY) / dt * 16;
   }
+  lastPointerX = e.clientX;
+  lastPointerY = e.clientY;
+  lastPointerTime = now;
+  panX = dragStartPanX + dx;
+  panY = dragStartPanY + dy;
+});
 
-  items.forEach((el, i) => {
-    const offset = i - scroll;
-    const y = offset * ITEM_SPACING;
-    const dist = Math.abs(offset);
+projectsEl.addEventListener('pointerup', () => { gridDragging = false; });
+projectsEl.addEventListener('pointercancel', () => { gridDragging = false; });
 
-    // Depth — push away from center
-    const z = -dist * dist * 60;
-
-    // Rotation
-    const rotX = offset * 3;
-
-    // Opacity
-    const opacity = Math.max(0, 1 - dist * 0.4);
-
-    // Scale
-    const scale = Math.max(0.7, 1 - dist * 0.06);
-
-    el.style.top = `${centerY}px`;
-    el.style.transform = `translateY(${y - 140}px) translateZ(${z}px) rotateX(${rotX}deg) scale(${scale})`;
-    el.style.opacity = opacity;
-
-    // Centered class for description float-in
-    const isCentered = dist < 0.08 && Math.abs(scrollVelocity) < 0.005;
-    el.classList.toggle('centered', isCentered);
-  });
-}
-
-// ─── Scroll handling ───
-let isDragging = false;
-let lastTouchY = 0;
-
-function onWheel(e) {
+// Animation loop
+function gridAnimate() {
+  requestAnimationFrame(gridAnimate);
   if (currentSection !== 'projects') return;
-  e.preventDefault();
-  snapTarget = null;
-  scrollVelocity += e.deltaY * 0.0008;
+  if (!gridDragging) {
+    panX += velX;
+    panY += velY;
+    velX *= 0.95;
+    velY *= 0.95;
+    if (Math.abs(velX) < 0.1) velX = 0;
+    if (Math.abs(velY) < 0.1) velY = 0;
+  }
+  renderGrid();
 }
-
-function onTouchStart(e) {
-  lastTouchY = e.touches[0].clientY;
-  scrollVelocity = 0;
-  snapTarget = null;
-  isDragging = true;
-}
-
-function onTouchMove(e) {
-  if (currentSection !== 'projects' || !isDragging) return;
-  e.preventDefault();
-  const y = e.touches[0].clientY;
-  scrollVelocity += (lastTouchY - y) * 0.001;
-  lastTouchY = y;
-}
-
-function onTouchEnd() { isDragging = false; }
-
-const projectsEl = document.getElementById('projects-section');
-projectsEl.addEventListener('wheel', onWheel, { passive: false });
-projectsEl.addEventListener('touchstart', onTouchStart, { passive: true });
-projectsEl.addEventListener('touchmove', onTouchMove, { passive: false });
-projectsEl.addEventListener('touchend', onTouchEnd);
-
+renderGrid();
+requestAnimationFrame(gridAnimate);
 // ─── Detail overlay ───
 const detailEl = document.getElementById('project-detail');
 const mainNav = document.getElementById('main-nav');
@@ -870,49 +857,6 @@ window.addEventListener('hashchange', handleHash);
 // Handle hash on initial load (after sections are set up)
 if (window.location.hash) handleHash();
 
-// ─── Animation ───
-function animate() {
-  requestAnimationFrame(animate);
-
-  if (currentSection !== 'projects') return;
-
-  currentIndex += scrollVelocity;
-  scrollVelocity *= 0.90;
-
-  // Soft edges — no bounce, just resistance
-  if (currentIndex < 0) {
-    currentIndex *= 0.9;
-    scrollVelocity *= 0.8;
-  }
-  if (currentIndex > projects.length - 1) {
-    const over = currentIndex - (projects.length - 1);
-    currentIndex = (projects.length - 1) + over * 0.9;
-    scrollVelocity *= 0.8;
-  }
-
-  // Snap to target (click-to-focus) or nearest item
-  const target = snapTarget != null ? snapTarget : Math.round(Math.max(0, Math.min(projects.length - 1, currentIndex)));
-  const diff = target - currentIndex;
-
-  if (Math.abs(scrollVelocity) < 0.01 || snapTarget != null) {
-    currentIndex += diff * 0.12;
-    scrollVelocity = 0;
-  }
-
-  if (Math.abs(diff) < 0.001) {
-    currentIndex = target;
-    scrollVelocity = 0;
-    snapTarget = null;
-  }
-
-  updateItems(currentIndex);
-}
-
-updateItems(0);
-// Trigger initial centered state after a frame
-requestAnimationFrame(() => { items[0].classList.add('centered'); });
-animate();
-
 // ─── Mobile Menu ───
 const menuToggle = document.getElementById('menu-toggle');
 const menuOverlay = document.getElementById('mobile-menu-overlay');
@@ -941,6 +885,8 @@ if (document.fonts && document.fonts.ready) {
 } else {
   window.addEventListener('load', () => document.body.classList.add('ready'));
 }
+
 </script>
+
 </body>
 </html>

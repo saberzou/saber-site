@@ -370,6 +370,46 @@ nav.detail-mode .nav-left { display: none; }
 .mobile-menu-overlay.open a:nth-child(3) { transition-delay: 0.2s; }
 .mobile-menu-overlay a:hover { color: var(--fg-muted); }
 
+/* ─── Desktop Enhancements ─── */
+@media (min-width: 769px) {
+  /* Nav pill containers */
+  .nav-left {
+    background: rgba(245, 243, 239, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 100px;
+    padding: 8px 20px;
+    border: 1px solid rgba(228, 224, 218, 0.6);
+  }
+  .nav-right-group {
+    background: rgba(245, 243, 239, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 100px;
+    padding: 8px 20px;
+    border: 1px solid rgba(228, 224, 218, 0.6);
+  }
+
+  /* Project detail as centered modal card */
+  #project-detail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: hidden;
+    padding: 0;
+  }
+  .detail-card {
+    max-width: 680px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 16px;
+    background: var(--bg);
+    box-shadow: 0 24px 80px rgba(0,0,0,0.12);
+    padding: 48px 40px;
+  }
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   nav { padding: 20px 24px; }
@@ -448,6 +488,7 @@ nav.detail-mode .nav-left { display: none; }
 </div>
 
 <div id="project-detail">
+  <div class="detail-card">
   <div class="detail-content">
     <div class="detail-image" id="detail-image"></div>
     <h2 id="detail-title"></h2>
@@ -455,6 +496,7 @@ nav.detail-mode .nav-left { display: none; }
     <a class="detail-link" id="detail-link" href="#" target="_blank">View Project</a>
     <div class="detail-how" id="detail-how"></div>
     <div class="detail-tags" id="detail-tags"></div>
+  </div>
   </div>
 </div>
 
@@ -796,6 +838,7 @@ window.closeDetail = () => {
   history.replaceState(null, '', '#projects');
 };
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+detailEl.addEventListener('click', e => { if (e.target === detailEl) closeDetail(); });
 
 // ─── Nav ───
 navBack.addEventListener('click', e => {

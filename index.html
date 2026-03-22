@@ -668,7 +668,7 @@ function renderGrid() {
     el.querySelector('.cell-emoji').src = p.emoji;
     el.querySelector('.cell-title').textContent = p.title;
     el.querySelector('.cell-desc').textContent = p.description;
-    el.onclick = () => { if (!dragMoved) openDetail(p); };
+    el.dataset.projectIdx = pIdx;
     gridContainer.appendChild(el);
     activeCells.set(key, el);
     if (!gridInitialized && !animatedCells.has(key)) {
@@ -720,7 +720,15 @@ projectsEl.addEventListener('pointermove', e => {
   panY = dragStartPanY + dy;
 });
 
-projectsEl.addEventListener('pointerup', () => { gridDragging = false; });
+projectsEl.addEventListener('pointerup', (e) => {
+  gridDragging = false;
+  if (!dragMoved) {
+    const cell = e.target.closest('.grid-cell');
+    if (cell && cell.dataset.projectIdx != null) {
+      openDetail(projects[cell.dataset.projectIdx]);
+    }
+  }
+});
 projectsEl.addEventListener('pointercancel', () => { gridDragging = false; });
 
 // Animation loop

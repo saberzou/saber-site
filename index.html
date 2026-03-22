@@ -388,15 +388,20 @@ nav.detail-mode .nav-left { display: none; }
     border-radius: 100px;
     padding: 8px 20px;
     border: 1px solid rgba(228, 224, 218, 0.6);
+    /* Match left pill height (which contains 32px avatar) */
+    height: calc(32px + 16px + 2px); /* avatar + padding + border */
+    display: flex; align-items: center;
   }
 
-  /* Project detail as centered modal card */
+  /* Project detail as centered modal card — no blur on desktop */
   #project-detail {
     display: flex;
     align-items: center;
     justify-content: center;
     overflow-y: hidden;
     padding: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
   .detail-card {
     max-width: 680px;

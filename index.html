@@ -723,7 +723,8 @@ projectsEl.addEventListener('pointermove', e => {
 projectsEl.addEventListener('pointerup', (e) => {
   gridDragging = false;
   if (!dragMoved) {
-    const cell = e.target.closest('.grid-cell');
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const cell = el && el.closest('.grid-cell');
     if (cell && cell.dataset.projectIdx != null) {
       openDetail(projects[cell.dataset.projectIdx]);
     }

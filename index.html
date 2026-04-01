@@ -182,7 +182,7 @@ nav > * { pointer-events: auto; }
 
 .detail-card {
   position: absolute; top: 0; left: 0; bottom: 0;
-  width: min(560px, 85vw);
+  width: 50vw;
   background: var(--bg);
   border-right: 1px solid var(--border);
   transform: translateX(-100%);
@@ -219,9 +219,10 @@ nav > * { pointer-events: auto; }
 #project-detail.visible .detail-content .detail-tags { opacity: 1; transform: translateX(0); transition-delay: 0.6s; }
 
 .detail-image {
-  width: 100%;
+  width: 50%; max-width: 280px;
   margin: 0 0 32px;
   overflow: hidden;
+  border-radius: 8px;
 }
 .detail-image img {
   width: 100%; height: auto; display: block;
@@ -428,6 +429,7 @@ nav > * { pointer-events: auto; }
 
   .detail-card { width: 100vw; }
   .detail-content { padding: 0 24px 40px; }
+  .detail-image { width: 100%; max-width: none; border-radius: 0; }
 }
 </style>
 </head>

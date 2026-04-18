@@ -120,7 +120,53 @@ body {
 .menu-bar-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 0;
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.35);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  padding: 8px 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95) translateY(-8px);
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 1001;
+}
+
+.menu-dropdown.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1) translateY(0);
+}
+
+.menu-dropdown-item {
+  padding: 6px 16px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.menu-dropdown-item:hover {
+  background: rgba(45,27,0,0.08);
+}
+
+.menu-dropdown-separator {
+  height: 1px;
+  background: rgba(45,27,0,0.1);
+  margin: 6px 0;
+}
+
+.menu-item-wrap {
+  position: relative;
 }
 
 .menu-logo {
@@ -128,23 +174,107 @@ body {
   font-weight: 600;
   letter-spacing: 0.05em;
   cursor: pointer;
-  padding: 0;
-  transition: opacity 0.2s;
+  padding: 2px 12px;
+  border-radius: 4px;
+  transition: background 0.2s;
 }
 
 .menu-logo:hover {
-  opacity: 0.7;
+  background: rgba(45,27,0,0.08);
+}
+
+/* Notification Panel */
+.notification-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 320px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.35);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  padding: 12px 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95) translateY(-8px);
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 1001;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-panel.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1) translateY(0);
+}
+
+.notification-header {
+  padding: 0 16px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(45,27,0,0.08);
+}
+
+.notification-item {
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.notification-item:hover {
+  background: rgba(45,27,0,0.06);
+}
+
+.notification-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--forest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--fg);
+  margin-bottom: 2px;
+}
+
+.notification-time {
+  font-size: 0.7rem;
+  color: var(--fg-muted);
 }
 
 .menu-item {
   cursor: pointer;
-  padding: 2px 8px;
+  padding: 2px 12px;
   border-radius: 4px;
   transition: background 0.2s;
 }
 
 .menu-item:hover {
   background: rgba(45,27,0,0.08);
+}
+
+.menu-item.active {
+  background: rgba(45,27,0,0.1);
 }
 
 .menu-bar-right {
@@ -235,6 +365,8 @@ body {
   gap: 12px;
   z-index: 5;
   width: 220px;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 .widget-stack > * { width: 100%; }
 .weather-widget:hover { transform: scale(1.02); }
@@ -253,7 +385,7 @@ body {
 }
 .stock-widget:hover { transform: scale(1.02); }
 .stock-widget-title {
-  font-size: 0.65rem; color: var(--fg); opacity: 0.6;
+  font-size: 0.65rem; color: inherit; opacity: 0.7;
   text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
 }
 .stock-row {
@@ -261,15 +393,15 @@ body {
   padding: 4px 0; font-size: 0.8rem;
 }
 .stock-row + .stock-row { border-top: 1px solid rgba(0,0,0,0.04); }
-.stock-ticker { font-weight: 500; color: var(--fg); font-family: var(--sans); }
-.stock-price { color: var(--fg-muted); font-family: var(--sans); }
+.stock-ticker { font-weight: 500; color: inherit; font-family: var(--sans); }
+.stock-price { color: inherit; opacity: 0.8; font-family: var(--sans); }
 .stock-change { font-size: 0.7rem; font-weight: 500; padding: 2px 6px; border-radius: 4px; }
 .stock-change.up { color: #1a8f4a; background: rgba(26,143,74,0.1); }
 .stock-change.down { color: #d63031; background: rgba(214,48,49,0.1); }
 .weather-icon { font-size: 2.2rem; line-height: 1; }
-.weather-temp { font-size: 1.5rem; font-weight: 500; color: var(--fg); line-height: 1.2; }
-.weather-desc { font-size: 0.75rem; color: var(--fg-muted); }
-.weather-location { font-size: 0.65rem; color: var(--fg); opacity: 0.6; }
+.weather-temp { font-size: 1.5rem; font-weight: 500; color: inherit; line-height: 1.2; }
+.weather-desc { font-size: 0.75rem; color: inherit; opacity: 0.85; }
+.weather-location { font-size: 0.65rem; color: inherit; opacity: 0.7; }
 
 /* ─── Todo Widget ─── */
 .todo-widget {
@@ -292,7 +424,7 @@ body {
 .todo-title {
   font-size: 0.8rem;
   font-weight: 500;
-  color: var(--fg);
+  color: inherit;
 }
 .todo-add-btn {
   width: 22px;
@@ -307,6 +439,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   transition: background 0.15s;
 }
 .todo-add-btn:hover { background: rgba(255,140,66,0.5); }
@@ -316,7 +449,7 @@ body {
   align-items: center;
   gap: 8px;
   font-size: 0.75rem;
-  color: var(--fg);
+  color: inherit;
 }
 .todo-item.done .todo-text { text-decoration: line-through; opacity: 0.5; }
 .todo-check {
@@ -730,21 +863,36 @@ body {
   gap: 10px;
   align-items: flex-end;
   z-index: 200;
-  box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 8px 32px rgba(0,0,0,0.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 8px 32px rgba(0,0,0,0.1);
   border: 1px solid rgba(255,255,255,0.35);
 }
 
 .dock-separator {
   width: 1px;
-  height: 44px;
+  height: 52px;
   background: rgba(255, 255, 255, 0.15);
   margin: 0 6px;
 }
 
+.dock-item-temp {
+  animation: dockItemAppear 0.3s var(--ease-out-quart);
+}
+
+@keyframes dockItemAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 .dock-item {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
   background: none;
   border: none;
   cursor: pointer;
@@ -763,11 +911,11 @@ body {
 }
 
 .dock-item img {
-  width: 46px;
-  height: 46px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
   pointer-events: none;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .dock-tooltip {
@@ -1541,14 +1689,85 @@ body {
 <nav class="menu-bar" id="menu-bar">
   <div class="menu-bar-left">
     <div class="menu-logo" onclick="openApp('about')">⌘</div>
-    <div class="menu-item" onclick="openApp('finder')">Finder</div>
-    <div class="menu-item" onclick="openApp('mail')">Mail</div>
-    <div class="menu-item" onclick="openApp('notes')">Notes</div>
+    <div class="menu-item-wrap">
+      <div class="menu-item" onclick="toggleMenuDropdown('menu-saber')">Saber</div>
+      <div class="menu-dropdown" id="menu-saber">
+        <div class="menu-dropdown-item" onclick="openApp('about')">About This Mac</div>
+        <div class="menu-dropdown-separator"></div>
+        <div class="menu-dropdown-item" onclick="location.reload()">Restart SaberOS</div>
+      </div>
+    </div>
+    <div class="menu-item-wrap">
+      <div class="menu-item" onclick="toggleMenuDropdown('menu-view')">View</div>
+      <div class="menu-dropdown" id="menu-view">
+        <div class="menu-dropdown-item" onclick="alert('View as Icons')">As Icons</div>
+        <div class="menu-dropdown-item" onclick="alert('View as List')">As List</div>
+        <div class="menu-dropdown-separator"></div>
+        <div class="menu-dropdown-item" onclick="alert('Sort by Name')">Sort by Name</div>
+        <div class="menu-dropdown-item" onclick="alert('Sort by Date')">Sort by Date</div>
+        <div class="menu-dropdown-item" onclick="alert('Sort by Color')">Sort by Color</div>
+      </div>
+    </div>
+    <div class="menu-item-wrap">
+      <div class="menu-item" onclick="toggleMenuDropdown('menu-go')">Go</div>
+      <div class="menu-dropdown" id="menu-go">
+        <div class="menu-dropdown-item" style="font-weight:600;color:var(--fg-muted);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;pointer-events:none;">Projects</div>
+        <div id="menu-go-projects"></div>
+        <div class="menu-dropdown-separator"></div>
+        <div class="menu-dropdown-item" style="font-weight:600;color:var(--fg-muted);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;pointer-events:none;">Apps</div>
+        <div class="menu-dropdown-item" onclick="openApp('finder')">Finder</div>
+        <div class="menu-dropdown-item" onclick="openApp('mail')">Mail</div>
+        <div class="menu-dropdown-item" onclick="openApp('notes')">Notes</div>
+        <div class="menu-dropdown-item" onclick="openApp('camera')">Camera</div>
+      </div>
+    </div>
+    <div class="menu-item-wrap">
+      <div class="menu-item" onclick="toggleMenuDropdown('menu-help')">Help</div>
+      <div class="menu-dropdown" id="menu-help">
+        <div class="menu-dropdown-item" onclick="showUserGuide()">User Guide</div>
+        <div class="menu-dropdown-item" onclick="showKeyboardShortcuts()">Keyboard Shortcuts</div>
+        <div class="menu-dropdown-separator"></div>
+        <div class="menu-dropdown-item" onclick="openApp('about')">About SaberOS</div>
+      </div>
+    </div>
   </div>
   <div class="menu-bar-right">
     <div class="menu-icon"><i data-feather="wifi" style="width:14px;height:14px"></i></div>
     <div class="menu-icon"><i data-feather="battery-charging" style="width:14px;height:14px"></i></div>
-    <div class="menu-clock" id="menu-clock">12:00 PM</div>
+    <div class="menu-item-wrap">
+      <div class="menu-clock" id="menu-clock" onclick="toggleNotificationPanel()">12:00 PM</div>
+      <div class="notification-panel" id="notification-panel">
+        <div class="notification-header">Notifications</div>
+        <div class="notification-item">
+          <div class="notification-icon">🚀</div>
+          <div class="notification-content">
+            <div class="notification-title">SaberOS v2.0 launched</div>
+            <div class="notification-time">Just now</div>
+          </div>
+        </div>
+        <div class="notification-item">
+          <div class="notification-icon" style="background:#52A5CE;">🎏</div>
+          <div class="notification-content">
+            <div class="notification-title">New project: Koi Pond added</div>
+            <div class="notification-time">2 hours ago</div>
+          </div>
+        </div>
+        <div class="notification-item">
+          <div class="notification-icon" style="background:#D3B6D3;">🖼️</div>
+          <div class="notification-content">
+            <div class="notification-title">Wallpaper collection updated</div>
+            <div class="notification-time">Yesterday</div>
+          </div>
+        </div>
+        <div class="notification-item">
+          <div class="notification-icon" style="background:#EF6F3C;">📈</div>
+          <div class="notification-content">
+            <div class="notification-title">Stock widget now live</div>
+            <div class="notification-time">2 days ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="menu-username">Saber</div>
     <div class="menu-hamburger" onclick="toggleMobileMenu()">
       <span></span>
@@ -1861,9 +2080,11 @@ function createWindow(id, data, options) {
   const desktop = document.getElementById('desktop');
   const deskW = desktop.clientWidth;
   const deskH = desktop.clientHeight;
-  const offsetStep = (windows.size % 6) * 25;
-  const baseX = Math.max(20, Math.round((deskW - winWidth) / 2) + offsetStep);
-  const baseY = Math.max(20, Math.round((deskH - winHeight) / 2) + offsetStep);
+  // Position window at upper-center (20% from top, centered horizontally)
+  const offsetStepX = (windows.size % 6) * 25;
+  const offsetStepY = Math.floor(windows.size / 6) * 25;
+  const baseX = Math.max(20, Math.round((deskW - winWidth) / 2) + offsetStepX);
+  const baseY = Math.max(20, Math.round(deskH * 0.2) + offsetStepY);
   windowEl.style.left = baseX + 'px';
   windowEl.style.top = baseY + 'px';
   windowEl.style.width = (options.width || (isSystemApp ? '480px' : '800px'));
@@ -1901,6 +2122,9 @@ function createWindow(id, data, options) {
     isMaximized: false,
     originalRect: null
   });
+  
+  // Add temporary dock item if app not already in dock
+  addTempDockItem(id, data);
   
   gsap.to(windowEl, {
     opacity: 1,
@@ -2136,6 +2360,9 @@ function closeWindow(id) {
   });
   
   updateDockIndicator(id, false);
+  
+  // Remove temporary dock item
+  removeTempDockItem(id);
 }
 
 function minimizeWindow(id) {
@@ -2226,6 +2453,9 @@ function makeDraggable(windowEl) {
 }
 
 // ─── Dock ───
+// Track permanent dock items vs temporary
+const permanentDockItems = new Set();
+
 function initDock() {
   const dock = document.getElementById('dock');
   const dockItems = [];
@@ -2235,6 +2465,7 @@ function initDock() {
   systemOrder.forEach(function(key) {
     const app = systemApps[key];
     dockItems.push({ id: key, title: app.title, icon: app.icon, accent: app.accent, isSystem: true });
+    permanentDockItems.add(key);
   });
   
   // Separator
@@ -2244,11 +2475,12 @@ function initDock() {
       '<div class="dock-tooltip">' + item.title + '</div>' +
       '<div class="dock-indicator"></div>' +
     '</button>';
-  }).join('') + '<div class="dock-separator"></div>';
+  }).join('') + '<div class="dock-separator" id="dock-separator-projects"></div>';
   
-  // Add featured projects
+  // Add featured projects (also permanent)
   const featured = projects.slice(0, 4);
   featured.forEach(function(p, i) {
+    permanentDockItems.add(p.id);
     const btn = document.createElement('button');
     btn.className = 'dock-item';
     btn.dataset.id = p.id;
@@ -2265,9 +2497,17 @@ function initDock() {
     });
   });
   
+  // Separator for temp items
+  var tempSep = document.createElement('div');
+  tempSep.className = 'dock-separator';
+  tempSep.id = 'dock-separator-temp';
+  tempSep.style.display = 'none';
+  dock.appendChild(tempSep);
+  
   // Trash separator + trash at the end (macOS style)
   var trashSep = document.createElement('div');
   trashSep.className = 'dock-separator';
+  trashSep.id = 'dock-separator-trash';
   dock.appendChild(trashSep);
   var trashBtn = document.createElement('button');
   trashBtn.className = 'dock-item';
@@ -2275,6 +2515,52 @@ function initDock() {
   trashBtn.innerHTML = '<img src="' + systemApps.trash.icon + '" alt="Trash"><div class="dock-tooltip">Trash</div><div class="dock-indicator"></div>';
   trashBtn.onclick = function() { openApp('trash'); };
   dock.appendChild(trashBtn);
+  permanentDockItems.add('trash');
+}
+
+function addTempDockItem(id, data) {
+  // Don't add if already in permanent dock
+  if (permanentDockItems.has(id)) return;
+  
+  const dock = document.getElementById('dock');
+  
+  // Check if temp item already exists
+  if (dock.querySelector('.dock-item-temp[data-id="' + id + '"')) return;
+  
+  // Show temp separator
+  const tempSep = document.getElementById('dock-separator-temp');
+  if (tempSep) tempSep.style.display = 'block';
+  
+  // Find trash separator to insert before
+  const trashSep = document.getElementById('dock-separator-trash');
+  
+  const btn = document.createElement('button');
+  btn.className = 'dock-item dock-item-temp';
+  btn.dataset.id = id;
+  btn.innerHTML = '<img src="' + (data.icon || data.image || '') + '" alt="' + data.title + '"><div class="dock-tooltip">' + data.title + '</div><div class="dock-indicator"></div>';
+  btn.onclick = function() { openApp(id); };
+  
+  if (trashSep) {
+    dock.insertBefore(btn, trashSep);
+  } else {
+    dock.appendChild(btn);
+  }
+}
+
+function removeTempDockItem(id) {
+  const item = document.querySelector('.dock-item-temp[data-id="' + id + '"]');
+  if (item) {
+    item.style.animation = 'dockItemAppear 0.2s var(--ease-out-quart) reverse';
+    setTimeout(function() {
+      item.remove();
+      // Hide temp separator if no more temp items
+      const remaining = document.querySelectorAll('.dock-item-temp');
+      if (remaining.length === 0) {
+        const tempSep = document.getElementById('dock-separator-temp');
+        if (tempSep) tempSep.style.display = 'none';
+      }
+    }, 200);
+  }
 }
 
 function updateDockIndicator(id, isActive) {
@@ -2717,12 +3003,118 @@ window.addEventListener('load', function() {
   initWeather();
   initStocks();
   renderTodos();
+  populateGoMenu();
   if (typeof feather !== 'undefined') feather.replace();
 });
 
 // ─── Mobile Menu Toggle ───
 function toggleMobileMenu() {
   showNotification('Mobile menu coming soon');
+}
+
+// ─── Menu Dropdown Functions ───
+function toggleMenuDropdown(menuId) {
+  const menu = document.getElementById(menuId);
+  const isOpen = menu.classList.contains('show');
+  
+  // Close all dropdowns
+  document.querySelectorAll('.menu-dropdown.show').forEach(function(el) {
+    el.classList.remove('show');
+  });
+  
+  // Toggle clicked dropdown
+  if (!isOpen) {
+    menu.classList.add('show');
+  }
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.menu-item-wrap')) {
+    document.querySelectorAll('.menu-dropdown.show').forEach(function(el) {
+      el.classList.remove('show');
+    });
+  }
+  
+  // Also close notification panel
+  if (!e.target.closest('.menu-clock') && !e.target.closest('.notification-panel')) {
+    const panel = document.getElementById('notification-panel');
+    if (panel) panel.classList.remove('show');
+  }
+});
+
+// Populate Go menu with projects
+function populateGoMenu() {
+  const container = document.getElementById('menu-go-projects');
+  if (!container) return;
+  
+  container.innerHTML = projects.map(function(p) {
+    return '<div class="menu-dropdown-item" onclick="openApp(\'' + p.id + '\'); toggleMenuDropdown(\'menu-go\')">' + p.title + '</div>';
+  }).join('');
+}
+
+// ─── Notification Panel ───
+function toggleNotificationPanel() {
+  const panel = document.getElementById('notification-panel');
+  panel.classList.toggle('show');
+}
+
+// ─── Help Functions ───
+function showUserGuide() {
+  const guideContent = 'Welcome to SaberOS!\n\n' +
+    '• Click any project icon to open it\n' +
+    '• Use the dock at the bottom to access apps\n' +
+    '• Right-click the desktop to change wallpaper\n' +
+    '• Drag windows by their title bar\n' +
+    '• Use the menu bar for quick navigation\n\n' +
+    'Built with ❤️ by Saber Zou';
+  
+  // Create a small modal window
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+  modal.innerHTML = '<div style="background:var(--bg);padding:24px;border-radius:12px;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">' +
+    '<h3 style="font-family:var(--sans);font-size:1.1rem;margin:0 0 16px;color:var(--fg);">User Guide</h3>' +
+    '<pre style="font-family:var(--sans);font-size:0.85rem;line-height:1.6;color:var(--fg-muted);white-space:pre-wrap;margin:0;">' + guideContent + '</pre>' +
+    '<button onclick="this.closest(\'.menu-dropdown\')?.classList.remove(\'show\');this.parentElement.parentElement.remove()" style="margin-top:20px;padding:8px 20px;background:var(--forest);color:white;border:none;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:0.8rem;">Got it</button>' +
+    '</div>';
+  modal.onclick = function(e) {
+    if (e.target === modal) modal.remove();
+  };
+  document.body.appendChild(modal);
+  
+  // Close menu dropdown
+  toggleMenuDropdown('menu-help');
+}
+
+function showKeyboardShortcuts() {
+  const shortcuts = [
+    { key: '⌘ + Click', action: 'Open app in new window' },
+    { key: 'Drag', action: 'Move windows' },
+    { key: 'Type "hello"', action: 'Easter egg surprise' },
+    { key: 'Right-click', action: 'Desktop context menu' }
+  ];
+  
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+  modal.innerHTML = '<div style="background:var(--bg);padding:24px;border-radius:12px;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">' +
+    '<h3 style="font-family:var(--sans);font-size:1.1rem;margin:0 0 16px;color:var(--fg);">Keyboard Shortcuts</h3>' +
+    '<div style="display:flex;flex-direction:column;gap:12px;">' +
+    shortcuts.map(function(s) {
+      return '<div style="display:flex;justify-content:space-between;align-items:center;font-family:var(--sans);font-size:0.85rem;">' +
+        '<span style="color:var(--fg-muted);">' + s.action + '</span>' +
+        '<kbd style="background:rgba(45,27,0,0.08);padding:4px 8px;border-radius:4px;font-family:monospace;font-size:0.75rem;color:var(--fg);">' + s.key + '</kbd>' +
+        '</div>';
+    }).join('') +
+    '</div>' +
+    '<button onclick="this.parentElement.parentElement.remove()" style="margin-top:20px;padding:8px 20px;background:var(--forest);color:white;border:none;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:0.8rem;">Close</button>' +
+    '</div>';
+  modal.onclick = function(e) {
+    if (e.target === modal) modal.remove();
+  };
+  document.body.appendChild(modal);
+  
+  // Close menu dropdown
+  toggleMenuDropdown('menu-help');
 }
 </script>
 </body>

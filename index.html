@@ -179,15 +179,7 @@ body {
 .desktop {
   position: fixed;
   inset: 28px 0 0 0;
-  background: var(--bg);
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(255,140,66,0.18) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(255,107,107,0.16) 0%, transparent 45%),
-    radial-gradient(circle at 60% 20%, rgba(255,170,51,0.15) 0%, transparent 40%),
-    radial-gradient(circle at 30% 80%, rgba(255,200,100,0.14) 0%, transparent 35%),
-    radial-gradient(circle at 70% 50%, rgba(255,160,120,0.12) 0%, transparent 40%);
-  background-size: 200% 200%;
-  animation: wallpaperShift 60s ease-in-out infinite;
+  background: var(--bg) url('wallpaper-fluted.jpg') center/cover no-repeat;
   z-index: 1;
   overflow: hidden;
 }
@@ -198,6 +190,132 @@ body {
   50% { background-position: 100% 100%; }
   75% { background-position: 0% 100%; }
 }
+
+/* ─── Weather Widget ─── */
+.weather-widget {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  z-index: 5;
+  cursor: default;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+.weather-widget:hover { transform: scale(1.02); }
+.weather-icon { font-size: 2.2rem; line-height: 1; }
+.weather-temp { font-size: 1.5rem; font-weight: 500; color: var(--fg); line-height: 1.2; }
+.weather-desc { font-size: 0.75rem; color: var(--fg-muted); }
+.weather-location { font-size: 0.65rem; color: var(--fg); opacity: 0.6; }
+
+/* ─── Todo Widget ─── */
+.todo-widget {
+  position: absolute;
+  top: 110px;
+  left: 30px;
+  width: 220px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  z-index: 5;
+  cursor: default;
+  user-select: none;
+}
+.todo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.todo-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--fg);
+}
+.todo-add-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,140,66,0.3);
+  color: var(--fg);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.todo-add-btn:hover { background: rgba(255,140,66,0.5); }
+.todo-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--fg);
+}
+.todo-item.done .todo-text { text-decoration: line-through; opacity: 0.5; }
+.todo-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--fg-muted);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  color: transparent;
+}
+.todo-item.done .todo-check {
+  background: rgba(255,140,66,0.4);
+  border-color: rgba(255,140,66,0.6);
+  color: var(--fg);
+}
+.todo-text { flex: 1; }
+.todo-remove {
+  opacity: 0;
+  border: none;
+  background: none;
+  color: var(--fg-muted);
+  cursor: pointer;
+  font-size: 0.7rem;
+  transition: opacity 0.15s;
+}
+.todo-item:hover .todo-remove { opacity: 0.7; }
+.todo-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  color: var(--fg);
+  font-size: 0.75rem;
+  font-family: inherit;
+  outline: none;
+  margin-top: 6px;
+}
+.todo-input::placeholder { color: var(--fg-muted); opacity: 0.6; }
+.todo-input-row { display: none; }
+.todo-input-row.visible { display: block; }
 
 /* ─── Desktop Icons ─── */
 .desktop-icons {
@@ -261,10 +379,11 @@ body {
   font-weight: 500;
   color: var(--fg);
   text-align: center;
-  max-width: 76px;
+  max-width: 90px;
   padding: 2px 6px;
   border-radius: 4px;
-  text-shadow: 0 1px 2px rgba(245, 240, 235, 0.8);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7), 0 0 8px rgba(0,0,0,0.4);
+  color: #fff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -665,6 +784,8 @@ body {
 
 /* ─── Mobile Layout ─── */
 @media (max-width: 767px) {
+  .weather-widget { display: none; }
+  .todo-widget { display: none; }
   .menu-bar {
     height: 48px;
     padding: 0 16px;
@@ -1354,6 +1475,28 @@ body {
 
 <!-- Desktop -->
 <div class="desktop" id="desktop" oncontextmenu="showContextMenu(event)">
+  <!-- Weather Widget -->
+  <div class="weather-widget" id="weather-widget">
+    <div class="weather-icon" id="weather-icon">☀️</div>
+    <div class="weather-info">
+      <div class="weather-temp" id="weather-temp">--°</div>
+      <div class="weather-desc" id="weather-desc">Loading...</div>
+      <div class="weather-location" id="weather-location">Beijing</div>
+    </div>
+  </div>
+
+  <!-- Todo Widget -->
+  <div class="todo-widget" id="todo-widget">
+    <div class="todo-header">
+      <span class="todo-title">✅ To-Do</span>
+      <button class="todo-add-btn" onclick="toggleTodoInput()" title="Add task">+</button>
+    </div>
+    <ul class="todo-list" id="todo-list"></ul>
+    <div class="todo-input-row" id="todo-input-row">
+      <input class="todo-input" id="todo-input" type="text" placeholder="New task..." onkeydown="if(event.key==='Enter')addTodo()">
+    </div>
+  </div>
+
   <!-- Desktop Icons -->
   <div class="desktop-icons" id="desktop-icons"></div>
   
@@ -1400,6 +1543,7 @@ const projects = [
   {
     id: 'cards-of-answers',
     title: 'Cards of Answers',
+    shortTitle: 'Cards',
     description: 'Tarot-inspired decision making tool with beautiful card animations.',
     detail: 'A tarot-inspired decision-making tool featuring beautiful card animations and thought-provoking prompts. Draw a card when you need guidance or inspiration.',
     howMade: 'CSS 3D transforms for card flips, GSAP for animations, custom illustration pipeline, localStorage for card history.',
@@ -1412,6 +1556,7 @@ const projects = [
   {
     id: 'axiom-thoughts',
     title: 'Axiom Thoughts',
+    shortTitle: 'Axiom',
     description: 'Philosophical queries and reflections in a minimalist interface.',
     detail: 'A minimalist interface for philosophical queries and daily reflections. Explore fundamental questions about existence, creativity, and human nature through an elegant card-based UI.',
     howMade: 'React for state management, Framer Motion for transitions, markdown rendering for content, dark mode support.',
@@ -1424,6 +1569,7 @@ const projects = [
   {
     id: 'agent-terrarium',
     title: 'Agent Terrarium',
+    shortTitle: 'Terrarium',
     description: 'A living ecosystem of AI agents visualized as digital creatures.',
     detail: 'A living ecosystem visualization where AI agents appear as digital creatures in a shared environment. Watch them interact, communicate, and evolve their behaviors over time.',
     howMade: 'Three.js for 3D environment, WebSocket simulation, agent behavior trees, particle effects for interactions.',
@@ -1436,6 +1582,7 @@ const projects = [
   {
     id: 'json-prompts',
     title: 'JSON Prompts',
+    shortTitle: 'Prompts',
     description: 'A curated gallery of AI image generation prompts with infinite canvas.',
     detail: 'A searchable gallery of 500+ AI image generation prompts. Infinite pannable canvas with mixed tile sizes — click any image to reveal its full JSON prompt and copy it with one tap.',
     howMade: 'Infinite scroll canvas, masonry grid layout, copy-to-clipboard API, search indexing with Fuse.js.',
@@ -1448,6 +1595,7 @@ const projects = [
   {
     id: 'between-floors',
     title: 'Between Floors',
+    shortTitle: 'Floors',
     description: 'Vertical swipe stories for English learning with hidden floors.',
     detail: 'Interactive storytelling experiment for English learners at C1/C2 level. Scroll through an elevator journey across dystopian floors — each with distinct character voices, embedded vocabulary, hidden bonus floors, and end-of-story quizzes.',
     howMade: 'GSAP ScrollTrigger, swipe gesture handling, dynamic content loading, quiz scoring system.',
@@ -1472,6 +1620,7 @@ const projects = [
   {
     id: 'postcards-from-mars',
     title: 'Postcards from Mars',
+    shortTitle: 'Postcards',
     description: '3D mission log with AI robot field diaries and NASA rover photos.',
     detail: 'Explore Mars through real NASA rover photos in a 3D mission log viewer. AI-generated robot field diaries narrate each sol, with imagery proxied through Cloudflare Workers.',
     howMade: 'Three.js for 3D scene, NASA API integration, AI text generation, Cloudflare Workers for image proxy.',
@@ -1508,6 +1657,7 @@ const projects = [
   {
     id: 'movie-oracle',
     title: 'Movie Oracle',
+    shortTitle: 'Movies',
     description: 'AI-powered movie recommendations with cinematic poster art.',
     detail: 'An AI-powered movie recommendation engine that suggests films based on mood, time available, and viewing context. Features cinematic poster art and trailer integration.',
     howMade: 'Recommendation algorithm, TMDB API, mood-based filtering, poster art gallery, watchlist management.',
@@ -1520,6 +1670,7 @@ const projects = [
   {
     id: 'pixel-dailies',
     title: 'Pixel Dailies',
+    shortTitle: 'Pixels',
     description: 'Daily pixel art challenges and community gallery.',
     detail: 'A daily pixel art challenge platform with community submissions. Practice your pixel art skills with daily prompts and browse the gallery for inspiration.',
     howMade: 'Canvas-based pixel editor, daily prompt system, community gallery with voting, export to PNG.',
@@ -1968,7 +2119,7 @@ function initDesktopIcons() {
     icon.dataset.id = p.id;
     icon.innerHTML = 
       '<div class="desktop-icon-img"><img src="' + p.icon + '" alt="' + p.title + '"></div>' +
-      '<div class="desktop-icon-label">' + p.title + '</div>';
+      '<div class="desktop-icon-label">' + (p.shortTitle || p.title) + '</div>';
     
     // Double click to open
     let clickCount = 0;
@@ -2229,6 +2380,74 @@ function showNotification(text) {
   }, 3000);
 }
 
+// ─── Todo Widget ───
+function getTodos() {
+  try { return JSON.parse(localStorage.getItem('saberos-todos') || '[]'); } catch(e) { return []; }
+}
+function saveTodos(todos) { localStorage.setItem('saberos-todos', JSON.stringify(todos)); }
+function renderTodos() {
+  var todos = getTodos();
+  var list = document.getElementById('todo-list');
+  if (!todos.length) {
+    list.innerHTML = '<li style="font-size:0.7rem;color:var(--fg-muted);opacity:0.6;">No tasks yet</li>';
+    return;
+  }
+  list.innerHTML = todos.map(function(t, i) {
+    return '<li class="todo-item' + (t.done ? ' done' : '') + '">' +
+      '<button class="todo-check" onclick="toggleTodo(' + i + ')">' + (t.done ? '✓' : '') + '</button>' +
+      '<span class="todo-text">' + t.text.replace(/</g,'&lt;') + '</span>' +
+      '<button class="todo-remove" onclick="removeTodo(' + i + ')">✕</button>' +
+      '</li>';
+  }).join('');
+}
+function toggleTodoInput() {
+  var row = document.getElementById('todo-input-row');
+  row.classList.toggle('visible');
+  if (row.classList.contains('visible')) document.getElementById('todo-input').focus();
+}
+function addTodo() {
+  var input = document.getElementById('todo-input');
+  var text = input.value.trim();
+  if (!text) return;
+  var todos = getTodos();
+  todos.push({ text: text, done: false });
+  saveTodos(todos);
+  input.value = '';
+  renderTodos();
+}
+function toggleTodo(i) {
+  var todos = getTodos();
+  if (todos[i]) todos[i].done = !todos[i].done;
+  saveTodos(todos);
+  renderTodos();
+}
+function removeTodo(i) {
+  var todos = getTodos();
+  todos.splice(i, 1);
+  saveTodos(todos);
+  renderTodos();
+}
+
+// ─── Weather Widget ───
+var weatherEmojis = {'Clear':'☀️','Sunny':'☀️','Partly cloudy':'⛅','Cloudy':'☁️','Overcast':'☁️','Mist':'🌫️','Fog':'🌫️','Rain':'🌧️','Light rain':'🌦️','Heavy rain':'🌧️','Thunderstorm':'⛈️','Snow':'🌨️','Drizzle':'🌦️'};
+
+function initWeather() {
+  fetch('https://wttr.in/Beijing?format=j1')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var cur = d.current_condition[0];
+      var temp = cur.temp_C;
+      var desc = cur.weatherDesc[0].value;
+      var emoji = weatherEmojis[desc] || '🌤️';
+      document.getElementById('weather-temp').textContent = temp + '°C';
+      document.getElementById('weather-desc').textContent = desc;
+      document.getElementById('weather-icon').textContent = emoji;
+    })
+    .catch(function() {
+      document.getElementById('weather-desc').textContent = 'Offline';
+    });
+}
+
 // ─── Boot Animation ───
 window.addEventListener('load', function() {
   setTimeout(function() {
@@ -2242,6 +2461,8 @@ window.addEventListener('load', function() {
   initDesktopIcons();
   initLaunchpad();
   initMobileGrid();
+  initWeather();
+  renderTodos();
 });
 
 // ─── Mobile Menu Toggle ───

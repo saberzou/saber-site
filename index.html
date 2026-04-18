@@ -177,49 +177,7 @@ body {
 
 /* ─── Desktop Wallpaper ─── */
 
-/* Wallpaper Picker */
-.wallpaper-picker {
-  display: none;
-  position: fixed;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 540px;
-  max-width: 90vw;
-  max-height: 80vh;
-  background: rgba(255,248,240,0.92);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border-radius: 12px;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(0,0,0,0.08);
-  z-index: 10000;
-  overflow: hidden;
-  flex-direction: column;
-}
-.wallpaper-picker.open { display: flex; }
-.wallpaper-picker-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(45,27,0,0.08);
-}
-.wallpaper-picker-title {
-  font-family: var(--sans); font-size: 0.8rem; font-weight: 500; color: var(--fg);
-}
-.wallpaper-picker-close {
-  background: none; border: none; font-size: 14px; cursor: pointer;
-  color: var(--fg-muted); width: 24px; height: 24px; display: flex;
-  align-items: center; justify-content: center; border-radius: 4px;
-}
-.wallpaper-picker-close:hover { background: rgba(45,27,0,0.06); }
-.wallpaper-picker-preview {
-  height: 180px; margin: 12px 16px;
-  border-radius: 8px; background: var(--bg) center/cover no-repeat;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
-  transition: background-image 0.3s;
-}
-.wallpaper-picker-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-  padding: 0 16px 16px; overflow-y: auto; max-height: 240px;
-}
+/* Wallpaper Picker Thumbnails */
 .wallpaper-thumb {
   aspect-ratio: 16/10; border-radius: 6px; cursor: pointer;
   background: var(--bg) center/cover no-repeat;
@@ -232,10 +190,6 @@ body {
   content: ''; position: absolute; inset: -2px; border-radius: 8px;
   border: 2.5px solid var(--forest);
 }
-.wallpaper-picker-overlay {
-  display: none; position: fixed; inset: 0; z-index: 9999;
-}
-.wallpaper-picker-overlay.open { display: block; }
 
 .desktop {
   position: fixed;
@@ -1506,18 +1460,6 @@ body {
   <div class="context-item" onclick="changeWallpaper()">
     <span><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span> Change Wallpaper
   </div>
-
-  <!-- Wallpaper Picker Overlay -->
-  <div class="wallpaper-picker-overlay" id="wallpaper-overlay" onclick="closeWallpaperPicker()"></div>
-
-  <!-- Wallpaper Picker -->
-  <div class="wallpaper-picker" id="wallpaper-picker">
-    <div class="wallpaper-picker-header">
-      <span class="wallpaper-picker-title">Desktop & Screen Saver</span>
-      <button class="wallpaper-picker-close" onclick="closeWallpaperPicker()">✕</button>
-    </div>
-    <div class="wallpaper-picker-preview" id="wallpaper-preview"></div>
-    <div class="wallpaper-picker-grid" id="wallpaper-grid"></div>
   </div>
   <div class="context-item" onclick="openApp('about')">
     <span><i data-feather="info" style="width:14px;height:14px;vertical-align:middle"></i></span> About This Mac
@@ -1764,7 +1706,8 @@ const systemApps = {
   notes: { id: 'notes', title: 'Notes', accent: '#EFCE7B', icon: ICON_BASE + '/littlebook.png' },
   camera: { id: 'camera', title: 'Camera', accent: '#EF6F3C', icon: ICON_BASE + '/postcards-from-mars.png' },
   about: { id: 'about', title: 'About This Mac', accent: '#FF8C42', icon: ICON_BASE + '/about-notebook.png' },
-  finder: { id: 'finder', title: 'Finder', accent: '#B8CEE8', icon: ICON_BASE + '/json-prompts.png' }
+  finder: { id: 'finder', title: 'Finder', accent: '#B8CEE8', icon: ICON_BASE + '/json-prompts.png' },
+  wallpaper: { id: 'wallpaper', title: 'Desktop & Screen Saver', accent: '#D3B6D3', icon: ICON_BASE + '/atticus.png' }
 };
 
 // Fake emails
@@ -1996,6 +1939,15 @@ function renderSystemApp(appId) {
         '</div>' +
       '</div>';
       
+    case 'wallpaper':
+      return '<div style="display: flex; flex-direction: column; height: 100%; gap: 0;">' +
+        '<div style="padding: 12px; flex-shrink: 0;">' +
+          '<div id="wp-app-preview" style="height: 160px; border-radius: 8px; background: ' + getWallpaperBg(wallpaperList[currentWallpaperIdx]) + ' center/cover no-repeat; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); transition: background-image 0.3s;"></div>' +
+        '</div>' +
+        '<div style="padding: 0 12px 4px; font-family: var(--sans); font-size: 0.7rem; font-weight: 500; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.05em;">Choose a wallpaper</div>' +
+        '<div id="wp-app-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 4px 12px 12px; overflow-y: auto; flex: 1;"></div>' +
+      '</div>';
+
     default:
       return '<p>App not found</p>';
   }
@@ -2004,6 +1956,28 @@ function renderSystemApp(appId) {
 function setupSystemApp(appId) {
   if (appId === 'camera') {
     initCamera();
+  }
+  if (appId === 'wallpaper') {
+    var grid = document.getElementById('wp-app-grid');
+    var preview = document.getElementById('wp-app-preview');
+    if (!grid) return;
+    grid.innerHTML = '';
+    wallpaperList.forEach(function(wp, i) {
+      var thumb = document.createElement('div');
+      thumb.className = 'wallpaper-thumb' + (i === currentWallpaperIdx ? ' selected' : '');
+      thumb.style.backgroundImage = getWallpaperBg(wp);
+      thumb.title = wp.name;
+      thumb.onclick = function() {
+        applyWallpaper(i);
+        grid.querySelectorAll('.wallpaper-thumb').forEach(function(t, j) {
+          t.classList.toggle('selected', j === i);
+        });
+        if (preview) preview.style.backgroundImage = getWallpaperBg(wp);
+      };
+      thumb.onmouseenter = function() { if (preview) preview.style.backgroundImage = getWallpaperBg(wp); };
+      thumb.onmouseleave = function() { if (preview) preview.style.backgroundImage = getWallpaperBg(wallpaperList[currentWallpaperIdx]); };
+      grid.appendChild(thumb);
+    });
   }
 }
 
@@ -2315,7 +2289,7 @@ document.addEventListener('click', function(e) {
 
 function changeWallpaper() {
   hideContextMenu();
-  openWallpaperPicker();
+  openApp('wallpaper');
 }
 
 var wallpaperList = [
@@ -2352,43 +2326,8 @@ function applyWallpaper(idx) {
   desktop.style.backgroundSize = 'cover';
   desktop.style.backgroundPosition = 'center';
   try { localStorage.setItem('saberos-wallpaper', idx); } catch(e) {}
-  updatePickerSelection();
 }
 
-function openWallpaperPicker() {
-  var picker = document.getElementById('wallpaper-picker');
-  var overlay = document.getElementById('wallpaper-overlay');
-  var grid = document.getElementById('wallpaper-grid');
-  var preview = document.getElementById('wallpaper-preview');
-  grid.innerHTML = '';
-  wallpaperList.forEach(function(wp, i) {
-    var thumb = document.createElement('div');
-    thumb.className = 'wallpaper-thumb' + (i === currentWallpaperIdx ? ' selected' : '');
-    thumb.style.backgroundImage = getWallpaperBg(wp);
-    thumb.title = wp.name;
-    thumb.onclick = function() { applyWallpaper(i); };
-    thumb.onmouseenter = function() { preview.style.backgroundImage = getWallpaperBg(wp); };
-    thumb.onmouseleave = function() { preview.style.backgroundImage = getWallpaperBg(wallpaperList[currentWallpaperIdx]); };
-    grid.appendChild(thumb);
-  });
-  preview.style.backgroundImage = getWallpaperBg(wallpaperList[currentWallpaperIdx]);
-  picker.classList.add('open');
-  overlay.classList.add('open');
-}
-
-function closeWallpaperPicker() {
-  document.getElementById('wallpaper-picker').classList.remove('open');
-  document.getElementById('wallpaper-overlay').classList.remove('open');
-}
-
-function updatePickerSelection() {
-  var thumbs = document.querySelectorAll('.wallpaper-thumb');
-  thumbs.forEach(function(t, i) {
-    t.classList.toggle('selected', i === currentWallpaperIdx);
-  });
-  var preview = document.getElementById('wallpaper-preview');
-  if (preview) preview.style.backgroundImage = getWallpaperBg(wallpaperList[currentWallpaperIdx]);
-}
 
 // Restore saved wallpaper on load
 (function() {

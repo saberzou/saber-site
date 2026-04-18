@@ -198,7 +198,7 @@ body {
 .desktop {
   position: fixed;
   inset: 28px 0 0 0;
-  background: var(--bg) url('wallpaper-fluted.jpg') center/cover no-repeat;
+  background: var(--bg) url('https://images.unsplash.com/photo-1745349563681-e84d4b10eefc?w=2560&q=80&fit=crop') center/cover no-repeat;
   z-index: 1;
   overflow: hidden;
 }
@@ -273,10 +273,6 @@ body {
 
 /* ─── Todo Widget ─── */
 .todo-widget {
-  position: absolute;
-  top: 110px;
-  left: 30px;
-  width: 220px;
   padding: 14px 16px;
   background: rgba(255,255,255,0.15);
   backdrop-filter: blur(24px) saturate(1.6);
@@ -284,7 +280,6 @@ body {
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,0.3);
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  z-index: 5;
   cursor: default;
   user-select: none;
 }
@@ -875,7 +870,6 @@ body {
 @media (max-width: 767px) {
   .weather-widget { display: none; }
   .widget-stack { display: none; }
-  .todo-widget { display: none; }
   .menu-bar {
     height: 48px;
     padding: 0 16px;
@@ -1583,9 +1577,7 @@ body {
     <div class="stock-row"><span class="stock-ticker">AAPL</span><span class="stock-price" id="stock-aapl-price">--</span><span class="stock-change" id="stock-aapl-change">--</span></div>
     <div class="stock-row"><span class="stock-ticker">GOOGL</span><span class="stock-price" id="stock-googl-price">--</span><span class="stock-change" id="stock-googl-change">--</span></div>
   </div>
-  </div>
 
-  <!-- Todo Widget -->
   <div class="todo-widget" id="todo-widget">
     <div class="todo-header">
       <span class="todo-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg> To-Do</span>
@@ -1595,6 +1587,7 @@ body {
     <div class="todo-input-row" id="todo-input-row">
       <input class="todo-input" id="todo-input" type="text" placeholder="New task..." onkeydown="if(event.key==='Enter')addTodo()">
     </div>
+  </div>
   </div>
 
   <!-- Desktop Icons -->
@@ -2449,18 +2442,14 @@ function changeWallpaper() {
 }
 
 var wallpaperList = [
-  { name: 'Fluted Glass', url: 'wallpaper-fluted.jpg' },
+  { name: 'Sand Dunes', url: 'https://images.unsplash.com/photo-1745349563681-e84d4b10eefc?w=2560&q=80&fit=crop' },
+  { name: 'Ocean Sky', url: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=2560&q=80&fit=crop' },
+  { name: 'Peach Silk', url: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=2560&q=80&fit=crop' },
+  { name: 'Amber Glass', url: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=2560&q=80&fit=crop' },
+  { name: 'Orange Wall', url: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=2560&q=80&fit=crop' },
+  { name: 'Dark Warm', url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=2560&q=80&fit=crop' },
   { name: 'Warm Gradient', gradient: 'linear-gradient(135deg, #FFF8F0 0%, #F4BEAE 50%, #EFCE7B 100%)' },
-  { name: 'Ocean', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80' },
-  { name: 'Mountains', url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80' },
-  { name: 'Aurora', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1920&q=80' },
-  { name: 'Desert', url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=1920&q=80' },
-  { name: 'Forest', url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=80' },
-  { name: 'Abstract', url: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1920&q=80' },
-  { name: 'Minimal', url: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=1920&q=80' },
-  { name: 'Sunset', url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=1920&q=80' },
-  { name: 'Silk', gradient: 'linear-gradient(160deg, #F4BEAE 0%, #D3B6D3 40%, #B8CEE8 70%, #AACC96 100%)' },
-  { name: 'Midnight', gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }
+  { name: 'Silk', gradient: 'linear-gradient(160deg, #F4BEAE 0%, #D3B6D3 40%, #B8CEE8 70%, #AACC96 100%)' }
 ];
 
 var currentWallpaperIdx = 0;
@@ -2696,23 +2685,19 @@ function initWeather() {
 function initStocks() {
   var tickers = ['MSFT', 'AAPL', 'GOOGL'];
   tickers.forEach(function(ticker) {
-    fetch('https://query1.finance.yahoo.com/v8/finance/chart/' + ticker + '?interval=1d&range=1d')
+    fetch('https://api.twelvedata.com/quote?symbol=' + ticker + '&apikey=demo')
       .then(function(r) { return r.json(); })
-      .then(function(d) {
-        var meta = d.chart.result[0].meta;
-        var price = meta.regularMarketPrice.toFixed(2);
-        var prev = meta.chartPreviousClose;
-        var change = ((meta.regularMarketPrice - prev) / prev * 100).toFixed(2);
-        var isUp = change >= 0;
-        document.getElementById('stock-' + ticker.toLowerCase() + '-price').textContent = '$' + price;
-        var changeEl = document.getElementById('stock-' + ticker.toLowerCase() + '-change');
-        changeEl.textContent = (isUp ? '+' : '') + change + '%';
-        changeEl.className = 'stock-change ' + (isUp ? 'up' : 'down');
-      })
-      .catch(function() {
-        document.getElementById('stock-' + ticker.toLowerCase() + '-price').textContent = '--';
-        document.getElementById('stock-' + ticker.toLowerCase() + '-change').textContent = '--';
-      });
+      .then(function(q) {
+        if (q && q.close) {
+          var price = parseFloat(q.close).toFixed(2);
+          var change = parseFloat(q.percent_change).toFixed(2);
+          var isUp = parseFloat(change) >= 0;
+          document.getElementById('stock-' + ticker.toLowerCase() + '-price').textContent = '$' + price;
+          var changeEl = document.getElementById('stock-' + ticker.toLowerCase() + '-change');
+          changeEl.textContent = (isUp ? '+' : '') + change + '%';
+          changeEl.className = 'stock-change ' + (isUp ? 'up' : 'down');
+        }
+      }).catch(function() {});
   });
 }
 

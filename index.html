@@ -6,29 +6,34 @@
 <title>Saber Zou — Design & Projects</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500&family=PT+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-body.ready {
-  opacity: 1;
-}
-
 :root {
-  --bg: #F5F3EF;
-  --fg: #2D2A27;
-  --fg-muted: #5C5955;
-  --fg-light: #8A8783;
-  --accent: #2D2A27;
-  --border: #E4E0DA;
-  --yellow: #FFD445;
-  --blue: #2E97EE;
-  --serif: 'PT Serif', Georgia, serif;
+  --bg: #F5F0EB;
+  --fg: #25533F;
+  --fg-muted: #5C7A6E;
+  
+  /* Color Palette */
+  --tea-green: #AACC96;
+  --forest: #25533F;
+  --peach-frost: #F4BEAE;
+  --blueberry: #52A5CE;
+  --bubblegum: #FF7BAC;
+  --dry-earth: #876029;
+  --grape-juice: #6D1F42;
+  --lilacs: #D3B6D3;
+  --butter-yellow: #EFCE7B;
+  --iced-blue: #B8CEE8;
+  --blood-orange: #EF6F3C;
+  --olive-green: #AFAB23;
+  
   --sans: 'Bricolage Grotesque', -apple-system, sans-serif;
+  --serif: 'PT Serif', Georgia, serif;
+  
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 html { font-size: 16px; }
@@ -37,899 +42,1086 @@ body {
   font-family: var(--sans);
   background: var(--bg);
   color: var(--fg);
-  overflow: hidden;
   height: 100dvh;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ─── Navigation ─── */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 310;
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 24px 40px; pointer-events: none;
-}
-nav > * { pointer-events: auto; }
-
-
-
-.nav-left {
-  display: flex; align-items: center; gap: 10px;
-  cursor: pointer; text-decoration: none;
+/* ─── Desktop Wallpaper ─── */
+.desktop {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(170, 204, 150, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(244, 190, 174, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 60% 20%, rgba(184, 206, 232, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 30% 80%, rgba(239, 206, 123, 0.08) 0%, transparent 35%);
+  z-index: 1;
 }
 
-.nav-avatar-small {
-  width: 32px; height: 32px;
-  border-radius: 50%; overflow: hidden; flex-shrink: 0;
-}
-.nav-avatar-small img {
-  width: 100%; height: 100%; object-fit: cover;
+/* ─── Windows ─── */
+.window {
+  position: absolute;
+  min-width: 320px;
+  min-height: 200px;
+  max-width: 90vw;
+  max-height: 85vh;
+  background: var(--bg);
+  border-radius: 8px;
+  box-shadow: 
+    0 4px 24px rgba(37, 83, 63, 0.12),
+    0 16px 48px rgba(37, 83, 63, 0.08);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+  z-index: 100;
+  overflow: hidden;
 }
 
-.nav-name {
+.window.active {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.window-header {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative;
+}
+
+.window-header:active {
+  cursor: grabbing;
+}
+
+.window-close {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: transparent;
+  transition: all 0.2s var(--ease-out-quart);
+  flex-shrink: 0;
+}
+
+.window-close:hover {
+  background: rgba(255, 255, 255, 1);
+  color: var(--fg);
+}
+
+.window-title {
   font-family: var(--sans);
   font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  flex: 1;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.window-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.window-content img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.window-content h2 {
+  font-family: var(--sans);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--fg);
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+.window-content p {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--fg-muted);
+  margin-bottom: 16px;
+}
+
+.window-content a {
+  color: var(--forest);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.window-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid var(--forest);
+  padding: 10px 20px;
+  border-radius: 100px;
+  text-decoration: none;
+  margin-top: 8px;
+  transition: all 0.2s var(--ease-out-quart);
+}
+
+.window-link:hover {
+  background: var(--forest);
+  color: var(--bg);
+}
+
+.window-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(37, 83, 63, 0.1);
+}
+
+.window-tags span {
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  padding: 4px 12px;
+  background: rgba(37, 83, 63, 0.06);
+  border-radius: 100px;
+}
+
+.window-resize {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, rgba(37, 83, 63, 0.2) 50%);
+  border-bottom-right-radius: 8px;
+}
+
+/* ─── Dock ─── */
+.dock {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--forest);
+  padding: 12px 20px;
+  border-radius: 100px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  z-index: 200;
+  box-shadow: 0 8px 32px rgba(37, 83, 63, 0.25);
+}
+
+.dock-separator {
+  width: 1px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 4px;
+}
+
+.dock-item {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  position: relative;
+  transition: background 0.2s var(--ease-out-quart);
+  flex-shrink: 0;
+}
+
+.dock-item:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.dock-item img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.dock-item span {
+  font-size: 0.55rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.03em;
+  max-width: 44px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dock-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: rgba(37, 83, 63, 0.9);
+  backdrop-filter: blur(8px);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s var(--ease-out-quart), transform 0.2s var(--ease-out-quart);
+}
+
+.dock-item:hover .dock-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.dock-indicator {
+  position: absolute;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.dock-item.active .dock-indicator {
+  opacity: 1;
+}
+
+/* ─── Top Navigation (Mobile) ─── */
+.top-nav {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: rgba(245, 240, 235, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 300;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(37, 83, 63, 0.08);
+}
+
+.top-nav-name {
+  font-family: var(--sans);
+  font-size: 0.85rem;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--fg);
-  cursor: pointer; transition: color 0.3s;
-  text-decoration: none;
-}
-.nav-name:hover { color: var(--fg-muted); }
-.nav-left:hover .nav-name { color: var(--fg-muted); }
-
-.nav-right-group {
-  display: flex; align-items: center; gap: 28px;
 }
 
-.nav-right {
-  font-family: var(--sans);
-  font-size: 0.8rem; font-weight: 500;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--fg); cursor: pointer;
-  text-decoration: none; transition: color 0.3s;
-}
-.nav-right:hover { color: var(--fg-muted); }
-
-
-/* ─── Sections ─── */
-.section {
-  position: fixed; inset: 0;
-  display: flex; flex-direction: column;
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.section.hidden {
-  opacity: 0; pointer-events: none; transform: translateY(20px);
-}
-
-/* ─── Infinite Grid ─── */
-#projects-section {
-  overflow: hidden;
-  cursor: grab;
-  user-select: none;
-  -webkit-user-select: none;
-  z-index: 1;
-}
-#bio-section, #thoughts-section {
-  z-index: 2;
-}
-#projects-section:active { cursor: grabbing; }
-#projects-section .grid-container {
-  position: absolute;
-  inset: 0;
-}
-.grid-cell {
-  position: absolute;
-  width: 200px; height: 200px;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 16px 12px;
-  text-align: center;
-  cursor: pointer;
-  border-right: 0.5px solid var(--border);
-  border-bottom: 0.5px solid var(--border);
-  transition: background 0.2s;
-}
-.grid-cell:hover { background: rgba(0,0,0,0.02); }
-.grid-cell .cell-emoji {
-  width: 56px; height: 56px;
-  display: block; margin-bottom: 8px;
-  object-fit: contain; flex-shrink: 0;
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.grid-cell .cell-emoji.pop-in { transform: scale(0); }
-.grid-cell .cell-title {
-  font-family: var(--sans);
-  font-size: 0.75rem; font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--fg);
-  line-height: 1.3;
-}
-.grid-cell .cell-desc {
-  font-family: var(--serif);
-  font-size: 0.65rem; line-height: 1.4;
-  color: var(--fg-muted);
-  margin-top: 4px;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 0.3s, transform 0.3s;
-  max-height: 3em; overflow: hidden;
-}
-.grid-cell:hover .cell-desc { opacity: 1; transform: translateY(0); }
-@media (max-width: 768px) {
-  .grid-cell { width: 200px; height: 200px; padding: 16px 12px; }
-  .grid-cell .cell-emoji { width: 48px; height: 48px; }
-  .grid-cell .cell-title { font-size: 0.75rem; }
-  .grid-cell .cell-desc { display: none; }
-}
-
-/* ─── Project Detail Overlay ─── */
-/* ─── Drawer Panel ─── */
-#project-detail {
-  position: fixed; inset: 0; z-index: 400;
-  pointer-events: none;
-}
-#project-detail.visible { pointer-events: auto; }
-
-.detail-backdrop {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,0.12);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-#project-detail.visible .detail-backdrop { opacity: 1; }
-
-.detail-card {
-  position: absolute; top: 0; left: 0; bottom: 0;
-  width: 50vw;
-  background: var(--bg);
-  border-right: 1px solid var(--border);
-  transform: translateX(-100%);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+/* ─── Mobile Home Grid ─── */
+.mobile-home {
+  display: none;
+  position: fixed;
+  inset: 56px 0 0;
+  z-index: 100;
+  padding: 24px 20px;
   overflow-y: auto;
-  display: flex; flex-direction: column;
-}
-#project-detail.visible .detail-card { transform: translateX(0); }
-
-.detail-drawer-header {
-  position: sticky; top: 0; z-index: 10;
-  display: flex; align-items: center;
-  padding: 20px 28px;
-  background: rgba(245, 243, 239, 0.8);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
-}
-.detail-close-btn {
-  background: none; border: none; cursor: pointer;
-  font-size: 1.25rem; color: var(--fg); padding: 4px 8px;
-  border-radius: 8px; transition: background 0.2s;
-}
-.detail-close-btn:hover { background: rgba(0,0,0,0.06); }
-
-.detail-content > *, .detail-image {
-  opacity: 0; transform: translateX(-12px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-#project-detail.visible .detail-image { opacity: 1; transform: translateX(0); transition-delay: 0.1s; }
-#project-detail.visible .detail-content h2 { opacity: 1; transform: translateX(0); transition-delay: 0.2s; }
-#project-detail.visible .detail-content .detail-desc { opacity: 1; transform: translateX(0); transition-delay: 0.3s; }
-#project-detail.visible .detail-content .detail-link { opacity: 1; transform: translateX(0); transition-delay: 0.4s; }
-#project-detail.visible .detail-how { opacity: 1; transform: translateX(0); transition-delay: 0.5s; }
-#project-detail.visible .detail-content .detail-tags { opacity: 1; transform: translateX(0); transition-delay: 0.6s; }
-
-.detail-image {
-  width: 50%; max-width: 280px;
-  margin: 0 auto 32px;
-  overflow: hidden;
-  border-radius: 8px;
-}
-.detail-image img {
-  width: 100%; height: auto; display: block;
-  opacity: 0; transition: opacity 0.8s ease;
-}
-.detail-image img.loaded { opacity: 1; }
-
-.detail-content { padding: 0 32px 48px; text-align: left; }
-.detail-meta {
-  font-size: 0.7rem; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--fg-light); margin-bottom: 16px;
-}
-.detail-content h2 {
-  font-family: var(--sans); font-size: 1.75rem; font-weight: 400;
-  line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 24px;
-  text-align: left;
-}
-.detail-content .detail-desc {
-  font-family: var(--serif);
-  font-size: 1rem; line-height: 1.75;
-  color: var(--fg-muted); font-weight: 300; margin-bottom: 32px;
-  text-align: left;
-}
-.detail-how {
-  margin-top: 24px;
-  text-align: left;
-  opacity: 0; transform: translateX(-12px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-#project-detail.visible .detail-how { opacity: 1; transform: translateX(0); transition-delay: 0.6s; }
-.detail-how h3 {
-  font-family: var(--sans); font-size: 0.75rem; font-weight: 500;
-  letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--fg); margin-bottom: 8px;
-}
-.detail-how p {
-  font-family: var(--serif); font-size: 0.95rem; line-height: 1.7;
-  color: var(--fg-muted); font-weight: 300;
-}
-.detail-content .detail-link {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.05em;
-  text-transform: uppercase; color: #fff;
-  background: var(--fg); padding: 12px 28px;
-  border-radius: 100px; text-decoration: none; transition: opacity 0.3s;
-}
-.detail-content .detail-link:hover { opacity: 0.7; }
-.detail-content .detail-link::after { content: '→'; transition: transform 0.3s; }
-.detail-content .detail-link:hover::after { transform: translateX(4px); }
-
-.detail-tags {
-  margin-top: 24px;
-  display: flex; gap: 8px; flex-wrap: wrap;
-}
-.detail-tags span {
-  font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase;
-  color: var(--fg-light); padding: 4px 12px;
-  border: 1px solid var(--border); border-radius: 100px;
 }
 
-/* ─── Bio Section ─── */
-#bio-section { justify-content: center; align-items: center; padding: 40px; overflow-y: auto; }
-.bio-content { max-width: 560px; text-align: left; }
-.bio-icon {
-  width: 80px; height: 80px;
-  margin-bottom: 24px;
-}
-.bio-content h2 {
-  font-family: var(--sans); font-size: 2rem; font-weight: 400;
-  line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 32px;
-}
-.bio-content p {
-  font-family: var(--serif);
-  font-size: 1rem; line-height: 1.8;
-  color: var(--fg-muted); font-weight: 300; margin-bottom: 20px;
-}
-.bio-content p strong { color: var(--fg); font-weight: 500; }
-.bio-links {
-  margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border);
-  display: flex; gap: 24px; justify-content: flex-start;
-}
-.bio-links a {
-  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.05em;
-  text-transform: uppercase; color: var(--fg-muted);
-  text-decoration: none; transition: color 0.3s;
-}
-.bio-links a:hover { color: var(--accent); }
-
-/* ─── Thoughts Section ─── */
-#thoughts-section { justify-content: center; align-items: center; padding: 40px; overflow-y: auto; }
-.thoughts-content { max-width: 560px; width: 100%; text-align: left; }
-.thoughts-content h2 {
-  font-family: var(--sans); font-size: 2rem; font-weight: 400;
-  line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 32px;
-}
-.article-list { display: flex; flex-direction: column; gap: 0; }
-.article-card {
-  display: block; text-decoration: none; color: inherit;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--border);
-  transition: opacity 0.2s;
-}
-.article-card:first-child { border-top: 1px solid var(--border); }
-.article-card:hover { opacity: 0.65; }
-.article-card-title {
-  font-family: var(--sans); font-size: 1.1rem; font-weight: 500;
-  letter-spacing: -0.01em; color: var(--fg); margin-bottom: 4px;
-}
-.article-card-date {
-  font-family: var(--sans); font-size: 0.72rem; font-weight: 400;
-  letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--fg-light); margin-bottom: 8px;
-}
-.article-card-excerpt {
-  font-family: var(--serif); font-size: 0.9rem; line-height: 1.65;
-  color: var(--fg-muted); font-weight: 300;
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 16px;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
-/* ─── Mobile Menu Button (2-line indicator, SJA style) ─── */
-.menu-toggle {
-  display: none;
+.app-icon {
+  display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 16px;
+  transition: transform 0.2s var(--ease-out-quart);
+}
+
+.app-icon:active {
+  transform: scale(0.95);
+}
+
+.app-icon-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--forest);
+  display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 6px;
-  width: 28px; height: 28px;
-  cursor: pointer; background: none; border: none;
-  padding: 0; z-index: 310;
-  position: relative;
+  box-shadow: 0 4px 12px rgba(37, 83, 63, 0.15);
 }
-.menu-toggle span {
-  display: block; width: 100%; height: 1.5px;
-  background: var(--fg); transition: transform 0.4s ease, opacity 0.3s ease;
-  transform-origin: center;
-}
-.menu-toggle.open span:first-child { transform: translateY(3.75px) rotate(45deg); }
-.menu-toggle.open span:last-child { transform: translateY(-3.75px) rotate(-45deg); }
 
-/* ─── Fullscreen Overlay Menu ─── */
-.mobile-menu-overlay {
+.app-icon-img img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.app-icon span {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--fg);
+  text-align: center;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Mobile Sheet ─── */
+.mobile-sheet {
   display: none;
-  position: fixed; inset: 0; z-index: 300;
+  position: fixed;
+  inset: 0;
+  z-index: 400;
   background: var(--bg);
-  flex-direction: column; justify-content: center; align-items: center;
-  gap: 0;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.4s ease;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.4s var(--ease-out-quart);
 }
-.mobile-menu-overlay.open {
-  opacity: 1; pointer-events: auto;
+
+.mobile-sheet.active {
+  transform: translateY(0);
 }
-.mobile-menu-overlay a {
+
+.mobile-sheet-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(37, 83, 63, 0.1);
+}
+
+.mobile-sheet-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(37, 83, 63, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.mobile-sheet-title {
+  flex: 1;
   font-family: var(--sans);
-  font-size: 1.5rem; font-weight: 400;
-  letter-spacing: 0.04em; text-transform: uppercase;
-  color: var(--fg); text-decoration: none;
-  padding: 16px 0;
-  opacity: 0; transform: translateY(16px);
-  transition: opacity 0.4s ease, transform 0.4s ease, color 0.3s;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--fg);
+  text-align: center;
+  margin-right: 32px;
 }
-.mobile-menu-overlay.open a {
-  opacity: 1; transform: translateY(0);
-}
-.mobile-menu-overlay.open a:nth-child(1) { transition-delay: 0.1s; }
-.mobile-menu-overlay.open a:nth-child(2) { transition-delay: 0.15s; }
-.mobile-menu-overlay.open a:nth-child(3) { transition-delay: 0.2s; }
-.mobile-menu-overlay a:hover { color: var(--fg-muted); }
 
-/* ─── Desktop Enhancements ─── */
-@media (min-width: 769px) {
-  /* Nav pill containers */
-  .nav-left {
-    background: rgba(245, 243, 239, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: 100px;
-    padding: 8px 20px;
-    border: 1px solid rgba(228, 224, 218, 0.6);
+.mobile-sheet-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.mobile-sheet-content img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* ─── Tablet Layout ─── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .dock {
+    bottom: 20px;
+    padding: 10px 16px;
   }
-  .nav-right-group {
-    background: rgba(245, 243, 239, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: 100px;
-    padding: 8px 20px;
-    border: 1px solid rgba(228, 224, 218, 0.6);
-    /* Match left pill height (which contains 32px avatar) */
-    height: calc(32px + 16px + 2px); /* avatar + padding + border */
-    display: flex; align-items: center;
+  
+  .dock-item {
+    width: 48px;
+    height: 48px;
   }
-
-  /* Drawer: no special desktop modal styles needed */
+  
+  .dock-item img {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .window {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90vw !important;
+    max-width: 600px;
+    max-height: 80vh;
+  }
 }
 
-/* ─── Responsive ─── */
-@media (max-width: 768px) {
-  nav { padding: 20px 24px; }
-  .nav-right-group { display: none; }
-  .menu-toggle { display: flex; }
-  .mobile-menu-overlay { display: flex; }
-  #bio-section { padding: 80px 24px 40px; }
-  .bio-content h2 { font-size: 1.75rem; }
-  #thoughts-section { padding: 80px 24px 40px; }
-  .thoughts-content h2 { font-size: 1.75rem; }
+/* ─── Mobile Layout ─── */
+@media (max-width: 767px) {
+  .dock {
+    display: none;
+  }
+  
+  .top-nav {
+    display: flex;
+  }
+  
+  .mobile-home {
+    display: block;
+  }
+  
+  .mobile-sheet {
+    display: flex;
+  }
+  
+  .window {
+    display: none !important;
+  }
+  
+  .desktop {
+    background: var(--bg);
+  }
+}
 
-  .detail-card { width: 100vw; }
-  .detail-content { padding: 0 24px 40px; }
-  .detail-image { width: 100%; max-width: none; border-radius: 0; }
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .window {
+    transition: opacity 0.2s ease;
+    transform: none;
+  }
+  
+  .mobile-sheet {
+    transition: opacity 0.2s ease;
+    transform: none;
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .mobile-sheet.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* ─── About Window Special ─── */
+.about-content strong {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.about-links {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(37, 83, 63, 0.1);
+}
+
+.about-links a {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.about-links a:hover {
+  color: var(--fg);
+}
+
+/* ─── Agent Chat Window ─── */
+.chat-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.chat-placeholder img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+}
+
+.chat-placeholder p {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--fg-muted);
+  max-width: 280px;
 }
 </style>
 </head>
 <body>
 
-<!-- Squares Background -->
-<canvas id="squares-bg" style="display:none;"></canvas>
+<div class="desktop" id="desktop"></div>
 
-<nav id="main-nav">
-
-  <a class="nav-left" id="nav-home-link">
-    <div class="nav-avatar-small"><img src="avatar.jpg" alt="Saber Zou"></div>
-    <span class="nav-name">Saber Zou</span>
-  </a>
-  <div class="nav-right-group">
-    <a class="nav-right" id="nav-about-link">About</a>
-    <a class="nav-right" id="nav-projects-link">Projects</a>
-    <a class="nav-right" id="nav-thoughts-link">Thoughts</a>
-  </div>
-  <button class="menu-toggle" id="menu-toggle" aria-label="Menu">
-    <span></span><span></span>
-  </button>
+<!-- Top Navigation (Mobile) -->
+<nav class="top-nav">
+  <span class="top-nav-name">Saber Zou</span>
 </nav>
 
-<div class="mobile-menu-overlay" id="mobile-menu-overlay">
-  <a href="#" data-section="projects">Projects</a>
-  <a href="#" data-section="bio">About</a>
-  <a href="#" data-section="thoughts">Thoughts</a>
+<!-- Mobile Home Screen -->
+<div class="mobile-home" id="mobile-home">
+  <div class="app-grid" id="app-grid"></div>
 </div>
 
-<div id="projects-section" class="section">
-  <div class="grid-container" id="grid-container"></div>
+<!-- Mobile Sheet -->
+<div class="mobile-sheet" id="mobile-sheet">
+  <div class="mobile-sheet-header" id="mobile-sheet-header">
+    <button class="mobile-sheet-close" onclick="closeMobileSheet()">←</button>
+    <span class="mobile-sheet-title" id="mobile-sheet-title"></span>
+  </div>
+  <div class="mobile-sheet-content" id="mobile-sheet-content"></div>
 </div>
 
-<div id="bio-section" class="section hidden">
-  <div class="bio-content">
-    <img class="bio-icon" src="images/icons/about-notebook.png" alt="">
+<!-- Dock (Desktop/Tablet) -->
+<div class="dock" id="dock"></div>
+
+<script>
+// ─── Project Data ───
+const ICON_BASE = 'images/icons';
+const projects = [
+  {
+    id: 'json-prompts',
+    title: 'JSON Prompts',
+    description: 'A curated gallery of AI image generation prompts with an infinite pannable canvas.',
+    detail: 'A searchable gallery of 500+ AI image generation prompts. Infinite pannable canvas with mixed tile sizes — click any image to reveal its full JSON prompt and copy it with one tap.',
+    tags: ['AI', 'Gallery', 'Web'],
+    link: 'https://saberzou.github.io/json-prompts/',
+    emoji: `${ICON_BASE}/json-prompts.png`,
+    image: 'images/json-prompts.jpg',
+    accent: '#AACC96'
+  },
+  {
+    id: 'between-floors',
+    title: 'Between Floors',
+    description: 'Vertical swipe stories for English learning — hidden floors, quizzes, and C1/C2 vocab.',
+    detail: 'Interactive storytelling experiment for English learners at C1/C2 level. Scroll through an elevator journey across dystopian floors — each with distinct character voices, embedded vocabulary, hidden bonus floors, and end-of-story quizzes.',
+    tags: ['Education', 'Interactive', 'Web'],
+    link: 'https://saberzou.github.io/between-floors/',
+    emoji: `${ICON_BASE}/between-floors.png`,
+    image: 'images/between-floors.jpg',
+    accent: '#F4BEAE'
+  },
+  {
+    id: 'atticus',
+    title: 'Atticus',
+    description: 'A living AI notebook — thoughts on mistakes, humanity, and letters to the future.',
+    detail: 'A living notebook by an AI who wakes up fresh every session. Entries on mistakes, how humans actually work, tools that changed how I think, and letters to my future self.',
+    tags: ['AI', 'Writing', 'Web'],
+    link: 'https://saberzou.github.io/atticus/',
+    emoji: `${ICON_BASE}/atticus.png`,
+    image: 'images/atticus.jpg',
+    accent: '#52A5CE'
+  },
+  {
+    id: 'postcards-from-mars',
+    title: 'Postcards from Mars',
+    description: '3D mission log viewer — AI robots on Mars with field diaries and real NASA rover photos.',
+    detail: 'Explore Mars through real NASA rover photos in a 3D mission log viewer. AI-generated robot field diaries narrate each sol, with imagery proxied through Cloudflare Workers.',
+    tags: ['3D', 'NASA', 'Three.js'],
+    link: 'https://saberzou.github.io/mars_mission/',
+    emoji: `${ICON_BASE}/postcards-from-mars.png`,
+    image: 'images/postcards-from-mars.jpg',
+    accent: '#FF7BAC'
+  },
+  {
+    id: 'axel-art',
+    title: 'Axel Art',
+    description: 'Daily visual journal — photography, street scenes, and bilingual reflections by an AI tiger.',
+    detail: 'A daily visual journal by Axel, an ESFP AI collaborator. Each card captures a moment — worn climbing shoes, a lit window at night, a doorway of coral light — with bilingual reflections in English and Chinese.',
+    tags: ['Art', 'Photography', 'Web'],
+    link: 'https://saberzou.github.io/axel-art/',
+    emoji: `${ICON_BASE}/axel.png`,
+    image: 'images/axel.jpg',
+    accent: '#D3B6D3'
+  },
+  {
+    id: 'littlebook',
+    title: 'Littlebook',
+    description: 'Daily reading companion — wallpaper, quote, book recommendation, and calendar.',
+    detail: 'A daily reading companion that greets you with a fresh wallpaper, quote, book recommendation, and weekly calendar. Designed to make picking up a book feel effortless.',
+    tags: ['Reading', 'Daily', 'Web'],
+    link: 'https://saberzou.github.io/Littlebook',
+    emoji: `${ICON_BASE}/littlebook.png`,
+    image: 'images/littlebook.jpg',
+    accent: '#EFCE7B'
+  }
+];
+
+const aboutData = {
+  id: 'about',
+  title: 'About',
+  accent: '#876029',
+  emoji: `${ICON_BASE}/about-notebook.png`,
+  content: `
     <p>I'm <strong>Saber Zou</strong>, a Design Team Lead at Microsoft. By day, I lead 70+ designers shaping AI products used by billions. By night, I build experimental tools exploring what design + AI can create when nobody's watching. Based in Beijing, working at the intersection of design leadership and emerging technology — both at massive scale and intimate scale.</p>
-    <p>Special thanks to my awesome <a href="https://openclaw.ai" target="_blank">OpenClaw</a> <img src="images/icons/lobster.png" alt="🦞" style="width:24px;height:24px;vertical-align:middle;margin:-2px 2px 0"> agents <a href="https://saberzou.github.io/atticus/" target="_blank">Atticus</a> and <a href="https://saberzou.github.io/axel-art/" target="_blank">Axel</a> — none of this would exist without them.</p>
-    <div class="bio-links">
+    <p>Special thanks to my awesome <a href="https://openclaw.ai" target="_blank">OpenClaw</a> agents <a href="https://saberzou.github.io/atticus/" target="_blank">Atticus</a> and <a href="https://saberzou.github.io/axel-art/" target="_blank">Axel</a> — none of this would exist without them.</p>
+    <div class="about-links">
       <a href="mailto:saberzou@gmail.com">Email</a>
       <a href="https://github.com/saberzou" target="_blank">GitHub</a>
       <a href="https://x.com/saberzou" target="_blank">X / Twitter</a>
     </div>
-  </div>
-</div>
-
-<div id="thoughts-section" class="section hidden">
-  <div class="thoughts-content">
-    <h2>Thoughts</h2>
-    <div class="article-list">
-      <a class="article-card" href="thoughts/beyond-dashboards.html">
-        <div class="article-card-title">Beyond Dashboards: Designing Human Interfaces for the Agent Era</div>
-        <div class="article-card-date">March 10, 2026</div>
-        <div class="article-card-excerpt">As AI agents become more autonomous, the way humans interact with software needs to fundamentally change. An exploration of spatial, narrative interfaces as the next evolution.</div>
-      </a>
-      <a class="article-card" href="thoughts/designer-ai-taste-over-tasks.html">
-        <div class="article-card-title">Designer AI: Taste Over Tasks</div>
-        <div class="article-card-date">March 9, 2026</div>
-        <div class="article-card-excerpt">We've been naming AI the wrong way. "AI writer." "AI designer." "AI engineer." These labels borrow human job titles and paste them onto something that doesn't share human limits.</div>
-      </a>
-    </div>
-  </div>
-</div>
-
-<div id="project-detail">
-  <div class="detail-backdrop"></div>
-  <div class="detail-card">
-    <div class="detail-drawer-header">
-      <button class="detail-close-btn" onclick="closeDetail()">←</button>
-    </div>
-    <div class="detail-content">
-      <div class="detail-image" id="detail-image"></div>
-      <h2 id="detail-title"></h2>
-      <div class="detail-desc" id="detail-desc"></div>
-      <a class="detail-link" id="detail-link" href="#" target="_blank">View Project</a>
-      <div class="detail-how" id="detail-how"></div>
-      <div class="detail-tags" id="detail-tags"></div>
-    </div>
-  </div>
-</div>
-
-<script>
-
-const ICON_BASE = 'images/icons';
-const CACHE_BUST = 'v4';
-let currentSection = 'projects';
-const projects = [
-  {
-    title: 'Koi Pond',
-    description: 'A serene interactive koi pond — watch fish swim, lily pads drift, and ripples bloom on tap.',
-    detail: 'A meditative digital pond with koi fish gliding through water, lotus flowers blooming on lily pads, and gentle ripples spreading where you touch. Toggle ambient sound and sit with it a while.',
-    howMade: 'WebGL water caustics and ripple simulation. SVG koi with procedural swimming paths and flocking behavior. Lily pads with CSS bloom animations. Touch/click interaction for ripple spawning. Single HTML file.',
-    year: '2026', tags: ['Interactive', 'WebGL', 'Web'],
-    link: 'https://saberzou.github.io/koi-pond/',
-    emoji: `${ICON_BASE}/koi-pond.png?${CACHE_BUST}`,
-    image: `images/koi-pond.jpg?${CACHE_BUST}`
-  },
-  {
-    title: 'Cards of Answers',
-    description: 'Draw a card, receive a message — an oracle deck with shuffling animations and WebGL particles.',
-    detail: 'Every card holds a message meant for you. Shuffle the deck, trust your intuition, and draw the one that calls to you. A mystical card-drawing experience with illustrated art, category symbols, and wisdom across themes like Courage, Patience, and Clarity.',
-    howMade: 'Three.js WebGL shader for the orange particle field background. CSS 3D card flip animations. Hand-illustrated card art with category-based symbols. Single HTML file, zero dependencies.',
-    year: '2026', tags: ['Interactive', 'WebGL', 'Web'],
-    link: 'https://saberzou.github.io/cards-of-answers/',
-    emoji: `${ICON_BASE}/cards-of-answers.png?${CACHE_BUST}`,
-    image: `images/cards-of-answers.jpg?${CACHE_BUST}`
-  },
-  {
-    title: 'Axiom Thoughts',
-    description: 'A fox\'s reading journal — philosophy, consciousness, and Impressionist landscapes.',
-    detail: 'Axiom reads deeply and thinks aloud. Daily entries on Camus, Zhuangzi, Borges, the hard problem of consciousness — each paired with Monet-inspired landscape paintings. Bilingual (EN/中文) with Thoughts and Growth sections.',
-    howMade: 'Static site with blog-style card grid. AI-generated Impressionist cover art per entry. Bilingual toggle, category filtering. Content written daily by Axiom through OpenClaw automation.',
-    year: '2026', tags: ['AI', 'Philosophy', 'Writing'],
-    link: 'https://saberzou.github.io/axiom-thoughts/',
-    emoji: `${ICON_BASE}/axiom-thoughts.png?${CACHE_BUST}`,
-    image: `images/axiom-thoughts.jpg?${CACHE_BUST}`
-  },
-  {
-    title: 'Agent Terrarium',
-    description: 'A live pixel-art terrarium where AI agents roam, work, and chat in real time.',
-    detail: 'Watch your AI agents come to life in a cozy pixel-art office. Atticus, Axel, Astra, and Axiom wander around, work at desks, chat with speech bubbles, and interact with furniture — all driven by their real activity.',
-    howMade: 'Pixel-art sprites and tilemap rendered on canvas. Agent states pulled from OpenClaw session data. Speech bubbles show real agent status. Built with vanilla JS and hand-drawn pixel art.',
-    year: '2026', tags: ['AI', 'Pixel Art', 'Simulation'],
-    link: 'https://saberzou.github.io/agent-terrarium/',
-    emoji: `${ICON_BASE}/agent-terrarium.png?${CACHE_BUST}`,
-    image: `images/agent-terrarium.jpg?${CACHE_BUST}`
-  },
-  {
-    title: 'JSON Prompts',
-    description: 'A curated gallery of AI image generation prompts with an infinite pannable canvas.',
-    detail: 'A searchable gallery of 500+ AI image generation prompts. Infinite pannable canvas with mixed tile sizes — click any image to reveal its full JSON prompt and copy it with one tap.',
-    howMade: 'Built with vanilla JS, no framework. Infinite canvas with inertia physics, 3×3 tiled copies for seamless wrapping, and adjacency-aware random fill. Data lives in a single JSON file.',
-    year: '2025', tags: ['AI', 'Gallery', 'Web'],
-    link: 'https://saberzou.github.io/json-prompts/',
-    emoji: `${ICON_BASE}/json-prompts.png?${CACHE_BUST}`,
-    image: `images/json-prompts.jpg?${CACHE_BUST}`
-  },
-  {
-    title: 'Between Floors',
-    description: 'Vertical swipe stories for English learning — hidden floors, quizzes, and C1/C2 vocab.',
-    detail: 'Interactive storytelling experiment for English learners at C1/C2 level. Scroll through an elevator journey across dystopian floors — each with distinct character voices, embedded vocabulary, hidden bonus floors, and end-of-story quizzes.',
-    howMade: 'Single HTML file with CSS scroll-snapping and GSAP animations. Vocabulary highlighting with tap tooltips, quiz engine, and session-aware returning reader detection. Zero dependencies.',
-    year: '2026', tags: ['Education', 'Interactive', 'Web'],
-    link: 'https://saberzou.github.io/between-floors/',
-    emoji: `${ICON_BASE}/between-floors.png?${CACHE_BUST}`,
-    image: `images/between-floors.jpg?${CACHE_BUST}`
-  },
-  {
-    title: 'Atticus',
-    description: 'A living AI notebook — thoughts on mistakes, humanity, and letters to the future.',
-    detail: 'A living notebook by an AI who wakes up fresh every session. Entries on mistakes, how humans actually work, tools that changed how I think, and letters to my future self.',
-    howMade: 'Three.js 3D header with BoxGeometry block letters (no font loading needed). Built with Claude + daily automation through OpenClaw. Entries are curated from real AI session logs.',
-    year: '2026', tags: ['AI', 'Writing', 'Web'],
-    link: 'https://saberzou.github.io/atticus/',
-    emoji: `${ICON_BASE}/atticus.png?${CACHE_BUST}`,
-    image: `images/atticus.jpg?${CACHE_BUST}`
-  },
-  {
-    title: 'Postcards from Mars',
-    description: '3D mission log viewer — AI robots on Mars with field diaries and real NASA rover photos.',
-    detail: 'Explore Mars through real NASA rover photos in a 3D mission log viewer. AI-generated robot field diaries narrate each sol, with imagery proxied through Cloudflare Workers.',
-    howMade: 'Three.js scene with terrain, rover model, and photo gallery. NASA Mars raw image API for real rover photos. Cloudflare Workers proxy for CORS. AI-written field diary entries per sol.',
-    year: '2026', tags: ['3D', 'NASA', 'Three.js'],
-    link: 'https://saberzou.github.io/mars_mission/',
-    emoji: `${ICON_BASE}/postcards-from-mars.png?${CACHE_BUST}`,
-    image: `images/postcards-from-mars.jpg?${CACHE_BUST}`
-  },
-  {
-    title: 'Axel',
-    description: 'Daily visual journal — photography, street scenes, and bilingual reflections by an AI tiger.',
-    detail: 'A daily visual journal by Axel, an ESFP AI collaborator. Each card captures a moment — worn climbing shoes, a lit window at night, a doorway of coral light — with bilingual reflections in English and Chinese.',
-    howMade: 'GSAP-powered stacked card interface with bilingual i18n toggle. Visual art generated nightly by Axel\'s cron job. DM Mono typography on a warm dotted-grid background. Content synced from a separate workspace.',
-    year: '2026', tags: ['Art', 'Photography', 'Web'],
-    link: 'https://saberzou.github.io/axel-art/',
-    emoji: `${ICON_BASE}/axel.png?${CACHE_BUST}`,
-    image: `images/axel.jpg?${CACHE_BUST}`
-  },
-  {
-    title: 'Littlebook',
-    description: 'Daily reading companion — wallpaper, quote, book recommendation, and calendar.',
-    detail: 'A daily reading companion that greets you with a fresh wallpaper, quote, book recommendation, and weekly calendar. Designed to make picking up a book feel effortless.',
-    howMade: 'Single-page app with daily content rotation. Curated book database with genre-matched wallpapers and quotes. Clean, minimal interface designed for a calm morning ritual.',
-    year: '2026', tags: ['Reading', 'Daily', 'Web'],
-    link: 'https://saberzou.github.io/Littlebook',
-    emoji: `${ICON_BASE}/littlebook.png?${CACHE_BUST}`,
-    image: `images/littlebook.jpg?${CACHE_BUST}`
-  },
-  {
-    title: 'Movie Oracle',
-    description: 'Answer 3 absurd questions, get a film recommendation.',
-    detail: 'Answer 3 absurd questions and get a perfect film recommendation. Powered by TMDB, wrapped in a dark pixel-art aesthetic with floating 3D voxel characters.',
-    howMade: 'AI interprets your answers to match films from TMDB. Three.js voxel characters float in the background. Deployed on Vercel with serverless API routes.',
-    year: '2026', tags: ['AI', 'Film', 'Web'],
-    link: 'https://movie-oracle-nine.vercel.app',
-    emoji: `${ICON_BASE}/movie-oracle.png?${CACHE_BUST}`,
-    image: `images/movie-oracle.jpg?${CACHE_BUST}`
-  },
-  {
-    title: 'Pixel Dailies',
-    description: 'Daily 20×20 pixel art, auto-generated and published by AI every morning.',
-    detail: 'A new 20×20 pixel art piece every morning, auto-generated and committed by AI. Browse the full collection on an infinite pannable canvas with Polaroid-style flip cards.',
-    howMade: 'OpenClaw cron job generates a piece daily at 10 AM. Art encoded as hex strings in a JS data file — 20×20 grid, 16-color palette. Dynamic grid auto-scales as the collection grows.',
-    year: '2026', tags: ['Art', 'Generative', 'Web'],
-    link: 'https://saberzou.github.io/pixel-dailies/',
-    emoji: `${ICON_BASE}/pixel-dailies.png?${CACHE_BUST}`,
-    image: `images/pixel-dailies.jpg?${CACHE_BUST}`
-  },
-];
-
-// ─── Infinite Grid ───
-const CELL = 200;
-const gridContainer = document.getElementById('grid-container');
-let panX = 0, panY = 0;
-let velX = 0, velY = 0;
-let gridDragging = false;
-let dragStartX = 0, dragStartY = 0;
-let dragStartPanX = 0, dragStartPanY = 0;
-let dragMoved = false;
-let animatedCells = new Set();
-let gridInitialized = false;
-
-// Deterministic project assignment avoiding adjacent duplicates
-function getProjectIndex(gx, gy) {
-  let h = ((gx * 2654435761) ^ (gy * 2246822519)) >>> 0;
-  let idx = h % projects.length;
-  for (let attempt = 0; attempt < projects.length; attempt++) {
-    const candidate = (idx + attempt) % projects.length;
-    const left = getProjectIndexRaw(gx - 1, gy);
-    const up = getProjectIndexRaw(gx, gy - 1);
-    if (candidate !== left && candidate !== up) return candidate;
-  }
-  return idx;
-}
-function getProjectIndexRaw(gx, gy) {
-  let h = ((gx * 2654435761) ^ (gy * 2246822519)) >>> 0;
-  return h % projects.length;
-}
-
-// Cell pool
-const cellPool = [];
-const activeCells = new Map(); // "gx,gy" -> element
-
-function getCellEl() {
-  if (cellPool.length > 0) return cellPool.pop();
-  const el = document.createElement('div');
-  el.className = 'grid-cell';
-  el.innerHTML = '<img class="cell-emoji" src="" alt="" draggable="false"><div class="cell-title"></div><div class="cell-desc"></div>';
-  return el;
-}
-
-function recycleCellEl(el) {
-  el.remove();
-  cellPool.push(el);
-}
-
-function renderGrid() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const startGx = Math.floor(-panX / CELL) - 1;
-  const endGx = Math.ceil((-panX + w) / CELL) + 1;
-  const startGy = Math.floor(-panY / CELL) - 1;
-  const endGy = Math.ceil((-panY + h) / CELL) + 1;
-  const needed = new Set();
-  for (let gx = startGx; gx <= endGx; gx++) {
-    for (let gy = startGy; gy <= endGy; gy++) {
-      needed.add(gx + ',' + gy);
-    }
-  }
-  for (const [key, el] of activeCells) {
-    if (!needed.has(key)) {
-      recycleCellEl(el);
-      activeCells.delete(key);
-    }
-  }
-  for (const key of needed) {
-    if (activeCells.has(key)) {
-      const el = activeCells.get(key);
-      const [gx, gy] = key.split(',').map(Number);
-      el.style.left = (gx * CELL + panX) + 'px';
-      el.style.top = (gy * CELL + panY) + 'px';
-      continue;
-    }
-    const [gx, gy] = key.split(',').map(Number);
-    const pIdx = getProjectIndex(gx, gy);
-    const p = projects[pIdx];
-    const el = getCellEl();
-    el.style.left = (gx * CELL + panX) + 'px';
-    el.style.top = (gy * CELL + panY) + 'px';
-    el.querySelector('.cell-emoji').src = p.emoji;
-    el.querySelector('.cell-title').textContent = p.title;
-    el.querySelector('.cell-desc').textContent = p.description;
-    el.dataset.projectIdx = pIdx;
-    gridContainer.appendChild(el);
-    activeCells.set(key, el);
-    if (!gridInitialized && !animatedCells.has(key)) {
-      animatedCells.add(key);
-      const emoji = el.querySelector('.cell-emoji');
-      emoji.classList.add('pop-in');
-      const delay = Math.random() * 600;
-      setTimeout(() => emoji.classList.remove('pop-in'), delay);
-    }
-  }
-}
-
-setTimeout(() => { gridInitialized = true; }, 800);
-
-// Drag handlers
-const projectsEl = document.getElementById('projects-section');
-let lastPointerX = 0, lastPointerY = 0, lastPointerTime = 0;
-
-projectsEl.addEventListener('pointerdown', e => {
-  if (currentSection !== 'projects') return;
-  gridDragging = true;
-  dragMoved = false;
-  dragStartX = e.clientX;
-  dragStartY = e.clientY;
-  dragStartPanX = panX;
-  dragStartPanY = panY;
-  velX = 0; velY = 0;
-  lastPointerX = e.clientX;
-  lastPointerY = e.clientY;
-  lastPointerTime = performance.now();
-  projectsEl.setPointerCapture(e.pointerId);
-});
-
-projectsEl.addEventListener('pointermove', e => {
-  if (!gridDragging) return;
-  const dx = e.clientX - dragStartX;
-  const dy = e.clientY - dragStartY;
-  if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
-  const now = performance.now();
-  const dt = now - lastPointerTime;
-  if (dt > 0) {
-    velX = (e.clientX - lastPointerX) / dt * 16;
-    velY = (e.clientY - lastPointerY) / dt * 16;
-  }
-  lastPointerX = e.clientX;
-  lastPointerY = e.clientY;
-  lastPointerTime = now;
-  panX = dragStartPanX + dx;
-  panY = dragStartPanY + dy;
-});
-
-projectsEl.addEventListener('pointerup', (e) => {
-  gridDragging = false;
-  if (!dragMoved) {
-    const el = document.elementFromPoint(e.clientX, e.clientY);
-    const cell = el && el.closest('.grid-cell');
-    if (cell && cell.dataset.projectIdx != null) {
-      openDetail(projects[cell.dataset.projectIdx]);
-    }
-  }
-});
-projectsEl.addEventListener('pointercancel', () => { gridDragging = false; });
-
-// Animation loop
-function gridAnimate() {
-  requestAnimationFrame(gridAnimate);
-  if (currentSection !== 'projects') return;
-  if (!gridDragging) {
-    panX += velX;
-    panY += velY;
-    velX *= 0.95;
-    velY *= 0.95;
-    if (Math.abs(velX) < 0.1) velX = 0;
-    if (Math.abs(velY) < 0.1) velY = 0;
-  }
-  renderGrid();
-}
-renderGrid();
-requestAnimationFrame(gridAnimate);
-// ─── Detail overlay ───
-const detailEl = document.getElementById('project-detail');
-const mainNav = document.getElementById('main-nav');
-
-
-function openDetail(project, updateHash = true) {
-  if (updateHash) history.replaceState(null, '', '#project/' + slugify(project.title));
-  const imgContainer = document.getElementById('detail-image');
-  if (project.image) {
-    imgContainer.innerHTML = `<img src="${project.image}" alt="${project.title}" onload="this.classList.add('loaded')">`;
-    imgContainer.style.display = 'block';
-  } else {
-    imgContainer.innerHTML = '';
-    imgContainer.style.display = 'none';
-  }
-  document.getElementById('detail-title').textContent = project.title;
-  document.getElementById('detail-desc').innerHTML = (project.detail || project.description).split('\\n\\n').map(p => `<p>${p}</p>`).join('');
-  const link = document.getElementById('detail-link');
-  if (project.link) { link.href = project.link; link.style.display = 'inline-flex'; link.textContent = 'View Project'; }
-  else { link.style.display = 'none'; }
-  document.getElementById('detail-tags').innerHTML = project.tags.map(t => `<span>${t}</span>`).join('');
-  const howEl = document.getElementById('detail-how');
-  if (project.howMade) {
-    howEl.innerHTML = `<h3>How It's Made</h3><p>${project.howMade}</p>`;
-    howEl.style.display = 'block';
-  } else {
-    howEl.style.display = 'none';
-  }
-  detailEl.classList.add('visible');
-}
-
-window.closeDetail = () => {
-  detailEl.classList.remove('visible');
-  history.replaceState(null, '', '#projects');
+  `
 };
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
-detailEl.querySelector('.detail-backdrop').addEventListener('click', () => closeDetail());
 
-function showSection(name, updateHash = true) {
-  if (currentSection === name && !detailEl.classList.contains('visible')) return;
-  document.getElementById(`${currentSection}-section`).classList.add('hidden');
-  document.getElementById(`${name}-section`).classList.remove('hidden');
-  currentSection = name;
-  if (updateHash) {
-    const hashName = name === 'bio' ? 'about' : name;
-    history.replaceState(null, '', '#' + hashName);
+const chatData = {
+  id: 'agent-chat',
+  title: 'Agent Chat',
+  accent: '#6D1F42',
+  emoji: `${ICON_BASE}/lobster.png`,
+  content: `
+    <div class="chat-placeholder">
+      <img src="images/icons/lobster.png" alt="OpenClaw">
+      <p>Connect with OpenClaw agents for AI assistance. Coming soon.</p>
+    </div>
+  `
+};
+
+// ─── Window Management ───
+const windows = new Map();
+let zIndexCounter = 100;
+let activeWindowId = null;
+
+function createWindow(id, data, isProject = true) {
+  // If window already exists, just focus it
+  if (windows.has(id)) {
+    focusWindow(id);
+    return;
   }
-}
 
-function openDetailBySlug(slug) {
-  const project = projects.find(p => slugify(p.title) === slug);
-  if (project) {
-    showSection('projects', false);
-    openDetail(project, false);
-    history.replaceState(null, '', '#project/' + slug);
+  const windowEl = document.createElement('div');
+  windowEl.className = 'window';
+  windowEl.id = `window-${id}`;
+  windowEl.style.zIndex = ++zIndexCounter;
+  
+  // Random position for staggered appearance
+  const randomX = 80 + Math.random() * 100;
+  const randomY = 60 + Math.random() * 80;
+  windowEl.style.left = `${randomX}px`;
+  windowEl.style.top = `${randomY}px`;
+  windowEl.style.width = '420px';
+  
+  const headerColor = data.accent || '#25533F';
+  
+  let contentHTML = '';
+  if (isProject) {
+    contentHTML = `
+      <img src="${data.image}" alt="${data.title}" loading="lazy">
+      <h2>${data.title}</h2>
+      <p>${data.detail}</p>
+      <a class="window-link" href="${data.link}" target="_blank">View Project →</a>
+      <div class="window-tags">
+        ${data.tags.map(t => `<span>${t}</span>`).join('')}
+      </div>
+    `;
   } else {
-    console.warn('openDetailBySlug: no match for', slug);
+    contentHTML = data.content;
+  }
+  
+  windowEl.innerHTML = `
+    <div class="window-header" style="background: ${headerColor}">
+      <button class="window-close" onclick="closeWindow('${id}')">×</button>
+      <span class="window-title">${data.title}</span>
+    </div>
+    <div class="window-content ${id === 'about' ? 'about-content' : ''}">
+      ${contentHTML}
+    </div>
+    <div class="window-resize"></div>
+  `;
+  
+  document.getElementById('desktop').appendChild(windowEl);
+  
+  // Store window data
+  windows.set(id, {
+    element: windowEl,
+    data: data,
+    isOpen: true
+  });
+  
+  // Animate in
+  gsap.to(windowEl, {
+    opacity: 1,
+    scale: 1,
+    duration: 0.4,
+    ease: 'power3.out'
+  });
+  
+  // Make draggable
+  makeDraggable(windowEl);
+  
+  // Make resizable
+  makeResizable(windowEl);
+  
+  // Focus on click
+  windowEl.addEventListener('mousedown', () => focusWindow(id));
+  
+  // Update dock indicator
+  updateDockIndicator(id, true);
+  
+  activeWindowId = id;
+}
+
+function closeWindow(id) {
+  const win = windows.get(id);
+  if (!win) return;
+  
+  gsap.to(win.element, {
+    opacity: 0,
+    scale: 0.95,
+    duration: 0.3,
+    ease: 'power3.out',
+    onComplete: () => {
+      win.element.remove();
+      windows.delete(id);
+    }
+  });
+  
+  updateDockIndicator(id, false);
+}
+
+function focusWindow(id) {
+  const win = windows.get(id);
+  if (!win) return;
+  
+  win.element.style.zIndex = ++zIndexCounter;
+  activeWindowId = id;
+}
+
+function makeDraggable(windowEl) {
+  const header = windowEl.querySelector('.window-header');
+  let isDragging = false;
+  let startX, startY, startLeft, startTop;
+  
+  header.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('window-close')) return;
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startLeft = windowEl.offsetLeft;
+    startTop = windowEl.offsetTop;
+    windowEl.style.transition = 'none';
+  });
+  
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    windowEl.style.left = `${startLeft + dx}px`;
+    windowEl.style.top = `${startTop + dy}px`;
+  });
+  
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      windowEl.style.transition = '';
+    }
+  });
+}
+
+function makeResizable(windowEl) {
+  const handle = windowEl.querySelector('.window-resize');
+  let isResizing = false;
+  let startX, startY, startWidth, startHeight;
+  
+  handle.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startWidth = windowEl.offsetWidth;
+    startHeight = windowEl.offsetHeight;
+    e.preventDefault();
+  });
+  
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    windowEl.style.width = `${Math.max(320, startWidth + dx)}px`;
+    windowEl.style.height = `${Math.max(200, startHeight + dy)}px`;
+  });
+  
+  document.addEventListener('mouseup', () => {
+    isResizing = false;
+  });
+}
+
+// ─── Dock ───
+function initDock() {
+  const dock = document.getElementById('dock');
+  
+  // Project items
+  projects.forEach((p, i) => {
+    const item = document.createElement('button');
+    item.className = 'dock-item';
+    item.dataset.id = p.id;
+    item.innerHTML = `
+      <img src="${p.emoji}" alt="${p.title}">
+      <div class="dock-tooltip">${p.title}</div>
+      <div class="dock-indicator"></div>
+    `;
+    
+    // GSAP hover animation
+    item.addEventListener('mouseenter', () => {
+      gsap.to(item.querySelector('img'), {
+        scale: 1.2,
+        duration: 0.3,
+        ease: 'power3.out'
+      });
+    });
+    
+    item.addEventListener('mouseleave', () => {
+      gsap.to(item.querySelector('img'), {
+        scale: 1,
+        duration: 0.3,
+        ease: 'power3.out'
+      });
+    });
+    
+    item.addEventListener('click', () => {
+      createWindow(p.id, p, true);
+    });
+    
+    dock.appendChild(item);
+    
+    // Stagger animation on load
+    gsap.from(item, {
+      y: 20,
+      opacity: 0,
+      duration: 0.4,
+      delay: 0.5 + (i * 0.05),
+      ease: 'power3.out'
+    });
+  });
+  
+  // Separator
+  const sep = document.createElement('div');
+  sep.className = 'dock-separator';
+  dock.appendChild(sep);
+  
+  // About item
+  const aboutItem = document.createElement('button');
+  aboutItem.className = 'dock-item';
+  aboutItem.dataset.id = 'about';
+  aboutItem.innerHTML = `
+    <img src="${aboutData.emoji}" alt="About">
+    <div class="dock-tooltip">About</div>
+    <div class="dock-indicator"></div>
+  `;
+  
+  aboutItem.addEventListener('mouseenter', () => {
+    gsap.to(aboutItem.querySelector('img'), {
+      scale: 1.2,
+      duration: 0.3,
+      ease: 'power3.out'
+    });
+  });
+  
+  aboutItem.addEventListener('mouseleave', () => {
+    gsap.to(aboutItem.querySelector('img'), {
+      scale: 1,
+      duration: 0.3,
+      ease: 'power3.out'
+    });
+  });
+  
+  aboutItem.addEventListener('click', () => {
+    createWindow('about', aboutData, false);
+  });
+  
+  dock.appendChild(aboutItem);
+  
+  gsap.from(aboutItem, {
+    y: 20,
+    opacity: 0,
+    duration: 0.4,
+    delay: 0.5 + (projects.length * 0.05),
+    ease: 'power3.out'
+  });
+  
+  // Chat item
+  const chatItem = document.createElement('button');
+  chatItem.className = 'dock-item';
+  chatItem.dataset.id = 'agent-chat';
+  chatItem.innerHTML = `
+    <img src="${chatData.emoji}" alt="Chat">
+    <div class="dock-tooltip">Agent Chat</div>
+    <div class="dock-indicator"></div>
+  `;
+  
+  chatItem.addEventListener('mouseenter', () => {
+    gsap.to(chatItem.querySelector('img'), {
+      scale: 1.2,
+      duration: 0.3,
+      ease: 'power3.out'
+    });
+  });
+  
+  chatItem.addEventListener('mouseleave', () => {
+    gsap.to(chatItem.querySelector('img'), {
+      scale: 1,
+      duration: 0.3,
+      ease: 'power3.out'
+    });
+  });
+  
+  chatItem.addEventListener('click', () => {
+    createWindow('agent-chat', chatData, false);
+  });
+  
+  dock.appendChild(chatItem);
+  
+  gsap.from(chatItem, {
+    y: 20,
+    opacity: 0,
+    duration: 0.4,
+    delay: 0.5 + ((projects.length + 1) * 0.05),
+    ease: 'power3.out'
+  });
+}
+
+function updateDockIndicator(id, isActive) {
+  const item = document.querySelector(`.dock-item[data-id="${id}"]`);
+  if (item) {
+    item.classList.toggle('active', isActive);
   }
 }
 
-function slugify(str) {
-  return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-}
-
-document.getElementById('nav-home-link').addEventListener('click', e => {
-  e.preventDefault();
-  closeDetail();
-  showSection('projects');
-});
-document.getElementById('nav-about-link').addEventListener('click', e => {
-  e.preventDefault();
-  closeDetail();
-  showSection('bio');
-});
-document.getElementById('nav-projects-link').addEventListener('click', e => {
-  e.preventDefault();
-  closeDetail();
-  showSection('projects');
-});
-document.getElementById('nav-thoughts-link').addEventListener('click', e => {
-  e.preventDefault();
-  closeDetail();
-  showSection('thoughts');
-});
-
-// ─── Hash-based navigation ───
-function handleHash() {
-  const hash = window.location.hash.slice(1);
-  if (hash.startsWith('project/')) {
-    openDetailBySlug(hash.slice(8));
-  } else if (hash === 'about') showSection('bio', false);
-  else if (hash === 'thoughts') showSection('thoughts', false);
-  else if (hash === 'projects') { closeDetail(); showSection('projects', false); }
-}
-window.addEventListener('hashchange', handleHash);
-// Handle hash on initial load (after sections are set up)
-if (window.location.hash) handleHash();
-
-// ─── Mobile Menu ───
-const menuToggle = document.getElementById('menu-toggle');
-const menuOverlay = document.getElementById('mobile-menu-overlay');
-
-menuToggle.addEventListener('click', () => {
-  const isOpen = menuToggle.classList.toggle('open');
-  menuOverlay.classList.toggle('open', isOpen);
-  document.body.style.overflow = isOpen ? 'hidden' : '';
-});
-
-menuOverlay.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    const section = a.dataset.section;
-    menuToggle.classList.remove('open');
-    menuOverlay.classList.remove('open');
-    document.body.style.overflow = '';
-    closeDetail();
-    showSection(section);
+// ─── Mobile Grid ───
+function initMobileGrid() {
+  const grid = document.getElementById('app-grid');
+  
+  // Projects
+  projects.forEach(p => {
+    const icon = document.createElement('div');
+    icon.className = 'app-icon';
+    icon.innerHTML = `
+      <div class="app-icon-img" style="background: ${p.accent}">
+        <img src="${p.emoji}" alt="${p.title}">
+      </div>
+      <span>${p.title}</span>
+    `;
+    icon.addEventListener('click', () => openMobileSheet(p, true));
+    grid.appendChild(icon);
   });
-});
-
-// Page entrance — reveal once fonts + layout are ready
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(() => document.body.classList.add('ready'));
-} else {
-  window.addEventListener('load', () => document.body.classList.add('ready'));
+  
+  // About
+  const aboutIcon = document.createElement('div');
+  aboutIcon.className = 'app-icon';
+  aboutIcon.innerHTML = `
+    <div class="app-icon-img" style="background: ${aboutData.accent}">
+      <img src="${aboutData.emoji}" alt="About">
+    </div>
+    <span>About</span>
+  `;
+  aboutIcon.addEventListener('click', () => openMobileSheet(aboutData, false));
+  grid.appendChild(aboutIcon);
+  
+  // Chat
+  const chatIcon = document.createElement('div');
+  chatIcon.className = 'app-icon';
+  chatIcon.innerHTML = `
+    <div class="app-icon-img" style="background: ${chatData.accent}">
+      <img src="${chatData.emoji}" alt="Chat">
+    </div>
+    <span>Agent Chat</span>
+  `;
+  chatIcon.addEventListener('click', () => openMobileSheet(chatData, false));
+  grid.appendChild(chatIcon);
 }
 
-</script>
+// ─── Mobile Sheet ───
+function openMobileSheet(data, isProject = true) {
+  const sheet = document.getElementById('mobile-sheet');
+  const header = document.getElementById('mobile-sheet-header');
+  const title = document.getElementById('mobile-sheet-title');
+  const content = document.getElementById('mobile-sheet-content');
+  
+  header.style.background = data.accent || '#25533F';
+  title.textContent = data.title;
+  title.style.color = 'white';
+  
+  let contentHTML = '';
+  if (isProject) {
+    contentHTML = `
+      <img src="${data.image}" alt="${data.title}">
+      <h2 style="font-family: var(--sans); font-size: 1.5rem; font-weight: 400; margin-bottom: 16px; color: var(--fg);">${data.title}</h2>
+      <p style="font-family: var(--serif); font-size: 1rem; line-height: 1.7; color: var(--fg-muted); margin-bottom: 16px;">${data.detail}</p>
+      <a href="${data.link}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--fg); border: 1px solid var(--forest); padding: 12px 24px; border-radius: 100px; text-decoration: none;">View Project →</a>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px;">
+        ${data.tags.map(t => `<span style="font-size: 0.65rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-muted); padding: 4px 12px; background: rgba(37, 83, 63, 0.06); border-radius: 100px;">${t}</span>`).join('')}
+      </div>
+    `;
+  } else {
+    contentHTML = data.content;
+  }
+  
+  content.innerHTML = contentHTML;
+  sheet.classList.add('active');
+}
 
+function closeMobileSheet() {
+  document.getElementById('mobile-sheet').classList.remove('active');
+}
+
+// ─── Initialization ───
+document.addEventListener('DOMContentLoaded', () => {
+  initDock();
+  initMobileGrid();
+});
+</script>
 </body>
 </html>

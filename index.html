@@ -2432,6 +2432,13 @@ function initWeather() {
 
 // ─── Boot Animation ───
 window.addEventListener('load', function() {
+  setTimeout(function() {
+    document.getElementById('boot-screen').classList.add('fade-out');
+    setTimeout(function() {
+      document.getElementById('boot-screen').style.display = 'none';
+    }, 600);
+  }, 1500);
+  
   initDock();
   initDesktopIcons();
   initLaunchpad();
@@ -2439,31 +2446,25 @@ window.addEventListener('load', function() {
   initWeather();
   renderTodos();
 
+  // Init liquidGL after a short delay to let DOM settle
   setTimeout(function() {
-    document.getElementById('boot-screen').classList.add('fade-out');
-    setTimeout(function() {
-      document.getElementById('boot-screen').style.display = 'none';
-      // Init liquidGL after boot is fully gone and dock is rendered
-      setTimeout(function() {
-        if (typeof liquidGL === 'function') {
-          liquidGL({
-            snapshot: 'body',
-            target: '.liquidGL-target',
-            resolution: 2.0,
-            refraction: 0.012,
-            bevelDepth: 0.06,
-            bevelWidth: 0.12,
-            frost: 4,
-            shadow: true,
-            specular: true,
-            reveal: 'fade',
-            tilt: false,
-            magnify: 1
-          });
-        }
-      }, 300);
-    }, 600);
-  }, 1500);
+    if (typeof liquidGL === 'function') {
+      liquidGL({
+        snapshot: 'body',
+        target: '.liquidGL-target',
+        resolution: 2.0,
+        refraction: 0.012,
+        bevelDepth: 0.06,
+        bevelWidth: 0.12,
+        frost: 4,
+        shadow: true,
+        specular: true,
+        reveal: 'fade',
+        tilt: false,
+        magnify: 1
+      });
+    }
+  }, 500);
 });
 
 // ─── Mobile Menu Toggle ───

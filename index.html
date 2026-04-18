@@ -102,9 +102,9 @@ body {
   left: 0;
   right: 0;
   height: 28px;
-  background: rgba(255,255,255,0.6);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid rgba(255,255,255,0.35);
   display: flex;
   align-items: center;
@@ -114,6 +114,7 @@ body {
   font-size: 0.75rem;
   font-weight: 500;
   color: #2D1B00;
+  box-shadow: inset 0 -1px 1px rgba(255,255,255,0.3), 0 2px 12px rgba(0,0,0,0.06);
 }
 
 .menu-bar-left {
@@ -211,9 +212,6 @@ body {
 
 /* ─── Weather Widget ─── */
 .weather-widget {
-  position: absolute;
-  top: 20px;
-  left: 30px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -224,12 +222,50 @@ body {
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,0.3);
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  z-index: 5;
   cursor: default;
   user-select: none;
   transition: transform 0.2s ease;
 }
+.widget-stack {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 5;
+  width: 220px;
+}
+.widget-stack > * { width: 100%; }
 .weather-widget:hover { transform: scale(1.02); }
+
+.stock-widget {
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  cursor: default;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+.stock-widget:hover { transform: scale(1.02); }
+.stock-widget-title {
+  font-size: 0.65rem; color: var(--fg); opacity: 0.6;
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
+}
+.stock-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 0; font-size: 0.8rem;
+}
+.stock-row + .stock-row { border-top: 1px solid rgba(0,0,0,0.04); }
+.stock-ticker { font-weight: 500; color: var(--fg); font-family: var(--sans); }
+.stock-price { color: var(--fg-muted); font-family: var(--sans); }
+.stock-change { font-size: 0.7rem; font-weight: 500; padding: 2px 6px; border-radius: 4px; }
+.stock-change.up { color: #1a8f4a; background: rgba(26,143,74,0.1); }
+.stock-change.down { color: #d63031; background: rgba(214,48,49,0.1); }
 .weather-icon { font-size: 2.2rem; line-height: 1; }
 .weather-temp { font-size: 1.5rem; font-weight: 500; color: var(--fg); line-height: 1.2; }
 .weather-desc { font-size: 0.75rem; color: var(--fg-muted); }
@@ -805,6 +841,7 @@ body {
 /* ─── Mobile Layout ─── */
 @media (max-width: 767px) {
   .weather-widget { display: none; }
+  .widget-stack { display: none; }
   .todo-widget { display: none; }
   .menu-bar {
     height: 48px;
@@ -1497,6 +1534,7 @@ body {
 <!-- Desktop -->
 <div class="desktop" id="desktop" oncontextmenu="showContextMenu(event)">
   <!-- Weather Widget -->
+  <div class="widget-stack" id="widget-stack">
   <div class="weather-widget" id="weather-widget">
     <div class="weather-icon" id="weather-icon">☀️</div>
     <div class="weather-info">
@@ -1504,6 +1542,14 @@ body {
       <div class="weather-desc" id="weather-desc">Loading...</div>
       <div class="weather-location" id="weather-location">Beijing</div>
     </div>
+  </div>
+
+  <div class="stock-widget" id="stock-widget">
+    <div class="stock-widget-title">Stocks</div>
+    <div class="stock-row"><span class="stock-ticker">MSFT</span><span class="stock-price" id="stock-msft-price">--</span><span class="stock-change" id="stock-msft-change">--</span></div>
+    <div class="stock-row"><span class="stock-ticker">AAPL</span><span class="stock-price" id="stock-aapl-price">--</span><span class="stock-change" id="stock-aapl-change">--</span></div>
+    <div class="stock-row"><span class="stock-ticker">GOOGL</span><span class="stock-price" id="stock-googl-price">--</span><span class="stock-change" id="stock-googl-change">--</span></div>
+  </div>
   </div>
 
   <!-- Todo Widget -->
@@ -2595,6 +2641,29 @@ function initWeather() {
     });
 }
 
+function initStocks() {
+  var tickers = ['MSFT', 'AAPL', 'GOOGL'];
+  tickers.forEach(function(ticker) {
+    fetch('https://query1.finance.yahoo.com/v8/finance/chart/' + ticker + '?interval=1d&range=1d')
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        var meta = d.chart.result[0].meta;
+        var price = meta.regularMarketPrice.toFixed(2);
+        var prev = meta.chartPreviousClose;
+        var change = ((meta.regularMarketPrice - prev) / prev * 100).toFixed(2);
+        var isUp = change >= 0;
+        document.getElementById('stock-' + ticker.toLowerCase() + '-price').textContent = '$' + price;
+        var changeEl = document.getElementById('stock-' + ticker.toLowerCase() + '-change');
+        changeEl.textContent = (isUp ? '+' : '') + change + '%';
+        changeEl.className = 'stock-change ' + (isUp ? 'up' : 'down');
+      })
+      .catch(function() {
+        document.getElementById('stock-' + ticker.toLowerCase() + '-price').textContent = '--';
+        document.getElementById('stock-' + ticker.toLowerCase() + '-change').textContent = '--';
+      });
+  });
+}
+
 // ─── Boot Animation ───
 window.addEventListener('load', function() {
   setTimeout(function() {
@@ -2609,6 +2678,7 @@ window.addEventListener('load', function() {
   initLaunchpad();
   initMobileGrid();
   initWeather();
+  initStocks();
   renderTodos();
   if (typeof feather !== 'undefined') feather.replace();
 });

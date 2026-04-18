@@ -1830,11 +1830,17 @@ function createWindow(id, data, options) {
   windowEl.id = 'window-' + id;
   windowEl.style.zIndex = ++zIndexCounter;
   
-  const baseX = 60 + (windows.size * 30) % 200;
-  const baseY = 50 + (windows.size * 20) % 150;
+  const winWidth = parseInt(options.width) || (isSystemApp ? 480 : 800);
+  const winHeight = isSystemApp ? 400 : 600;
+  const desktop = document.getElementById('desktop');
+  const deskW = desktop.clientWidth;
+  const deskH = desktop.clientHeight;
+  const offsetStep = (windows.size % 6) * 25;
+  const baseX = Math.max(20, Math.round((deskW - winWidth) / 2) + offsetStep);
+  const baseY = Math.max(20, Math.round((deskH - winHeight) / 2) + offsetStep);
   windowEl.style.left = baseX + 'px';
   windowEl.style.top = baseY + 'px';
-  windowEl.style.width = options.width || (isSystemApp ? '480px' : '800px');
+  windowEl.style.width = (options.width || (isSystemApp ? '480px' : '800px'));
   windowEl.style.height = isSystemApp ? '' : '600px';
   
   const headerColor = data.accent || '#FF8C42';

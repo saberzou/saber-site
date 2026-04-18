@@ -2070,7 +2070,7 @@ function initDock() {
     btn.className = 'dock-item';
     btn.dataset.id = p.id;
     btn.innerHTML = '<img src="' + p.icon + '" alt="' + p.title + '"><div class="dock-tooltip">' + p.title + '</div><div class="dock-indicator"></div>';
-    btn.onclick = function() { openApp(p.id); };
+    btn.onclick = function() { if (p.link) window.open(p.link, '_blank'); };
     dock.appendChild(btn);
     
     gsap.from(btn, {
@@ -2119,18 +2119,13 @@ function initDesktopIcons() {
       '<div class="desktop-icon-img"><img src="' + p.icon + '" alt="' + p.title + '"></div>' +
       '<div class="desktop-icon-label">' + (p.shortTitle || p.title) + '</div>';
     
-    // Double click to open
-    let clickCount = 0;
+    // Single click selects, double click opens project URL
     icon.addEventListener('click', function() {
-      clickCount++;
       document.querySelectorAll('.desktop-icon').forEach(function(el) { el.classList.remove('selected'); });
       icon.classList.add('selected');
-      
-      if (clickCount === 2) {
-        openApp(p.id);
-        clickCount = 0;
-      }
-      setTimeout(function() { clickCount = 0; }, 400);
+    });
+    icon.addEventListener('dblclick', function() {
+      if (p.link) window.open(p.link, '_blank');
     });
     
     container.appendChild(icon);

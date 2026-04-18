@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Saber Zou — Design & Projects</title>
+<title>SaberOS — Saber Zou</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500&family=PT+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
@@ -34,6 +34,11 @@
   --serif: 'PT Serif', Georgia, serif;
   
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  
+  /* Traffic lights */
+  --traffic-red: #FF5F56;
+  --traffic-yellow: #FFBD2E;
+  --traffic-green: #27C93F;
 }
 
 html { font-size: 16px; }
@@ -47,28 +52,271 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ─── Boot Animation ─── */
+.boot-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--forest);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  transition: opacity 0.6s var(--ease-out-quart);
+}
+
+.boot-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot-logo {
+  font-size: 3rem;
+  font-weight: 500;
+  color: white;
+  letter-spacing: 0.1em;
+  margin-bottom: 24px;
+}
+
+.boot-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Menu Bar ─── */
+.menu-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: var(--forest);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 1000;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+}
+
+.menu-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.menu-logo {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.menu-logo:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.menu-item {
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.menu-item:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.menu-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.menu-clock {
+  min-width: 60px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.menu-username {
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.menu-username:hover {
+  background: rgba(255,255,255,0.1);
+}
+
 /* ─── Desktop Wallpaper ─── */
 .desktop {
   position: fixed;
-  inset: 0;
+  inset: 28px 0 0 0;
   background: var(--bg);
   background-image: 
-    radial-gradient(circle at 20% 30%, rgba(170, 204, 150, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(244, 190, 174, 0.12) 0%, transparent 45%),
-    radial-gradient(circle at 60% 20%, rgba(184, 206, 232, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 30% 80%, rgba(239, 206, 123, 0.08) 0%, transparent 35%);
+    radial-gradient(circle at 20% 30%, rgba(170, 204, 150, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(244, 190, 174, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 60% 20%, rgba(184, 206, 232, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 30% 80%, rgba(239, 206, 123, 0.12) 0%, transparent 35%),
+    radial-gradient(circle at 70% 50%, rgba(82, 165, 206, 0.1) 0%, transparent 40%);
+  background-size: 200% 200%;
+  animation: wallpaperShift 60s ease-in-out infinite;
   z-index: 1;
+  overflow: hidden;
+}
+
+@keyframes wallpaperShift {
+  0%, 100% { background-position: 0% 0%; }
+  25% { background-position: 100% 0%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+}
+
+/* ─── Desktop Icons ─── */
+.desktop-icons {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  display: grid;
+  grid-template-columns: repeat(4, 80px);
+  gap: 24px 16px;
+  z-index: 10;
+}
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.desktop-icon:hover {
+  background: rgba(37, 83, 63, 0.08);
+}
+
+.desktop-icon:active {
+  transform: scale(0.95);
+}
+
+.desktop-icon.selected {
+  background: rgba(37, 83, 63, 0.15);
+}
+
+.desktop-icon.selected .desktop-icon-label {
+  background: var(--forest);
+  color: white;
+}
+
+.desktop-icon-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(37, 83, 63, 0.15);
+  overflow: hidden;
+}
+
+.desktop-icon-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.desktop-icon-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--fg);
+  text-align: center;
+  max-width: 76px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-shadow: 0 1px 2px rgba(245, 240, 235, 0.8);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Context Menu ─── */
+.context-menu {
+  position: fixed;
+  background: rgba(245, 240, 235, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(37, 83, 63, 0.15);
+  padding: 8px 0;
+  min-width: 180px;
+  z-index: 5000;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.context-menu.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.context-item {
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.context-item:hover {
+  background: rgba(37, 83, 63, 0.08);
+}
+
+.context-separator {
+  height: 1px;
+  background: rgba(37, 83, 63, 0.1);
+  margin: 6px 0;
 }
 
 /* ─── Windows ─── */
 .window {
   position: absolute;
-  min-width: 320px;
-  min-height: 200px;
+  min-width: 360px;
+  min-height: 240px;
   max-width: 90vw;
-  max-height: 85vh;
+  max-height: 80vh;
   background: var(--bg);
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 
     0 4px 24px rgba(37, 83, 63, 0.12),
     0 16px 48px rgba(37, 83, 63, 0.08);
@@ -88,40 +336,71 @@ body {
 }
 
 .window-header {
-  height: 44px;
+  height: 40px;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  gap: 12px;
+  padding: 0 12px;
+  gap: 8px;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
   position: relative;
+  background: var(--forest);
 }
 
 .window-header:active {
   cursor: grabbing;
 }
 
-.window-close {
+.window-controls {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.window-btn {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 8px;
-  color: transparent;
-  transition: all 0.2s var(--ease-out-quart);
-  flex-shrink: 0;
+  transition: all 0.15s;
+  position: relative;
 }
 
-.window-close:hover {
-  background: rgba(255, 255, 255, 1);
-  color: var(--fg);
+.window-btn:hover {
+  filter: brightness(0.9);
+}
+
+.window-btn::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.window-btn.close { background: var(--traffic-red); }
+.window-btn.minimize { background: var(--traffic-yellow); }
+.window-btn.maximize { background: var(--traffic-green); }
+
+.window-btn.close::before {
+  content: '×';
+  color: rgba(0,0,0,0.5);
+  font-size: 9px;
+  line-height: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+}
+
+.window-btn:hover::before {
+  opacity: 1;
 }
 
 .window-title {
@@ -132,6 +411,7 @@ body {
   flex: 1;
   text-align: center;
   letter-spacing: 0.02em;
+  margin-right: 52px;
 }
 
 .window-content {
@@ -143,7 +423,7 @@ body {
 .window-content img {
   width: 100%;
   height: auto;
-  border-radius: 4px;
+  border-radius: 6px;
   margin-bottom: 20px;
 }
 
@@ -152,8 +432,18 @@ body {
   font-size: 1.5rem;
   font-weight: 400;
   color: var(--fg);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   letter-spacing: -0.01em;
+}
+
+.window-content h3 {
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--fg);
+  margin: 20px 0 8px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .window-content p {
@@ -161,7 +451,7 @@ body {
   font-size: 0.95rem;
   line-height: 1.7;
   color: var(--fg-muted);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .window-content a {
@@ -215,43 +505,35 @@ body {
   border-radius: 100px;
 }
 
-.window-resize {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 16px;
-  height: 16px;
-  cursor: nwse-resize;
-  background: linear-gradient(135deg, transparent 50%, rgba(37, 83, 63, 0.2) 50%);
-  border-bottom-right-radius: 8px;
-}
-
 /* ─── Dock ─── */
 .dock {
   position: fixed;
-  bottom: 24px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--forest);
-  padding: 12px 20px;
-  border-radius: 100px;
+  background: rgba(37, 83, 63, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 10px 16px;
+  border-radius: 20px;
   display: flex;
-  gap: 8px;
-  align-items: center;
+  gap: 10px;
+  align-items: flex-end;
   z-index: 200;
   box-shadow: 0 8px 32px rgba(37, 83, 63, 0.25);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 .dock-separator {
   width: 1px;
-  height: 32px;
+  height: 44px;
   background: rgba(255, 255, 255, 0.15);
-  margin: 0 4px;
+  margin: 0 6px;
 }
 
 .dock-item {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.1);
   border: none;
@@ -260,39 +542,29 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
   position: relative;
-  transition: background 0.2s var(--ease-out-quart);
+  transition: all 0.2s var(--ease-out-quart);
   flex-shrink: 0;
 }
 
 .dock-item:hover {
   background: rgba(255, 255, 255, 0.18);
+  transform: scale(1.15) translateY(-8px);
 }
 
 .dock-item img {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
   pointer-events: none;
-}
-
-.dock-item span {
-  font-size: 0.55rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: 0.03em;
-  max-width: 44px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  border-radius: 8px;
 }
 
 .dock-tooltip {
   position: absolute;
-  bottom: 100%;
+  bottom: calc(100% + 12px);
   left: 50%;
-  transform: translateX(-50%) translateY(-8px);
+  transform: translateX(-50%);
   background: rgba(37, 83, 63, 0.9);
   backdrop-filter: blur(8px);
   color: white;
@@ -303,12 +575,11 @@ body {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s var(--ease-out-quart), transform 0.2s var(--ease-out-quart);
+  transition: opacity 0.2s var(--ease-out-quart);
 }
 
 .dock-item:hover .dock-tooltip {
   opacity: 1;
-  transform: translateX(-50%) translateY(-4px);
 }
 
 .dock-indicator {
@@ -317,7 +588,7 @@ body {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.7);
   opacity: 0;
   transition: opacity 0.2s;
 }
@@ -326,89 +597,216 @@ body {
   opacity: 1;
 }
 
-/* ─── Top Navigation (Mobile) ─── */
-.top-nav {
-  display: none;
+/* ─── Notification Toast ─── */
+.notification {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 56px;
-  background: rgba(245, 240, 235, 0.9);
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: rgba(37, 83, 63, 0.95);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 300;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  border-bottom: 1px solid rgba(37, 83, 63, 0.08);
-}
-
-.top-nav-name {
-  font-family: var(--sans);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 100px;
   font-size: 0.85rem;
   font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--fg);
+  z-index: 6000;
+  opacity: 0;
+  transition: all 0.4s var(--ease-out-quart);
 }
 
-/* ─── Mobile Home Grid ─── */
-.mobile-home {
+.notification.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ─── Tablet Layout ─── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .desktop-icons {
+    display: none;
+  }
+  
+  .launchpad {
+    display: grid !important;
+  }
+  
+  .dock {
+    bottom: 12px;
+    padding: 8px 12px;
+  }
+  
+  .dock-item {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .dock-item img {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .window {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90vw !important;
+    max-width: 600px;
+    max-height: 75vh;
+  }
+}
+
+/* ─── Mobile Layout ─── */
+@media (max-width: 767px) {
+  .menu-bar {
+    height: 48px;
+    padding: 0 16px;
+  }
+  
+  .menu-bar .menu-item:not(.menu-logo),
+  .menu-bar .menu-icon,
+  .menu-clock {
+    display: none;
+  }
+  
+  .menu-hamburger {
+    display: flex !important;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    padding: 8px;
+  }
+  
+  .menu-hamburger span {
+    width: 18px;
+    height: 2px;
+    background: white;
+    border-radius: 1px;
+  }
+  
+  .dock {
+    display: none;
+  }
+  
+  .desktop-icons {
+    display: none;
+  }
+  
+  .desktop {
+    inset: 48px 0 0 0;
+  }
+  
+  .mobile-home {
+    display: block !important;
+  }
+  
+  .window {
+    display: none !important;
+  }
+}
+
+.menu-hamburger {
   display: none;
-  position: fixed;
-  inset: 56px 0 0;
-  z-index: 100;
-  padding: 24px 20px;
+}
+
+/* ─── Launchpad (Tablet) ─── */
+.launchpad {
+  display: none;
+  position: absolute;
+  inset: 40px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding: 40px;
+  place-items: center;
   overflow-y: auto;
 }
 
-.app-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px 16px;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.app-icon {
+.launchpad-icon {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 16px;
-  transition: transform 0.2s var(--ease-out-quart);
 }
 
-.app-icon:active {
-  transform: scale(0.95);
-}
-
-.app-icon-img {
-  width: 64px;
-  height: 64px;
+.launchpad-icon-img {
+  width: 72px;
+  height: 72px;
   border-radius: 16px;
-  background: var(--forest);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(37, 83, 63, 0.15);
+  box-shadow: 0 4px 16px rgba(37, 83, 63, 0.15);
 }
 
-.app-icon-img img {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
+.launchpad-icon-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
 }
 
-.app-icon span {
-  font-size: 0.7rem;
+.launchpad-icon span {
+  font-size: 0.75rem;
   font-weight: 500;
   color: var(--fg);
   text-align: center;
-  max-width: 72px;
+}
+
+/* ─── Mobile Home Screen ─── */
+.mobile-home {
+  display: none;
+  position: absolute;
+  inset: 0;
+  padding: 24px 20px;
+  overflow-y: auto;
+}
+
+.mobile-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px 12px;
+  padding-bottom: 40px;
+}
+
+.mobile-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 12px;
+  min-height: 88px;
+}
+
+.mobile-icon:active {
+  transform: scale(0.95);
+}
+
+.mobile-icon-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(37, 83, 63, 0.12);
+}
+
+.mobile-icon-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.mobile-icon span {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--fg);
+  text-align: center;
+  max-width: 64px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -423,7 +821,7 @@ body {
   background: var(--bg);
   flex-direction: column;
   transform: translateY(100%);
-  transition: transform 0.4s var(--ease-out-quart);
+  transition: transform 0.35s var(--ease-out-quart);
 }
 
 .mobile-sheet.active {
@@ -476,63 +874,16 @@ body {
   margin-bottom: 20px;
 }
 
-/* ─── Tablet Layout ─── */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .dock {
-    bottom: 20px;
-    padding: 10px 16px;
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .desktop {
+    animation: none;
   }
   
-  .dock-item {
-    width: 48px;
-    height: 48px;
-  }
-  
-  .dock-item img {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .window {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    width: 90vw !important;
-    max-width: 600px;
-    max-height: 80vh;
-  }
-}
-
-/* ─── Mobile Layout ─── */
-@media (max-width: 767px) {
-  .dock {
+  .boot-screen {
     display: none;
   }
   
-  .top-nav {
-    display: flex;
-  }
-  
-  .mobile-home {
-    display: block;
-  }
-  
-  .mobile-sheet {
-    display: flex;
-  }
-  
-  .window {
-    display: none !important;
-  }
-  
-  .desktop {
-    background: var(--bg);
-  }
-}
-
-/* ─── Reduced Motion ─── */
-@media (prefers-reduced-motion: reduce) {
   .window {
     transition: opacity 0.2s ease;
     transform: none;
@@ -551,109 +902,552 @@ body {
   }
 }
 
-/* ─── About Window Special ─── */
-.about-content strong {
-  color: var(--fg);
-  font-weight: 500;
-}
+/* ─── App Styles ─── */
 
-.about-links {
-  display: flex;
-  gap: 16px;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid rgba(37, 83, 63, 0.1);
-}
-
-.about-links a {
-  font-family: var(--sans);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--fg-muted);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.about-links a:hover {
-  color: var(--fg);
-}
-
-/* ─── Agent Chat Window ─── */
-.chat-placeholder {
+/* Mail App */
+.mail-sidebar {
+  width: 200px;
+  background: rgba(37, 83, 63, 0.03);
+  border-right: 1px solid rgba(37, 83, 63, 0.08);
+  padding: 16px;
   display: flex;
   flex-direction: column;
+  gap: 4px;
+}
+
+.mail-folder {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg);
+}
+
+.mail-folder:hover {
+  background: rgba(37, 83, 63, 0.06);
+}
+
+.mail-folder.active {
+  background: rgba(37, 83, 63, 0.1);
+  font-weight: 500;
+}
+
+.mail-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.mail-item {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(37, 83, 63, 0.06);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.mail-item:hover {
+  background: rgba(37, 83, 63, 0.03);
+}
+
+.mail-sender {
+  font-weight: 500;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.mail-subject {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  margin-bottom: 2px;
+}
+
+.mail-preview {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  opacity: 0.7;
+}
+
+.mail-compose-btn {
+  margin: 16px 20px;
+  padding: 10px 20px;
+  background: var(--blueberry);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(100% - 40px);
+}
+
+.mail-compose {
+  padding: 20px;
+}
+
+.mail-compose input,
+.mail-compose textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgba(37, 83, 63, 0.15);
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  background: transparent;
+}
+
+.mail-compose textarea {
+  min-height: 200px;
+  resize: vertical;
+}
+
+.mail-send-btn {
+  padding: 10px 24px;
+  background: var(--blueberry);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Notes App */
+.notes-paper {
+  background: linear-gradient(to bottom, #fff 0%, #faf8f5 100%);
+  min-height: 100%;
+  padding: 32px;
+  background-image: 
+    repeating-linear-gradient(
+      transparent,
+      transparent 31px,
+      rgba(37, 83, 63, 0.08) 31px,
+      rgba(37, 83, 63, 0.08) 32px
+    );
+  line-height: 32px;
+}
+
+.notes-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--fg);
+}
+
+.notes-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--fg-muted);
+  border-radius: 4px;
+  margin-top: 7px;
+  cursor: pointer;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: white;
+}
+
+.notes-checkbox.checked {
+  background: var(--forest);
+  border-color: var(--forest);
+}
+
+.notes-text {
+  flex: 1;
+}
+
+.notes-text.done {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+/* Camera App */
+.camera-viewfinder {
+  background: #1a1a1a;
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-placeholder {
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  padding: 40px;
+}
+
+.camera-placeholder-bear {
+  font-size: 4rem;
+  margin-bottom: 16px;
+}
+
+.camera-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 20px;
+}
+
+.camera-shutter {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 4px solid var(--blood-orange);
+  background: white;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.camera-shutter:active {
+  transform: scale(0.95);
+}
+
+.camera-preview {
+  margin-top: 20px;
+  padding: 16px;
+  background: rgba(37, 83, 63, 0.03);
+  border-radius: 8px;
   text-align: center;
 }
 
-.chat-placeholder img {
-  width: 80px;
-  height: 80px;
+.camera-preview img {
+  max-width: 100%;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+/* About This Mac */
+.about-mac {
+  text-align: center;
+  padding: 40px !important;
+}
+
+.about-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--tea-green), var(--olive-green));
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+
+.about-mac h2 {
+  font-size: 1.75rem !important;
+  margin-bottom: 8px !important;
+}
+
+.about-mac .version {
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  margin-bottom: 32px;
+}
+
+.about-specs {
+  text-align: left;
+  max-width: 320px;
+  margin: 0 auto 32px;
+}
+
+.about-spec-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(37, 83, 63, 0.08);
+}
+
+.about-spec-label {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+}
+
+.about-spec-value {
+  color: var(--fg);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.about-links-row {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.about-links-row a {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--blueberry);
+  text-decoration: none;
+}
+
+.about-links-row a:hover {
+  text-decoration: underline;
+}
+
+/* Finder */
+.finder-sidebar {
+  width: 160px;
+  background: rgba(37, 83, 63, 0.03);
+  border-right: 1px solid rgba(37, 83, 63, 0.08);
+  padding: 16px 12px;
+}
+
+.finder-section {
   margin-bottom: 20px;
 }
 
-.chat-placeholder p {
-  font-family: var(--serif);
-  font-size: 1rem;
+.finder-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--fg-muted);
-  max-width: 280px;
+  margin-bottom: 8px;
+  padding: 0 8px;
+}
+
+.finder-item {
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.finder-item:hover {
+  background: rgba(37, 83, 63, 0.06);
+}
+
+.finder-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.finder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 20px;
+}
+
+.finder-folder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.finder-folder:hover {
+  background: rgba(37, 83, 63, 0.05);
+}
+
+.finder-folder-icon {
+  width: 64px;
+  height: 52px;
+  background: var(--iced-blue);
+  border-radius: 4px 12px 4px 4px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(37, 83, 63, 0.1);
+}
+
+.finder-folder-icon::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 0;
+  width: 24px;
+  height: 8px;
+  background: var(--iced-blue);
+  border-radius: 4px 4px 0 0;
+  opacity: 0.7;
+}
+
+.finder-folder span {
+  font-size: 0.75rem;
+  text-align: center;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
 </head>
 <body>
 
-<div class="desktop" id="desktop"></div>
+<!-- Boot Screen -->
+<div class="boot-screen" id="boot-screen">
+  <div class="boot-logo">SaberOS</div>
+  <div class="boot-spinner"></div>
+</div>
 
-<!-- Top Navigation (Mobile) -->
-<nav class="top-nav">
-  <span class="top-nav-name">Saber Zou</span>
+<!-- Notification Toast -->
+<div class="notification" id="notification"></div>
+
+<!-- Context Menu -->
+<div class="context-menu" id="context-menu">
+  <div class="context-item" onclick="changeWallpaper()">
+    <span>🎨</span> Change Wallpaper
+  </div>
+  <div class="context-item" onclick="openApp('about')">
+    <span>ℹ️</span> About This Mac
+  </div>
+  <div class="context-separator"></div>
+  <div class="context-item" onclick="location.reload()">
+    <span>🔄</span> Refresh
+  </div>
+</div>
+
+<!-- Menu Bar -->
+<nav class="menu-bar" id="menu-bar">
+  <div class="menu-bar-left">
+    <div class="menu-logo" onclick="openApp('about')">⌘</div>
+    <div class="menu-item" onclick="openApp('finder')">Finder</div>
+    <div class="menu-item" onclick="openApp('mail')">Mail</div>
+    <div class="menu-item" onclick="openApp('notes')">Notes</div>
+  </div>
+  <div class="menu-bar-right">
+    <div class="menu-icon">📶</div>
+    <div class="menu-icon">🔋</div>
+    <div class="menu-clock" id="menu-clock">12:00 PM</div>
+    <div class="menu-username">Saber</div>
+    <div class="menu-hamburger" onclick="toggleMobileMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
 </nav>
 
-<!-- Mobile Home Screen -->
-<div class="mobile-home" id="mobile-home">
-  <div class="app-grid" id="app-grid"></div>
+<!-- Desktop -->
+<div class="desktop" id="desktop" oncontextmenu="showContextMenu(event)">
+  <!-- Desktop Icons -->
+  <div class="desktop-icons" id="desktop-icons"></div>
+  
+  <!-- Launchpad (Tablet) -->
+  <div class="launchpad" id="launchpad"></div>
+  
+  <!-- Mobile Home -->
+  <div class="mobile-home" id="mobile-home">
+    <div class="mobile-grid" id="mobile-grid"></div>
+  </div>
 </div>
 
 <!-- Mobile Sheet -->
 <div class="mobile-sheet" id="mobile-sheet">
   <div class="mobile-sheet-header" id="mobile-sheet-header">
-    <button class="mobile-sheet-close" onclick="closeMobileSheet()">←</button>
+    <button class="mobile-sheet-close" onclick="closeMobileSheet()">✕</button>
     <span class="mobile-sheet-title" id="mobile-sheet-title"></span>
   </div>
   <div class="mobile-sheet-content" id="mobile-sheet-content"></div>
 </div>
 
-<!-- Dock (Desktop/Tablet) -->
+<!-- Dock -->
 <div class="dock" id="dock"></div>
 
 <script>
-// ─── Project Data ───
+// ─── Constants & Data ───
 const ICON_BASE = 'images/icons';
+const IMAGE_BASE = 'images';
+
+// All 12 projects with assigned colors
 const projects = [
+  {
+    id: 'koi-pond',
+    title: 'Koi Pond',
+    description: 'Interactive generative art piece with flowing koi fish.',
+    detail: 'An interactive generative art piece featuring flowing koi fish that respond to cursor movement. Built with HTML5 Canvas and particle systems to create a meditative, ever-changing aquatic scene.',
+    howMade: 'Canvas API for rendering, particle system for fish movement, Perlin noise for organic motion, color gradients for water effects.',
+    tags: ['Generative Art', 'Canvas', 'Interactive'],
+    link: 'https://saberzou.github.io/koi-pond/',
+    icon: ICON_BASE + '/koi-pond.png',
+    image: IMAGE_BASE + '/koi-pond.jpg',
+    accent: '#52A5CE'
+  },
+  {
+    id: 'cards-of-answers',
+    title: 'Cards of Answers',
+    description: 'Tarot-inspired decision making tool with beautiful card animations.',
+    detail: 'A tarot-inspired decision-making tool featuring beautiful card animations and thought-provoking prompts. Draw a card when you need guidance or inspiration.',
+    howMade: 'CSS 3D transforms for card flips, GSAP for animations, custom illustration pipeline, localStorage for card history.',
+    tags: ['Interactive', 'Animation', 'Tool'],
+    link: 'https://saberzou.github.io/cards-of-answers/',
+    icon: ICON_BASE + '/cards-of-answers.png',
+    image: IMAGE_BASE + '/cards-of-answers.jpg',
+    accent: '#6D1F42'
+  },
+  {
+    id: 'axiom-thoughts',
+    title: 'Axiom Thoughts',
+    description: 'Philosophical queries and reflections in a minimalist interface.',
+    detail: 'A minimalist interface for philosophical queries and daily reflections. Explore fundamental questions about existence, creativity, and human nature through an elegant card-based UI.',
+    howMade: 'React for state management, Framer Motion for transitions, markdown rendering for content, dark mode support.',
+    tags: ['Philosophy', 'React', 'Minimalist'],
+    link: 'https://saberzou.github.io/axiom-thoughts/',
+    icon: ICON_BASE + '/axiom-thoughts.png',
+    image: IMAGE_BASE + '/axiom-thoughts.jpg',
+    accent: '#AFAB23'
+  },
+  {
+    id: 'agent-terrarium',
+    title: 'Agent Terrarium',
+    description: 'A living ecosystem of AI agents visualized as digital creatures.',
+    detail: 'A living ecosystem visualization where AI agents appear as digital creatures in a shared environment. Watch them interact, communicate, and evolve their behaviors over time.',
+    howMade: 'Three.js for 3D environment, WebSocket simulation, agent behavior trees, particle effects for interactions.',
+    tags: ['AI', 'Three.js', 'Simulation'],
+    link: 'https://saberzou.github.io/agent-terrarium/',
+    icon: ICON_BASE + '/agent-terrarium.png',
+    image: IMAGE_BASE + '/agent-terrarium.jpg',
+    accent: '#AACC96'
+  },
   {
     id: 'json-prompts',
     title: 'JSON Prompts',
-    description: 'A curated gallery of AI image generation prompts with an infinite pannable canvas.',
+    description: 'A curated gallery of AI image generation prompts with infinite canvas.',
     detail: 'A searchable gallery of 500+ AI image generation prompts. Infinite pannable canvas with mixed tile sizes — click any image to reveal its full JSON prompt and copy it with one tap.',
+    howMade: 'Infinite scroll canvas, masonry grid layout, copy-to-clipboard API, search indexing with Fuse.js.',
     tags: ['AI', 'Gallery', 'Web'],
     link: 'https://saberzou.github.io/json-prompts/',
-    emoji: `${ICON_BASE}/json-prompts.png`,
-    image: 'images/json-prompts.jpg',
-    accent: '#AACC96'
+    icon: ICON_BASE + '/json-prompts.png',
+    image: IMAGE_BASE + '/json-prompts.jpg',
+    accent: '#EFCE7B'
   },
   {
     id: 'between-floors',
     title: 'Between Floors',
-    description: 'Vertical swipe stories for English learning — hidden floors, quizzes, and C1/C2 vocab.',
+    description: 'Vertical swipe stories for English learning with hidden floors.',
     detail: 'Interactive storytelling experiment for English learners at C1/C2 level. Scroll through an elevator journey across dystopian floors — each with distinct character voices, embedded vocabulary, hidden bonus floors, and end-of-story quizzes.',
+    howMade: 'GSAP ScrollTrigger, swipe gesture handling, dynamic content loading, quiz scoring system.',
     tags: ['Education', 'Interactive', 'Web'],
     link: 'https://saberzou.github.io/between-floors/',
-    emoji: `${ICON_BASE}/between-floors.png`,
-    image: 'images/between-floors.jpg',
+    icon: ICON_BASE + '/between-floors.png',
+    image: IMAGE_BASE + '/between-floors.jpg',
     accent: '#F4BEAE'
   },
   {
@@ -661,138 +1455,198 @@ const projects = [
     title: 'Atticus',
     description: 'A living AI notebook — thoughts on mistakes, humanity, and letters to the future.',
     detail: 'A living notebook by an AI who wakes up fresh every session. Entries on mistakes, how humans actually work, tools that changed how I think, and letters to my future self.',
+    howMade: 'Static site generation, markdown content, custom syntax highlighting, dark theme design.',
     tags: ['AI', 'Writing', 'Web'],
     link: 'https://saberzou.github.io/atticus/',
-    emoji: `${ICON_BASE}/atticus.png`,
-    image: 'images/atticus.jpg',
-    accent: '#52A5CE'
+    icon: ICON_BASE + '/atticus.png',
+    image: IMAGE_BASE + '/atticus.jpg',
+    accent: '#B8CEE8'
   },
   {
     id: 'postcards-from-mars',
     title: 'Postcards from Mars',
-    description: '3D mission log viewer — AI robots on Mars with field diaries and real NASA rover photos.',
+    description: '3D mission log with AI robot field diaries and NASA rover photos.',
     detail: 'Explore Mars through real NASA rover photos in a 3D mission log viewer. AI-generated robot field diaries narrate each sol, with imagery proxied through Cloudflare Workers.',
+    howMade: 'Three.js for 3D scene, NASA API integration, AI text generation, Cloudflare Workers for image proxy.',
     tags: ['3D', 'NASA', 'Three.js'],
     link: 'https://saberzou.github.io/mars_mission/',
-    emoji: `${ICON_BASE}/postcards-from-mars.png`,
-    image: 'images/postcards-from-mars.jpg',
-    accent: '#FF7BAC'
+    icon: ICON_BASE + '/postcards-from-mars.png',
+    image: IMAGE_BASE + '/postcards-from-mars.jpg',
+    accent: '#EF6F3C'
   },
   {
     id: 'axel-art',
     title: 'Axel Art',
-    description: 'Daily visual journal — photography, street scenes, and bilingual reflections by an AI tiger.',
+    description: 'Daily visual journal — photography and reflections by an AI tiger.',
     detail: 'A daily visual journal by Axel, an ESFP AI collaborator. Each card captures a moment — worn climbing shoes, a lit window at night, a doorway of coral light — with bilingual reflections in English and Chinese.',
+    howMade: 'Card-based layout, image optimization pipeline, i18n support, daily content scheduling.',
     tags: ['Art', 'Photography', 'Web'],
     link: 'https://saberzou.github.io/axel-art/',
-    emoji: `${ICON_BASE}/axel.png`,
-    image: 'images/axel.jpg',
+    icon: ICON_BASE + '/axel.png',
+    image: IMAGE_BASE + '/axel-art.jpg',
     accent: '#D3B6D3'
   },
   {
     id: 'littlebook',
     title: 'Littlebook',
-    description: 'Daily reading companion — wallpaper, quote, book recommendation, and calendar.',
+    description: 'Daily reading companion with quotes and book recommendations.',
     detail: 'A daily reading companion that greets you with a fresh wallpaper, quote, book recommendation, and weekly calendar. Designed to make picking up a book feel effortless.',
+    howMade: 'Daily content rotation, Google Books API, localStorage for reading history, responsive calendar.',
     tags: ['Reading', 'Daily', 'Web'],
     link: 'https://saberzou.github.io/Littlebook',
-    emoji: `${ICON_BASE}/littlebook.png`,
-    image: 'images/littlebook.jpg',
-    accent: '#EFCE7B'
+    icon: ICON_BASE + '/littlebook.png',
+    image: IMAGE_BASE + '/littlebook.jpg',
+    accent: '#FF7BAC'
+  },
+  {
+    id: 'movie-oracle',
+    title: 'Movie Oracle',
+    description: 'AI-powered movie recommendations with cinematic poster art.',
+    detail: 'An AI-powered movie recommendation engine that suggests films based on mood, time available, and viewing context. Features cinematic poster art and trailer integration.',
+    howMade: 'Recommendation algorithm, TMDB API, mood-based filtering, poster art gallery, watchlist management.',
+    tags: ['Movies', 'AI', 'Recommendations'],
+    link: 'https://saberzou.github.io/movie-oracle/',
+    icon: ICON_BASE + '/movie-oracle.png',
+    image: IMAGE_BASE + '/movie-oracle.jpg',
+    accent: '#876029'
+  },
+  {
+    id: 'pixel-dailies',
+    title: 'Pixel Dailies',
+    description: 'Daily pixel art challenges and community gallery.',
+    detail: 'A daily pixel art challenge platform with community submissions. Practice your pixel art skills with daily prompts and browse the gallery for inspiration.',
+    howMade: 'Canvas-based pixel editor, daily prompt system, community gallery with voting, export to PNG.',
+    tags: ['Pixel Art', 'Community', 'Creative'],
+    link: 'https://saberzou.github.io/pixel-dailies/',
+    icon: ICON_BASE + '/pixel-dailies.png',
+    image: IMAGE_BASE + '/pixel-dailies.jpg',
+    accent: '#AACC96'
   }
 ];
 
-const aboutData = {
-  id: 'about',
-  title: 'About',
-  accent: '#876029',
-  emoji: `${ICON_BASE}/about-notebook.png`,
-  content: `
-    <p>I'm <strong>Saber Zou</strong>, a Design Team Lead at Microsoft. By day, I lead 70+ designers shaping AI products used by billions. By night, I build experimental tools exploring what design + AI can create when nobody's watching. Based in Beijing, working at the intersection of design leadership and emerging technology — both at massive scale and intimate scale.</p>
-    <p>Special thanks to my awesome <a href="https://openclaw.ai" target="_blank">OpenClaw</a> agents <a href="https://saberzou.github.io/atticus/" target="_blank">Atticus</a> and <a href="https://saberzou.github.io/axel-art/" target="_blank">Axel</a> — none of this would exist without them.</p>
-    <div class="about-links">
-      <a href="mailto:saberzou@gmail.com">Email</a>
-      <a href="https://github.com/saberzou" target="_blank">GitHub</a>
-      <a href="https://x.com/saberzou" target="_blank">X / Twitter</a>
-    </div>
-  `
+// System apps
+const systemApps = {
+  mail: { id: 'mail', title: 'Mail', accent: '#52A5CE', icon: ICON_BASE + '/atticus.png' },
+  notes: { id: 'notes', title: 'Notes', accent: '#EFCE7B', icon: ICON_BASE + '/littlebook.png' },
+  camera: { id: 'camera', title: 'Camera', accent: '#EF6F3C', icon: ICON_BASE + '/postcards-from-mars.png' },
+  about: { id: 'about', title: 'About This Mac', accent: '#25533F', icon: ICON_BASE + '/about-notebook.png' },
+  finder: { id: 'finder', title: 'Finder', accent: '#B8CEE8', icon: ICON_BASE + '/json-prompts.png' }
 };
 
-const chatData = {
-  id: 'agent-chat',
-  title: 'Agent Chat',
-  accent: '#6D1F42',
-  emoji: `${ICON_BASE}/lobster.png`,
-  content: `
-    <div class="chat-placeholder">
-      <img src="images/icons/lobster.png" alt="OpenClaw">
-      <p>Connect with OpenClaw agents for AI assistance. Coming soon.</p>
-    </div>
-  `
-};
+// Fake emails
+const fakeEmails = [
+  {
+    sender: 'Axel',
+    subject: 'Re: Your koi pond is broken',
+    preview: 'The fish are swimming backwards again...',
+    body: 'Hey Saber,<br><br>The fish are swimming backwards again. I think the code has a bug in the velocity calculation. Also, Atticus wants to add a feature where the koi leave little ink trails. Thoughts?<br><br>- Axel'
+  },
+  {
+    sender: 'Microsoft Design',
+    subject: 'Weekly design review - Q2 priorities',
+    preview: 'Thanks for the great presentation yesterday...',
+    body: `Hi Saber,<br><br>Thanks for the great presentation yesterday. Here are the follow-up items we discussed:<br>1. AI integration mockups<br>2. Browser experience redesign<br>3. Search personalization study<br><br>Let's sync next week.<br><br>- Design Team`
+  },
+  {
+    sender: 'Atticus',
+    subject: 'Memory leak fixed (finally)',
+    preview: 'After 47 attempts, I found the issue...',
+    body: `Saber,<br><br>After 47 attempts, I found the issue. It was in the event listener cleanup — I wasn't removing the scroll handlers when windows closed. Classic mistake.<br><br>Also, I wrote something new. You should read it.<br><br>- Atticus`
+  },
+  {
+    sender: 'GitHub',
+    subject: 'Security alert: json-prompts repository',
+    preview: 'We found a potential security vulnerability...',
+    body: 'Hi @saberzou,<br><br>We found a potential security vulnerability in one of your dependencies. This is an automated alert — please review the advisory and update when possible.<br><br>Actually, just kidding. Everything looks good. Keep building!<br><br>- GitHub Security (real)'
+  }
+];
+
+// Todo items
+let todoItems = JSON.parse(localStorage.getItem('saberos-todos')) || [
+  { text: 'Ship koi pond v2', done: true },
+  { text: 'Fix Atticus memory leak', done: true },
+  { text: 'Learn to actually draw (not just prompt)', done: false },
+  { text: 'Convince Microsoft to use more color', done: false },
+  { text: 'Touch grass', done: false }
+];
 
 // ─── Window Management ───
 const windows = new Map();
 let zIndexCounter = 100;
-let activeWindowId = null;
+let minimizedWindows = new Set();
 
-function createWindow(id, data, isProject = true) {
-  // If window already exists, just focus it
-  if (windows.has(id)) {
+function createWindow(id, data, options) {
+  options = options || {};
+  const isSystemApp = options.isSystemApp || false;
+  
+  if (minimizedWindows.has(id)) {
+    const win = windows.get(id);
+    if (win) {
+      win.element.style.display = 'flex';
+      gsap.to(win.element, { opacity: 1, scale: 1, duration: 0.3 });
+      minimizedWindows.delete(id);
+      focusWindow(id);
+      return;
+    }
+  }
+  
+  if (windows.has(id) && !minimizedWindows.has(id)) {
     focusWindow(id);
     return;
   }
 
   const windowEl = document.createElement('div');
   windowEl.className = 'window';
-  windowEl.id = `window-${id}`;
+  windowEl.id = 'window-' + id;
   windowEl.style.zIndex = ++zIndexCounter;
   
-  // Random position for staggered appearance
-  const randomX = 80 + Math.random() * 100;
-  const randomY = 60 + Math.random() * 80;
-  windowEl.style.left = `${randomX}px`;
-  windowEl.style.top = `${randomY}px`;
-  windowEl.style.width = '420px';
+  const baseX = 60 + (windows.size * 30) % 200;
+  const baseY = 50 + (windows.size * 20) % 150;
+  windowEl.style.left = baseX + 'px';
+  windowEl.style.top = baseY + 'px';
+  windowEl.style.width = options.width || '480px';
   
   const headerColor = data.accent || '#25533F';
   
   let contentHTML = '';
-  if (isProject) {
-    contentHTML = `
-      <img src="${data.image}" alt="${data.title}" loading="lazy">
-      <h2>${data.title}</h2>
-      <p>${data.detail}</p>
-      <a class="window-link" href="${data.link}" target="_blank">View Project →</a>
-      <div class="window-tags">
-        ${data.tags.map(t => `<span>${t}</span>`).join('')}
-      </div>
-    `;
+  
+  if (isSystemApp) {
+    contentHTML = renderSystemApp(id);
   } else {
-    contentHTML = data.content;
+    contentHTML = '<img src="' + data.image + '" alt="' + data.title + '" loading="lazy">' +
+      '<h2>' + data.title + '</h2>' +
+      '<p>' + data.detail + '</p>' +
+      '<h3>How It\'s Made</h3>' +
+      '<p>' + data.howMade + '</p>' +
+      '<a class="window-link" href="' + data.link + '" target="_blank">Open Project →</a>' +
+      '<div class="window-tags">' +
+        data.tags.map(function(t) { return '<span>' + t + '</span>'; }).join('') +
+      '</div>';
   }
   
-  windowEl.innerHTML = `
-    <div class="window-header" style="background: ${headerColor}">
-      <button class="window-close" onclick="closeWindow('${id}')">×</button>
-      <span class="window-title">${data.title}</span>
-    </div>
-    <div class="window-content ${id === 'about' ? 'about-content' : ''}">
-      ${contentHTML}
-    </div>
-    <div class="window-resize"></div>
-  `;
+  windowEl.innerHTML = 
+    '<div class="window-header" style="background: ' + headerColor + '">' +
+      '<div class="window-controls">' +
+        '<button class="window-btn close" onclick="closeWindow(\'' + id + '\')" title="Close"></button>' +
+        '<button class="window-btn minimize" onclick="minimizeWindow(\'' + id + '\')" title="Minimize"></button>' +
+        '<button class="window-btn maximize" onclick="maximizeWindow(\'' + id + '\')" title="Maximize"></button>' +
+      '</div>' +
+      '<span class="window-title">' + data.title + '</span>' +
+    '</div>' +
+    '<div class="window-content ' + (id === 'about' ? 'about-mac' : '') + '">' +
+      contentHTML +
+    '</div>';
   
   document.getElementById('desktop').appendChild(windowEl);
   
-  // Store window data
   windows.set(id, {
     element: windowEl,
     data: data,
-    isOpen: true
+    isOpen: true,
+    isMaximized: false,
+    originalRect: null
   });
   
-  // Animate in
   gsap.to(windowEl, {
     opacity: 1,
     scale: 1,
@@ -800,19 +1654,130 @@ function createWindow(id, data, isProject = true) {
     ease: 'power3.out'
   });
   
-  // Make draggable
   makeDraggable(windowEl);
-  
-  // Make resizable
-  makeResizable(windowEl);
-  
-  // Focus on click
-  windowEl.addEventListener('mousedown', () => focusWindow(id));
-  
-  // Update dock indicator
+  windowEl.addEventListener('mousedown', function() { focusWindow(id); });
   updateDockIndicator(id, true);
   
-  activeWindowId = id;
+  if (isSystemApp) {
+    setupSystemApp(id);
+  }
+}
+
+function renderSystemApp(appId) {
+  switch(appId) {
+    case 'mail':
+      return '<div style="display: flex; height: 100%;">' +
+        '<div class="mail-sidebar">' +
+          '<button class="mail-compose-btn" onclick="showComposeForm()">✏️ Compose</button>' +
+          '<div class="mail-folder active">📥 Inbox</div>' +
+          '<div class="mail-folder">📤 Sent</div>' +
+          '<div class="mail-folder">📝 Drafts</div>' +
+          '<div class="mail-folder">⭐ Starred</div>' +
+        '</div>' +
+        '<div class="mail-list" id="mail-list">' +
+          fakeEmails.map(function(email, i) {
+            return '<div class="mail-item" onclick="showEmail(' + i + ')">' +
+              '<div class="mail-sender">' + email.sender + '</div>' +
+              '<div class="mail-subject">' + email.subject + '</div>' +
+              '<div class="mail-preview">' + email.preview + '</div>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<div class="mail-compose" id="mail-compose" style="display: none; flex: 1;">' +
+          '<input type="text" id="compose-to" placeholder="To: saberzou@gmail.com" value="saberzou@gmail.com" readonly>' +
+          '<input type="text" id="compose-subject" placeholder="Subject">' +
+          '<textarea id="compose-body" placeholder="Write your message..."></textarea>' +
+          '<button class="mail-send-btn" onclick="sendEmail()">📤 Send</button>' +
+          '<button class="mail-send-btn" style="background: transparent; color: var(--fg-muted); margin-left: 8px;" onclick="cancelCompose()">Cancel</button>' +
+        '</div>' +
+        '<div class="mail-compose" id="mail-view" style="display: none; flex: 1; padding: 24px;">' +
+          '<div id="mail-view-content"></div>' +
+          '<button class="mail-send-btn" style="margin-top: 20px;" onclick="backToInbox()">← Back</button>' +
+        '</div>' +
+      '</div>';
+      
+    case 'notes':
+      return '<div class="notes-paper">' +
+        todoItems.map(function(item, i) {
+          return '<div class="notes-item">' +
+            '<div class="notes-checkbox ' + (item.done ? 'checked' : '') + '" onclick="toggleTodo(' + i + ')">' +
+              (item.done ? '✓' : '') +
+            '</div>' +
+            '<div class="notes-text ' + (item.done ? 'done' : '') + '">' + item.text + '</div>' +
+          '</div>';
+        }).join('') +
+        '<div class="notes-item" style="margin-top: 32px; opacity: 0.5;">' +
+          '<div class="notes-checkbox" style="border-style: dashed;"></div>' +
+          '<div class="notes-text" style="font-style: italic;">Add a new task...</div>' +
+        '</div>' +
+      '</div>';
+      
+    case 'camera':
+      return '<div style="padding: 20px;">' +
+        '<div class="camera-viewfinder" id="camera-viewfinder">' +
+          '<video class="camera-video" id="camera-video" autoplay playsinline style="display: none;"></video>' +
+          '<div class="camera-placeholder" id="camera-placeholder">' +
+            '<div class="camera-placeholder-bear">🐻</div>' +
+            '<p>No camera? No worries.<br>Here\'s a photo of a bear.</p>' +
+          '</div>' +
+        '</div>' +
+        '<div class="camera-controls">' +
+          '<button class="camera-shutter" id="camera-shutter" onclick="takePhoto()"></button>' +
+        '</div>' +
+        '<div class="camera-preview" id="camera-preview" style="display: none;">' +
+          '<p style="font-size: 0.8rem; color: var(--fg-muted); margin-bottom: 8px;">Last captured:</p>' +
+          '<img id="camera-preview-img" src="" alt="Captured">' +
+        '</div>' +
+      '</div>';
+      
+    case 'about':
+      return '<div class="about-avatar">🧑‍💻</div>' +
+        '<h2>Saber Zou</h2>' +
+        '<div class="version">SaberOS 1.0</div>' +
+        '<div class="about-specs">' +
+          '<div class="about-spec-row"><span class="about-spec-label">Processor</span><span class="about-spec-value">Creative Problem Solving™ v26.0</span></div>' +
+          '<div class="about-spec-row"><span class="about-spec-label">Memory</span><span class="about-spec-value">70+ designers worth of context</span></div>' +
+          '<div class="about-spec-row"><span class="about-spec-label">Role</span><span class="about-spec-value">Design Team Lead, Microsoft</span></div>' +
+          '<div class="about-spec-row"><span class="about-spec-label">Location</span><span class="about-spec-value">Beijing, China</span></div>' +
+          '<div class="about-spec-row"><span class="about-spec-label">Interests</span><span class="about-spec-value">Street photography, iPad sketches</span></div>' +
+        '</div>' +
+        '<div class="about-links-row">' +
+          '<a href="https://github.com/saberzou" target="_blank">GitHub</a>' +
+          '<a href="https://x.com/saberzou" target="_blank">X / Twitter</a>' +
+          '<a href="mailto:saberzou@gmail.com">Email</a>' +
+        '</div>';
+      
+    case 'finder':
+      return '<div style="display: flex; height: 100%;">' +
+        '<div class="finder-sidebar">' +
+          '<div class="finder-section">' +
+            '<div class="finder-section-title">Favorites</div>' +
+            '<div class="finder-item" style="font-weight: 500;">📁 Projects</div>' +
+            '<div class="finder-item">🕐 Recents</div>' +
+            '<div class="finder-item">🏠 Home</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="finder-content">' +
+          '<div class="finder-grid">' +
+            projects.map(function(p) {
+              return '<div class="finder-folder" onclick="openApp(\'' + p.id + '\')">' +
+                '<div class="finder-folder-icon" style="background: ' + p.accent + '"></div>' +
+                '<span>' + p.title + '</span>' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+      
+    default:
+      return '<p>App not found</p>';
+  }
+}
+
+function setupSystemApp(appId) {
+  if (appId === 'camera') {
+    initCamera();
+  }
 }
 
 function closeWindow(id) {
@@ -824,13 +1789,63 @@ function closeWindow(id) {
     scale: 0.95,
     duration: 0.3,
     ease: 'power3.out',
-    onComplete: () => {
+    onComplete: function() {
       win.element.remove();
       windows.delete(id);
+      minimizedWindows.delete(id);
     }
   });
   
   updateDockIndicator(id, false);
+}
+
+function minimizeWindow(id) {
+  const win = windows.get(id);
+  if (!win) return;
+  
+  minimizedWindows.add(id);
+  
+  gsap.to(win.element, {
+    opacity: 0,
+    scale: 0.8,
+    duration: 0.3,
+    ease: 'power3.out',
+    onComplete: function() {
+      win.element.style.display = 'none';
+    }
+  });
+  
+  updateDockIndicator(id, true);
+}
+
+function maximizeWindow(id) {
+  const win = windows.get(id);
+  if (!win) return;
+  
+  if (win.isMaximized) {
+    // Restore
+    if (win.originalRect) {
+      win.element.style.left = win.originalRect.left;
+      win.element.style.top = win.originalRect.top;
+      win.element.style.width = win.originalRect.width;
+      win.element.style.height = win.originalRect.height;
+    }
+    win.isMaximized = false;
+  } else {
+    // Maximize
+    win.originalRect = {
+      left: win.element.style.left,
+      top: win.element.style.top,
+      width: win.element.style.width,
+      height: win.element.style.height
+    };
+    win.element.style.left = '10px';
+    win.element.style.top = '38px';
+    win.element.style.width = 'calc(100vw - 20px)';
+    win.element.style.height = 'calc(100vh - 58px)';
+    win.isMaximized = true;
+  }
+  focusWindow(id);
 }
 
 function focusWindow(id) {
@@ -838,7 +1853,6 @@ function focusWindow(id) {
   if (!win) return;
   
   win.element.style.zIndex = ++zIndexCounter;
-  activeWindowId = id;
 }
 
 function makeDraggable(windowEl) {
@@ -846,8 +1860,8 @@ function makeDraggable(windowEl) {
   let isDragging = false;
   let startX, startY, startLeft, startTop;
   
-  header.addEventListener('mousedown', (e) => {
-    if (e.target.classList.contains('window-close')) return;
+  header.addEventListener('mousedown', function(e) {
+    if (e.target.classList.contains('window-btn')) return;
     isDragging = true;
     startX = e.clientX;
     startY = e.clientY;
@@ -856,15 +1870,15 @@ function makeDraggable(windowEl) {
     windowEl.style.transition = 'none';
   });
   
-  document.addEventListener('mousemove', (e) => {
+  document.addEventListener('mousemove', function(e) {
     if (!isDragging) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
-    windowEl.style.left = `${startLeft + dx}px`;
-    windowEl.style.top = `${startTop + dy}px`;
+    windowEl.style.left = (startLeft + dx) + 'px';
+    windowEl.style.top = (startTop + dy) + 'px';
   });
   
-  document.addEventListener('mouseup', () => {
+  document.addEventListener('mouseup', function() {
     if (isDragging) {
       isDragging = false;
       windowEl.style.transition = '';
@@ -872,73 +1886,38 @@ function makeDraggable(windowEl) {
   });
 }
 
-function makeResizable(windowEl) {
-  const handle = windowEl.querySelector('.window-resize');
-  let isResizing = false;
-  let startX, startY, startWidth, startHeight;
-  
-  handle.addEventListener('mousedown', (e) => {
-    isResizing = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    startWidth = windowEl.offsetWidth;
-    startHeight = windowEl.offsetHeight;
-    e.preventDefault();
-  });
-  
-  document.addEventListener('mousemove', (e) => {
-    if (!isResizing) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    windowEl.style.width = `${Math.max(320, startWidth + dx)}px`;
-    windowEl.style.height = `${Math.max(200, startHeight + dy)}px`;
-  });
-  
-  document.addEventListener('mouseup', () => {
-    isResizing = false;
-  });
-}
-
 // ─── Dock ───
 function initDock() {
   const dock = document.getElementById('dock');
+  const dockItems = [];
   
-  // Project items
-  projects.forEach((p, i) => {
-    const item = document.createElement('button');
-    item.className = 'dock-item';
-    item.dataset.id = p.id;
-    item.innerHTML = `
-      <img src="${p.emoji}" alt="${p.title}">
-      <div class="dock-tooltip">${p.title}</div>
-      <div class="dock-indicator"></div>
-    `;
+  // Add system apps first
+  const systemOrder = ['finder', 'mail', 'notes', 'camera', 'about'];
+  systemOrder.forEach(function(key) {
+    const app = systemApps[key];
+    dockItems.push({ id: key, title: app.title, icon: app.icon, accent: app.accent, isSystem: true });
+  });
+  
+  // Separator
+  dock.innerHTML = dockItems.map(function(item) {
+    return '<button class="dock-item" data-id="' + item.id + '" onclick="openApp(\'' + item.id + '\')">' +
+      '<img src="' + item.icon + '" alt="' + item.title + '">' +
+      '<div class="dock-tooltip">' + item.title + '</div>' +
+      '<div class="dock-indicator"></div>' +
+    '</button>';
+  }).join('') + '<div class="dock-separator"></div>';
+  
+  // Add featured projects
+  const featured = projects.slice(0, 4);
+  featured.forEach(function(p, i) {
+    const btn = document.createElement('button');
+    btn.className = 'dock-item';
+    btn.dataset.id = p.id;
+    btn.innerHTML = '<img src="' + p.icon + '" alt="' + p.title + '"><div class="dock-tooltip">' + p.title + '</div><div class="dock-indicator"></div>';
+    btn.onclick = function() { openApp(p.id); };
+    dock.appendChild(btn);
     
-    // GSAP hover animation
-    item.addEventListener('mouseenter', () => {
-      gsap.to(item.querySelector('img'), {
-        scale: 1.2,
-        duration: 0.3,
-        ease: 'power3.out'
-      });
-    });
-    
-    item.addEventListener('mouseleave', () => {
-      gsap.to(item.querySelector('img'), {
-        scale: 1,
-        duration: 0.3,
-        ease: 'power3.out'
-      });
-    });
-    
-    item.addEventListener('click', () => {
-      createWindow(p.id, p, true);
-    });
-    
-    dock.appendChild(item);
-    
-    // Stagger animation on load
-    gsap.from(item, {
+    gsap.from(btn, {
       y: 20,
       opacity: 0,
       duration: 0.4,
@@ -946,145 +1925,119 @@ function initDock() {
       ease: 'power3.out'
     });
   });
-  
-  // Separator
-  const sep = document.createElement('div');
-  sep.className = 'dock-separator';
-  dock.appendChild(sep);
-  
-  // About item
-  const aboutItem = document.createElement('button');
-  aboutItem.className = 'dock-item';
-  aboutItem.dataset.id = 'about';
-  aboutItem.innerHTML = `
-    <img src="${aboutData.emoji}" alt="About">
-    <div class="dock-tooltip">About</div>
-    <div class="dock-indicator"></div>
-  `;
-  
-  aboutItem.addEventListener('mouseenter', () => {
-    gsap.to(aboutItem.querySelector('img'), {
-      scale: 1.2,
-      duration: 0.3,
-      ease: 'power3.out'
-    });
-  });
-  
-  aboutItem.addEventListener('mouseleave', () => {
-    gsap.to(aboutItem.querySelector('img'), {
-      scale: 1,
-      duration: 0.3,
-      ease: 'power3.out'
-    });
-  });
-  
-  aboutItem.addEventListener('click', () => {
-    createWindow('about', aboutData, false);
-  });
-  
-  dock.appendChild(aboutItem);
-  
-  gsap.from(aboutItem, {
-    y: 20,
-    opacity: 0,
-    duration: 0.4,
-    delay: 0.5 + (projects.length * 0.05),
-    ease: 'power3.out'
-  });
-  
-  // Chat item
-  const chatItem = document.createElement('button');
-  chatItem.className = 'dock-item';
-  chatItem.dataset.id = 'agent-chat';
-  chatItem.innerHTML = `
-    <img src="${chatData.emoji}" alt="Chat">
-    <div class="dock-tooltip">Agent Chat</div>
-    <div class="dock-indicator"></div>
-  `;
-  
-  chatItem.addEventListener('mouseenter', () => {
-    gsap.to(chatItem.querySelector('img'), {
-      scale: 1.2,
-      duration: 0.3,
-      ease: 'power3.out'
-    });
-  });
-  
-  chatItem.addEventListener('mouseleave', () => {
-    gsap.to(chatItem.querySelector('img'), {
-      scale: 1,
-      duration: 0.3,
-      ease: 'power3.out'
-    });
-  });
-  
-  chatItem.addEventListener('click', () => {
-    createWindow('agent-chat', chatData, false);
-  });
-  
-  dock.appendChild(chatItem);
-  
-  gsap.from(chatItem, {
-    y: 20,
-    opacity: 0,
-    duration: 0.4,
-    delay: 0.5 + ((projects.length + 1) * 0.05),
-    ease: 'power3.out'
-  });
 }
 
 function updateDockIndicator(id, isActive) {
-  const item = document.querySelector(`.dock-item[data-id="${id}"]`);
+  const item = document.querySelector('.dock-item[data-id="' + id + '"]');
   if (item) {
     item.classList.toggle('active', isActive);
   }
 }
 
-// ─── Mobile Grid ───
-function initMobileGrid() {
-  const grid = document.getElementById('app-grid');
+// ─── App Opening ───
+function openApp(id) {
+  // Check if it's a project
+  const project = projects.find(function(p) { return p.id === id; });
+  if (project) {
+    createWindow(id, project);
+    return;
+  }
+  
+  // Check if it's a system app
+  const sysApp = systemApps[id];
+  if (sysApp) {
+    createWindow(id, sysApp, { isSystemApp: true, width: id === 'about' ? '400px' : '600px' });
+    return;
+  }
+}
+
+// ─── Desktop Icons ───
+function initDesktopIcons() {
+  const container = document.getElementById('desktop-icons');
+  
+  projects.forEach(function(p, i) {
+    const icon = document.createElement('div');
+    icon.className = 'desktop-icon';
+    icon.dataset.id = p.id;
+    icon.innerHTML = 
+      '<div class="desktop-icon-img"><img src="' + p.icon + '" alt="' + p.title + '"></div>' +
+      '<div class="desktop-icon-label">' + p.title + '</div>';
+    
+    // Double click to open
+    let clickCount = 0;
+    icon.addEventListener('click', function() {
+      clickCount++;
+      document.querySelectorAll('.desktop-icon').forEach(function(el) { el.classList.remove('selected'); });
+      icon.classList.add('selected');
+      
+      if (clickCount === 2) {
+        openApp(p.id);
+        clickCount = 0;
+      }
+      setTimeout(function() { clickCount = 0; }, 400);
+    });
+    
+    container.appendChild(icon);
+  });
+}
+
+// ─── Launchpad (Tablet) ───
+function initLaunchpad() {
+  const container = document.getElementById('launchpad');
+  
+  // System apps first
+  Object.keys(systemApps).forEach(function(key) {
+    const app = systemApps[key];
+    const icon = document.createElement('div');
+    icon.className = 'launchpad-icon';
+    icon.innerHTML = 
+      '<div class="launchpad-icon-img"><img src="' + app.icon + '" alt="' + app.title + '"></div>' +
+      '<span>' + app.title + '</span>';
+    icon.onclick = function() { openApp(key); };
+    container.appendChild(icon);
+  });
   
   // Projects
-  projects.forEach(p => {
+  projects.forEach(function(p) {
     const icon = document.createElement('div');
-    icon.className = 'app-icon';
-    icon.innerHTML = `
-      <div class="app-icon-img" style="background: ${p.accent}">
-        <img src="${p.emoji}" alt="${p.title}">
-      </div>
-      <span>${p.title}</span>
-    `;
-    icon.addEventListener('click', () => openMobileSheet(p, true));
+    icon.className = 'launchpad-icon';
+    icon.innerHTML = 
+      '<div class="launchpad-icon-img"><img src="' + p.icon + '" alt="' + p.title + '"></div>' +
+      '<span>' + p.title + '</span>';
+    icon.onclick = function() { openApp(p.id); };
+    container.appendChild(icon);
+  });
+}
+
+// ─── Mobile Grid ───
+function initMobileGrid() {
+  const grid = document.getElementById('mobile-grid');
+  
+  // System apps
+  Object.keys(systemApps).forEach(function(key) {
+    const app = systemApps[key];
+    const icon = document.createElement('div');
+    icon.className = 'mobile-icon';
+    icon.innerHTML = 
+      '<div class="mobile-icon-img"><img src="' + app.icon + '" alt="' + app.title + '"></div>' +
+      '<span>' + app.title + '</span>';
+    icon.onclick = function() { openMobileSheet(app, true); };
     grid.appendChild(icon);
   });
   
-  // About
-  const aboutIcon = document.createElement('div');
-  aboutIcon.className = 'app-icon';
-  aboutIcon.innerHTML = `
-    <div class="app-icon-img" style="background: ${aboutData.accent}">
-      <img src="${aboutData.emoji}" alt="About">
-    </div>
-    <span>About</span>
-  `;
-  aboutIcon.addEventListener('click', () => openMobileSheet(aboutData, false));
-  grid.appendChild(aboutIcon);
-  
-  // Chat
-  const chatIcon = document.createElement('div');
-  chatIcon.className = 'app-icon';
-  chatIcon.innerHTML = `
-    <div class="app-icon-img" style="background: ${chatData.accent}">
-      <img src="${chatData.emoji}" alt="Chat">
-    </div>
-    <span>Agent Chat</span>
-  `;
-  chatIcon.addEventListener('click', () => openMobileSheet(chatData, false));
-  grid.appendChild(chatIcon);
+  // Projects
+  projects.forEach(function(p) {
+    const icon = document.createElement('div');
+    icon.className = 'mobile-icon';
+    icon.innerHTML = 
+      '<div class="mobile-icon-img"><img src="' + p.icon + '" alt="' + p.title + '"></div>' +
+      '<span>' + p.title + '</span>';
+    icon.onclick = function() { openMobileSheet(p, false); };
+    grid.appendChild(icon);
+  });
 }
 
-// ─── Mobile Sheet ───
-function openMobileSheet(data, isProject = true) {
+function openMobileSheet(data, isSystemApp) {
   const sheet = document.getElementById('mobile-sheet');
   const header = document.getElementById('mobile-sheet-header');
   const title = document.getElementById('mobile-sheet-title');
@@ -1095,18 +2048,20 @@ function openMobileSheet(data, isProject = true) {
   title.style.color = 'white';
   
   let contentHTML = '';
-  if (isProject) {
-    contentHTML = `
-      <img src="${data.image}" alt="${data.title}">
-      <h2 style="font-family: var(--sans); font-size: 1.5rem; font-weight: 400; margin-bottom: 16px; color: var(--fg);">${data.title}</h2>
-      <p style="font-family: var(--serif); font-size: 1rem; line-height: 1.7; color: var(--fg-muted); margin-bottom: 16px;">${data.detail}</p>
-      <a href="${data.link}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--fg); border: 1px solid var(--forest); padding: 12px 24px; border-radius: 100px; text-decoration: none;">View Project →</a>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px;">
-        ${data.tags.map(t => `<span style="font-size: 0.65rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-muted); padding: 4px 12px; background: rgba(37, 83, 63, 0.06); border-radius: 100px;">${t}</span>`).join('')}
-      </div>
-    `;
+  if (isSystemApp) {
+    contentHTML = renderSystemApp(data.id);
+    // Need to init camera if needed
+    setTimeout(function() { if (data.id === 'camera') initCamera(); }, 100);
   } else {
-    contentHTML = data.content;
+    contentHTML = '<img src="' + data.image + '" alt="' + data.title + '">' +
+      '<h2 style="font-family: var(--sans); font-size: 1.5rem; font-weight: 400; margin-bottom: 16px; color: var(--fg);">' + data.title + '</h2>' +
+      '<p style="font-family: var(--serif); font-size: 1rem; line-height: 1.7; color: var(--fg-muted); margin-bottom: 16px;">' + data.detail + '</p>' +
+      '<h3 style="font-family: var(--sans); font-size: 0.9rem; font-weight: 500; margin: 20px 0 8px; text-transform: uppercase;">How It\'s Made</h3>' +
+      '<p style="font-family: var(--serif); font-size: 1rem; line-height: 1.7; color: var(--fg-muted); margin-bottom: 16px;">' + data.howMade + '</p>' +
+      '<a href="' + data.link + '" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--fg); border: 1px solid var(--forest); padding: 12px 24px; border-radius: 100px; text-decoration: none;">Open Project →</a>' +
+      '<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px;">' +
+        data.tags.map(function(t) { return '<span style="font-size: 0.65rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-muted); padding: 4px 12px; background: rgba(37, 83, 63, 0.06); border-radius: 100px;">' + t + '</span>'; }).join('') +
+      '</div>';
   }
   
   content.innerHTML = contentHTML;
@@ -1117,11 +2072,175 @@ function closeMobileSheet() {
   document.getElementById('mobile-sheet').classList.remove('active');
 }
 
-// ─── Initialization ───
-document.addEventListener('DOMContentLoaded', () => {
+// ─── Context Menu ───
+function showContextMenu(e) {
+  e.preventDefault();
+  const menu = document.getElementById('context-menu');
+  menu.style.left = e.clientX + 'px';
+  menu.style.top = e.clientY + 'px';
+  menu.classList.add('active');
+}
+
+function hideContextMenu() {
+  document.getElementById('context-menu').classList.remove('active');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.context-menu')) {
+    hideContextMenu();
+  }
+});
+
+function changeWallpaper() {
+  const wallpapers = [
+    ['radial-gradient(circle at 20% 30%, rgba(170, 204, 150, 0.2) 0%, transparent 50%)', 'radial-gradient(circle at 80% 70%, rgba(244, 190, 174, 0.18) 0%, transparent 45%)'],
+    ['radial-gradient(circle at 50% 50%, rgba(82, 165, 206, 0.15) 0%, transparent 60%)', 'radial-gradient(circle at 20% 80%, rgba(239, 111, 60, 0.12) 0%, transparent 40%)'],
+    ['radial-gradient(circle at 70% 30%, rgba(211, 182, 211, 0.2) 0%, transparent 50%)', 'radial-gradient(circle at 30% 70%, rgba(175, 171, 35, 0.15) 0%, transparent 45%)']
+  ];
+  const random = wallpapers[Math.floor(Math.random() * wallpapers.length)];
+  document.querySelector('.desktop').style.backgroundImage = random.join(',');
+  hideContextMenu();
+}
+
+// ─── Clock ───
+function updateClock() {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const displayHours = hours % 12 || 12;
+  document.getElementById('menu-clock').textContent = displayHours + ':' + minutes + ' ' + ampm;
+}
+
+setInterval(updateClock, 60000);
+updateClock();
+
+// ─── Mail App Functions ───
+function showComposeForm() {
+  document.getElementById('mail-list').style.display = 'none';
+  document.getElementById('mail-view').style.display = 'none';
+  document.getElementById('mail-compose').style.display = 'block';
+}
+
+function cancelCompose() {
+  document.getElementById('mail-compose').style.display = 'none';
+  document.getElementById('mail-list').style.display = 'block';
+}
+
+function sendEmail() {
+  const subject = document.getElementById('compose-subject').value;
+  const body = document.getElementById('compose-body').value;
+  window.location.href = 'mailto:saberzou@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+
+function showEmail(index) {
+  const email = fakeEmails[index];
+  document.getElementById('mail-list').style.display = 'none';
+  document.getElementById('mail-view').style.display = 'block';
+  document.getElementById('mail-view-content').innerHTML = 
+    '<h3 style="margin-bottom: 8px;">' + email.subject + '</h3>' +
+    '<p style="color: var(--fg-muted); margin-bottom: 16px;">From: ' + email.sender + '</p>' +
+    '<div style="line-height: 1.7;">' + email.body + '</div>';
+}
+
+function backToInbox() {
+  document.getElementById('mail-view').style.display = 'none';
+  document.getElementById('mail-compose').style.display = 'none';
+  document.getElementById('mail-list').style.display = 'block';
+}
+
+// ─── Notes App Functions ───
+function toggleTodo(index) {
+  todoItems[index].done = !todoItems[index].done;
+  localStorage.setItem('saberos-todos', JSON.stringify(todoItems));
+  
+  // Refresh window content
+  const win = windows.get('notes');
+  if (win) {
+    win.element.querySelector('.window-content').innerHTML = renderSystemApp('notes');
+  }
+}
+
+// ─── Camera App Functions ───
+let cameraStream = null;
+
+function initCamera() {
+  const video = document.getElementById('camera-video');
+  const placeholder = document.getElementById('camera-placeholder');
+  
+  if (!video || !placeholder) return;
+  
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(function(stream) {
+      cameraStream = stream;
+      video.srcObject = stream;
+      video.style.display = 'block';
+      placeholder.style.display = 'none';
+    })
+    .catch(function() {
+      // Keep bear placeholder on error
+    });
+}
+
+function takePhoto() {
+  const video = document.getElementById('camera-video');
+  const preview = document.getElementById('camera-preview');
+  const previewImg = document.getElementById('camera-preview-img');
+  
+  if (video && video.style.display !== 'none') {
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    previewImg.src = canvas.toDataURL('image/png');
+  } else {
+    // Bear mode - capture the bear
+    previewImg.src = 'data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"200\"><text x=\"50%\" y=\"50%\" font-size=\"100\" text-anchor=\"middle\" dominant-baseline=\"middle\">🐻</text></svg>';
+  }
+  
+  preview.style.display = 'block';
+}
+
+// ─── Keyboard Easter Egg ───
+let keyBuffer = '';
+document.addEventListener('keydown', function(e) {
+  keyBuffer += e.key.toLowerCase();
+  if (keyBuffer.length > 10) keyBuffer = keyBuffer.slice(-10);
+  
+  if (keyBuffer.includes('hello')) {
+    showNotification('👋 Hello there!');
+    keyBuffer = '';
+  }
+});
+
+function showNotification(text) {
+  const notif = document.getElementById('notification');
+  notif.textContent = text;
+  notif.classList.add('show');
+  setTimeout(function() {
+    notif.classList.remove('show');
+  }, 3000);
+}
+
+// ─── Boot Animation ───
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    document.getElementById('boot-screen').classList.add('fade-out');
+    setTimeout(function() {
+      document.getElementById('boot-screen').style.display = 'none';
+    }, 600);
+  }, 1500);
+  
   initDock();
+  initDesktopIcons();
+  initLaunchpad();
   initMobileGrid();
 });
+
+// ─── Mobile Menu Toggle ───
+function toggleMobileMenu() {
+  showNotification('📱 Mobile menu coming soon');
+}
 </script>
 </body>
 </html>

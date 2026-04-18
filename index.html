@@ -91,6 +91,9 @@ body {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+@keyframes blink {
+  50% { opacity: 0; }
+}
 
 /* ─── Menu Bar ─── */
 .menu-bar {
@@ -1702,12 +1705,16 @@ const projects = [
 
 // System apps
 const systemApps = {
-  mail: { id: 'mail', title: 'Mail', accent: '#52A5CE', icon: ICON_BASE + '/atticus.png' },
-  notes: { id: 'notes', title: 'Notes', accent: '#EFCE7B', icon: ICON_BASE + '/littlebook.png' },
-  camera: { id: 'camera', title: 'Camera', accent: '#EF6F3C', icon: ICON_BASE + '/postcards-from-mars.png' },
-  about: { id: 'about', title: 'About This Mac', accent: '#FF8C42', icon: ICON_BASE + '/about-notebook.png' },
-  finder: { id: 'finder', title: 'Finder', accent: '#B8CEE8', icon: ICON_BASE + '/json-prompts.png' },
-  wallpaper: { id: 'wallpaper', title: 'Desktop & Screen Saver', accent: '#D3B6D3', icon: ICON_BASE + '/atticus.png' }
+  mail: { id: 'mail', title: 'Mail', accent: '#52A5CE', icon: ICON_BASE + '/thiings/mail.png' },
+  notes: { id: 'notes', title: 'Notes', accent: '#EFCE7B', icon: ICON_BASE + '/thiings/notes.png' },
+  camera: { id: 'camera', title: 'Camera', accent: '#EF6F3C', icon: ICON_BASE + '/thiings/camera.png' },
+  about: { id: 'about', title: 'About This Mac', accent: '#FF8C42', icon: ICON_BASE + '/thiings/about.png' },
+  finder: { id: 'finder', title: 'Finder', accent: '#B8CEE8', icon: ICON_BASE + '/thiings/finder.png' },
+  wallpaper: { id: 'wallpaper', title: 'Desktop & Screen Saver', accent: '#D3B6D3', icon: ICON_BASE + '/thiings/wallpaper.png' },
+  music: { id: 'music', title: 'Music', accent: '#FF7BAC', icon: ICON_BASE + '/thiings/music.png' },
+  books: { id: 'books', title: 'Books', accent: '#876029', icon: ICON_BASE + '/thiings/books.png' },
+  terminal: { id: 'terminal', title: 'Terminal', accent: '#25533F', icon: ICON_BASE + '/thiings/terminal.png' },
+  trash: { id: 'trash', title: 'Trash', accent: '#7A5C3A', icon: ICON_BASE + '/thiings/trash.png' }
 };
 
 // Fake emails
@@ -1948,6 +1955,46 @@ function renderSystemApp(appId) {
         '<div id="wp-app-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 4px 12px 12px; overflow-y: auto; flex: 1;"></div>' +
       '</div>';
 
+    case 'music':
+      return '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 16px; padding: 24px; text-align: center;">' +
+        '<div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #FF7BAC, #D3B6D3); display: flex; align-items: center; justify-content: center;"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></div>' +
+        '<h2 style="font-family: var(--sans); font-size: 1.2rem; margin: 0;">Music</h2>' +
+        '<p style="font-family: var(--serif); color: var(--fg-muted); font-size: 0.9rem; margin: 0;">Saber\'s playlist is playing somewhere in the background.</p>' +
+        '<div style="display: flex; gap: 24px; align-items: center; margin-top: 8px;"><span style="font-size: 1.4rem; cursor: pointer;">⏮</span><span style="font-size: 2rem; cursor: pointer;">▶</span><span style="font-size: 1.4rem; cursor: pointer;">⏭</span></div>' +
+      '</div>';
+
+    case 'books':
+      return '<div style="display: flex; flex-direction: column; height: 100%; padding: 16px; gap: 12px;">' +
+        '<h3 style="font-family: var(--sans); font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fg-muted); margin: 0;">Currently Reading</h3>' +
+        '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">' +
+          '<div style="aspect-ratio: 2/3; background: linear-gradient(135deg, #876029, #EFCE7B); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-family: var(--serif); font-size: 0.7rem; padding: 8px; text-align: center;">The Design of Everyday Things</div>' +
+          '<div style="aspect-ratio: 2/3; background: linear-gradient(135deg, #6D1F42, #D3B6D3); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-family: var(--serif); font-size: 0.7rem; padding: 8px; text-align: center;">Thinking, Fast and Slow</div>' +
+          '<div style="aspect-ratio: 2/3; background: linear-gradient(135deg, #25533F, #AACC96); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-family: var(--serif); font-size: 0.7rem; padding: 8px; text-align: center;">Creative Selection</div>' +
+        '</div>' +
+        '<p style="font-family: var(--serif); color: var(--fg-muted); font-size: 0.85rem; margin: 4px 0 0;">More at <a href="https://littlebook.vercel.app" target="_blank" style="color: var(--forest);">Littlebook</a></p>' +
+      '</div>';
+
+    case 'terminal':
+      return '<div style="background: #1a1a2e; color: #AACC96; font-family: monospace; font-size: 0.8rem; padding: 12px; height: 100%; overflow-y: auto; line-height: 1.6;">' +
+        '<div>Last login: ' + new Date().toDateString() + ' on ttys000</div>' +
+        '<div style="margin-top: 8px;"><span style="color: #52A5CE;">saber@saberos</span>:<span style="color: #EFCE7B;">~</span>$ whoami</div>' +
+        '<div>Saber Zou — Design Team Lead @ Microsoft</div>' +
+        '<div style="margin-top: 4px;"><span style="color: #52A5CE;">saber@saberos</span>:<span style="color: #EFCE7B;">~</span>$ cat interests.txt</div>' +
+        '<div>Street photography, iPad sketching, vibe coding, Apple fanboy</div>' +
+        '<div style="margin-top: 4px;"><span style="color: #52A5CE;">saber@saberos</span>:<span style="color: #EFCE7B;">~</span>$ ls projects/</div>' +
+        '<div style="color: #B8CEE8;">koi-pond/  cards-of-answers/  axiom-thoughts/  between-floors/  pixel-dailies/  artuzzle/  littlebook/  json-prompts/</div>' +
+        '<div style="margin-top: 4px;"><span style="color: #52A5CE;">saber@saberos</span>:<span style="color: #EFCE7B;">~</span>$ echo "Thanks for visiting!"</div>' +
+        '<div>Thanks for visiting!</div>' +
+        '<div style="margin-top: 4px;"><span style="color: #52A5CE;">saber@saberos</span>:<span style="color: #EFCE7B;">~</span>$ <span style="animation: blink 1s step-end infinite;">▌</span></div>' +
+      '</div>';
+
+    case 'trash':
+      return '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; color: var(--fg-muted);">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>' +
+        '<p style="font-family: var(--sans); font-size: 0.9rem; margin: 0;">Trash is empty</p>' +
+        '<p style="font-family: var(--serif); font-size: 0.8rem; margin: 0;">Nothing to see here. Move along.</p>' +
+      '</div>';
+
     default:
       return '<p>App not found</p>';
   }
@@ -2093,7 +2140,7 @@ function initDock() {
   const dockItems = [];
   
   // Add system apps first
-  const systemOrder = ['finder', 'mail', 'notes', 'camera', 'about'];
+  const systemOrder = ['finder', 'mail', 'notes', 'camera', 'music', 'books', 'terminal', 'wallpaper', 'about'];
   systemOrder.forEach(function(key) {
     const app = systemApps[key];
     dockItems.push({ id: key, title: app.title, icon: app.icon, accent: app.accent, isSystem: true });
@@ -2126,6 +2173,17 @@ function initDock() {
       ease: 'power3.out'
     });
   });
+  
+  // Trash separator + trash at the end (macOS style)
+  var trashSep = document.createElement('div');
+  trashSep.className = 'dock-separator';
+  dock.appendChild(trashSep);
+  var trashBtn = document.createElement('button');
+  trashBtn.className = 'dock-item';
+  trashBtn.dataset.id = 'trash';
+  trashBtn.innerHTML = '<img src="' + systemApps.trash.icon + '" alt="Trash"><div class="dock-tooltip">Trash</div><div class="dock-indicator"></div>';
+  trashBtn.onclick = function() { openApp('trash'); };
+  dock.appendChild(trashBtn);
 }
 
 function updateDockIndicator(id, isActive) {

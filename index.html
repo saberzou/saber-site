@@ -1760,7 +1760,8 @@ function createWindow(id, data, options) {
   const baseY = 50 + (windows.size * 20) % 150;
   windowEl.style.left = baseX + 'px';
   windowEl.style.top = baseY + 'px';
-  windowEl.style.width = options.width || '480px';
+  windowEl.style.width = options.width || (isSystemApp ? '480px' : '800px');
+  windowEl.style.height = isSystemApp ? '' : '600px';
   
   const headerColor = data.accent || '#FF8C42';
   
@@ -1769,15 +1770,7 @@ function createWindow(id, data, options) {
   if (isSystemApp) {
     contentHTML = renderSystemApp(id);
   } else {
-    contentHTML = '<img src="' + data.image + '" alt="' + data.title + '" loading="lazy">' +
-      '<h2>' + data.title + '</h2>' +
-      '<p>' + data.detail + '</p>' +
-      '<h3>How It\'s Made</h3>' +
-      '<p>' + data.howMade + '</p>' +
-      '<a class="window-link" href="' + data.link + '" target="_blank">Open Project →</a>' +
-      '<div class="window-tags">' +
-        data.tags.map(function(t) { return '<span>' + t + '</span>'; }).join('') +
-      '</div>';
+    contentHTML = '<iframe src="' + data.link + '" style="width:100%;height:100%;border:none;flex:1;"></iframe>';
   }
   
   windowEl.innerHTML = 
@@ -2070,7 +2063,7 @@ function initDock() {
     btn.className = 'dock-item';
     btn.dataset.id = p.id;
     btn.innerHTML = '<img src="' + p.icon + '" alt="' + p.title + '"><div class="dock-tooltip">' + p.title + '</div><div class="dock-indicator"></div>';
-    btn.onclick = function() { if (p.link) window.open(p.link, '_blank'); };
+    btn.onclick = function() { openApp(p.id); };
     dock.appendChild(btn);
     
     gsap.from(btn, {
@@ -2119,13 +2112,13 @@ function initDesktopIcons() {
       '<div class="desktop-icon-img"><img src="' + p.icon + '" alt="' + p.title + '"></div>' +
       '<div class="desktop-icon-label">' + (p.shortTitle || p.title) + '</div>';
     
-    // Single click selects, double click opens project URL
+    // Single click selects, double click opens app window
     icon.addEventListener('click', function() {
       document.querySelectorAll('.desktop-icon').forEach(function(el) { el.classList.remove('selected'); });
       icon.classList.add('selected');
     });
     icon.addEventListener('dblclick', function() {
-      if (p.link) window.open(p.link, '_blank');
+      openApp(p.id);
     });
     
     container.appendChild(icon);

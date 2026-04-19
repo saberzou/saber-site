@@ -2614,7 +2614,7 @@ function createWindow(id, data, options) {
   windowEl.style.zIndex = ++zIndexCounter;
   
   const winWidth = parseInt(options.width) || (isSystemApp ? 480 : 800);
-  const winHeight = parseInt(options.height) || (isSystemApp ? 400 : 600);
+  const winHeight = parseInt(options.height) || 600;
   const desktop = document.getElementById('desktop');
   const deskW = desktop.clientWidth;
   const deskH = desktop.clientHeight;
@@ -2626,7 +2626,7 @@ function createWindow(id, data, options) {
   windowEl.style.left = baseX + 'px';
   windowEl.style.top = baseY + 'px';
   windowEl.style.width = (options.width || (isSystemApp ? '480px' : '800px'));
-  windowEl.style.height = (options.height || (isSystemApp ? '400px' : '600px'));
+  windowEl.style.height = (options.height || '600px');
   
   const headerColor = data.accent || '#FF8C42';
   
@@ -3317,9 +3317,7 @@ function openApp(id) {
   // Check if it's a system app
   const sysApp = systemApps[id];
   if (sysApp) {
-    const opts = { isSystemApp: true, width: id === 'about' ? '400px' : '600px' };
-    if (id === 'music') opts.height = '420px';
-    createWindow(id, sysApp, opts);
+    createWindow(id, sysApp, { isSystemApp: true, width: id === 'about' ? '400px' : '600px' });
     if (id === 'music') {
       setTimeout(initMusicApp, 200);
     }

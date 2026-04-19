@@ -2254,7 +2254,7 @@ body {
               <div class="temp" id="widget-temp">--°</div>
               <div class="condition" id="widget-condition">Loading...</div>
             </div>
-            <div id="widget-icon" style="width: 50px; height: 50px;"></div>
+            <img id="widget-icon" src="images/weather-icons/clear_day.svg" style="width: 50px; height: 50px;" alt="weather">
           </div>
           <div class="mobile-widget todo">
             <h4>To-Do</h4>
@@ -3344,54 +3344,32 @@ function initMobileGrid() {
   
   if (!page1 || !page2 || !page3) return;
   
-  // Page 1: Main system apps (first 8)
-  const page1Apps = ['finder', 'mail', 'todo', 'notes', 'camera', 'music', 'messages', 'terminal'];
-  page1Apps.forEach(function(key) {
-    const app = systemApps[key];
-    if (!app) return;
-    const icon = document.createElement('div');
+  // Helper to create project icon that opens in new tab
+  function createProjectIcon(p) {
+    const icon = document.createElement('a');
     icon.className = 'mobile-icon';
-    icon.innerHTML = 
-      '<div class="mobile-icon-img"><img src="' + app.icon + '" alt="' + app.title + '" onerror="this.onerror=null; this.parentElement.style.background=\'' + (app.accent || '#ddd') + '\'; this.style.display=\'none\'"></div>' +
-      '<span>' + app.title + '</span>';
-    icon.onclick = function() { openMobileSheet(app, true); };
-    page1.appendChild(icon);
-  });
-  
-  // Page 2: More system apps + first 4 projects
-  const page2Apps = ['wallpaper', 'about'];
-  page2Apps.forEach(function(key) {
-    const app = systemApps[key];
-    if (!app) return;
-    const icon = document.createElement('div');
-    icon.className = 'mobile-icon';
-    icon.innerHTML = 
-      '<div class="mobile-icon-img"><img src="' + app.icon + '" alt="' + app.title + '" onerror="this.onerror=null; this.parentElement.style.background=\'' + (app.accent || '#ddd') + '\'; this.style.display=\'none\'"></div>' +
-      '<span>' + app.title + '</span>';
-    icon.onclick = function() { openMobileSheet(app, true); };
-    page2.appendChild(icon);
-  });
-  
-  // Add first 4 projects to page 2
-  projects.slice(0, 4).forEach(function(p) {
-    const icon = document.createElement('div');
-    icon.className = 'mobile-icon';
+    icon.href = p.link;
+    icon.target = '_blank';
+    icon.style.textDecoration = 'none';
     icon.innerHTML = 
       '<div class="mobile-icon-img"><img src="' + p.icon + '" alt="' + p.title + '" onerror="this.onerror=null; this.parentElement.style.background=\'' + (p.accent || '#ddd') + '\'; this.style.display=\'none\'"></div>' +
       '<span>' + (p.shortTitle || p.title) + '</span>';
-    icon.onclick = function() { openMobileSheet(p, false); };
-    page2.appendChild(icon);
+    return icon;
+  }
+  
+  // Page 1: First 4 projects (below widgets)
+  projects.slice(0, 4).forEach(function(p) {
+    page1.appendChild(createProjectIcon(p));
+  });
+  
+  // Page 2: Next 4 projects
+  projects.slice(4, 8).forEach(function(p) {
+    page2.appendChild(createProjectIcon(p));
   });
   
   // Page 3: Remaining projects
-  projects.slice(4).forEach(function(p) {
-    const icon = document.createElement('div');
-    icon.className = 'mobile-icon';
-    icon.innerHTML = 
-      '<div class="mobile-icon-img"><img src="' + p.icon + '" alt="' + p.title + '" onerror="this.onerror=null; this.parentElement.style.background=\'' + (p.accent || '#ddd') + '\'; this.style.display=\'none\'"></div>' +
-      '<span>' + (p.shortTitle || p.title) + '</span>';
-    icon.onclick = function() { openMobileSheet(p, false); };
-    page3.appendChild(icon);
+  projects.slice(8).forEach(function(p) {
+    page3.appendChild(createProjectIcon(p));
   });
   
   // Setup page scroll indicator
@@ -3424,19 +3402,42 @@ function loadMobileWidgets() {
   const conditionEl = document.getElementById('widget-condition');
   const iconEl = document.getElementById('widget-icon');
   
+  const weatherIconMap = {
+    'Clear': 'clear_day.svg',
+    'Sunny': 'clear_day.svg',
+    'Partly cloudy': 'partly_cloudy_day.svg',
+    'Cloudy': 'cloudy.svg',
+    'Overcast': 'mostly_cloudy_day.svg',
+    'Mist': 'haze_fog_dust_smoke.svg',
+    'Fog': 'haze_fog_dust_smoke.svg',
+    'Rain': 'cloudy_with_rain.svg',
+    'Light rain': 'drizzle.svg',
+    'Heavy rain': 'heavy_rain.svg',
+    'Snow': 'cloudy_with_snow.svg',
+    'Thunderstorm': 'isolated_scattered_thunderstorms_day.svg'
+  };
+  
   if (tempEl && conditionEl) {
     fetch('https://wttr.in/Beijing?format=%C|%t')
       .then(function(r) { return r.text(); })
       .then(function(data) {
         const parts = data.split('|');
         if (parts.length >= 2) {
-          conditionEl.textContent = parts[0].trim();
+          const condition = parts[0].trim();
+          conditionEl.textContent = condition;
           tempEl.textContent = parts[1].trim();
+          
+          // Set weather icon
+          if (iconEl) {
+            const iconFile = weatherIconMap[condition] || 'clear_day.svg';
+            iconEl.src = 'images/weather-icons/' + iconFile;
+          }
         }
       })
       .catch(function() {
         conditionEl.textContent = 'Beijing';
         tempEl.textContent = '22°C';
+        if (iconEl) iconEl.src = 'images/weather-icons/clear_day.svg';
       });
   }
   

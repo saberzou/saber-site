@@ -3225,67 +3225,81 @@ function makeDraggable(windowEl) {
     }
   });
   
-  // ─── Resize Logic ───
-  let isResizing = false;
-  let resizeDir = '';
-  let startW, startH;
-  
+  // ─── Resize Logic (single global handler) ───
   const resizeHandles = windowEl.querySelectorAll('.resize-handle');
   resizeHandles.forEach(function(handle) {
     handle.addEventListener('mousedown', function(e) {
       e.stopPropagation();
-      isResizing = true;
-      resizeDir = handle.dataset.resize;
-      startX = e.clientX;
-      startY = e.clientY;
-      startW = windowEl.offsetWidth;
-      startH = windowEl.offsetHeight;
-      startLeft = windowEl.offsetLeft;
-      startTop = windowEl.offsetTop;
-      windowEl.style.transition = 'none';
+      e.preventDefault();
+      startResize(e, handle.dataset.resize, windowEl);
     });
-  });
-  
-  let rafId = null;
-  
-  document.addEventListener('mousemove', function(e) {
-    if (!isResizing) return;
-    if (rafId) cancelAnimationFrame(rafId);
-    
-    rafId = requestAnimationFrame(function() {
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      const minW = 300;
-      const minH = 200;
-      
-      if (resizeDir.includes('e')) {
-        windowEl.style.width = Math.max(minW, startW + dx) + 'px';
-      }
-      if (resizeDir.includes('w')) {
-        const newW = Math.max(minW, startW - dx);
-        windowEl.style.width = newW + 'px';
-        windowEl.style.left = (startLeft + startW - newW) + 'px';
-      }
-      if (resizeDir.includes('s')) {
-        windowEl.style.height = Math.max(minH, startH + dy) + 'px';
-      }
-      if (resizeDir.includes('n')) {
-        const newH = Math.max(minH, startH - dy);
-        windowEl.style.height = newH + 'px';
-        windowEl.style.top = (startTop + startH - newH) + 'px';
-      }
-    });
-  });
-  
-  document.addEventListener('mouseup', function() {
-    if (isResizing) {
-      isResizing = false;
-      resizeDir = '';
-      if (rafId) cancelAnimationFrame(rafId);
-      windowEl.style.transition = '';
-    }
   });
 }
+
+// Global resize state (single handler for all windows)
+let resizeState = null;
+
+function startResize(e, dir, windowEl) {
+  resizeState = {
+    dir: dir,
+    el: windowEl,
+    startX: e.clientX,
+    startY: e.clientY,
+    startW: windowEl.offsetWidth,
+    startH: windowEl.offsetHeight,
+    startLeft: windowEl.offsetLeft,
+    startTop: windowEl.offsetTop
+  };
+  windowEl.style.transition = 'none';
+  document.body.style.cursor = getResizeCursor(dir);
+  document.body.style.userSelect = 'none';
+}
+
+function getResizeCursor(dir) {
+  if (dir.includes('nw') || dir.includes('se')) return 'nwse-resize';
+  if (dir.includes('ne') || dir.includes('sw')) return 'nesw-resize';
+  if (dir === 'n' || dir === 's') return 'ns-resize';
+  if (dir === 'e' || dir === 'w') return 'ew-resize';
+  return 'default';
+}
+
+// Single global mousemove handler
+document.addEventListener('mousemove', function(e) {
+  if (!resizeState) return;
+  
+  const st = resizeState;
+  const dx = e.clientX - st.startX;
+  const dy = e.clientY - st.startY;
+  const minW = 300;
+  const minH = 200;
+  
+  if (st.dir.includes('e')) {
+    st.el.style.width = Math.max(minW, st.startW + dx) + 'px';
+  }
+  if (st.dir.includes('w')) {
+    const newW = Math.max(minW, st.startW - dx);
+    st.el.style.width = newW + 'px';
+    st.el.style.left = (st.startLeft + st.startW - newW) + 'px';
+  }
+  if (st.dir.includes('s')) {
+    st.el.style.height = Math.max(minH, st.startH + dy) + 'px';
+  }
+  if (st.dir.includes('n')) {
+    const newH = Math.max(minH, st.startH - dy);
+    st.el.style.height = newH + 'px';
+    st.el.style.top = (st.startTop + st.startH - newH) + 'px';
+  }
+});
+
+// Single global mouseup handler
+document.addEventListener('mouseup', function() {
+  if (resizeState) {
+    resizeState.el.style.transition = '';
+    resizeState = null;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }
+});
 
 // ─── Dock ───
 // Track permanent dock items vs temporary

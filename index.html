@@ -1432,6 +1432,7 @@ body {
   padding: 60px 20px 20px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .mobile-page-content {
@@ -1529,8 +1530,8 @@ body {
   grid-template-columns: repeat(4, 1fr);
   gap: 20px 12px;
   flex: 1;
-  overflow-y: auto;
-  padding-bottom: 10px;
+  overflow: hidden;
+  align-content: start;
 }
 
 .mobile-page-dots {
@@ -3571,9 +3572,14 @@ function initMobileGrid() {
   // Check if widgets are visible (mobile vs tablet)
   const widgetsVisible = window.innerWidth <= 767;
   
-  // Fixed apps per page: 4x4 grid = 16 apps per page
-  // Page 1 has widgets, so fewer apps visible initially
-  const appsPerPage = 16;
+  // Calculate apps per page based on available space
+  // Page 1 has widgets (120px height), so fewer apps fit
+  const isMobile = window.innerWidth <= 767;
+  const widgetHeight = isMobile ? 140 : 0; // Widgets on mobile only
+  const availableHeight = window.innerHeight - 90 - 60 - 100 - widgetHeight; // dock - top - bottom - widgets
+  const rowHeight = 88; // icon + label + gap
+  const maxRows = Math.max(3, Math.floor(availableHeight / rowHeight));
+  const appsPerPage = 4 * maxRows; // 4 columns
   
   // Only show projects on mobile/tablet canvas (not system apps)
   const allApps = [];

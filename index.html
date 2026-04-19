@@ -57,13 +57,13 @@ body {
 .boot-screen {
   position: fixed;
   inset: 0;
-  background: #3A2200;
+  background: #FFF8F0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  transition: opacity 0.6s var(--ease-out-quart);
+  transition: opacity 0.8s var(--ease-out-quart);
 }
 
 .boot-screen.fade-out {
@@ -71,26 +71,61 @@ body {
   pointer-events: none;
 }
 
-.boot-logo {
-  font-size: 3rem;
-  font-weight: 500;
-  color: white;
-  letter-spacing: 0.1em;
-  margin-bottom: 24px;
+.boot-hello {
+  font-size: clamp(4rem, 15vw, 12rem);
+  font-weight: 600;
+  color: #2D1B00;
+  letter-spacing: -0.02em;
+  display: flex;
+  gap: 0.1em;
 }
 
-.boot-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255,255,255,0.2);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.boot-hello span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: helloBounce 0.6s var(--ease-out-quart) forwards;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.boot-hello span:nth-child(1) { animation-delay: 0.1s; }
+.boot-hello span:nth-child(2) { animation-delay: 0.2s; }
+.boot-hello span:nth-child(3) { animation-delay: 0.3s; }
+.boot-hello span:nth-child(4) { animation-delay: 0.4s; }
+.boot-hello span:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes helloBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.8);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
+
+.boot-welcome {
+  margin-top: 2rem;
+  font-size: 1rem;
+  color: #7A5C3A;
+  opacity: 0;
+  animation: fadeInUp 0.6s var(--ease-out-quart) 0.8s forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes blink {
   50% { opacity: 0; }
 }
@@ -1970,8 +2005,10 @@ body {
 
 <!-- Boot Screen -->
 <div class="boot-screen" id="boot-screen">
-  <div class="boot-logo">SaberOS</div>
-  <div class="boot-spinner"></div>
+  <div class="boot-hello">
+    <span>H</span><span>e</span><span>l</span><span>l</span><span>o</span>
+  </div>
+  <div class="boot-welcome">Welcome to SaberOS</div>
 </div>
 
 <!-- Notification Toast -->

@@ -1134,6 +1134,30 @@ body {
     display: flex !important;
   }
   
+  /* Hide widgets on tablet, show all apps */
+  .mobile-page-widgets {
+    display: none !important;
+  }
+  
+  .mobile-page {
+    padding-top: 60px !important;
+  }
+  
+  /* Larger app grid for tablet */
+  .mobile-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)) !important;
+    gap: 24px 32px !important;
+  }
+  
+  .mobile-icon {
+    width: 80px !important;
+  }
+  
+  .mobile-icon-img {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  
   .mobile-dock {
     display: flex;
     position: fixed;

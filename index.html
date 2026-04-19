@@ -877,29 +877,65 @@ body {
 
 .resize-handle {
   position: absolute;
-  width: 12px;
-  height: 12px;
   z-index: 100;
 }
+/* Corner handles - larger grab area */
 .resize-nw {
-  top: 0;
-  left: 0;
+  top: -6px;
+  left: -6px;
+  width: 20px;
+  height: 20px;
   cursor: nw-resize;
 }
 .resize-ne {
-  top: 0;
-  right: 0;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
   cursor: ne-resize;
 }
 .resize-sw {
-  bottom: 0;
-  left: 0;
+  bottom: -6px;
+  left: -6px;
+  width: 20px;
+  height: 20px;
   cursor: sw-resize;
 }
 .resize-se {
-  bottom: 0;
-  right: 0;
+  bottom: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
   cursor: se-resize;
+}
+/* Edge handles for easier resizing */
+.resize-n {
+  top: -4px;
+  left: 20px;
+  right: 20px;
+  height: 8px;
+  cursor: n-resize;
+}
+.resize-s {
+  bottom: -4px;
+  left: 20px;
+  right: 20px;
+  height: 8px;
+  cursor: s-resize;
+}
+.resize-e {
+  right: -4px;
+  top: 20px;
+  bottom: 20px;
+  width: 8px;
+  cursor: e-resize;
+}
+.resize-w {
+  left: -4px;
+  top: 20px;
+  bottom: 20px;
+  width: 8px;
+  cursor: w-resize;
 }
 
 .window-content img {
@@ -2680,8 +2716,12 @@ function createWindow(id, data, options) {
       contentHTML +
     '</div>' +
     '<div class="resize-handle resize-nw" data-resize="nw"></div>' +
+    '<div class="resize-handle resize-n" data-resize="n"></div>' +
     '<div class="resize-handle resize-ne" data-resize="ne"></div>' +
+    '<div class="resize-handle resize-w" data-resize="w"></div>' +
+    '<div class="resize-handle resize-e" data-resize="e"></div>' +
     '<div class="resize-handle resize-sw" data-resize="sw"></div>' +
+    '<div class="resize-handle resize-s" data-resize="s"></div>' +
     '<div class="resize-handle resize-se" data-resize="se"></div>';
   
   document.getElementById('desktop').appendChild(windowEl);
@@ -3206,35 +3246,42 @@ function makeDraggable(windowEl) {
     });
   });
   
+  let rafId = null;
+  
   document.addEventListener('mousemove', function(e) {
     if (!isResizing) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    const minW = 300;
-    const minH = 200;
+    if (rafId) cancelAnimationFrame(rafId);
     
-    if (resizeDir.includes('e')) {
-      windowEl.style.width = Math.max(minW, startW + dx) + 'px';
-    }
-    if (resizeDir.includes('w')) {
-      const newW = Math.max(minW, startW - dx);
-      windowEl.style.width = newW + 'px';
-      windowEl.style.left = (startLeft + startW - newW) + 'px';
-    }
-    if (resizeDir.includes('s')) {
-      windowEl.style.height = Math.max(minH, startH + dy) + 'px';
-    }
-    if (resizeDir.includes('n')) {
-      const newH = Math.max(minH, startH - dy);
-      windowEl.style.height = newH + 'px';
-      windowEl.style.top = (startTop + startH - newH) + 'px';
-    }
+    rafId = requestAnimationFrame(function() {
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      const minW = 300;
+      const minH = 200;
+      
+      if (resizeDir.includes('e')) {
+        windowEl.style.width = Math.max(minW, startW + dx) + 'px';
+      }
+      if (resizeDir.includes('w')) {
+        const newW = Math.max(minW, startW - dx);
+        windowEl.style.width = newW + 'px';
+        windowEl.style.left = (startLeft + startW - newW) + 'px';
+      }
+      if (resizeDir.includes('s')) {
+        windowEl.style.height = Math.max(minH, startH + dy) + 'px';
+      }
+      if (resizeDir.includes('n')) {
+        const newH = Math.max(minH, startH - dy);
+        windowEl.style.height = newH + 'px';
+        windowEl.style.top = (startTop + startH - newH) + 'px';
+      }
+    });
   });
   
   document.addEventListener('mouseup', function() {
     if (isResizing) {
       isResizing = false;
       resizeDir = '';
+      if (rafId) cancelAnimationFrame(rafId);
       windowEl.style.transition = '';
     }
   });

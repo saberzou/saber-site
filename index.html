@@ -3169,7 +3169,6 @@ function changeWallpaper() {
 
 var AXIOM_CDN = 'https://saberzou.github.io/axiom-thoughts/paintings/';
 var wallpaperList = [
-  { name: 'Default', url: 'wallpaper-default.jpg' },
   { name: 'Aurora Borealis', url: 'wallpapers/anita-austvika-RfSMtI-KeMo-unsplash.jpg' },
   { name: 'Abstract Flow', url: 'wallpapers/kseniya-lapteva-pWsriea-RPY-unsplash.jpg' },
   { name: 'Mountain Lake', url: 'wallpapers/marek-piwnicki-NwZmYW5ETnE-unsplash.jpg' },
@@ -3184,7 +3183,7 @@ var wallpaperList = [
   { name: 'Starry Night', url: 'wallpapers/universtock-spmU0phaFDc-unsplash.jpg' }
 ];
 
-var currentWallpaperIdx = 10; // Default to Forest Mist
+var currentWallpaperIdx = 9; // Default to Forest Mist (index 9 after removing Default)
 
 function getWallpaperBg(wp) {
   if (wp.gradient) return wp.gradient;

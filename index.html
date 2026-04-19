@@ -2503,29 +2503,12 @@ function initDock() {
     '</button>';
   }).join('');
   
-  // Add featured projects (also permanent)
-  const featured = projects.slice(0, 4);
-  featured.forEach(function(p, i) {
-    permanentDockItems.add(p.id);
-    const btn = document.createElement('button');
-    btn.className = 'dock-item';
-    btn.dataset.id = p.id;
-    btn.innerHTML = '<img src="' + p.icon + '" alt="' + p.title + '"><div class="dock-tooltip">' + p.title + '</div><div class="dock-indicator"></div>';
-    btn.onclick = function() { openApp(p.id); };
-    dock.appendChild(btn);
-    
-    gsap.from(btn, {
-      y: 20,
-      opacity: 0,
-      duration: 0.4,
-      delay: 0.5 + (i * 0.05),
-      ease: 'power3.out'
-    });
-  });
-  
   // (no separator for temp items)
   
-  // Trash at the end (macOS style, no separator gap)
+  // Trash separator + trash at the end
+  var trashSep = document.createElement('div');
+  trashSep.className = 'dock-separator';
+  dock.appendChild(trashSep);
   var trashBtn = document.createElement('button');
   trashBtn.className = 'dock-item';
   trashBtn.dataset.id = 'trash';

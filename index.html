@@ -3528,7 +3528,7 @@ function renderTodos() {
   var todos = getTodos();
   var list = document.getElementById('todo-list');
   if (!todos.length) {
-    list.innerHTML = '<li style="font-size:0.7rem;color:var(--fg-muted);opacity:0.6;">No tasks yet</li>';
+    list.innerHTML = '<li style="font-size:0.7rem;color:#FF8C42;opacity:0.8;">No tasks yet</li>';
     return;
   }
   list.innerHTML = todos.map(function(t, i) {

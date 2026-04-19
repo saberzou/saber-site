@@ -3430,13 +3430,8 @@ function initMobileGrid() {
   const rows = Math.floor(availableHeight / (iconSize + iconGap + 20)); // +20 for label
   const appsPerPage = Math.max(1, cols * rows);
   
-  // Get all apps (system + projects)
+  // Only show projects on mobile/tablet canvas (not system apps)
   const allApps = [];
-  Object.keys(systemApps).forEach(function(key) {
-    if (key !== 'trash') {
-      allApps.push({ type: 'system', id: key, data: systemApps[key] });
-    }
-  });
   projects.forEach(function(p) {
     allApps.push({ type: 'project', id: p.id, data: p });
   });

@@ -776,6 +776,27 @@ body {
 .window-btn.minimize { background: var(--traffic-yellow); }
 .window-btn.maximize { background: var(--traffic-green); }
 
+.window-external-link {
+  margin-left: auto;
+  margin-right: 12px;
+  background: rgba(255,255,255,0.3);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 6px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.window-external-link:hover {
+  background: rgba(255,255,255,0.5);
+  color: var(--fg);
+}
+
 .window-btn.close::before {
   content: '×';
   color: rgba(0,0,0,0.5);
@@ -2713,6 +2734,9 @@ function createWindow(id, data, options) {
     contentHTML = '<iframe src="' + data.link + '" style="width:100%;height:100%;border:none;flex:1;"></iframe>';
   }
   
+  const externalLinkBtn = (!isSystemApp && data.link) ? 
+    '<button class="window-external-link" onclick="window.open(\'' + data.link + '\', \'_blank\')" title="Open in New Tab"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></button>' : '';
+  
   windowEl.innerHTML = 
     '<div class="window-header" style="background: rgba(255,255,255,0.35); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); border-bottom: 1px solid rgba(255,255,255,0.3); box-shadow: inset 0 1px 0 rgba(255,255,255,0.5); background-image: linear-gradient(to right, ' + headerColor + '18, transparent);">' +
       '<div class="window-controls">' +
@@ -2721,6 +2745,7 @@ function createWindow(id, data, options) {
         '<button class="window-btn maximize" onclick="maximizeWindow(\'' + id + '\')" title="Maximize"></button>' +
       '</div>' +
       '<span class="window-title">' + data.title + (isSystemApp ? '' : ' <span class="title-chevron" onclick="toggleProjectDropdown(this, event)">▼</span><div class="project-dropdown">' + (data.detail || data.desc || '') + '</div>') + '</span>' +
+      externalLinkBtn +
     '</div>' +
     '<div class="window-content ' + (id === 'about' ? 'about-mac' : '') + '">' +
       contentHTML +

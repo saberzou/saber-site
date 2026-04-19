@@ -2530,11 +2530,7 @@ function initDock() {
   tempSep.style.display = 'none';
   dock.appendChild(tempSep);
   
-  // Trash separator + trash at the end (macOS style)
-  var trashSep = document.createElement('div');
-  trashSep.className = 'dock-separator';
-  trashSep.id = 'dock-separator-trash';
-  dock.appendChild(trashSep);
+  // Trash at the end (macOS style, no separator gap)
   var trashBtn = document.createElement('button');
   trashBtn.className = 'dock-item';
   trashBtn.dataset.id = 'trash';
@@ -2557,8 +2553,8 @@ function addTempDockItem(id, data) {
   const tempSep = document.getElementById('dock-separator-temp');
   if (tempSep) tempSep.style.display = 'block';
   
-  // Find trash separator to insert before
-  const trashSep = document.getElementById('dock-separator-trash');
+  // Find trash item to insert before
+  const trashItem = dock.querySelector('.dock-item[data-id="trash"]');
   
   const btn = document.createElement('button');
   btn.className = 'dock-item dock-item-temp';
@@ -2566,8 +2562,8 @@ function addTempDockItem(id, data) {
   btn.innerHTML = '<img src="' + (data.icon || data.image || '') + '" alt="' + data.title + '"><div class="dock-tooltip">' + data.title + '</div><div class="dock-indicator"></div>';
   btn.onclick = function() { openApp(id); };
   
-  if (trashSep) {
-    dock.insertBefore(btn, trashSep);
+  if (trashItem) {
+    dock.insertBefore(btn, trashItem);
   } else {
     dock.appendChild(btn);
   }

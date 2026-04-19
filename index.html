@@ -2497,6 +2497,7 @@ function renderSystemApp(appId) {
       return '<div style="height: 100%; display: flex; flex-direction: column; background: #FFFEF5;">' +
         '<div style="padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; gap: 8px; align-items: center; background: #FFFEF5;">' +
           '<button onclick="createNewNote()" style="padding: 6px 12px; background: #FF8C42; color: white; border: none; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-family: var(--sans);">+ New Note</button>' +
+          '<button onclick="resetNotesToDefaults()" style="padding: 6px 12px; background: transparent; color: var(--fg-muted); border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-family: var(--sans);">Reset</button>' +
           '<span style="font-size: 0.75rem; color: var(--fg-muted); margin-left: auto;">Auto-saved</span>' +
         '</div>' +
         '<div style="flex: 1; display: flex; overflow: hidden;">' +
@@ -3308,6 +3309,11 @@ var notesData = JSON.parse(localStorage.getItem('saberos-notes')) || [
   { id: 1, title: 'Welcome to Notes', content: 'This is a simple note-taking app.\n\nYou can:\n- Create new notes\n- Edit titles and content\n- Notes are auto-saved\n\nStart writing your thoughts here...', date: new Date().toISOString() },
   { id: 2, title: 'Credits & Resources', content: 'SaberOS is built with love and these amazing resources:\n\n— Design —\n• Feather Icons (feathericons.com)\n• Google Weather Icons by mrdarrengriffin (github.com/mrdarrengriffin/google-weather-icons)\n• Bricolage Grotesque & PT Serif fonts (Google Fonts)\n• Wallpapers from Unsplash\n\n— Code —\n• GSAP animation library (gsap.com)\n• wttr.in weather API\n• Vanilla JS, no frameworks\n\n— Inspiration —\n• macOS design language\n• Warm orange you can feel\n\nBuilt by Saber Zou with Atticus & Axel 🐻🐯', date: new Date().toISOString() }
 ];
+// Migrate: inject Credits note if missing from cached localStorage
+if (!notesData.find(function(n) { return n.title === 'Credits & Resources'; })) {
+  notesData.push({ id: Date.now(), title: 'Credits & Resources', content: 'SaberOS is built with love and these amazing resources:\n\n\u2014 Design \u2014\n\u2022 Feather Icons (feathericons.com)\n\u2022 Google Weather Icons by mrdarrengriffin (github.com/mrdarrengriffin/google-weather-icons)\n\u2022 Bricolage Grotesque & PT Serif fonts (Google Fonts)\n\u2022 Wallpapers from Unsplash\n\n\u2014 Code \u2014\n\u2022 GSAP animation library (gsap.com)\n\u2022 wttr.in weather API\n\u2022 Vanilla JS, no frameworks\n\n\u2014 Inspiration \u2014\n\u2022 macOS design language\n\u2022 Warm orange you can feel\n\nBuilt by Saber Zou with Atticus & Axel \ud83d\udc3b\ud83d\udc2f', date: new Date().toISOString() });
+  localStorage.setItem('saberos-notes', JSON.stringify(notesData));
+}
 var currentNoteId = null;
 
 function initNotesApp() {

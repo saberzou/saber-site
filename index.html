@@ -2497,11 +2497,11 @@ function initDock() {
   // Separator
   dock.innerHTML = dockItems.map(function(item) {
     return '<button class="dock-item" data-id="' + item.id + '" onclick="openApp(\'' + item.id + '\')">' +
-      '<img src="' + item.icon + '" alt="' + item.title + '">' +
+      '<img src="' + item.icon + '" alt="' + item.title + '" onerror="this.parentElement.style.display=\'none\'">' +
       '<div class="dock-tooltip">' + item.title + '</div>' +
       '<div class="dock-indicator"></div>' +
     '</button>';
-  }).join('') + '<div class="dock-separator" id="dock-separator-projects"></div>';
+  }).join('');
   
   // Add featured projects (also permanent)
   const featured = projects.slice(0, 4);
@@ -2523,12 +2523,7 @@ function initDock() {
     });
   });
   
-  // Separator for temp items
-  var tempSep = document.createElement('div');
-  tempSep.className = 'dock-separator';
-  tempSep.id = 'dock-separator-temp';
-  tempSep.style.display = 'none';
-  dock.appendChild(tempSep);
+  // (no separator for temp items)
   
   // Trash at the end (macOS style, no separator gap)
   var trashBtn = document.createElement('button');
@@ -2550,9 +2545,7 @@ function addTempDockItem(id, data) {
   if (dock.querySelector('.dock-item-temp[data-id="' + id + '"')) return;
   
   // Show temp separator
-  const tempSep = document.getElementById('dock-separator-temp');
-  if (tempSep) tempSep.style.display = 'block';
-  
+
   // Find trash item to insert before
   const trashItem = dock.querySelector('.dock-item[data-id="trash"]');
   
@@ -2578,8 +2571,7 @@ function removeTempDockItem(id) {
       // Hide temp separator if no more temp items
       const remaining = document.querySelectorAll('.dock-item-temp');
       if (remaining.length === 0) {
-        const tempSep = document.getElementById('dock-separator-temp');
-        if (tempSep) tempSep.style.display = 'none';
+        // no temp separator to hide
       }
     }, 200);
   }

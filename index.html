@@ -3390,43 +3390,46 @@ function setupMobilePageDots() {
 }
 
 function loadMobileWidgets() {
-  // Load weather
+  // Load weather from Open-Meteo (JSON API, no HTML)
   const tempEl = document.getElementById('widget-temp');
   const conditionEl = document.getElementById('widget-condition');
   const iconEl = document.getElementById('widget-icon');
   
-  const weatherIconMap = {
-    'Clear': 'clear_day.svg',
-    'Sunny': 'clear_day.svg',
-    'Partly cloudy': 'partly_cloudy_day.svg',
-    'Cloudy': 'cloudy.svg',
-    'Overcast': 'mostly_cloudy_day.svg',
-    'Mist': 'haze_fog_dust_smoke.svg',
-    'Fog': 'haze_fog_dust_smoke.svg',
-    'Rain': 'cloudy_with_rain.svg',
-    'Light rain': 'drizzle.svg',
-    'Heavy rain': 'heavy_rain.svg',
-    'Snow': 'cloudy_with_snow.svg',
-    'Thunderstorm': 'isolated_scattered_thunderstorms_day.svg'
+  // WMO weather code to icon/condition mapping
+  const weatherCodes = {
+    0: { condition: 'Clear', icon: 'clear_day.svg' },
+    1: { condition: 'Mostly Clear', icon: 'mostly_sunny.svg' },
+    2: { condition: 'Partly Cloudy', icon: 'partly_cloudy_day.svg' },
+    3: { condition: 'Overcast', icon: 'mostly_cloudy_day.svg' },
+    45: { condition: 'Foggy', icon: 'haze_fog_dust_smoke.svg' },
+    48: { condition: 'Foggy', icon: 'haze_fog_dust_smoke.svg' },
+    51: { condition: 'Drizzle', icon: 'drizzle.svg' },
+    53: { condition: 'Drizzle', icon: 'drizzle.svg' },
+    55: { condition: 'Drizzle', icon: 'drizzle.svg' },
+    61: { condition: 'Rain', icon: 'cloudy_with_rain.svg' },
+    63: { condition: 'Rain', icon: 'cloudy_with_rain.svg' },
+    65: { condition: 'Heavy Rain', icon: 'heavy_rain.svg' },
+    71: { condition: 'Snow', icon: 'cloudy_with_snow.svg' },
+    73: { condition: 'Snow', icon: 'cloudy_with_snow.svg' },
+    75: { condition: 'Snow', icon: 'cloudy_with_snow.svg' },
+    95: { condition: 'Thunderstorm', icon: 'isolated_scattered_thunderstorms_day.svg' }
   };
   
   if (tempEl && conditionEl) {
-    // Use wttr.in with format parameter and no follow redirects
-    fetch('https://wttr.in/Beijing?format=%C|%t&A')
-      .then(function(r) { return r.text(); })
+    // Open-Meteo API - Beijing coordinates
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=39.9042&longitude=116.4074&current_weather=true')
+      .then(function(r) { return r.json(); })
       .then(function(data) {
-        // Strip any HTML tags if present
-        const cleanData = data.replace(/<[^>]*>/g, '').replace(/&[a-z]+;/g, '').trim();
-        const parts = cleanData.split('|');
-        if (parts.length >= 2) {
-          const condition = parts[0].trim();
-          conditionEl.textContent = condition;
-          tempEl.textContent = parts[1].trim();
+        if (data.current_weather) {
+          const temp = Math.round(data.current_weather.temperature);
+          const code = data.current_weather.weathercode;
+          const weather = weatherCodes[code] || { condition: 'Clear', icon: 'clear_day.svg' };
           
-          // Set weather icon
+          conditionEl.textContent = weather.condition;
+          tempEl.textContent = temp + '°C';
+          
           if (iconEl) {
-            const iconFile = weatherIconMap[condition] || 'clear_day.svg';
-            iconEl.src = 'images/weather-icons/' + iconFile;
+            iconEl.src = 'images/weather-icons/' + weather.icon;
           }
         }
       })

@@ -3591,13 +3591,16 @@ function closeMobileSheet() {
 
 // ─── Mobile Dock Apps ───
 function openMobileApp(appId) {
+  console.log('openMobileApp called:', appId);
   const sheet = document.getElementById('mobile-sheet');
   const header = document.getElementById('mobile-sheet-header');
   const title = document.getElementById('mobile-sheet-title');
   const content = document.getElementById('mobile-sheet-content');
   
+  if (!sheet) { console.log('mobile-sheet not found'); return; }
+  
   const sysApp = systemApps[appId];
-  if (!sysApp) return;
+  if (!sysApp) { console.log('sysApp not found for:', appId); return; }
   
   header.style.background = sysApp.accent || '#FF8C42';
   title.textContent = sysApp.title === 'About This Mac' ? 'About This Phone' : sysApp.title;
@@ -3614,6 +3617,7 @@ function openMobileApp(appId) {
   }, 100);
   
   sheet.classList.add('active');
+  console.log('sheet activated');
 }
 
 // ─── Mobile-Optimized App Renderers ───

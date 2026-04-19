@@ -3617,21 +3617,29 @@ function removeTodo(i) {
 }
 
 // ─── Weather Widget ───
-var weatherIcons = {
-  'Clear': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
-  'Sunny': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
-  'Partly cloudy': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path><line x1="12" y1="2" x2="12" y2="4"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="1" y1="12" x2="3" y2="12"></line></svg>',
-  'Cloudy': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>',
-  'Overcast': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>',
-  'Mist': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h16"></path><path d="M4 9h16"></path><path d="M4 12h16"></path></svg>',
-  'Fog': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h16"></path><path d="M4 9h16"></path><path d="M4 12h16"></path></svg>',
-  'Rain': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v8"></path><path d="M8 13v8"></path><path d="M12 15v8"></path><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path></svg>',
-  'Light rain': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v4"></path><path d="M8 13v4"></path><path d="M12 15v4"></path><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path></svg>',
-  'Heavy rain': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v8"></path><path d="M8 13v8"></path><path d="M12 15v8"></path><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path></svg>',
-  'Thunderstorm': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>',
-  'Snow': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="8" y1="20" x2="8.01" y2="20"></line><line x1="12" y1="18" x2="12.01" y2="18"></line><line x1="12" y1="22" x2="12.01" y2="22"></line><line x1="16" y1="16" x2="16.01" y2="16"></line><line x1="16" y1="20" x2="16.01" y2="20"></line></svg>',
-  'Drizzle': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v2"></path><path d="M8 13v2"></path><path d="M12 15v2"></path><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path></svg>'
+// Google Weather Icons (set-4) mapping
+var weatherIconMap = {
+  'Clear': 'clear_day.svg',
+  'Sunny': 'clear_day.svg',
+  'Partly cloudy': 'partly_cloudy_day.svg',
+  'Cloudy': 'cloudy.svg',
+  'Overcast': 'cloudy.svg',
+  'Mist': 'haze_fog_dust_smoke.svg',
+  'Fog': 'haze_fog_dust_smoke.svg',
+  'Rain': 'cloudy_with_rain.svg',
+  'Light rain': 'drizzle.svg',
+  'Heavy rain': 'heavy_rain.svg',
+  'Thunderstorm': 'isolated_scattered_thunderstorms_day.svg',
+  'Snow': 'cloudy_with_snow.svg',
+  'Drizzle': 'drizzle.svg',
+  'Mostly sunny': 'mostly_sunny.svg',
+  'Mostly cloudy': 'mostly_cloudy_day.svg'
 };
+
+function getWeatherIconUrl(desc) {
+  var iconFile = weatherIconMap[desc] || 'partly_cloudy_day.svg';
+  return 'images/weather-icons/' + iconFile;
+}
 
 function initWeather() {
   fetch('https://wttr.in/Beijing?format=j1')
@@ -3640,13 +3648,14 @@ function initWeather() {
       var cur = d.current_condition[0];
       var temp = cur.temp_C;
       var desc = cur.weatherDesc[0].value;
-      var iconSvg = weatherIcons[desc] || weatherIcons['Partly cloudy'];
+      var iconUrl = getWeatherIconUrl(desc);
       document.getElementById('weather-temp').textContent = temp + '°C';
       document.getElementById('weather-desc').textContent = desc;
-      document.getElementById('weather-icon').innerHTML = iconSvg;
+      document.getElementById('weather-icon').innerHTML = '<img src="' + iconUrl + '" alt="' + desc + '" style="width:100%;height:100%;object-fit:contain;">';
     })
     .catch(function() {
       document.getElementById('weather-desc').textContent = 'Offline';
+      document.getElementById('weather-icon').innerHTML = '<img src="images/weather-icons/partly_cloudy_day.svg" alt="Offline" style="width:100%;height:100%;object-fit:contain;">';
     });
 }
 

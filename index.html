@@ -1123,27 +1123,58 @@ body {
 
 /* ─── Tablet Layout ─── */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .desktop-icons {
-    display: none;
+  /* Tablet uses mobile-style layout */
+  .weather-widget { display: none; }
+  .widget-stack { display: none; }
+  .menu-bar { display: none; }
+  .dock { display: none; }
+  .desktop-icons { display: none; }
+  
+  .mobile-home {
+    display: flex !important;
   }
   
-  .launchpad {
-    display: grid !important;
+  .mobile-dock {
+    display: flex;
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 24px;
+    padding: 10px 16px;
+    gap: 16px;
+    z-index: 9999;
+    pointer-events: auto;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
   }
   
-  .dock {
-    bottom: 12px;
-    padding: 8px 12px;
+  .mobile-dock-item {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
-  .dock-item {
-    width: 48px;
-    height: 48px;
+  .mobile-dock-item:active {
+    transform: scale(0.9);
   }
   
-  .dock-item img {
-    width: 38px;
-    height: 38px;
+  .mobile-dock-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+  }
+  
+  .mobile-menu-btn {
+    display: flex;
   }
   
   .window {
@@ -1151,9 +1182,9 @@ body {
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    width: 90vw !important;
+    width: 80vw !important;
     max-width: 600px;
-    max-height: 75vh;
+    max-height: 80vh;
   }
 }
 

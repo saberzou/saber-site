@@ -3086,6 +3086,9 @@ function openApp(id) {
   const sysApp = systemApps[id];
   if (sysApp) {
     createWindow(id, sysApp, { isSystemApp: true, width: id === 'about' ? '400px' : '600px' });
+    if (id === 'music') {
+      setTimeout(initMusicApp, 200);
+    }
     return;
   }
 }

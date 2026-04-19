@@ -3405,6 +3405,18 @@ function createNewNote() {
   }, 50);
 }
 
+function resetNotesToDefaults() {
+  if (!confirm('Reset all notes to defaults? This will delete your custom notes.')) return;
+  localStorage.removeItem('saberos-notes');
+  notesData = [
+    { id: 1, title: 'Welcome to Notes', content: 'This is a simple note-taking app.\n\nYou can:\n- Create new notes\n- Edit titles and content\n- Notes are auto-saved\n\nStart writing your thoughts here...', date: new Date().toISOString() },
+    { id: 2, title: 'Credits & Resources', content: 'SaberOS is built with love and these amazing resources:\n\n— Design —\n• Feather Icons (feathericons.com)\n• Google Weather Icons by mrdarrengriffin (github.com/mrdarrengriffin/google-weather-icons)\n• Bricolage Grotesque & PT Serif fonts (Google Fonts)\n• Wallpapers from Unsplash\n\n— Code —\n• GSAP animation library (gsap.com)\n• wttr.in weather API\n• Vanilla JS, no frameworks\n\n— Inspiration —\n• macOS design language\n• Warm orange you can feel\n\nBuilt by Saber Zou with Atticus & Axel 🐻🐯', date: new Date().toISOString() }
+  ];
+  currentNoteId = null;
+  renderNotesList();
+  if (notesData.length > 0) loadNote(notesData[0].id);
+}
+
 // ─── Camera App Functions ───
 let cameraStream = null;
 

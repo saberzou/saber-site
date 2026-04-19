@@ -2620,28 +2620,28 @@ function renderSystemApp(appId) {
         '<h2 style="font-size: 1.3rem; margin: 0 0 20px; color: var(--fg);">Welcome to SaberOS</h2>' +
         '<div style="display: flex; flex-direction: column; gap: 16px;">' +
           '<div style="display: flex; align-items: flex-start; gap: 12px;">' +
-            '<div style="width: 32px; height: 32px; background: rgba(255,140,66,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">👆</div>' +
+            '<div style="width: 32px; height: 32px; background: rgba(255,140,66,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-feather="grid" style="width: 16px; height: 16px; color: #FF8C42;"></i></div>' +
             '<div><h4 style="font-size: 0.9rem; margin: 0 0 4px; color: var(--fg);">Open Projects</h4><p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">Click any project icon on the desktop to open it in a window.</p></div>' +
           '</div>' +
           '<div style="display: flex; align-items: flex-start; gap: 12px;">' +
-            '<div style="width: 32px; height: 32px; background: rgba(82,165,206,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🎯</div>' +
+            '<div style="width: 32px; height: 32px; background: rgba(82,165,206,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-feather="layout" style="width: 16px; height: 16px; color: #52A5CE;"></i></div>' +
             '<div><h4 style="font-size: 0.9rem; margin: 0 0 4px; color: var(--fg);">Dock Apps</h4><p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">Use the dock at the bottom to access system apps like Mail, Notes, and Messages.</p></div>' +
           '</div>' +
           '<div style="display: flex; align-items: flex-start; gap: 12px;">' +
-            '<div style="width: 32px; height: 32px; background: rgba(239,206,123,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🖱️</div>' +
+            '<div style="width: 32px; height: 32px; background: rgba(239,206,123,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-feather="mouse-pointer" style="width: 16px; height: 16px; color: #D4A843;"></i></div>' +
             '<div><h4 style="font-size: 0.9rem; margin: 0 0 4px; color: var(--fg);">Right-Click</h4><p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">Right-click the desktop to change wallpaper or access quick actions.</p></div>' +
           '</div>' +
           '<div style="display: flex; align-items: flex-start; gap: 12px;">' +
-            '<div style="width: 32px; height: 32px; background: rgba(170,204,150,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">✋</div>' +
+            '<div style="width: 32px; height: 32px; background: rgba(170,204,150,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-feather="move" style="width: 16px; height: 16px; color: #7FB069;"></i></div>' +
             '<div><h4 style="font-size: 0.9rem; margin: 0 0 4px; color: var(--fg);">Drag Windows</h4><p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">Drag any window by its title bar to move it around. Resize from the corners.</p></div>' +
           '</div>' +
           '<div style="display: flex; align-items: flex-start; gap: 12px;">' +
-            '<div style="width: 32px; height: 32px; background: rgba(255,123,172,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">⌨️</div>' +
+            '<div style="width: 32px; height: 32px; background: rgba(255,123,172,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-feather="menu" style="width: 16px; height: 16px; color: #FF7BAC;"></i></div>' +
             '<div><h4 style="font-size: 0.9rem; margin: 0 0 4px; color: var(--fg);">Menu Bar</h4><p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">Use the menu bar for quick navigation and access to system features.</p></div>' +
           '</div>' +
         '</div>' +
         '<div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid rgba(45,27,0,0.1);">' +
-          '<p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0; text-align: center;">Built with ❤️ by Saber Zou</p>' +
+          '<p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0; text-align: center;">Built with <i data-feather="heart" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i> by Saber Zou</p>' +
         '</div>' +
       '</div>';
 
@@ -2663,7 +2663,7 @@ function renderSystemApp(appId) {
           }).join('') +
         '</div>' +
         '<div style="margin-top: 24px; padding: 16px; background: rgba(255,140,66,0.08); border-radius: 8px;">' +
-          '<p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">💡 <strong>Pro tip:</strong> Windows can be minimized, maximized, and closed using the traffic light buttons in the top-left corner.</p>' +
+          '<p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;"><i data-feather="lightbulb" style="width: 14px; height: 14px; display: inline; vertical-align: middle; margin-right: 4px;"></i> <strong>Pro tip:</strong> Windows can be minimized, maximized, and closed using the traffic light buttons in the top-left corner.</p>' +
         '</div>' +
       '</div>';
 
@@ -2675,6 +2675,9 @@ function renderSystemApp(appId) {
 function setupSystemApp(appId) {
   if (appId === 'camera') {
     initCamera();
+  }
+  if (appId === 'userguide' || appId === 'shortcuts') {
+    if (typeof feather !== 'undefined') feather.replace();
   }
   if (appId === 'wallpaper') {
     var grid = document.getElementById('wp-app-grid');

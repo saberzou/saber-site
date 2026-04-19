@@ -3577,7 +3577,7 @@ function initMobileGrid() {
   const isMobile = window.innerWidth <= 767;
   const widgetHeight = isMobile ? 140 : 0; // Widgets on mobile only
   const availableHeight = window.innerHeight - 90 - 60 - 100 - widgetHeight; // dock - top - bottom - widgets
-  const rowHeight = 88; // icon + label + gap
+  const rowHeight = 108; // icon min-height (88) + grid row gap (20)
   const maxRows = Math.max(3, Math.floor(availableHeight / rowHeight));
   const appsPerPage = 4 * maxRows; // 4 columns
   

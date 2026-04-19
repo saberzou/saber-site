@@ -785,6 +785,33 @@ body {
   padding: 4px 4px 4px 4px;
 }
 
+.resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  z-index: 100;
+}
+.resize-nw {
+  top: 0;
+  left: 0;
+  cursor: nw-resize;
+}
+.resize-ne {
+  top: 0;
+  right: 0;
+  cursor: ne-resize;
+}
+.resize-sw {
+  bottom: 0;
+  left: 0;
+  cursor: sw-resize;
+}
+.resize-se {
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+}
+
 .window-content img {
   width: 100%;
   height: auto;
@@ -2137,7 +2164,11 @@ function createWindow(id, data, options) {
     '</div>' +
     '<div class="window-content ' + (id === 'about' ? 'about-mac' : '') + '">' +
       contentHTML +
-    '</div>';
+    '</div>' +
+    '<div class="resize-handle resize-nw" data-resize="nw"></div>' +
+    '<div class="resize-handle resize-ne" data-resize="ne"></div>' +
+    '<div class="resize-handle resize-sw" data-resize="sw"></div>' +
+    '<div class="resize-handle resize-se" data-resize="se"></div>';
   
   document.getElementById('desktop').appendChild(windowEl);
   
@@ -2473,6 +2504,60 @@ function makeDraggable(windowEl) {
   document.addEventListener('mouseup', function() {
     if (isDragging) {
       isDragging = false;
+      windowEl.style.transition = '';
+    }
+  });
+  
+  // ─── Resize Logic ───
+  let isResizing = false;
+  let resizeDir = '';
+  let startW, startH;
+  
+  const resizeHandles = windowEl.querySelectorAll('.resize-handle');
+  resizeHandles.forEach(function(handle) {
+    handle.addEventListener('mousedown', function(e) {
+      e.stopPropagation();
+      isResizing = true;
+      resizeDir = handle.dataset.resize;
+      startX = e.clientX;
+      startY = e.clientY;
+      startW = windowEl.offsetWidth;
+      startH = windowEl.offsetHeight;
+      startLeft = windowEl.offsetLeft;
+      startTop = windowEl.offsetTop;
+      windowEl.style.transition = 'none';
+    });
+  });
+  
+  document.addEventListener('mousemove', function(e) {
+    if (!isResizing) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    const minW = 300;
+    const minH = 200;
+    
+    if (resizeDir.includes('e')) {
+      windowEl.style.width = Math.max(minW, startW + dx) + 'px';
+    }
+    if (resizeDir.includes('w')) {
+      const newW = Math.max(minW, startW - dx);
+      windowEl.style.width = newW + 'px';
+      windowEl.style.left = (startLeft + startW - newW) + 'px';
+    }
+    if (resizeDir.includes('s')) {
+      windowEl.style.height = Math.max(minH, startH + dy) + 'px';
+    }
+    if (resizeDir.includes('n')) {
+      const newH = Math.max(minH, startH - dy);
+      windowEl.style.height = newH + 'px';
+      windowEl.style.top = (startTop + startH - newH) + 'px';
+    }
+  });
+  
+  document.addEventListener('mouseup', function() {
+    if (isResizing) {
+      isResizing = false;
+      resizeDir = '';
       windowEl.style.transition = '';
     }
   });

@@ -3184,7 +3184,7 @@ var wallpaperList = [
   { name: 'Starry Night', url: 'wallpapers/universtock-spmU0phaFDc-unsplash.jpg' }
 ];
 
-var currentWallpaperIdx = 0;
+var currentWallpaperIdx = 10; // Default to Forest Mist
 
 function getWallpaperBg(wp) {
   if (wp.gradient) return wp.gradient;
@@ -3202,26 +3202,18 @@ function applyWallpaper(idx) {
   }
   desktop.style.backgroundSize = 'cover';
   desktop.style.backgroundPosition = 'center';
-  try { localStorage.setItem('saberos-wallpaper', idx); } catch(e) {}
 }
 
 
-// Restore saved wallpaper on load
+// Apply default wallpaper on load (no localStorage persistence)
 (function() {
   try {
-    var saved = localStorage.getItem('saberos-wallpaper');
-    if (saved !== null) {
-      var idx = parseInt(saved, 10);
-      if (idx >= 0 && idx < wallpaperList.length) {
-        currentWallpaperIdx = idx;
-        var desktop = document.querySelector('.desktop');
-        if (desktop) {
-          var wp = wallpaperList[idx];
-          desktop.style.backgroundImage = wp.gradient || ('url(' + wp.url + ')');
-          desktop.style.backgroundSize = 'cover';
-          desktop.style.backgroundPosition = 'center';
-        }
-      }
+    var desktop = document.querySelector('.desktop');
+    if (desktop) {
+      var wp = wallpaperList[currentWallpaperIdx];
+      desktop.style.backgroundImage = wp.gradient || ('url(' + wp.url + ')');
+      desktop.style.backgroundSize = 'cover';
+      desktop.style.backgroundPosition = 'center';
     }
   } catch(e) {}
 })();

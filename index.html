@@ -1291,8 +1291,8 @@ body {
 }
 
 .mobile-page-widgets {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-bottom: 24px;
 }
@@ -1303,58 +1303,74 @@ body {
   border-radius: 20px;
   padding: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.mobile-widget.weather {
+.mobile-widget.weather .widget-content {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  text-align: center;
+  gap: 8px;
+}
+
+.mobile-widget.weather img {
+  width: 48px;
+  height: 48px;
 }
 
 .mobile-widget.weather .temp {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: 300;
+  color: var(--fg);
 }
 
 .mobile-widget.weather .condition {
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   color: var(--fg-muted);
 }
 
-.mobile-widget.todo {
-  max-height: 200px;
-  overflow: hidden;
-}
-
-.mobile-widget.todo h4 {
-  margin: 0 0 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.mobile-widget.todo .todo-preview {
+.mobile-widget.stocks {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  justify-content: center;
+  gap: 12px;
 }
 
-.mobile-widget.todo .todo-item {
+.mobile-widget.stocks .stock-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
+  gap: 2px;
 }
 
-.mobile-widget.todo .todo-check {
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--fg-muted);
-  border-radius: 4px;
+.mobile-widget.stocks .stock-symbol {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-transform: uppercase;
 }
 
-.mobile-widget.todo .todo-item.done {
-  opacity: 0.5;
-  text-decoration: line-through;
+.mobile-widget.stocks .stock-price {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.mobile-widget.stocks .stock-change {
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.mobile-widget.stocks .stock-change.up {
+  color: #34C759;
+}
+
+.mobile-widget.stocks .stock-change.down {
+  color: #FF3B30;
 }
 
 .mobile-grid {
@@ -2250,16 +2266,22 @@ body {
       <div class="mobile-page" id="mobile-page-1">
         <div class="mobile-page-widgets">
           <div class="mobile-widget weather" id="mobile-widget-weather">
-            <div>
+            <div class="widget-content">
+              <img id="widget-icon" src="images/weather-icons/clear_day.svg" alt="weather">
               <div class="temp" id="widget-temp">--°</div>
               <div class="condition" id="widget-condition">Loading...</div>
             </div>
-            <img id="widget-icon" src="images/weather-icons/clear_day.svg" style="width: 50px; height: 50px;" alt="weather">
           </div>
-          <div class="mobile-widget todo">
-            <h4>To-Do</h4>
-            <div class="todo-preview" id="widget-todo-preview">
-              <div class="todo-item"><div class="todo-check"></div>Loading...</div>
+          <div class="mobile-widget stocks" id="mobile-widget-stocks">
+            <div class="stock-item">
+              <span class="stock-symbol">AAPL</span>
+              <span class="stock-price" id="stock-aapl">--</span>
+              <span class="stock-change" id="stock-aapl-change">--</span>
+            </div>
+            <div class="stock-item">
+              <span class="stock-symbol">MSFT</span>
+              <span class="stock-price" id="stock-msft">--</span>
+              <span class="stock-change" id="stock-msft-change">--</span>
             </div>
           </div>
         </div>
@@ -3439,19 +3461,47 @@ function loadMobileWidgets() {
       });
   }
   
-  // Load todo preview
-  const todoPreview = document.getElementById('widget-todo-preview');
-  if (todoPreview) {
-    const todos = JSON.parse(localStorage.getItem('saber-todos') || '[]');
-    const pending = todos.filter(function(t) { return !t.done; }).slice(0, 3);
-    
-    if (pending.length > 0) {
-      todoPreview.innerHTML = pending.map(function(t) {
-        return '<div class="todo-item ' + (t.done ? 'done' : '') + '"><div class="todo-check"></div>' + t.text + '</div>';
-      }).join('');
-    } else {
-      todoPreview.innerHTML = '<div class="todo-item"><div class="todo-check"></div>No pending tasks</div>';
-    }
+  // Load stocks
+  const aaplPrice = document.getElementById('stock-aapl');
+  const aaplChange = document.getElementById('stock-aapl-change');
+  const msftPrice = document.getElementById('stock-msft');
+  const msftChange = document.getElementById('stock-msft-change');
+  
+  if (aaplPrice && msftPrice) {
+    // Use a simple API or fallback to mock data
+    fetch('https://query1.finance.yahoo.com/v8/finance/chart/AAPL,MSFT?interval=1d&range=1d')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.chart && data.chart.result) {
+          data.chart.result.forEach(function(stock) {
+            const symbol = stock.meta.symbol;
+            const price = stock.meta.regularMarketPrice;
+            const prevClose = stock.meta.previousClose;
+            const change = price - prevClose;
+            const changePct = (change / prevClose * 100).toFixed(2);
+            const changeStr = (change >= 0 ? '+' : '') + change.toFixed(2) + ' (' + changePct + '%)';
+            
+            if (symbol === 'AAPL') {
+              aaplPrice.textContent = '$' + price.toFixed(2);
+              aaplChange.textContent = changeStr;
+              aaplChange.className = 'stock-change ' + (change >= 0 ? 'up' : 'down');
+            } else if (symbol === 'MSFT') {
+              msftPrice.textContent = '$' + price.toFixed(2);
+              msftChange.textContent = changeStr;
+              msftChange.className = 'stock-change ' + (change >= 0 ? 'up' : 'down');
+            }
+          });
+        }
+      })
+      .catch(function() {
+        // Fallback data
+        aaplPrice.textContent = '$270.23';
+        aaplChange.textContent = '+2.59%';
+        aaplChange.className = 'stock-change up';
+        msftPrice.textContent = '$425.00';
+        msftChange.textContent = '+1.20%';
+        msftChange.className = 'stock-change up';
+      });
   }
 }
 

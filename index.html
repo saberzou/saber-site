@@ -209,65 +209,59 @@ body {
 }
 
 /* Notification Panel */
-.notification-panel {
+/* ─── Notification Banners (macOS style) ─── */
+.notification-banners {
   position: fixed;
-  top: 28px;
-  right: 80px;
-  width: 320px;
-  background: rgba(245, 240, 235, 0.82);
+  top: 50px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.notification-banner {
+  width: 340px;
+  padding: 12px 16px;
+  background: rgba(245, 240, 235, 0.75);
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.45);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.5);
-  padding: 8px 0;
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.95) translateY(-4px);
-  transition: opacity 0.15s, transform 0.15s;
-  z-index: 1001;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.notification-panel.show {
-  opacity: 1;
-  pointer-events: auto;
-  transform: scale(1) translateY(0);
-}
-
-.notification-header {
-  padding: 0 12px 8px;
-  margin: 0 4px 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--fg-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid rgba(45,27,0,0.08);
-}
-
-.notification-item {
-  margin: 4px 8px;
-  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.5);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6);
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
-  transition: background 0.15s;
-  background: rgba(255,255,255,0.4);
+  pointer-events: auto;
+  transform: translateX(120%);
+  opacity: 0;
+  animation: bannerSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes bannerSlideIn {
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notification-banner.hiding {
+  animation: bannerSlideOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes bannerSlideOut {
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+.notification-banner .notification-icon {
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.3);
-}
-
-.notification-item:hover {
-  background: rgba(255,255,255,0.6);
-}
-
-.notification-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
   background: var(--forest);
   display: flex;
   align-items: center;
@@ -275,27 +269,28 @@ body {
   flex-shrink: 0;
 }
 
-.notification-icon svg {
-  width: 16px;
-  height: 16px;
+.notification-banner .notification-icon svg {
+  width: 18px;
+  height: 18px;
   stroke: #fff;
   stroke-width: 2;
 }
 
-.notification-content {
+.notification-banner .notification-content {
   flex: 1;
   min-width: 0;
 }
 
-.notification-title {
-  font-size: 0.8rem;
-  font-weight: 500;
+.notification-banner .notification-title {
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--fg);
   margin-bottom: 2px;
+  line-height: 1.3;
 }
 
-.notification-time {
-  font-size: 0.7rem;
+.notification-banner .notification-time {
+  font-size: 0.75rem;
   color: var(--fg-muted);
 }
 
@@ -2009,40 +2004,7 @@ body {
   <div class="menu-bar-right">
     <div class="menu-icon"><i data-feather="wifi" style="width:14px;height:14px"></i></div>
     <div class="menu-icon"><i data-feather="battery-charging" style="width:14px;height:14px"></i></div>
-    <div class="menu-item-wrap">
-      <div class="menu-clock" id="menu-clock" onclick="toggleNotificationPanel()">12:00 PM</div>
-      <div class="notification-panel" id="notification-panel">
-        <div class="notification-header">Notifications</div>
-        <div class="notification-item">
-          <div class="notification-icon" style="background:#FF8C42;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
-          <div class="notification-content">
-            <div class="notification-title">SaberOS v2.0 launched</div>
-            <div class="notification-time">Just now</div>
-          </div>
-        </div>
-        <div class="notification-item">
-          <div class="notification-icon" style="background:#52A5CE;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></div>
-          <div class="notification-content">
-            <div class="notification-title">New project: Koi Pond added</div>
-            <div class="notification-time">2 hours ago</div>
-          </div>
-        </div>
-        <div class="notification-item">
-          <div class="notification-icon" style="background:#D3B6D3;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div>
-          <div class="notification-content">
-            <div class="notification-title">Wallpaper collection updated</div>
-            <div class="notification-time">Yesterday</div>
-          </div>
-        </div>
-        <div class="notification-item">
-          <div class="notification-icon" style="background:#34C759;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div>
-          <div class="notification-content">
-            <div class="notification-title">Stock widget now live</div>
-            <div class="notification-time">2 days ago</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div class="menu-clock" id="menu-clock">12:00 PM</div>
     <div class="menu-username">Saber</div>
     <div class="menu-hamburger" onclick="toggleMobileMenu()">
       <span></span>
@@ -2054,6 +2016,9 @@ body {
 
 <!-- Desktop -->
 <div class="desktop" id="desktop" oncontextmenu="showContextMenu(event)">
+  <!-- Notification Banners -->
+  <div class="notification-banners" id="notification-banners"></div>
+  
   <!-- Weather Widget -->
   <div class="widget-stack" id="widget-stack">
   <div class="weather-widget" id="weather-widget">
@@ -3672,6 +3637,7 @@ window.addEventListener('load', function() {
   initMobileGrid();
   initWeather();
   initStocks();
+  initNotifications();
   renderTodos();
   populateGoMenu();
   if (typeof feather !== 'undefined') feather.replace();
@@ -3712,10 +3678,6 @@ document.addEventListener('click', function(e) {
   }
   
   // Also close notification panel
-  if (!e.target.closest('.menu-clock') && !e.target.closest('.notification-panel')) {
-    const panel = document.getElementById('notification-panel');
-    if (panel) panel.classList.remove('show');
-  }
 });
 
 // Populate Go menu with projects
@@ -3729,10 +3691,57 @@ function populateGoMenu() {
   if (typeof feather !== 'undefined') feather.replace();
 }
 
-// ─── Notification Panel ───
-function toggleNotificationPanel() {
-  const panel = document.getElementById('notification-panel');
-  panel.classList.toggle('show');
+// ─── Notification Banners ───
+const notificationData = [
+  { icon: 'zap', iconBg: '#FF8C42', title: 'SaberOS v2.0 launched', time: 'Just now' },
+  { icon: 'droplet', iconBg: '#52A5CE', title: 'New project: Koi Pond added', time: '2 hours ago' },
+  { icon: 'image', iconBg: '#D3B6D3', title: 'Wallpaper collection updated', time: 'Yesterday' },
+  { icon: 'trending-up', iconBg: '#34C759', title: 'Stock widget now live', time: '2 days ago' }
+];
+
+const notificationIcons = {
+  'zap': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+  'droplet': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>',
+  'image': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
+  'trending-up': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>'
+};
+
+function showNotificationBanner(data) {
+  const container = document.getElementById('notification-banners');
+  if (!container) return;
+  
+  const banner = document.createElement('div');
+  banner.className = 'notification-banner';
+  banner.innerHTML = 
+    '<div class="notification-icon" style="background:' + data.iconBg + ';">' + notificationIcons[data.icon] + '</div>' +
+    '<div class="notification-content">' +
+      '<div class="notification-title">' + data.title + '</div>' +
+      '<div class="notification-time">' + data.time + '</div>' +
+    '</div>';
+  
+  banner.onclick = function() {
+    banner.classList.add('hiding');
+    setTimeout(function() { banner.remove(); }, 300);
+  };
+  
+  container.appendChild(banner);
+  
+  // Auto-dismiss after 5 seconds
+  setTimeout(function() {
+    if (banner.parentNode) {
+      banner.classList.add('hiding');
+      setTimeout(function() { banner.remove(); }, 300);
+    }
+  }, 5000);
+}
+
+// Show notifications on load with stagger
+function initNotifications() {
+  notificationData.forEach(function(n, i) {
+    setTimeout(function() {
+      showNotificationBanner(n);
+    }, 1000 + (i * 800));
+  });
 }
 
 // ─── Help Functions ───

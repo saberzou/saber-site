@@ -2023,6 +2023,7 @@ body {
         <div class="menu-dropdown-label">Apps</div>
         <div class="menu-dropdown-item" onclick="openApp('finder')"><i data-feather="folder" class="menu-dd-icon"></i> Finder</div>
         <div class="menu-dropdown-item" onclick="openApp('mail')"><i data-feather="mail" class="menu-dd-icon"></i> Mail</div>
+        <div class="menu-dropdown-item" onclick="openApp('todo')"><i data-feather="check-square" class="menu-dd-icon"></i> To-Do</div>
         <div class="menu-dropdown-item" onclick="openApp('notes')"><i data-feather="edit-3" class="menu-dd-icon"></i> Notes</div>
         <div class="menu-dropdown-item" onclick="openApp('camera')"><i data-feather="camera" class="menu-dd-icon"></i> Camera</div>
         <div class="menu-dropdown-item" onclick="openApp('messages')"><i data-feather="message-circle" class="menu-dd-icon"></i> Messages</div>
@@ -2286,6 +2287,7 @@ const projects = [
 // System apps
 const systemApps = {
   mail: { id: 'mail', title: 'Mail', accent: '#52A5CE', icon: ICON_BASE + '/thiings/mail.png' },
+  todo: { id: 'todo', title: 'To-Do', accent: '#EFCE7B', icon: ICON_BASE + '/thiings/notes.png' },
   notes: { id: 'notes', title: 'Notes', accent: '#EFCE7B', icon: ICON_BASE + '/thiings/notes.png' },
   camera: { id: 'camera', title: 'Camera', accent: '#EF6F3C', icon: ICON_BASE + '/thiings/camera.png' },
   about: { id: 'about', title: 'About This Computer', accent: '#FF8C42', icon: ICON_BASE + '/thiings/about.png' },
@@ -2387,6 +2389,11 @@ function createWindow(id, data, options) {
   
   if (isSystemApp) {
     contentHTML = renderSystemApp(id);
+    // Init app-specific functions
+    setTimeout(function() {
+      if (id === 'camera') initCamera();
+      if (id === 'notes') initNotesApp();
+    }, 100);
   } else {
     contentHTML = '<iframe src="' + data.link + '" style="width:100%;height:100%;border:none;flex:1;"></iframe>';
   }
@@ -2470,7 +2477,7 @@ function renderSystemApp(appId) {
         '</div>' +
       '</div>';
       
-    case 'notes':
+    case 'todo':
       return '<div class="notes-paper">' +
         todoItems.map(function(item, i) {
           return '<div class="notes-item">' +
@@ -2483,6 +2490,23 @@ function renderSystemApp(appId) {
         '<div class="notes-item" style="margin-top: 32px; opacity: 0.5;">' +
           '<div class="notes-checkbox" style="border-style: dashed;"></div>' +
           '<div class="notes-text" style="font-style: italic;">Add a new task...</div>' +
+        '</div>' +
+      '</div>';
+      
+    case 'notes':
+      return '<div style="height: 100%; display: flex; flex-direction: column; background: #FFFEF5;">' +
+        '<div style="padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; gap: 8px; align-items: center; background: #FFFEF5;">' +
+          '<button onclick="createNewNote()" style="padding: 6px 12px; background: #FF8C42; color: white; border: none; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-family: var(--sans);">+ New Note</button>' +
+          '<span style="font-size: 0.75rem; color: var(--fg-muted); margin-left: auto;">Auto-saved</span>' +
+        '</div>' +
+        '<div style="flex: 1; display: flex; overflow: hidden;">' +
+          '<div style="width: 180px; border-right: 1px solid rgba(0,0,0,0.08); overflow-y: auto; background: #FAFAF8;" id="notes-sidebar">' +
+            '<div id="notes-list"></div>' +
+          '</div>' +
+          '<div style="flex: 1; display: flex; flex-direction: column; padding: 20px;">' +
+            '<input type="text" id="note-title" placeholder="Note title..." style="font-size: 1.2rem; font-weight: 600; border: none; background: transparent; outline: none; margin-bottom: 12px; font-family: var(--sans); color: var(--fg);">' +
+            '<textarea id="note-content" placeholder="Start writing..." style="flex: 1; border: none; background: transparent; outline: none; resize: none; font-family: var(--serif); font-size: 1rem; line-height: 1.6; color: var(--fg);"></textarea>' +
+          '</div>' +
         '</div>' +
       '</div>';
       
@@ -2924,7 +2948,7 @@ function initDock() {
   const dockItems = [];
   
   // Add system apps first
-  const systemOrder = ['finder', 'mail', 'notes', 'camera', 'music', 'messages', 'terminal', 'wallpaper', 'about'];
+  const systemOrder = ['finder', 'mail', 'todo', 'notes', 'camera', 'music', 'messages', 'terminal', 'wallpaper', 'about'];
   systemOrder.forEach(function(key) {
     const app = systemApps[key];
     dockItems.push({ id: key, title: app.title, icon: app.icon, accent: app.accent, isSystem: true });
@@ -3121,8 +3145,11 @@ function openMobileSheet(data, isSystemApp) {
   let contentHTML = '';
   if (isSystemApp) {
     contentHTML = renderSystemApp(data.id);
-    // Need to init camera if needed
-    setTimeout(function() { if (data.id === 'camera') initCamera(); }, 100);
+    // Init app-specific functions
+    setTimeout(function() {
+      if (data.id === 'camera') initCamera();
+      if (data.id === 'notes') initNotesApp();
+    }, 100);
   } else {
     contentHTML = '<img src="' + data.image + '" alt="' + data.title + '">' +
       '<h2 style="font-family: var(--sans); font-size: 1.5rem; font-weight: 400; margin-bottom: 16px; color: var(--fg);">' + data.title + '</h2>' +
@@ -3264,16 +3291,111 @@ function backToInbox() {
   document.getElementById('mail-list').style.display = 'block';
 }
 
-// ─── Notes App Functions ───
+// ─── To-Do App Functions ───
 function toggleTodo(index) {
   todoItems[index].done = !todoItems[index].done;
   localStorage.setItem('saberos-todos', JSON.stringify(todoItems));
   
   // Refresh window content
-  const win = windows.get('notes');
+  const win = windows.get('todo');
   if (win) {
-    win.element.querySelector('.window-content').innerHTML = renderSystemApp('notes');
+    win.element.querySelector('.window-content').innerHTML = renderSystemApp('todo');
   }
+}
+
+// ─── Notes App Functions ───
+var notesData = JSON.parse(localStorage.getItem('saberos-notes')) || [
+  { id: 1, title: 'Welcome to Notes', content: 'This is a simple note-taking app.\n\nYou can:\n- Create new notes\n- Edit titles and content\n- Notes are auto-saved\n\nStart writing your thoughts here...', date: new Date().toISOString() }
+];
+var currentNoteId = null;
+
+function initNotesApp() {
+  renderNotesList();
+  if (notesData.length > 0) {
+    loadNote(notesData[0].id);
+  }
+  
+  // Auto-save on input
+  const titleInput = document.getElementById('note-title');
+  const contentInput = document.getElementById('note-content');
+  
+  if (titleInput) {
+    titleInput.addEventListener('input', debounce(saveCurrentNote, 500));
+  }
+  if (contentInput) {
+    contentInput.addEventListener('input', debounce(saveCurrentNote, 500));
+  }
+}
+
+function debounce(func, wait) {
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    clearTimeout(timeout);
+    timeout = setTimeout(function() { func.apply(context, args); }, wait);
+  };
+}
+
+function renderNotesList() {
+  var list = document.getElementById('notes-list');
+  if (!list) return;
+  
+  list.innerHTML = notesData.map(function(note) {
+    var isActive = note.id === currentNoteId;
+    var preview = note.content.substring(0, 40).replace(/\n/g, ' ') + (note.content.length > 40 ? '...' : '');
+    return '<div class="note-list-item ' + (isActive ? 'active' : '') + '" onclick="loadNote(' + note.id + ')" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); ' + (isActive ? 'background: rgba(255,140,66,0.1);' : '') + '">' +
+      '<div style="font-weight: 500; font-size: 0.85rem; margin-bottom: 4px; color: var(--fg);">' + (note.title || 'Untitled') + '</div>' +
+      '<div style="font-size: 0.75rem; color: var(--fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + preview + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function loadNote(id) {
+  currentNoteId = id;
+  var note = notesData.find(function(n) { return n.id === id; });
+  if (!note) return;
+  
+  var titleInput = document.getElementById('note-title');
+  var contentInput = document.getElementById('note-content');
+  
+  if (titleInput) titleInput.value = note.title || '';
+  if (contentInput) contentInput.value = note.content || '';
+  
+  renderNotesList();
+}
+
+function saveCurrentNote() {
+  if (!currentNoteId) return;
+  
+  var titleInput = document.getElementById('note-title');
+  var contentInput = document.getElementById('note-content');
+  
+  var note = notesData.find(function(n) { return n.id === currentNoteId; });
+  if (note) {
+    note.title = titleInput ? titleInput.value : note.title;
+    note.content = contentInput ? contentInput.value : note.content;
+    note.date = new Date().toISOString();
+    localStorage.setItem('saberos-notes', JSON.stringify(notesData));
+    renderNotesList();
+  }
+}
+
+function createNewNote() {
+  var newNote = {
+    id: Date.now(),
+    title: '',
+    content: '',
+    date: new Date().toISOString()
+  };
+  notesData.unshift(newNote);
+  localStorage.setItem('saberos-notes', JSON.stringify(notesData));
+  loadNote(newNote.id);
+  
+  // Focus title
+  setTimeout(function() {
+    var titleInput = document.getElementById('note-title');
+    if (titleInput) titleInput.focus();
+  }, 50);
 }
 
 // ─── Camera App Functions ───

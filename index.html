@@ -1261,8 +1261,100 @@ body {
   display: none;
   position: absolute;
   inset: 0;
-  padding: 24px 20px;
+  overflow: hidden;
+}
+
+.mobile-pages-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobile-pages-container::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-page {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  padding: 60px 20px 100px;
   overflow-y: auto;
+}
+
+.mobile-page-widgets {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.mobile-widget {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.mobile-widget.weather {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-widget.weather .temp {
+  font-size: 2.5rem;
+  font-weight: 300;
+}
+
+.mobile-widget.weather .condition {
+  font-size: 0.9rem;
+  color: var(--fg-muted);
+}
+
+.mobile-widget.todo {
+  max-height: 200px;
+  overflow: hidden;
+}
+
+.mobile-widget.todo h4 {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.mobile-widget.todo .todo-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-widget.todo .todo-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.mobile-widget.todo .todo-check {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--fg-muted);
+  border-radius: 4px;
+}
+
+.mobile-widget.todo .todo-item.done {
+  opacity: 0.5;
+  text-decoration: line-through;
 }
 
 .mobile-grid {
@@ -1270,6 +1362,28 @@ body {
   grid-template-columns: repeat(4, 1fr);
   gap: 20px 12px;
   padding-bottom: 40px;
+}
+
+.mobile-page-dots {
+  position: absolute;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.mobile-page-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(45, 27, 0, 0.3);
+  transition: background 0.2s;
+}
+
+.mobile-page-dot.active {
+  background: rgba(45, 27, 0, 0.8);
 }
 
 .mobile-icon {
@@ -2131,7 +2245,40 @@ body {
   
   <!-- Mobile Home -->
   <div class="mobile-home" id="mobile-home">
-    <div class="mobile-grid" id="mobile-grid"></div>
+    <div class="mobile-pages-container" id="mobile-pages-container">
+      <!-- Page 1: Widgets + Main Apps -->
+      <div class="mobile-page" id="mobile-page-1">
+        <div class="mobile-page-widgets">
+          <div class="mobile-widget weather" id="mobile-widget-weather">
+            <div>
+              <div class="temp" id="widget-temp">--°</div>
+              <div class="condition" id="widget-condition">Loading...</div>
+            </div>
+            <div id="widget-icon" style="width: 50px; height: 50px;"></div>
+          </div>
+          <div class="mobile-widget todo">
+            <h4>To-Do</h4>
+            <div class="todo-preview" id="widget-todo-preview">
+              <div class="todo-item"><div class="todo-check"></div>Loading...</div>
+            </div>
+          </div>
+        </div>
+        <div class="mobile-grid" id="mobile-grid-page1"></div>
+      </div>
+      <!-- Page 2: More Apps -->
+      <div class="mobile-page" id="mobile-page-2">
+        <div class="mobile-grid" id="mobile-grid-page2"></div>
+      </div>
+      <!-- Page 3: Projects -->
+      <div class="mobile-page" id="mobile-page-3">
+        <div class="mobile-grid" id="mobile-grid-page3"></div>
+      </div>
+    </div>
+    <div class="mobile-page-dots" id="mobile-page-dots">
+      <div class="mobile-page-dot active" data-page="0"></div>
+      <div class="mobile-page-dot" data-page="1"></div>
+      <div class="mobile-page-dot" data-page="2"></div>
+    </div>
   </div>
 </div>
 
@@ -3191,30 +3338,122 @@ function initLaunchpad() {
 
 // ─── Mobile Grid ───
 function initMobileGrid() {
-  const grid = document.getElementById('mobile-grid');
+  const page1 = document.getElementById('mobile-grid-page1');
+  const page2 = document.getElementById('mobile-grid-page2');
+  const page3 = document.getElementById('mobile-grid-page3');
   
-  // System apps
-  Object.keys(systemApps).forEach(function(key) {
+  if (!page1 || !page2 || !page3) return;
+  
+  // Page 1: Main system apps (first 8)
+  const page1Apps = ['finder', 'mail', 'todo', 'notes', 'camera', 'music', 'messages', 'terminal'];
+  page1Apps.forEach(function(key) {
     const app = systemApps[key];
+    if (!app) return;
     const icon = document.createElement('div');
     icon.className = 'mobile-icon';
     icon.innerHTML = 
-      '<div class="mobile-icon-img"><img src="' + app.icon + '" alt="' + app.title + '"></div>' +
+      '<div class="mobile-icon-img"><img src="' + app.icon + '" alt="' + app.title + '" onerror="this.onerror=null; this.parentElement.style.background=\'' + (app.accent || '#ddd') + '\'; this.style.display=\'none\'"></div>' +
       '<span>' + app.title + '</span>';
     icon.onclick = function() { openMobileSheet(app, true); };
-    grid.appendChild(icon);
+    page1.appendChild(icon);
   });
   
-  // Projects
-  projects.forEach(function(p) {
+  // Page 2: More system apps + first 4 projects
+  const page2Apps = ['wallpaper', 'about'];
+  page2Apps.forEach(function(key) {
+    const app = systemApps[key];
+    if (!app) return;
     const icon = document.createElement('div');
     icon.className = 'mobile-icon';
     icon.innerHTML = 
-      '<div class="mobile-icon-img"><img src="' + p.icon + '" alt="' + p.title + '"></div>' +
-      '<span>' + p.title + '</span>';
-    icon.onclick = function() { openMobileSheet(p, false); };
-    grid.appendChild(icon);
+      '<div class="mobile-icon-img"><img src="' + app.icon + '" alt="' + app.title + '" onerror="this.onerror=null; this.parentElement.style.background=\'' + (app.accent || '#ddd') + '\'; this.style.display=\'none\'"></div>' +
+      '<span>' + app.title + '</span>';
+    icon.onclick = function() { openMobileSheet(app, true); };
+    page2.appendChild(icon);
   });
+  
+  // Add first 4 projects to page 2
+  projects.slice(0, 4).forEach(function(p) {
+    const icon = document.createElement('div');
+    icon.className = 'mobile-icon';
+    icon.innerHTML = 
+      '<div class="mobile-icon-img"><img src="' + p.icon + '" alt="' + p.title + '" onerror="this.onerror=null; this.parentElement.style.background=\'' + (p.accent || '#ddd') + '\'; this.style.display=\'none\'"></div>' +
+      '<span>' + (p.shortTitle || p.title) + '</span>';
+    icon.onclick = function() { openMobileSheet(p, false); };
+    page2.appendChild(icon);
+  });
+  
+  // Page 3: Remaining projects
+  projects.slice(4).forEach(function(p) {
+    const icon = document.createElement('div');
+    icon.className = 'mobile-icon';
+    icon.innerHTML = 
+      '<div class="mobile-icon-img"><img src="' + p.icon + '" alt="' + p.title + '" onerror="this.onerror=null; this.parentElement.style.background=\'' + (p.accent || '#ddd') + '\'; this.style.display=\'none\'"></div>' +
+      '<span>' + (p.shortTitle || p.title) + '</span>';
+    icon.onclick = function() { openMobileSheet(p, false); };
+    page3.appendChild(icon);
+  });
+  
+  // Setup page scroll indicator
+  setupMobilePageDots();
+  
+  // Load widget data
+  loadMobileWidgets();
+}
+
+function setupMobilePageDots() {
+  const container = document.getElementById('mobile-pages-container');
+  const dots = document.querySelectorAll('.mobile-page-dot');
+  
+  if (!container) return;
+  
+  container.addEventListener('scroll', function() {
+    const scrollLeft = container.scrollLeft;
+    const pageWidth = container.offsetWidth;
+    const currentPage = Math.round(scrollLeft / pageWidth);
+    
+    dots.forEach(function(dot, i) {
+      dot.classList.toggle('active', i === currentPage);
+    });
+  });
+}
+
+function loadMobileWidgets() {
+  // Load weather
+  const tempEl = document.getElementById('widget-temp');
+  const conditionEl = document.getElementById('widget-condition');
+  const iconEl = document.getElementById('widget-icon');
+  
+  if (tempEl && conditionEl) {
+    fetch('https://wttr.in/Beijing?format=%C|%t')
+      .then(function(r) { return r.text(); })
+      .then(function(data) {
+        const parts = data.split('|');
+        if (parts.length >= 2) {
+          conditionEl.textContent = parts[0].trim();
+          tempEl.textContent = parts[1].trim();
+        }
+      })
+      .catch(function() {
+        conditionEl.textContent = 'Beijing';
+        tempEl.textContent = '22°C';
+      });
+  }
+  
+  // Load todo preview
+  const todoPreview = document.getElementById('widget-todo-preview');
+  if (todoPreview) {
+    const todos = JSON.parse(localStorage.getItem('saber-todos') || '[]');
+    const pending = todos.filter(function(t) { return !t.done; }).slice(0, 3);
+    
+    if (pending.length > 0) {
+      todoPreview.innerHTML = pending.map(function(t) {
+        return '<div class="todo-item ' + (t.done ? 'done' : '') + '"><div class="todo-check"></div>' + t.text + '</div>';
+      }).join('');
+    } else {
+      todoPreview.innerHTML = '<div class="todo-item"><div class="todo-check"></div>No pending tasks</div>';
+    }
+  }
 }
 
 function openMobileSheet(data, isSystemApp) {

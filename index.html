@@ -1710,6 +1710,205 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ─── Messages App ─── */
+.messages-container {
+  display: flex;
+  height: 100%;
+  background: #fff;
+}
+
+.messages-sidebar {
+  width: 240px;
+  background: #f5f5f7;
+  border-right: 1px solid rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.messages-search {
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e8e8ed;
+  margin: 12px;
+  border-radius: 8px;
+}
+
+.messages-search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.85rem;
+  flex: 1;
+}
+
+.messages-search svg {
+  color: var(--fg-muted);
+}
+
+.messages-contact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.messages-contact:hover,
+.messages-contact.active {
+  background: rgba(0,0,0,0.05);
+}
+
+.messages-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.messages-contact-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.messages-contact-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.messages-contact-preview {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.messages-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.messages-header {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.messages-header-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.messages-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  position: relative;
+}
+
+.message-bubble.received {
+  background: #e9e9eb;
+  color: var(--fg);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.message-bubble.sent {
+  background: #007AFF;
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.message-sender {
+  font-size: 0.7rem;
+  color: var(--fg-muted);
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+.message-bubble.sent .message-sender {
+  color: rgba(255,255,255,0.8);
+}
+
+.messages-input-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  background: #f5f5f7;
+}
+
+.messages-input {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.messages-send-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #007AFF;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.messages-send-btn:hover {
+  transform: scale(1.05);
+}
+
+.messages-send-btn:active {
+  transform: scale(0.95);
+}
 </style>
 </head>
 <body>
@@ -1772,6 +1971,7 @@ body {
         <div class="menu-dropdown-item" onclick="openApp('mail')"><i data-feather="mail" class="menu-dd-icon"></i> Mail</div>
         <div class="menu-dropdown-item" onclick="openApp('notes')"><i data-feather="edit-3" class="menu-dd-icon"></i> Notes</div>
         <div class="menu-dropdown-item" onclick="openApp('camera')"><i data-feather="camera" class="menu-dd-icon"></i> Camera</div>
+        <div class="menu-dropdown-item" onclick="openApp('messages')"><i data-feather="message-circle" class="menu-dd-icon"></i> Messages</div>
       </div>
     </div>
     <div class="menu-item-wrap">
@@ -2056,7 +2256,7 @@ const systemApps = {
   finder: { id: 'finder', title: 'Finder', accent: '#B8CEE8', icon: ICON_BASE + '/thiings/finder.png' },
   wallpaper: { id: 'wallpaper', title: 'Desktop & Screen Saver', accent: '#D3B6D3', icon: ICON_BASE + '/thiings/wallpaper.png' },
   music: { id: 'music', title: 'Music', accent: '#FF7BAC', icon: ICON_BASE + '/thiings/music.png' },
-  books: { id: 'books', title: 'Books', accent: '#876029', icon: ICON_BASE + '/thiings/books.png' },
+  messages: { id: 'messages', title: 'Messages', accent: '#34C759', icon: ICON_BASE + '/thiings/messages.png' },
   terminal: { id: 'terminal', title: 'Terminal', accent: '#25533F', icon: ICON_BASE + '/thiings/terminal.png' },
   trash: { id: 'trash', title: 'Trash', accent: '#7A5C3A', icon: ICON_BASE + '/thiings/trash.png' }
 };
@@ -2322,15 +2522,53 @@ function renderSystemApp(appId) {
         '<div style="display: flex; gap: 24px; align-items: center; margin-top: 8px;"><span style="font-size: 1.4rem; cursor: pointer;">⏮</span><span style="font-size: 2rem; cursor: pointer;">▶</span><span style="font-size: 1.4rem; cursor: pointer;">⏭</span></div>' +
       '</div>';
 
-    case 'books':
-      return '<div style="display: flex; flex-direction: column; height: 100%; padding: 16px; gap: 12px;">' +
-        '<h3 style="font-family: var(--sans); font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fg-muted); margin: 0;">Currently Reading</h3>' +
-        '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">' +
-          '<div style="aspect-ratio: 2/3; background: linear-gradient(135deg, #876029, #EFCE7B); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-family: var(--serif); font-size: 0.7rem; padding: 8px; text-align: center;">The Design of Everyday Things</div>' +
-          '<div style="aspect-ratio: 2/3; background: linear-gradient(135deg, #6D1F42, #D3B6D3); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-family: var(--serif); font-size: 0.7rem; padding: 8px; text-align: center;">Thinking, Fast and Slow</div>' +
-          '<div style="aspect-ratio: 2/3; background: linear-gradient(135deg, #25533F, #AACC96); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-family: var(--serif); font-size: 0.7rem; padding: 8px; text-align: center;">Creative Selection</div>' +
+    case 'messages':
+      return '<div class="messages-container" id="messages-container">' +
+        '<div class="messages-sidebar">' +
+          '<div class="messages-search">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>' +
+            '<input type="text" placeholder="Search">' +
+          '</div>' +
+          '<div class="messages-contact active" data-contact="group" onclick="switchChat(\'group\')">' +
+            '<div class="messages-avatar" style="background: linear-gradient(135deg, #FF8C42, #FF7BAC);">👥</div>' +
+            '<div class="messages-contact-info">' +
+              '<div class="messages-contact-name">Saber & Agents</div>' +
+              '<div class="messages-contact-preview">Say hello to the team...</div>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
-        '<p style="font-family: var(--serif); color: var(--fg-muted); font-size: 0.85rem; margin: 4px 0 0;">More at <a href="https://littlebook.vercel.app" target="_blank" style="color: var(--forest);">Littlebook</a></p>' +
+        '<div class="messages-chat">' +
+          '<div class="messages-header">' +
+            '<div class="messages-header-avatar" style="background: linear-gradient(135deg, #FF8C42, #FF7BAC);">👥</div>' +
+            '<span>Saber & Agents</span>' +
+          '</div>' +
+          '<div class="messages-list" id="messages-list">' +
+            '<div class="message-group">' +
+              '<div class="message-bubble received">' +
+                '<div class="message-sender">Atticus 🐻</div>' +
+                '<div class="message-text">Welcome! I\'m Atticus — the orchestrator. Ask me anything about Saber\'s work or this site.</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="message-group">' +
+              '<div class="message-bubble received">' +
+                '<div class="message-sender">Axel 🐯</div>' +
+                '<div class="message-text">Hey there! I\'m Axel — I handle creative stuff. Wanna see some cool designs?</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="message-group">' +
+              '<div class="message-bubble received">' +
+                '<div class="message-sender">Saber 👤</div>' +
+                '<div class="message-text">Hi! I\'m Saber. Feel free to explore my projects or drop us a message!</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="messages-input-area">' +
+            '<input type="text" class="messages-input" id="message-input" placeholder="iMessage" onkeypress="if(event.key===\'Enter\')sendMessage()">' +
+            '<button class="messages-send-btn" onclick="sendMessage()">' +
+              '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
       '</div>';
 
     case 'terminal':
@@ -2572,7 +2810,7 @@ function initDock() {
   const dockItems = [];
   
   // Add system apps first
-  const systemOrder = ['finder', 'mail', 'notes', 'camera', 'music', 'books', 'terminal', 'wallpaper', 'about'];
+  const systemOrder = ['finder', 'mail', 'notes', 'camera', 'music', 'messages', 'terminal', 'wallpaper', 'about'];
   systemOrder.forEach(function(key) {
     const app = systemApps[key];
     dockItems.push({ id: key, title: app.title, icon: app.icon, accent: app.accent, isSystem: true });
@@ -2964,6 +3202,126 @@ function takePhoto() {
   }
   
   preview.style.display = 'block';
+}
+
+// ─── Messages App Functions ───
+const chatParticipants = {
+  atticus: { name: 'Atticus', emoji: '🐻', color: '#8B4513', personality: 'analytical, warm, decisive INTJ orchestrator' },
+  axel: { name: 'Axel', emoji: '🐯', color: '#FF8C42', personality: 'creative, playful, chaotic good ESFP' },
+  saber: { name: 'Saber', emoji: '👤', color: '#52A5CE', personality: 'Design Team Lead at Microsoft, INTJ, street photography enthusiast' }
+};
+
+function sendMessage() {
+  const input = document.getElementById('message-input');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  // Add user message
+  addMessageBubble(text, 'sent', 'You');
+  input.value = '';
+  
+  // Save to localStorage
+  saveMessage(text, 'user');
+  
+  // Get AI response after a short delay
+  setTimeout(function() {
+    getAIResponse(text);
+  }, 1000 + Math.random() * 1000);
+}
+
+function addMessageBubble(text, type, sender) {
+  const list = document.getElementById('messages-list');
+  if (!list) return;
+  
+  const group = document.createElement('div');
+  group.className = 'message-group';
+  
+  const bubble = document.createElement('div');
+  bubble.className = 'message-bubble ' + type;
+  
+  if (type === 'received') {
+    const senderDiv = document.createElement('div');
+    senderDiv.className = 'message-sender';
+    senderDiv.textContent = sender;
+    bubble.appendChild(senderDiv);
+  }
+  
+  const textDiv = document.createElement('div');
+  textDiv.className = 'message-text';
+  textDiv.textContent = text;
+  bubble.appendChild(textDiv);
+  
+  group.appendChild(bubble);
+  list.appendChild(group);
+  list.scrollTop = list.scrollHeight;
+}
+
+function getAIResponse(userText) {
+  const lower = userText.toLowerCase();
+  let responder, response;
+  
+  // Simple routing logic
+  if (lower.includes('design') || lower.includes('project') || lower.includes('work') || lower.includes('microsoft')) {
+    responder = 'saber';
+    if (lower.includes('project')) {
+      response = "Check out the Finder app to see all my projects! The koi pond is my favorite. 🎏";
+    } else if (lower.includes('microsoft')) {
+      response = "I lead a team of 70+ designers working on AI, Search, and Browser experiences. It's challenging but rewarding!";
+    } else {
+      response = "I love talking about design! I believe in iterating fast and shipping constantly. Small fixes add up.";
+    }
+  } else if (lower.includes('creative') || lower.includes('art') || lower.includes('fun') || lower.includes('cool')) {
+    responder = 'axel';
+    if (lower.includes('art') || lower.includes('creative')) {
+      response = "Ooh, you like art? You should check out the Pixel Dailies project! I helped make those cute 20×20 pixel sprites. 🎨";
+    } else {
+      response = "Hey! Want to see something cool? Open the Koi Pond app and watch the fish swim around! 🐟";
+    }
+  } else if (lower.includes('help') || lower.includes('how') || lower.includes('what') || lower.includes('who')) {
+    responder = 'atticus';
+    if (lower.includes('who are you')) {
+      response = "I'm Atticus 🐻 — the orchestrator. I coordinate things around here. Saber is the human, Axel handles creative stuff, and I make sure everything works.";
+    } else if (lower.includes('help')) {
+      response = "I can help! Try opening different apps from the dock or menu bar. You can drag windows around and resize them from the corners.";
+    } else {
+      response = "Good question! This is SaberOS — a little macOS-inspired site showcasing Saber's projects. Feel free to explore!";
+    }
+  } else {
+    // Random responder for other messages
+    const responders = ['atticus', 'axel', 'saber'];
+    responder = responders[Math.floor(Math.random() * responders.length)];
+    
+    const genericResponses = {
+      atticus: ["Interesting! Tell me more.", "I see. What else is on your mind?", "Thanks for sharing that with us!"],
+      axel: ["Nice! 🎉", "That's awesome!", "Love it! 💫"],
+      saber: ["Thanks for stopping by!", "Appreciate you checking out the site.", "Hope you're enjoying the experience!"]
+    };
+    
+    const responses = genericResponses[responder];
+    response = responses[Math.floor(Math.random() * responses.length)];
+  }
+  
+  const p = chatParticipants[responder];
+  addMessageBubble(response, 'received', p.name + ' ' + p.emoji);
+  saveMessage(response, responder);
+}
+
+function saveMessage(text, sender) {
+  try {
+    const messages = JSON.parse(localStorage.getItem('saberos-messages') || '[]');
+    messages.push({ text: text, sender: sender, time: Date.now() });
+    // Keep only last 100 messages
+    if (messages.length > 100) messages.shift();
+    localStorage.setItem('saberos-messages', JSON.stringify(messages));
+  } catch(e) {}
+}
+
+function switchChat(contactId) {
+  // For now, only one chat is supported
+  document.querySelectorAll('.messages-contact').forEach(function(c) {
+    c.classList.remove('active');
+  });
+  document.querySelector('[data-contact="' + contactId + '"]').classList.add('active');
 }
 
 // ─── Keyboard Easter Egg ───

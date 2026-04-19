@@ -3132,6 +3132,9 @@ function closeWindow(id) {
   const win = windows.get(id);
   if (!win) return;
   
+  // Reset music app init flag when closing
+  if (id === 'music') musicAppInitialized = false;
+  
   gsap.to(win.element, {
     opacity: 0,
     scale: 0.95,
@@ -4730,10 +4733,14 @@ function openSpotify() {
   window.open('https://open.spotify.com/search/' + encodeURIComponent(album.artist + ' ' + album.name), '_blank');
 }
 
-// Initialize music app when opened
+// Initialize music app when opened (only once)
+let musicAppInitialized = false;
 document.addEventListener('click', function(e) {
-  if (e.target.closest('[onclick*="openApp(\'music\')"]') || e.target.closest('#window-music')) {
-    setTimeout(initMusicApp, 100);
+  if (e.target.closest('[onclick*="openApp(\'music\')"]')) {
+    if (!musicAppInitialized) {
+      musicAppInitialized = true;
+      setTimeout(initMusicApp, 100);
+    }
   }
 });
 

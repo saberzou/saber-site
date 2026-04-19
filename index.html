@@ -3915,14 +3915,14 @@ document.addEventListener('click', function(e) {
 
 // ─── Music App ───
 const musicAlbums = [
-  { id: '1', name: 'The Fame Monster', artist: 'Lady Gaga', year: '2009', spotify: 'spotify:album:6DGZdvrWlR7hKfO0M5eIVY' },
-  { id: '2', name: 'After Hours', artist: 'The Weeknd', year: '2020', spotify: 'spotify:album:4yP0hdKOZPNshxUOjY0cZj' },
-  { id: '3', name: '范特西', artist: '周杰伦', year: '2001', spotify: 'spotify:album:7BUzAJ9J3R6Jy8DGSd7bR3' },
-  { id: '4', name: 'Bad Boy', artist: '张惠妹', year: '1997', spotify: 'spotify:album:1hU2S1j9OvVp8h8p8e1Q1L' },
-  { id: '5', name: '21', artist: 'Adele', year: '2011', spotify: 'spotify:album:0Lg1uZvI5Y8J8U8O8u8O8u' },
-  { id: '6', name: '1989', artist: 'Taylor Swift', year: '2014', spotify: 'spotify:album:34OkZVpuN5LYx7l0df1H9h' },
-  { id: '7', name: 'In Between Dreams', artist: 'Jack Johnson', year: '2005', spotify: 'spotify:album:3dZvR4JZC0w7FyV6h8j9k0' },
-  { id: '8', name: 'If You\'re Feeling Sinister', artist: 'Belle & Sebastian', year: '1996', spotify: 'spotify:album:1h8Y1h8Y1h8Y1h8Y1h8Y1h8' }
+  { id: '1', name: 'The Fame Monster', artist: 'Lady Gaga', year: '2009', color: '#FF1493', art: 'images/albums/lady-gaga-fame-monster.jpg' },
+  { id: '2', name: 'After Hours', artist: 'The Weeknd', year: '2020', color: '#8B0000', art: 'images/albums/weeknd-after-hours.jpg' },
+  { id: '3', name: '范特西', artist: '周杰伦', year: '2001', color: '#4A4A4A', art: 'images/albums/jay-fantasy.jpg' },
+  { id: '4', name: 'Bad Boy', artist: '张惠妹', year: '1997', color: '#FF4500', art: 'images/albums/amei-bad-boy.jpg' },
+  { id: '5', name: '21', artist: 'Adele', year: '2011', color: '#2F4F4F', art: 'images/albums/adele-21.jpg' },
+  { id: '6', name: '1989', year: '2014', color: '#87CEEB', art: 'images/albums/taylor-1989.jpg' },
+  { id: '7', name: 'In Between Dreams', artist: 'Jack Johnson', year: '2005', color: '#F4A460', art: 'images/albums/jack-dreams.jpg' },
+  { id: '8', name: 'If You\'re Feeling Sinister', artist: 'Belle & Sebastian', year: '1996', color: '#DDA0DD', art: 'images/albums/belle-sinister.jpg' }
 ];
 
 let musicCurrentIndex = 0;
@@ -3953,7 +3953,10 @@ function initMusicApp() {
       'border-radius: 8px;' +
       'overflow: hidden;' +
     '">' +
-      '<img src="https://via.placeholder.com/200x200/FF7BAC/ffffff?text=' + encodeURIComponent(album.name.substring(0, 10)) + '" alt="' + album.name + '" style="width:100%;height:100%;object-fit:cover;">' +
+      '<div style="width:100%;height:100%;background:' + album.color + ';display:flex;align-items:center;justify-content:center;position:relative;">' +
+        '<img src="' + album.art + '" alt="' + album.name + '" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display=\'none\'">' +
+        '<span style="font-size:3rem;opacity:0.3;position:relative;z-index:1;">♪</span>' +
+      '</div>' +
       '<div style="position:absolute;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:#fff;">' +
         '<div style="font-size:0.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + album.name + '</div>' +
         '<div style="font-size:0.7rem;opacity:0.8;">' + album.artist + '</div>' +

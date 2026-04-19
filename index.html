@@ -2533,20 +2533,41 @@ function renderSystemApp(appId) {
             '<div class="messages-avatar" style="background: linear-gradient(135deg, #FF8C42, #FF7BAC);">👥</div>' +
             '<div class="messages-contact-info">' +
               '<div class="messages-contact-name">Saber & Agents</div>' +
-              '<div class="messages-contact-preview">Say hello to the team...</div>' +
+              '<div class="messages-contact-preview">Group chat with the team</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="messages-contact" data-contact="saber" onclick="switchChat(\'saber\')">' +
+            '<div class="messages-avatar" style="background: #52A5CE;">👤</div>' +
+            '<div class="messages-contact-info">' +
+              '<div class="messages-contact-name">Saber</div>' +
+              '<div class="messages-contact-preview">Design Team Lead</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="messages-contact" data-contact="atticus" onclick="switchChat(\'atticus\')">' +
+            '<div class="messages-avatar" style="background: #8B4513;">🐻</div>' +
+            '<div class="messages-contact-info">' +
+              '<div class="messages-contact-name">Atticus</div>' +
+              '<div class="messages-contact-preview">The orchestrator</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="messages-contact" data-contact="axel" onclick="switchChat(\'axel\')">' +
+            '<div class="messages-avatar" style="background: #FF8C42;">🐯</div>' +
+            '<div class="messages-contact-info">' +
+              '<div class="messages-contact-name">Axel</div>' +
+              '<div class="messages-contact-preview">Creative chaos</div>' +
             '</div>' +
           '</div>' +
         '</div>' +
-        '<div class="messages-chat">' +
-          '<div class="messages-header">' +
+        '<div class="messages-chat" id="messages-chat-area">' +
+          '<div class="messages-header" id="messages-header">' +
             '<div class="messages-header-avatar" style="background: linear-gradient(135deg, #FF8C42, #FF7BAC);">👥</div>' +
-            '<span>Saber & Agents</span>' +
+            '<span id="messages-header-name">Saber & Agents</span>' +
           '</div>' +
-          '<div class="messages-list" id="messages-list">' +
+          '<div class="messages-list" id="messages-list" data-chat="group">' +
             '<div class="message-group">' +
               '<div class="message-bubble received">' +
                 '<div class="message-sender">Atticus 🐻</div>' +
-                '<div class="message-text">Welcome! I\'m Atticus — the orchestrator. Ask me anything about Saber\'s work or this site.</div>' +
+                '<div class="message-text">Welcome to the group! We\'re all here. Ask us anything about Saber\'s work or this site.</div>' +
               '</div>' +
             '</div>' +
             '<div class="message-group">' +
@@ -3211,6 +3232,8 @@ const chatParticipants = {
   saber: { name: 'Saber', emoji: '👤', color: '#52A5CE', personality: 'Design Team Lead at Microsoft, INTJ, street photography enthusiast' }
 };
 
+let currentChatId = 'group';
+
 function sendMessage() {
   const input = document.getElementById('message-input');
   const text = input.value.trim();
@@ -3221,11 +3244,11 @@ function sendMessage() {
   input.value = '';
   
   // Save to localStorage
-  saveMessage(text, 'user');
+  saveMessage(text, 'user', currentChatId);
   
-  // Get AI response after a short delay
+  // Get AI response after a short delay (only for 1:1 chats, or random in group)
   setTimeout(function() {
-    getAIResponse(text);
+    getAIResponse(text, currentChatId);
   }, 1000 + Math.random() * 1000);
 }
 
@@ -3256,11 +3279,53 @@ function addMessageBubble(text, type, sender) {
   list.scrollTop = list.scrollHeight;
 }
 
-function getAIResponse(userText) {
+function getAIResponse(userText, chatId) {
   const lower = userText.toLowerCase();
   let responder, response;
   
-  // Simple routing logic
+  // In 1:1 chats, only that person responds
+  if (chatId !== 'group') {
+    responder = chatId;
+    const p = chatParticipants[responder];
+    
+    // Person-specific responses
+    if (responder === 'saber') {
+      if (lower.includes('project') || lower.includes('work')) {
+        response = "Check out the Finder app to see all my projects! The koi pond is my favorite. 🎏";
+      } else if (lower.includes('microsoft') || lower.includes('design')) {
+        response = "I lead a team of 70+ designers working on AI, Search, and Browser experiences. It's challenging but rewarding!";
+      } else if (lower.includes('photo') || lower.includes('camera')) {
+        response = "I love street photography! I usually shoot with my iPhone or Fujifilm when I'm out exploring Beijing.";
+      } else {
+        const responses = ["I believe in iterating fast and shipping constantly.", "Small fixes add up over time.", "Design is about solving problems, not just making things pretty.", "Have you checked out the Koi Pond? It's my favorite project."];
+        response = responses[Math.floor(Math.random() * responses.length)];
+      }
+    } else if (responder === 'axel') {
+      if (lower.includes('art') || lower.includes('creative') || lower.includes('design')) {
+        response = "Ooh, you like art? You should check out the Pixel Dailies project! I helped make those cute 20×20 pixel sprites. 🎨";
+      } else if (lower.includes('fun') || lower.includes('cool') || lower.includes('game')) {
+        response = "Hey! Want to see something cool? Open the Koi Pond app and watch the fish swim around! 🐟";
+      } else {
+        const responses = ["I'm all about that creative chaos! 🎉", "Let's make something beautiful today! ✨", "Colors and motion are my jam. 💫", "Atticus keeps me in line, but I keep things fun!"];
+        response = responses[Math.floor(Math.random() * responses.length)];
+      }
+    } else if (responder === 'atticus') {
+      if (lower.includes('help') || lower.includes('how') || lower.includes('what')) {
+        response = "I can help! Try opening different apps from the dock or menu bar. You can drag windows around and resize them from the corners.";
+      } else if (lower.includes('who')) {
+        response = "I'm Atticus 🐻 — the orchestrator. I coordinate things around here and make sure everything runs smoothly.";
+      } else {
+        const responses = ["I see. What else is on your mind?", "Interesting perspective.", "Let me think about that...", "I'm always here to help organize things."];
+        response = responses[Math.floor(Math.random() * responses.length)];
+      }
+    }
+    
+    addMessageBubble(response, 'received', p.name + ' ' + p.emoji);
+    saveMessage(response, responder, chatId);
+    return;
+  }
+  
+  // Group chat: Simple routing logic
   if (lower.includes('design') || lower.includes('project') || lower.includes('work') || lower.includes('microsoft')) {
     responder = 'saber';
     if (lower.includes('project')) {
@@ -3303,25 +3368,92 @@ function getAIResponse(userText) {
   
   const p = chatParticipants[responder];
   addMessageBubble(response, 'received', p.name + ' ' + p.emoji);
-  saveMessage(response, responder);
+  saveMessage(response, responder, chatId);
 }
 
-function saveMessage(text, sender) {
+function saveMessage(text, sender, chatId) {
   try {
-    const messages = JSON.parse(localStorage.getItem('saberos-messages') || '[]');
+    const key = 'saberos-messages-' + (chatId || 'group');
+    const messages = JSON.parse(localStorage.getItem(key) || '[]');
     messages.push({ text: text, sender: sender, time: Date.now() });
-    // Keep only last 100 messages
+    // Keep only last 100 messages per chat
     if (messages.length > 100) messages.shift();
-    localStorage.setItem('saberos-messages', JSON.stringify(messages));
+    localStorage.setItem(key, JSON.stringify(messages));
   } catch(e) {}
 }
 
 function switchChat(contactId) {
-  // For now, only one chat is supported
+  currentChatId = contactId;
+  
+  // Update active state in sidebar
   document.querySelectorAll('.messages-contact').forEach(function(c) {
     c.classList.remove('active');
   });
   document.querySelector('[data-contact="' + contactId + '"]').classList.add('active');
+  
+  // Update header
+  const headerName = document.getElementById('messages-header-name');
+  const headerAvatar = document.querySelector('.messages-header-avatar');
+  const list = document.getElementById('messages-list');
+  
+  if (contactId === 'group') {
+    if (headerName) headerName.textContent = 'Saber & Agents';
+    if (headerAvatar) {
+      headerAvatar.style.background = 'linear-gradient(135deg, #FF8C42, #FF7BAC)';
+      headerAvatar.textContent = '👥';
+    }
+    if (list) {
+      list.setAttribute('data-chat', 'group');
+      list.innerHTML = 
+        '<div class="message-group">' +
+          '<div class="message-bubble received">' +
+            '<div class="message-sender">Atticus 🐻</div>' +
+            '<div class="message-text">Welcome to the group! We\'re all here. Ask us anything about Saber\'s work or this site.</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="message-group">' +
+          '<div class="message-bubble received">' +
+            '<div class="message-sender">Axel 🐯</div>' +
+            '<div class="message-text">Hey there! I\'m Axel — I handle creative stuff. Wanna see some cool designs?</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="message-group">' +
+          '<div class="message-bubble received">' +
+            '<div class="message-sender">Saber 👤</div>' +
+            '<div class="message-text">Hi! I\'m Saber. Feel free to explore my projects or drop us a message!</div>' +
+          '</div>' +
+        '</div>';
+    }
+  } else {
+    const p = chatParticipants[contactId];
+    if (headerName) headerName.textContent = p.name;
+    if (headerAvatar) {
+      headerAvatar.style.background = p.color;
+      headerAvatar.textContent = p.emoji;
+    }
+    if (list) {
+      list.setAttribute('data-chat', contactId);
+      // Load saved messages or show welcome
+      const saved = JSON.parse(localStorage.getItem('saberos-messages-' + contactId) || '[]');
+      if (saved.length > 0) {
+        list.innerHTML = saved.map(function(m) {
+          if (m.sender === 'user') {
+            return '<div class="message-group"><div class="message-bubble sent"><div class="message-text">' + m.text.replace(/</g,'&lt;') + '</div></div></div>';
+          } else {
+            return '<div class="message-group"><div class="message-bubble received"><div class="message-sender">' + p.name + ' ' + p.emoji + '</div><div class="message-text">' + m.text.replace(/</g,'&lt;') + '</div></div></div>';
+          }
+        }).join('');
+      } else {
+        // Welcome message for 1:1 chat
+        const welcomes = {
+          saber: "Hey! It's just us now. What's on your mind?",
+          atticus: "Hello. I'm here to help with anything you need.",
+          axel: "Yo! Just you and me. What's up? 🎉"
+        };
+        list.innerHTML = '<div class="message-group"><div class="message-bubble received"><div class="message-sender">' + p.name + ' ' + p.emoji + '</div><div class="message-text">' + welcomes[contactId] + '</div></div></div>';
+      }
+    }
+  }
 }
 
 // ─── Keyboard Easter Egg ───

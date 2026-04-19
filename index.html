@@ -1960,7 +1960,7 @@ body {
     <div class="menu-item-wrap">
       <div class="menu-item" onclick="toggleMenuDropdown('menu-saber')">Saber</div>
       <div class="menu-dropdown" id="menu-saber">
-        <div class="menu-dropdown-item" onclick="openApp('about')"><i data-feather="monitor" class="menu-dd-icon"></i> About This Mac</div>
+        <div class="menu-dropdown-item" onclick="openApp('about')"><i data-feather="monitor" class="menu-dd-icon"></i> About This Computer</div>
         <div class="menu-dropdown-separator"></div>
         <div class="menu-dropdown-item" onclick="location.reload()"><i data-feather="refresh-cw" class="menu-dd-icon"></i> Restart SaberOS</div>
       </div>
@@ -2237,7 +2237,7 @@ const systemApps = {
   mail: { id: 'mail', title: 'Mail', accent: '#52A5CE', icon: ICON_BASE + '/thiings/mail.png' },
   notes: { id: 'notes', title: 'Notes', accent: '#EFCE7B', icon: ICON_BASE + '/thiings/notes.png' },
   camera: { id: 'camera', title: 'Camera', accent: '#EF6F3C', icon: ICON_BASE + '/thiings/camera.png' },
-  about: { id: 'about', title: 'About This Mac', accent: '#FF8C42', icon: ICON_BASE + '/thiings/about.png' },
+  about: { id: 'about', title: 'About This Computer', accent: '#FF8C42', icon: ICON_BASE + '/thiings/about.png' },
   finder: { id: 'finder', title: 'Finder', accent: '#B8CEE8', icon: ICON_BASE + '/thiings/finder.png' },
   wallpaper: { id: 'wallpaper', title: 'Desktop & Screen Saver', accent: '#D3B6D3', icon: ICON_BASE + '/thiings/wallpaper.png' },
   music: { id: 'music', title: 'Music', accent: '#FF7BAC', icon: ICON_BASE + '/thiings/music.png' },
@@ -2454,9 +2454,9 @@ function renderSystemApp(appId) {
       '</div>';
       
     case 'about':
-      return '<div class="about-avatar">🧑‍💻</div>' +
+      return '<img src="avatar.jpg" class="about-avatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 16px;display:block;box-shadow:0 4px 12px rgba(0,0,0,0.15);">' +
         '<h2>Saber Zou</h2>' +
-        '<div class="version">SaberOS 1.0</div>' +
+        '<div class="version">SaberOS 2.0</div>' +
         '<div class="about-specs">' +
           '<div class="about-spec-row"><span class="about-spec-label">Processor</span><span class="about-spec-value">Creative Problem Solving™ v26.0</span></div>' +
           '<div class="about-spec-row"><span class="about-spec-label">Memory</span><span class="about-spec-value">70+ designers worth of context</span></div>' +
@@ -3627,6 +3627,8 @@ window.addEventListener('load', function() {
     document.getElementById('boot-screen').classList.add('fade-out');
     setTimeout(function() {
       document.getElementById('boot-screen').style.display = 'none';
+      // Open About app after boot
+      openApp('about');
     }, 600);
   }, 1500);
   

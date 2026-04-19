@@ -2003,8 +2003,7 @@ body {
   <div class="menu-bar-right">
     <div class="menu-icon"><i data-feather="wifi" style="width:14px;height:14px"></i></div>
     <div class="menu-icon"><i data-feather="battery-charging" style="width:14px;height:14px"></i></div>
-    <div class="menu-clock" id="menu-clock">12:00 PM</div>
-    <div class="menu-username">Saber</div>
+    <div class="menu-clock" id="menu-clock" onclick="toggleNotifications()">12:00 PM</div>
     <div class="menu-hamburger" onclick="toggleMobileMenu()">
       <span></span>
       <span></span>
@@ -3636,7 +3635,6 @@ window.addEventListener('load', function() {
   initMobileGrid();
   initWeather();
   initStocks();
-  initNotifications();
   renderTodos();
   populateGoMenu();
   if (typeof feather !== 'undefined') feather.replace();
@@ -3734,13 +3732,29 @@ function showNotificationBanner(data) {
   }, 5000);
 }
 
-// Show notifications on load with stagger
-function initNotifications() {
-  notificationData.forEach(function(n, i) {
-    setTimeout(function() {
-      showNotificationBanner(n);
-    }, 1000 + (i * 800));
-  });
+// Toggle notifications on clock click
+let notificationsVisible = false;
+function toggleNotifications() {
+  const container = document.getElementById('notification-banners');
+  if (!container) return;
+  
+  if (notificationsVisible) {
+    // Hide all notifications
+    const banners = container.querySelectorAll('.notification-banner');
+    banners.forEach(function(b) {
+      b.classList.add('hiding');
+      setTimeout(function() { b.remove(); }, 300);
+    });
+    notificationsVisible = false;
+  } else {
+    // Show all notifications
+    notificationData.forEach(function(n, i) {
+      setTimeout(function() {
+        showNotificationBanner(n);
+      }, i * 100);
+    });
+    notificationsVisible = true;
+  }
 }
 
 // ─── Help Functions ───

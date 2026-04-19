@@ -2335,40 +2335,9 @@ body {
   <!-- Mobile Home -->
   <div class="mobile-home" id="mobile-home">
     <div class="mobile-pages-container" id="mobile-pages-container">
-      <!-- Page 1: Widgets + Main Apps -->
-      <div class="mobile-page" id="mobile-page-1">
-        <div class="mobile-page-widgets">
-          <div class="mobile-widget weather" id="mobile-widget-weather">
-            <div class="widget-content">
-              <img id="widget-icon" src="images/weather-icons/clear_day.svg" alt="weather">
-              <div class="temp" id="widget-temp">--°</div>
-              <div class="condition" id="widget-condition">Loading...</div>
-            </div>
-          </div>
-          <div class="mobile-widget stocks" id="mobile-widget-stocks">
-            <div class="stock-item">
-              <span class="stock-symbol">AAPL</span>
-              <span class="stock-price" id="stock-aapl">--</span>
-              <span class="stock-change" id="stock-aapl-change">--</span>
-            </div>
-            <div class="stock-item">
-              <span class="stock-symbol">MSFT</span>
-              <span class="stock-price" id="stock-msft">--</span>
-              <span class="stock-change" id="stock-msft-change">--</span>
-            </div>
-          </div>
-        </div>
-        <div class="mobile-grid" id="mobile-grid-page1"></div>
-      </div>
-      <!-- Page 2: More Apps -->
-      <div class="mobile-page" id="mobile-page-2">
-        <div class="mobile-grid" id="mobile-grid-page2"></div>
-      </div>
+      <!-- Pages generated dynamically by initMobileGrid() -->
     </div>
-    <div class="mobile-page-dots" id="mobile-page-dots">
-      <div class="mobile-page-dot active" data-page="0"></div>
-      <div class="mobile-page-dot" data-page="1"></div>
-    </div>
+    <div class="mobile-page-dots" id="mobile-page-dots"></div>
   </div>
 </div>
 
@@ -3441,42 +3410,128 @@ function initLaunchpad() {
 
 // ─── Mobile Grid ───
 function initMobileGrid() {
-  const page1 = document.getElementById('mobile-grid-page1');
-  const page2 = document.getElementById('mobile-grid-page2');
+  const container = document.getElementById('mobile-pages-container');
+  const dotsContainer = document.getElementById('mobile-page-dots');
   
-  if (!page1 || !page2) return;
+  if (!container) return;
   
-  // Calculate apps per page (4 columns x 4 rows = 16, minus space for widgets on page 1)
-  const page1Capacity = 8; // Space for widgets takes some room
-  const page2Capacity = 16;
+  // Check if widgets are visible (mobile vs tablet)
+  const widgetsVisible = window.innerWidth <= 767;
   
-  // Helper to create project icon that opens in new tab
-  function createProjectIcon(p) {
-    const icon = document.createElement('a');
-    icon.className = 'mobile-icon';
-    icon.href = p.link;
-    icon.target = '_blank';
-    icon.style.textDecoration = 'none';
-    icon.innerHTML = 
-      '<div class="mobile-icon-img"><img src="' + p.icon + '" alt="' + p.title + '" onerror="this.onerror=null; this.style.display=\'none\'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;"></div>' +
-      '<span>' + (p.shortTitle || p.title) + '</span>';
-    return icon;
-  }
+  // Calculate how many apps fit per page based on viewport
+  const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1023;
+  const iconSize = isTablet ? 80 : 64;
+  const iconGap = isTablet ? 32 : 20;
+  const pagePadding = 40;
+  const availableWidth = window.innerWidth - pagePadding;
+  const availableHeight = window.innerHeight - 200; // Account for dock, status bar, etc
   
-  // Distribute projects across pages based on capacity
-  projects.forEach(function(p, i) {
-    if (i < page1Capacity) {
-      page1.appendChild(createProjectIcon(p));
-    } else {
-      page2.appendChild(createProjectIcon(p));
+  const cols = Math.floor(availableWidth / (iconSize + iconGap));
+  const rows = Math.floor(availableHeight / (iconSize + iconGap + 20)); // +20 for label
+  const appsPerPage = Math.max(1, cols * rows);
+  
+  // Get all apps (system + projects)
+  const allApps = [];
+  Object.keys(systemApps).forEach(function(key) {
+    if (key !== 'trash') {
+      allApps.push({ type: 'system', id: key, data: systemApps[key] });
     }
   });
+  projects.forEach(function(p) {
+    allApps.push({ type: 'project', id: p.id, data: p });
+  });
+  
+  // Calculate number of pages needed
+  const totalApps = allApps.length;
+  const numPages = Math.ceil(totalApps / appsPerPage);
+  
+  // Clear existing pages
+  container.innerHTML = '';
+  if (dotsContainer) dotsContainer.innerHTML = '';
+  
+  // Create pages dynamically
+  for (let pageNum = 0; pageNum < numPages; pageNum++) {
+    const page = document.createElement('div');
+    page.className = 'mobile-page';
+    page.id = 'mobile-page-' + (pageNum + 1);
+    
+    // Add widgets only to first page on mobile
+    if (pageNum === 0 && widgetsVisible) {
+      const widgetsDiv = document.createElement('div');
+      widgetsDiv.className = 'mobile-page-widgets';
+      widgetsDiv.innerHTML = 
+        '<div class="mobile-widget weather" id="mobile-widget-weather">' +
+          '<div class="widget-content">' +
+            '<img id="widget-icon" src="images/weather-icons/clear_day.svg" alt="weather">' +
+            '<div class="temp" id="widget-temp">--°</div>' +
+            '<div class="condition" id="widget-condition">Loading...</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="mobile-widget stocks" id="mobile-widget-stocks">' +
+          '<div class="stock-item">' +
+            '<span class="stock-symbol">AAPL</span>' +
+            '<span class="stock-price" id="stock-aapl">--</span>' +
+            '<span class="stock-change" id="stock-aapl-change">--</span>' +
+          '</div>' +
+          '<div class="stock-item">' +
+            '<span class="stock-symbol">MSFT</span>' +
+            '<span class="stock-price" id="stock-msft">--</span>' +
+            '<span class="stock-change" id="stock-msft-change">--</span>' +
+          '</div>' +
+        '</div>';
+      page.appendChild(widgetsDiv);
+    }
+    
+    const grid = document.createElement('div');
+    grid.className = 'mobile-grid';
+    
+    // Add apps for this page
+    const startIdx = pageNum * appsPerPage;
+    const endIdx = Math.min(startIdx + appsPerPage, totalApps);
+    
+    for (let i = startIdx; i < endIdx; i++) {
+      const app = allApps[i];
+      const icon = document.createElement(app.type === 'project' ? 'a' : 'div');
+      icon.className = 'mobile-icon';
+      
+      if (app.type === 'project') {
+        icon.href = app.data.link;
+        icon.target = '_blank';
+        icon.style.textDecoration = 'none';
+      } else {
+        icon.onclick = (function(id) { return function() { openMobileApp(id); }; })(app.id);
+      }
+      
+      const isCircle = app.id === 'me';
+      const isExternal = app.id === 'me';
+      icon.innerHTML = 
+        '<div class="mobile-icon-img" style="' + (isCircle ? 'border-radius:50%;' : '') + '">' +
+          '<img src="' + (app.type === 'project' ? app.data.icon : app.data.icon) + '" alt="' + (app.type === 'project' ? app.data.title : app.data.title) + '" style="' + (isCircle ? 'border-radius:50%;' : '') + '" onerror="this.onerror=null; this.style.display=\'none\'">' +
+        '</div>' +
+        '<span>' + (app.type === 'project' ? (app.data.shortTitle || app.data.title) : app.data.title) + (isExternal ? ' ↗' : '') + '</span>';
+      
+      grid.appendChild(icon);
+    }
+    
+    page.appendChild(grid);
+    container.appendChild(page);
+    
+    // Add dot indicator
+    if (dotsContainer) {
+      const dot = document.createElement('div');
+      dot.className = 'mobile-page-dot' + (pageNum === 0 ? ' active' : '');
+      dot.dataset.page = pageNum;
+      dotsContainer.appendChild(dot);
+    }
+  }
   
   // Setup page scroll indicator
   setupMobilePageDots();
   
-  // Load widget data
-  loadMobileWidgets();
+  // Load widget data if on mobile
+  if (widgetsVisible) {
+    loadMobileWidgets();
+  }
 }
 
 function setupMobilePageDots() {

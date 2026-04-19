@@ -1181,7 +1181,8 @@ body {
     border-radius: 24px;
     padding: 10px 16px;
     gap: 16px;
-    z-index: 1000;
+    z-index: 9999;
+    pointer-events: auto;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
   }
   
@@ -1278,6 +1279,7 @@ body {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  z-index: 1;
 }
 
 .mobile-pages-container {

@@ -2258,6 +2258,8 @@ const systemApps = {
   music: { id: 'music', title: 'Music', accent: '#FF7BAC', icon: ICON_BASE + '/thiings/music.png' },
   messages: { id: 'messages', title: 'Messages', accent: '#34C759', icon: ICON_BASE + '/thiings/messages.png' },
   terminal: { id: 'terminal', title: 'Terminal', accent: '#25533F', icon: ICON_BASE + '/thiings/terminal.png' },
+  userguide: { id: 'userguide', title: 'User Guide', accent: '#52A5CE', icon: ICON_BASE + '/thiings/notes.png' },
+  shortcuts: { id: 'shortcuts', title: 'Keyboard Shortcuts', accent: '#EFCE7B', icon: ICON_BASE + '/thiings/terminal.png' },
   trash: { id: 'trash', title: 'Trash', accent: '#7A5C3A', icon: ICON_BASE + '/thiings/trash.png' }
 };
 
@@ -2611,6 +2613,58 @@ function renderSystemApp(appId) {
         '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>' +
         '<p style="font-family: var(--sans); font-size: 0.9rem; margin: 0;">Trash is empty</p>' +
         '<p style="font-family: var(--serif); font-size: 0.8rem; margin: 0;">Nothing to see here. Move along.</p>' +
+      '</div>';
+
+    case 'userguide':
+      return '<div style="padding: 24px; height: 100%; overflow-y: auto; font-family: var(--sans);">' +
+        '<h2 style="font-size: 1.3rem; margin: 0 0 20px; color: var(--fg);">Welcome to SaberOS</h2>' +
+        '<div style="display: flex; flex-direction: column; gap: 16px;">' +
+          '<div style="display: flex; align-items: flex-start; gap: 12px;">' +
+            '<div style="width: 32px; height: 32px; background: rgba(255,140,66,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">👆</div>' +
+            '<div><h4 style="font-size: 0.9rem; margin: 0 0 4px; color: var(--fg);">Open Projects</h4><p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">Click any project icon on the desktop to open it in a window.</p></div>' +
+          '</div>' +
+          '<div style="display: flex; align-items: flex-start; gap: 12px;">' +
+            '<div style="width: 32px; height: 32px; background: rgba(82,165,206,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🎯</div>' +
+            '<div><h4 style="font-size: 0.9rem; margin: 0 0 4px; color: var(--fg);">Dock Apps</h4><p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">Use the dock at the bottom to access system apps like Mail, Notes, and Messages.</p></div>' +
+          '</div>' +
+          '<div style="display: flex; align-items: flex-start; gap: 12px;">' +
+            '<div style="width: 32px; height: 32px; background: rgba(239,206,123,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🖱️</div>' +
+            '<div><h4 style="font-size: 0.9rem; margin: 0 0 4px; color: var(--fg);">Right-Click</h4><p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">Right-click the desktop to change wallpaper or access quick actions.</p></div>' +
+          '</div>' +
+          '<div style="display: flex; align-items: flex-start; gap: 12px;">' +
+            '<div style="width: 32px; height: 32px; background: rgba(170,204,150,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">✋</div>' +
+            '<div><h4 style="font-size: 0.9rem; margin: 0 0 4px; color: var(--fg);">Drag Windows</h4><p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">Drag any window by its title bar to move it around. Resize from the corners.</p></div>' +
+          '</div>' +
+          '<div style="display: flex; align-items: flex-start; gap: 12px;">' +
+            '<div style="width: 32px; height: 32px; background: rgba(255,123,172,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">⌨️</div>' +
+            '<div><h4 style="font-size: 0.9rem; margin: 0 0 4px; color: var(--fg);">Menu Bar</h4><p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">Use the menu bar for quick navigation and access to system features.</p></div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid rgba(45,27,0,0.1);">' +
+          '<p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0; text-align: center;">Built with ❤️ by Saber Zou</p>' +
+        '</div>' +
+      '</div>';
+
+    case 'shortcuts':
+      const shortcuts = [
+        { key: 'Drag', action: 'Move windows by title bar' },
+        { key: 'Resize handles', action: 'Resize windows from corners' },
+        { key: 'Right-click', action: 'Desktop context menu' },
+        { key: 'Type "hello"', action: 'Easter egg surprise' }
+      ];
+      return '<div style="padding: 24px; height: 100%; overflow-y: auto; font-family: var(--sans);">' +
+        '<h2 style="font-size: 1.3rem; margin: 0 0 20px; color: var(--fg);">Keyboard Shortcuts</h2>' +
+        '<div style="display: flex; flex-direction: column; gap: 12px;">' +
+          shortcuts.map(function(s) {
+            return '<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(45,27,0,0.03); border-radius: 8px;">' +
+              '<span style="font-size: 0.85rem; color: var(--fg-muted);">' + s.action + '</span>' +
+              '<kbd style="background: rgba(45,27,0,0.08); padding: 6px 12px; border-radius: 6px; font-family: var(--sans); font-size: 0.75rem; color: var(--fg); font-weight: 500;">' + s.key + '</kbd>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<div style="margin-top: 24px; padding: 16px; background: rgba(255,140,66,0.08); border-radius: 8px;">' +
+          '<p style="font-size: 0.8rem; color: var(--fg-muted); margin: 0;">💡 <strong>Pro tip:</strong> Windows can be minimized, maximized, and closed using the traffic light buttons in the top-left corner.</p>' +
+        '</div>' +
       '</div>';
 
     default:
@@ -3644,60 +3698,19 @@ function toggleNotificationPanel() {
 
 // ─── Help Functions ───
 function showUserGuide() {
-  const guideContent = 'Welcome to SaberOS!\n\n' +
-    '• Click any project icon to open it\n' +
-    '• Use the dock at the bottom to access apps\n' +
-    '• Right-click the desktop to change wallpaper\n' +
-    '• Drag windows by their title bar\n' +
-    '• Use the menu bar for quick navigation\n\n' +
-    'Built with ❤️ by Saber Zou';
-  
-  // Create a small modal window
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
-  modal.innerHTML = '<div style="background:var(--bg);padding:24px;border-radius:12px;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">' +
-    '<h3 style="font-family:var(--sans);font-size:1.1rem;margin:0 0 16px;color:var(--fg);">User Guide</h3>' +
-    '<pre style="font-family:var(--sans);font-size:0.85rem;line-height:1.6;color:var(--fg-muted);white-space:pre-wrap;margin:0;">' + guideContent + '</pre>' +
-    '<button onclick="this.closest(\'.menu-dropdown\')?.classList.remove(\'show\');this.parentElement.parentElement.remove()" style="margin-top:20px;padding:8px 20px;background:var(--forest);color:white;border:none;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:0.8rem;">Got it</button>' +
-    '</div>';
-  modal.onclick = function(e) {
-    if (e.target === modal) modal.remove();
-  };
-  document.body.appendChild(modal);
-  
   // Close menu dropdown
   toggleMenuDropdown('menu-help');
+  
+  // Open as proper app window
+  openApp('userguide');
 }
 
 function showKeyboardShortcuts() {
-  const shortcuts = [
-    { key: '⌘ + Click', action: 'Open app in new window' },
-    { key: 'Drag', action: 'Move windows' },
-    { key: 'Type "hello"', action: 'Easter egg surprise' },
-    { key: 'Right-click', action: 'Desktop context menu' }
-  ];
-  
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
-  modal.innerHTML = '<div style="background:var(--bg);padding:24px;border-radius:12px;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">' +
-    '<h3 style="font-family:var(--sans);font-size:1.1rem;margin:0 0 16px;color:var(--fg);">Keyboard Shortcuts</h3>' +
-    '<div style="display:flex;flex-direction:column;gap:12px;">' +
-    shortcuts.map(function(s) {
-      return '<div style="display:flex;justify-content:space-between;align-items:center;font-family:var(--sans);font-size:0.85rem;">' +
-        '<span style="color:var(--fg-muted);">' + s.action + '</span>' +
-        '<kbd style="background:rgba(45,27,0,0.08);padding:4px 8px;border-radius:4px;font-family:monospace;font-size:0.75rem;color:var(--fg);">' + s.key + '</kbd>' +
-        '</div>';
-    }).join('') +
-    '</div>' +
-    '<button onclick="this.parentElement.parentElement.remove()" style="margin-top:20px;padding:8px 20px;background:var(--forest);color:white;border:none;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:0.8rem;">Close</button>' +
-    '</div>';
-  modal.onclick = function(e) {
-    if (e.target === modal) modal.remove();
-  };
-  document.body.appendChild(modal);
-  
   // Close menu dropdown
   toggleMenuDropdown('menu-help');
+  
+  // Open as proper app window
+  openApp('shortcuts');
 }
 </script>
 </body>

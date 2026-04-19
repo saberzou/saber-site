@@ -2591,11 +2591,33 @@ function renderSystemApp(appId) {
       '</div>';
 
     case 'music':
-      return '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 16px; padding: 24px; text-align: center;">' +
-        '<div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #FF7BAC, #D3B6D3); display: flex; align-items: center; justify-content: center;"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></div>' +
-        '<h2 style="font-family: var(--sans); font-size: 1.2rem; margin: 0;">Music</h2>' +
-        '<p style="font-family: var(--serif); color: var(--fg-muted); font-size: 0.9rem; margin: 0;">Saber\'s playlist is playing somewhere in the background.</p>' +
-        '<div style="display: flex; gap: 24px; align-items: center; margin-top: 8px;"><span style="font-size: 1.4rem; cursor: pointer;">⏮</span><span style="font-size: 2rem; cursor: pointer;">▶</span><span style="font-size: 1.4rem; cursor: pointer;">⏭</span></div>' +
+      return '<div class="music-app" style="display: flex; flex-direction: column; height: 100%; background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); color: #fff; font-family: var(--sans);">' +
+        '<div class="music-header" style="padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1);">' +
+          '<h2 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Saber\'s Music</h2>' +
+          '<div style="display: flex; gap: 12px; align-items: center;">' +
+            '<span id="music-status" style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">Ready</span>' +
+            '<button onclick="openSpotify()" style="background: #1DB954; border: none; color: #fff; padding: 6px 12px; border-radius: 16px; font-size: 0.75rem; cursor: pointer; font-weight: 500;">Open Spotify</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="music-coverflow" id="music-coverflow" style="flex: 1; display: flex; align-items: center; justify-content: center; perspective: 1000px; overflow: hidden; position: relative;">' +
+          '<div id="coverflow-container" style="display: flex; align-items: center; justify-content: center; transform-style: preserve-3d; transition: transform 0.5s ease;"></div>' +
+        '</div>' +
+        '<div class="music-controls" style="padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; border-top: 1px solid rgba(255,255,255,0.1);">' +
+          '<div id="now-playing" style="text-align: center; min-height: 48px;">' +
+            '<div id="track-name" style="font-size: 0.95rem; font-weight: 500; margin-bottom: 4px;">Select an album</div>' +
+            '<div id="artist-name" style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Browse your favorites</div>' +
+          '</div>' +
+          '<div style="display: flex; gap: 32px; align-items: center;">' +
+            '<button onclick="musicPrev()" style="background: none; border: none; color: #fff; cursor: pointer; padding: 8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>' +
+            '<button onclick="musicToggle()" id="play-btn" style="background: #fff; border: none; color: #1a1a2e; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;"><svg id="play-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><svg id="pause-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>' +
+            '<button onclick="musicNext()" style="background: none; border: none; color: #fff; cursor: pointer; padding: 8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>' +
+          '</div>' +
+          '<div style="display: flex; gap: 16px; align-items: center; width: 100%; max-width: 300px;">' +
+            '<span style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">1:24</span>' +
+            '<div style="flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden;"><div style="width: 35%; height: 100%; background: #1DB954; border-radius: 2px;"></div></div>' +
+            '<span style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">3:45</span>' +
+          '</div>' +
+        '</div>' +
       '</div>';
 
     case 'messages':
@@ -3889,6 +3911,108 @@ document.addEventListener('click', function(e) {
   }
   
   // Also close notification panel
+});
+
+// ─── Music App ───
+const musicAlbums = [
+  { id: '1', name: 'The Fame Monster', artist: 'Lady Gaga', year: '2009', spotify: 'spotify:album:6DGZdvrWlR7hKfO0M5eIVY' },
+  { id: '2', name: 'After Hours', artist: 'The Weeknd', year: '2020', spotify: 'spotify:album:4yP0hdKOZPNshxUOjY0cZj' },
+  { id: '3', name: '范特西', artist: '周杰伦', year: '2001', spotify: 'spotify:album:7BUzAJ9J3R6Jy8DGSd7bR3' },
+  { id: '4', name: 'Bad Boy', artist: '张惠妹', year: '1997', spotify: 'spotify:album:1hU2S1j9OvVp8h8p8e1Q1L' },
+  { id: '5', name: '21', artist: 'Adele', year: '2011', spotify: 'spotify:album:0Lg1uZvI5Y8J8U8O8u8O8u' },
+  { id: '6', name: '1989', artist: 'Taylor Swift', year: '2014', spotify: 'spotify:album:34OkZVpuN5LYx7l0df1H9h' },
+  { id: '7', name: 'In Between Dreams', artist: 'Jack Johnson', year: '2005', spotify: 'spotify:album:3dZvR4JZC0w7FyV6h8j9k0' },
+  { id: '8', name: 'If You\'re Feeling Sinister', artist: 'Belle & Sebastian', year: '1996', spotify: 'spotify:album:1h8Y1h8Y1h8Y1h8Y1h8Y1h8' }
+];
+
+let musicCurrentIndex = 0;
+let musicIsPlaying = false;
+let musicAudio = null;
+
+function initMusicApp() {
+  const container = document.getElementById('coverflow-container');
+  if (!container) return;
+  
+  container.innerHTML = musicAlbums.map((album, i) => {
+    const offset = i - musicCurrentIndex;
+    const rotateY = offset * 45;
+    const translateZ = Math.abs(offset) * -200;
+    const translateX = offset * 120;
+    const opacity = Math.abs(offset) > 2 ? 0 : 1 - Math.abs(offset) * 0.3;
+    const scale = 1 - Math.abs(offset) * 0.15;
+    
+    return '<div class="coverflow-item" data-index="' + i + '" onclick="selectAlbum(' + i + ')" style="' +
+      'position: absolute;' +
+      'width: 200px;' +
+      'height: 200px;' +
+      'transform: translateX(' + translateX + 'px) translateZ(' + translateZ + 'px) rotateY(' + rotateY + 'deg) scale(' + scale + ');' +
+      'opacity: ' + opacity + ';' +
+      'transition: all 0.5s ease;' +
+      'cursor: pointer;' +
+      'box-shadow: 0 20px 40px rgba(0,0,0,0.4);' +
+      'border-radius: 8px;' +
+      'overflow: hidden;' +
+    '">' +
+      '<img src="https://via.placeholder.com/200x200/FF7BAC/ffffff?text=' + encodeURIComponent(album.name.substring(0, 10)) + '" alt="' + album.name + '" style="width:100%;height:100%;object-fit:cover;">' +
+      '<div style="position:absolute;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:#fff;">' +
+        '<div style="font-size:0.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + album.name + '</div>' +
+        '<div style="font-size:0.7rem;opacity:0.8;">' + album.artist + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  
+  updateNowPlaying();
+}
+
+function selectAlbum(index) {
+  musicCurrentIndex = index;
+  initMusicApp();
+  updateNowPlaying();
+}
+
+function updateNowPlaying() {
+  const album = musicAlbums[musicCurrentIndex];
+  const trackName = document.getElementById('track-name');
+  const artistName = document.getElementById('artist-name');
+  if (trackName) trackName.textContent = album.name;
+  if (artistName) artistName.textContent = album.artist + ' • ' + album.year;
+}
+
+function musicPrev() {
+  if (musicCurrentIndex > 0) {
+    musicCurrentIndex--;
+    initMusicApp();
+  }
+}
+
+function musicNext() {
+  if (musicCurrentIndex < musicAlbums.length - 1) {
+    musicCurrentIndex++;
+    initMusicApp();
+  }
+}
+
+function musicToggle() {
+  musicIsPlaying = !musicIsPlaying;
+  const playIcon = document.getElementById('play-icon');
+  const pauseIcon = document.getElementById('pause-icon');
+  const status = document.getElementById('music-status');
+  
+  if (playIcon) playIcon.style.display = musicIsPlaying ? 'none' : 'block';
+  if (pauseIcon) pauseIcon.style.display = musicIsPlaying ? 'block' : 'none';
+  if (status) status.textContent = musicIsPlaying ? 'Playing' : 'Paused';
+}
+
+function openSpotify() {
+  const album = musicAlbums[musicCurrentIndex];
+  window.open('https://open.spotify.com/search/' + encodeURIComponent(album.artist + ' ' + album.name), '_blank');
+}
+
+// Initialize music app when opened
+document.addEventListener('click', function(e) {
+  if (e.target.closest('[onclick*="openApp(\'music\')"]') || e.target.closest('#window-music')) {
+    setTimeout(initMusicApp, 100);
+  }
 });
 
 // Populate Go menu with projects

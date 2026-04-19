@@ -2335,11 +2335,11 @@ function createWindow(id, data, options) {
   const desktop = document.getElementById('desktop');
   const deskW = desktop.clientWidth;
   const deskH = desktop.clientHeight;
-  // Position window at upper-center (20% from top, centered horizontally)
+  // Position window at upper-center (12% from top, centered horizontally)
   const offsetStepX = (windows.size % 6) * 25;
   const offsetStepY = Math.floor(windows.size / 6) * 25;
   const baseX = Math.max(20, Math.round((deskW - winWidth) / 2) + offsetStepX);
-  const baseY = Math.max(20, Math.round(deskH * 0.2) + offsetStepY);
+  const baseY = Math.max(50, Math.round(deskH * 0.12) + offsetStepY);
   windowEl.style.left = baseX + 'px';
   windowEl.style.top = baseY + 'px';
   windowEl.style.width = (options.width || (isSystemApp ? '480px' : '800px'));

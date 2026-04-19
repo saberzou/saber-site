@@ -2269,15 +2269,10 @@ body {
       <div class="mobile-page" id="mobile-page-2">
         <div class="mobile-grid" id="mobile-grid-page2"></div>
       </div>
-      <!-- Page 3: Projects -->
-      <div class="mobile-page" id="mobile-page-3">
-        <div class="mobile-grid" id="mobile-grid-page3"></div>
-      </div>
     </div>
     <div class="mobile-page-dots" id="mobile-page-dots">
       <div class="mobile-page-dot active" data-page="0"></div>
       <div class="mobile-page-dot" data-page="1"></div>
-      <div class="mobile-page-dot" data-page="2"></div>
     </div>
   </div>
 </div>
@@ -3340,36 +3335,34 @@ function initLaunchpad() {
 function initMobileGrid() {
   const page1 = document.getElementById('mobile-grid-page1');
   const page2 = document.getElementById('mobile-grid-page2');
-  const page3 = document.getElementById('mobile-grid-page3');
   
-  if (!page1 || !page2 || !page3) return;
+  if (!page1 || !page2) return;
   
-  // Helper to create project icon that opens in new tab
+  // Calculate apps per page (4 columns x 4 rows = 16, minus space for widgets on page 1)
+  const page1Capacity = 8; // Space for widgets takes some room
+  const page2Capacity = 16;
+  
+  // Helper to create project icon that opens in new tab with contrast text
   function createProjectIcon(p) {
+    const textColor = getContrastColor(p.accent || '#ddd');
     const icon = document.createElement('a');
     icon.className = 'mobile-icon';
     icon.href = p.link;
     icon.target = '_blank';
     icon.style.textDecoration = 'none';
     icon.innerHTML = 
-      '<div class="mobile-icon-img"><img src="' + p.icon + '" alt="' + p.title + '" onerror="this.onerror=null; this.parentElement.style.background=\'' + (p.accent || '#ddd') + '\'; this.style.display=\'none\'"></div>' +
-      '<span>' + (p.shortTitle || p.title) + '</span>';
+      '<div class="mobile-icon-img" style="background: ' + (p.accent || '#ddd') + ';"><img src="' + p.icon + '" alt="' + p.title + '" onerror="this.onerror=null; this.style.display=\'none\'" style="width: 100%; height: 100%; object-fit: cover;"></div>' +
+      '<span style="color: ' + textColor + ';">' + (p.shortTitle || p.title) + '</span>';
     return icon;
   }
   
-  // Page 1: First 4 projects (below widgets)
-  projects.slice(0, 4).forEach(function(p) {
-    page1.appendChild(createProjectIcon(p));
-  });
-  
-  // Page 2: Next 4 projects
-  projects.slice(4, 8).forEach(function(p) {
-    page2.appendChild(createProjectIcon(p));
-  });
-  
-  // Page 3: Remaining projects
-  projects.slice(8).forEach(function(p) {
-    page3.appendChild(createProjectIcon(p));
+  // Distribute projects across pages based on capacity
+  projects.forEach(function(p, i) {
+    if (i < page1Capacity) {
+      page1.appendChild(createProjectIcon(p));
+    } else {
+      page2.appendChild(createProjectIcon(p));
+    }
   });
   
   // Setup page scroll indicator
@@ -3418,10 +3411,12 @@ function loadMobileWidgets() {
   };
   
   if (tempEl && conditionEl) {
-    fetch('https://wttr.in/Beijing?format=%C|%t')
+    fetch('https://wttr.in/Beijing?format=%C|%t', { headers: { 'Accept': 'text/plain' } })
       .then(function(r) { return r.text(); })
       .then(function(data) {
-        const parts = data.split('|');
+        // Strip any HTML tags if present
+        const cleanData = data.replace(/<[^>]*>/g, '').trim();
+        const parts = cleanData.split('|');
         if (parts.length >= 2) {
           const condition = parts[0].trim();
           conditionEl.textContent = condition;
@@ -3455,6 +3450,23 @@ function loadMobileWidgets() {
       todoPreview.innerHTML = '<div class="todo-item"><div class="todo-check"></div>No pending tasks</div>';
     }
   }
+}
+
+// Calculate contrast color (black or white) based on background
+function getContrastColor(hexColor) {
+  // Remove # if present
+  const hex = hexColor.replace('#', '');
+  
+  // Parse RGB
+  const r = parseInt(hex.substr(0, 2), 16) || 0;
+  const g = parseInt(hex.substr(2, 2), 16) || 0;
+  const b = parseInt(hex.substr(4, 2), 16) || 0;
+  
+  // Calculate luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  // Return white for dark backgrounds, black for light
+  return luminance > 0.5 ? '#2D1B00' : '#FFFFFF';
 }
 
 function openMobileSheet(data, isSystemApp) {

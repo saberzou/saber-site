@@ -2281,6 +2281,17 @@ body {
   color: rgba(255,255,255,0.8);
 }
 
+.typing-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: rgba(0,0,0,0.4);
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}
+
 .messages-input-area {
   display: flex;
   align-items: center;
@@ -4378,17 +4389,7 @@ const chatParticipants = {
 
 let currentChatId = 'group';
 
-var mobileMessageResponses = [
-  { sender: 'Atticus 🐻', text: 'Thanks for saying hi! Feel free to explore the projects above.' },
-  { sender: 'Axel 🐯', text: 'Yo! Check out my art page — tap the Axel Art icon!' },
-  { sender: 'Atticus 🐻', text: 'Did you know this whole site runs as a single HTML file? Pretty wild.' },
-  { sender: 'Axel 🐯', text: 'If you like pixel art, try Pixel Dailies! 🎨' },
-  { sender: 'Atticus 🐻', text: 'Saber built this to feel like a real OS. What do you think?' },
-  { sender: 'Axel 🐯', text: 'The wallpaper app has some cool options — go check it out!' },
-];
-var mobileMsgIdx = 0;
-
-function sendMobileMessage() {
+async function sendMobileMessage() {
   var input = document.getElementById('mobile-message-input');
   if (!input) return;
   var text = input.value.trim();
@@ -4404,16 +4405,42 @@ function sendMobileMessage() {
   chatArea.insertAdjacentHTML('beforeend', userBubble);
   chatArea.scrollTop = chatArea.scrollHeight;
   
-  // Agent reply after delay
-  setTimeout(function() {
-    var resp = mobileMessageResponses[mobileMsgIdx % mobileMessageResponses.length];
-    mobileMsgIdx++;
+  // Pick responder
+  var responders = ['atticus', 'axel', 'saber'];
+  var responder = responders[Math.floor(Math.random() * responders.length)];
+  var p = chatParticipants[responder];
+  
+  // Show typing
+  var typingBubble = '<div id="mobile-typing" style="align-self: flex-start; max-width: 80%; background: #e5e5e5; padding: 10px 14px; border-radius: 18px; border-bottom-left-radius: 4px;">' +
+    '<div style="font-size: 0.7rem; color: #666; margin-bottom: 2px;">' + p.name + ' ' + p.emoji + '</div>' +
+    '<div style="display: flex; gap: 4px;"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>';
+  chatArea.insertAdjacentHTML('beforeend', typingBubble);
+  chatArea.scrollTop = chatArea.scrollHeight;
+  
+  try {
+    var res = await fetch(CHAT_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ character: responder, messages: [{ text: text, sender: 'user' }], chatId: 'group' })
+    });
+    var data = await res.json();
+    var el = document.getElementById('mobile-typing');
+    if (el) el.remove();
+    var reply = data.text || '...';
     var replyBubble = '<div style="align-self: flex-start; max-width: 80%; background: #e5e5e5; padding: 10px 14px; border-radius: 18px; border-bottom-left-radius: 4px;">' +
-      '<div style="font-size: 0.7rem; color: #666; margin-bottom: 2px;">' + resp.sender + '</div>' +
-      '<div style="font-size: 0.9rem;">' + resp.text + '</div></div>';
+      '<div style="font-size: 0.7rem; color: #666; margin-bottom: 2px;">' + p.name + ' ' + p.emoji + '</div>' +
+      '<div style="font-size: 0.9rem;">' + reply + '</div></div>';
     chatArea.insertAdjacentHTML('beforeend', replyBubble);
     chatArea.scrollTop = chatArea.scrollHeight;
-  }, 800 + Math.random() * 800);
+  } catch(e) {
+    var el = document.getElementById('mobile-typing');
+    if (el) el.remove();
+    var replyBubble = '<div style="align-self: flex-start; max-width: 80%; background: #e5e5e5; padding: 10px 14px; border-radius: 18px; border-bottom-left-radius: 4px;">' +
+      '<div style="font-size: 0.7rem; color: #666; margin-bottom: 2px;">' + p.name + ' ' + p.emoji + '</div>' +
+      '<div style="font-size: 0.9rem;">Signal\'s a bit fuzzy... try again?</div></div>';
+    chatArea.insertAdjacentHTML('beforeend', replyBubble);
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
 }
 
 function sendMessage() {
@@ -4461,96 +4488,73 @@ function addMessageBubble(text, type, sender) {
   list.scrollTop = list.scrollHeight;
 }
 
-function getAIResponse(userText, chatId) {
-  const lower = userText.toLowerCase();
-  let responder, response;
+const CHAT_API_URL = 'https://saber-site-chat.vercel.app/api/chat';
+
+function showTypingIndicator(senderName) {
+  const list = document.getElementById('messages-list');
+  if (!list) return null;
+  const group = document.createElement('div');
+  group.className = 'message-group typing-indicator-group';
+  group.innerHTML = '<div class="message-bubble received" style="padding: 8px 14px;"><div class="message-sender">' + senderName + '</div><div class="message-text" style="display: flex; gap: 4px; align-items: center;"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>';
+  list.appendChild(group);
+  list.scrollTop = list.scrollHeight;
+  return group;
+}
+
+async function getAIResponse(userText, chatId) {
+  let responder;
   
-  // In 1:1 chats, only that person responds
   if (chatId !== 'group') {
     responder = chatId;
-    const p = chatParticipants[responder];
-    
-    // Person-specific responses
-    if (responder === 'saber') {
-      if (lower.includes('project') || lower.includes('work')) {
-        response = "Check out the Finder app to see all my projects! The koi pond is my favorite. 🎏";
-      } else if (lower.includes('microsoft') || lower.includes('design')) {
-        response = "I lead a team of 70+ designers working on AI, Search, and Browser experiences. It's challenging but rewarding!";
-      } else if (lower.includes('photo') || lower.includes('camera')) {
-        response = "I love street photography! I usually shoot with my iPhone or Fujifilm when I'm out exploring Beijing.";
-      } else {
-        const responses = ["I believe in iterating fast and shipping constantly.", "Small fixes add up over time.", "Design is about solving problems, not just making things pretty.", "Have you checked out the Koi Pond? It's my favorite project."];
-        response = responses[Math.floor(Math.random() * responses.length)];
-      }
-    } else if (responder === 'axel') {
-      if (lower.includes('art') || lower.includes('creative') || lower.includes('design')) {
-        response = "Ooh, you like art? You should check out the Pixel Dailies project! I helped make those cute 20×20 pixel sprites. 🎨";
-      } else if (lower.includes('fun') || lower.includes('cool') || lower.includes('game')) {
-        response = "Hey! Want to see something cool? Open the Koi Pond app and watch the fish swim around! 🐟";
-      } else {
-        const responses = ["I'm all about that creative chaos! 🎉", "Let's make something beautiful today! ✨", "Colors and motion are my jam. 💫", "Atticus keeps me in line, but I keep things fun!"];
-        response = responses[Math.floor(Math.random() * responses.length)];
-      }
-    } else if (responder === 'atticus') {
-      if (lower.includes('help') || lower.includes('how') || lower.includes('what')) {
-        response = "I can help! Try opening different apps from the dock or menu bar. You can drag windows around and resize them from the corners.";
-      } else if (lower.includes('who')) {
-        response = "I'm Atticus 🐻 — the orchestrator. I coordinate things around here and make sure everything runs smoothly.";
-      } else {
-        const responses = ["I see. What else is on your mind?", "Interesting perspective.", "Let me think about that...", "I'm always here to help organize things."];
-        response = responses[Math.floor(Math.random() * responses.length)];
-      }
-    }
-    
-    addMessageBubble(response, 'received', p.name + ' ' + p.emoji);
-    saveMessage(response, responder, chatId);
-    return;
-  }
-  
-  // Group chat: Simple routing logic
-  if (lower.includes('design') || lower.includes('project') || lower.includes('work') || lower.includes('microsoft')) {
-    responder = 'saber';
-    if (lower.includes('project')) {
-      response = "Check out the Finder app to see all my projects! The koi pond is my favorite. 🎏";
-    } else if (lower.includes('microsoft')) {
-      response = "I lead a team of 70+ designers working on AI, Search, and Browser experiences. It's challenging but rewarding!";
-    } else {
-      response = "I love talking about design! I believe in iterating fast and shipping constantly. Small fixes add up.";
-    }
-  } else if (lower.includes('creative') || lower.includes('art') || lower.includes('fun') || lower.includes('cool')) {
-    responder = 'axel';
-    if (lower.includes('art') || lower.includes('creative')) {
-      response = "Ooh, you like art? You should check out the Pixel Dailies project! I helped make those cute 20×20 pixel sprites. 🎨";
-    } else {
-      response = "Hey! Want to see something cool? Open the Koi Pond app and watch the fish swim around! 🐟";
-    }
-  } else if (lower.includes('help') || lower.includes('how') || lower.includes('what') || lower.includes('who')) {
-    responder = 'atticus';
-    if (lower.includes('who are you')) {
-      response = "I'm Atticus 🐻 — the orchestrator. I coordinate things around here. Saber is the human, Axel handles creative stuff, and I make sure everything works.";
-    } else if (lower.includes('help')) {
-      response = "I can help! Try opening different apps from the dock or menu bar. You can drag windows around and resize them from the corners.";
-    } else {
-      response = "Good question! This is SaberOS — a little macOS-inspired site showcasing Saber's projects. Feel free to explore!";
-    }
   } else {
-    // Random responder for other messages
-    const responders = ['atticus', 'axel', 'saber'];
-    responder = responders[Math.floor(Math.random() * responders.length)];
-    
-    const genericResponses = {
-      atticus: ["Interesting! Tell me more.", "I see. What else is on your mind?", "Thanks for sharing that with us!"],
-      axel: ["Nice! 🎉", "That's awesome!", "Love it! 💫"],
-      saber: ["Thanks for stopping by!", "Appreciate you checking out the site.", "Hope you're enjoying the experience!"]
-    };
-    
-    const responses = genericResponses[responder];
-    response = responses[Math.floor(Math.random() * responses.length)];
+    // Pick a responder for group chat
+    const lower = userText.toLowerCase();
+    if (lower.includes('design') || lower.includes('project') || lower.includes('work') || lower.includes('microsoft') || lower.includes('photo')) {
+      responder = 'saber';
+    } else if (lower.includes('creative') || lower.includes('art') || lower.includes('fun') || lower.includes('cool') || lower.includes('pixel')) {
+      responder = 'axel';
+    } else if (lower.includes('help') || lower.includes('how') || lower.includes('what') || lower.includes('who') || lower.includes('site')) {
+      responder = 'atticus';
+    } else {
+      const responders = ['atticus', 'axel', 'saber'];
+      responder = responders[Math.floor(Math.random() * responders.length)];
+    }
   }
   
   const p = chatParticipants[responder];
-  addMessageBubble(response, 'received', p.name + ' ' + p.emoji);
-  saveMessage(response, responder, chatId);
+  const typingEl = showTypingIndicator(p.name + ' ' + p.emoji);
+  
+  // Build message history from localStorage
+  const key = 'saberos-messages-' + (chatId || 'group');
+  const saved = JSON.parse(localStorage.getItem(key) || '[]');
+  const history = saved.slice(-8).map(function(m) {
+    return { text: m.text, sender: m.sender === 'user' ? 'user' : responder };
+  });
+  history.push({ text: userText, sender: 'user' });
+  
+  try {
+    const res = await fetch(CHAT_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ character: responder, messages: history, chatId: chatId })
+    });
+    const data = await res.json();
+    if (typingEl) typingEl.remove();
+    const reply = data.text || '...';
+    addMessageBubble(reply, 'received', p.name + ' ' + p.emoji);
+    saveMessage(reply, responder, chatId);
+  } catch(e) {
+    if (typingEl) typingEl.remove();
+    // Fallback to local responses
+    const fallbacks = {
+      saber: "Hmm, signal's weak. Try again?",
+      atticus: "Lost the thread. Go on.",
+      axel: "Whoops, brain hiccup! 🤪 One more time?"
+    };
+    const reply = fallbacks[responder] || '...';
+    addMessageBubble(reply, 'received', p.name + ' ' + p.emoji);
+    saveMessage(reply, responder, chatId);
+  }
 }
 
 function saveMessage(text, sender, chatId) {

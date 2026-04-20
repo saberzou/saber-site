@@ -1512,37 +1512,42 @@ body {
 .mobile-widget.stocks .stock-item {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
+}
+
+.mobile-widget.stocks .stock-item .stock-left {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .mobile-widget.stocks .stock-symbol {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 600;
   color: var(--fg-muted);
   text-transform: uppercase;
-  width: 38px;
-  flex-shrink: 0;
+  line-height: 1;
 }
 
 .mobile-widget.stocks .stock-price {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--fg);
-  flex: 1;
 }
 
 .mobile-widget.stocks .stock-change {
   font-size: 0.65rem;
   font-weight: 500;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .mobile-widget.stocks .stock-change.up {
-  color: #34C759;
+  color: #2E7D32;
 }
 
 .mobile-widget.stocks .stock-change.down {
-  color: #FF3B30;
+  color: #C62828;
 }
 
 .mobile-grid {
@@ -3634,18 +3639,15 @@ function initMobileGrid() {
         '<div class="mobile-widget stocks" id="mobile-widget-stocks">' +
           '<div class="widget-title">Stocks</div>' +
           '<div class="stock-item">' +
-            '<span class="stock-symbol">MSFT</span>' +
-            '<span class="stock-price" id="mw-stock-msft-price">--</span>' +
+            '<div class="stock-left"><span class="stock-symbol">MSFT</span><span class="stock-price" id="mw-stock-msft-price">--</span></div>' +
             '<span class="stock-change" id="mw-stock-msft-change">--</span>' +
           '</div>' +
           '<div class="stock-item">' +
-            '<span class="stock-symbol">AAPL</span>' +
-            '<span class="stock-price" id="mw-stock-aapl-price">--</span>' +
+            '<div class="stock-left"><span class="stock-symbol">AAPL</span><span class="stock-price" id="mw-stock-aapl-price">--</span></div>' +
             '<span class="stock-change" id="mw-stock-aapl-change">--</span>' +
           '</div>' +
           '<div class="stock-item">' +
-            '<span class="stock-symbol">GOOGL</span>' +
-            '<span class="stock-price" id="mw-stock-googl-price">--</span>' +
+            '<div class="stock-left"><span class="stock-symbol">GOOGL</span><span class="stock-price" id="mw-stock-googl-price">--</span></div>' +
             '<span class="stock-change" id="mw-stock-googl-change">--</span>' +
           '</div>' +
         '</div>';
@@ -4686,9 +4688,9 @@ function initStocks() {
   var tickers = ['MSFT', 'AAPL', 'GOOGL'];
   // Fallback data (updated periodically)
   var fallback = {
-    MSFT: { price: '449.26', change: '+0.85' },
-    AAPL: { price: '270.23', change: '+1.22' },
-    GOOGL: { price: '164.68', change: '+0.94' }
+    MSFT: { price: '449.26', change: '0.85' },
+    AAPL: { price: '270.23', change: '1.22' },
+    GOOGL: { price: '164.68', change: '0.94' }
   };
   
   function updateUI(ticker, price, change) {

@@ -3572,6 +3572,14 @@ function initMobileGrid() {
   
   // Only show projects on mobile/tablet canvas (not system apps)
   const allApps = [];
+  
+  // Add useful system apps first (not ones already in dock: wallpaper, about, messages)
+  var mobileSystemApps = ['music', 'mail', 'notes', 'camera', 'todo'];
+  mobileSystemApps.forEach(function(key) {
+    var app = systemApps[key];
+    if (app) allApps.push({ type: 'system', id: key, data: app });
+  });
+  
   projects.forEach(function(p) {
     allApps.push({ type: 'project', id: p.id, data: p });
   });
@@ -3866,6 +3874,7 @@ function openMobileApp(appId) {
     if (appId === 'camera') initCamera();
     if (appId === 'notes') initNotesApp();
     if (appId === 'wallpaper') initWallpaperApp();
+    if (appId === 'music') initMusicApp();
   }, 100);
   
   sheet.classList.add('active');

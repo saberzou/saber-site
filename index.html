@@ -2878,17 +2878,19 @@ function renderSystemApp(appId) {
       
     case 'todo':
       return '<div class="notes-paper">' +
-        todoItems.map(function(item, i) {
+        '<div id="todo-app-list">' +
+        getTodos().map(function(item, i) {
           return '<div class="notes-item">' +
             '<div class="notes-checkbox ' + (item.done ? 'checked' : '') + '" onclick="toggleTodo(' + i + ')">' +
               (item.done ? '✓' : '') +
             '</div>' +
-            '<div class="notes-text ' + (item.done ? 'done' : '') + '">' + item.text + '</div>' +
+            '<div class="notes-text ' + (item.done ? 'done' : '') + '">' + item.text.replace(/</g,'&lt;') + '</div>' +
           '</div>';
         }).join('') +
-        '<div class="notes-item" style="margin-top: 32px; opacity: 0.5;">' +
-          '<div class="notes-checkbox" style="border-style: dashed;"></div>' +
-          '<div class="notes-text" style="font-style: italic;">Add a new task...</div>' +
+        '</div>' +
+        '<div style="margin-top: 16px; display: flex; gap: 8px;">' +
+          '<input type="text" id="todo-app-input" placeholder="Add a new task..." style="flex:1; padding: 8px 12px; border: 1px dashed rgba(0,0,0,0.2); border-radius: 8px; background: transparent; font-family: var(--sans); font-size: 0.85rem; outline: none;" onkeydown="if(event.key===\'Enter\')addTodoFromApp()">' +
+          '<button onclick="addTodoFromApp()" style="padding: 8px 14px; background: #FF8C42; color: white; border: none; border-radius: 8px; font-family: var(--sans); font-size: 0.85rem; cursor: pointer;">Add</button>' +
         '</div>' +
       '</div>';
       
@@ -4190,15 +4192,27 @@ function backToInbox() {
 }
 
 // ─── To-Do App Functions ───
-function toggleTodo(index) {
-  todoItems[index].done = !todoItems[index].done;
-  localStorage.setItem('saberos-todos', JSON.stringify(todoItems));
-  
-  // Refresh window content
-  const win = windows.get('todo');
+function addTodoFromApp() {
+  var input = document.getElementById('todo-app-input');
+  if (!input) return;
+  var text = input.value.trim();
+  if (!text) return;
+  var todos = getTodos();
+  todos.push({ text: text, done: false });
+  saveTodos(todos);
+  input.value = '';
+  refreshTodoEverywhere();
+}
+function refreshTodoEverywhere() {
+  // Refresh desktop window
+  var win = windows.get('todo');
   if (win) {
     win.element.querySelector('.window-content').innerHTML = renderSystemApp('todo');
   }
+  // Refresh widget
+  renderTodos();
+  // Sync todoItems array
+  todoItems = getTodos();
 }
 
 // ─── Notes App Functions ───
@@ -4683,13 +4697,13 @@ function toggleTodo(i) {
   var todos = getTodos();
   if (todos[i]) todos[i].done = !todos[i].done;
   saveTodos(todos);
-  renderTodos();
+  refreshTodoEverywhere();
 }
 function removeTodo(i) {
   var todos = getTodos();
   todos.splice(i, 1);
   saveTodos(todos);
-  renderTodos();
+  refreshTodoEverywhere();
 }
 
 // ─── Weather Widget ───

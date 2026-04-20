@@ -1506,12 +1506,13 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 2px;
 }
 
 .mobile-widget.stocks .stock-item {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  align-items: baseline;
+  gap: 6px;
 }
 
 .mobile-widget.stocks .stock-symbol {
@@ -1519,17 +1520,21 @@ body {
   font-weight: 600;
   color: var(--fg-muted);
   text-transform: uppercase;
+  width: 38px;
+  flex-shrink: 0;
 }
 
 .mobile-widget.stocks .stock-price {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--fg);
+  flex: 1;
 }
 
 .mobile-widget.stocks .stock-change {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .mobile-widget.stocks .stock-change.up {
@@ -3630,18 +3635,18 @@ function initMobileGrid() {
           '<div class="widget-title">Stocks</div>' +
           '<div class="stock-item">' +
             '<span class="stock-symbol">MSFT</span>' +
-            '<span class="stock-price" id="stock-msft">--</span>' +
-            '<span class="stock-change" id="stock-msft-change">--</span>' +
+            '<span class="stock-price" id="mw-stock-msft-price">--</span>' +
+            '<span class="stock-change" id="mw-stock-msft-change">--</span>' +
           '</div>' +
           '<div class="stock-item">' +
             '<span class="stock-symbol">AAPL</span>' +
-            '<span class="stock-price" id="stock-aapl">--</span>' +
-            '<span class="stock-change" id="stock-aapl-change">--</span>' +
+            '<span class="stock-price" id="mw-stock-aapl-price">--</span>' +
+            '<span class="stock-change" id="mw-stock-aapl-change">--</span>' +
           '</div>' +
           '<div class="stock-item">' +
             '<span class="stock-symbol">GOOGL</span>' +
-            '<span class="stock-price" id="stock-googl">--</span>' +
-            '<span class="stock-change" id="stock-googl-change">--</span>' +
+            '<span class="stock-price" id="mw-stock-googl-price">--</span>' +
+            '<span class="stock-change" id="mw-stock-googl-change">--</span>' +
           '</div>' +
         '</div>';
       page.appendChild(widgetsDiv);
@@ -4679,18 +4684,40 @@ function initWeather() {
 
 function initStocks() {
   var tickers = ['MSFT', 'AAPL', 'GOOGL'];
+  // Fallback data (updated periodically)
+  var fallback = {
+    MSFT: { price: '449.26', change: '+0.85' },
+    AAPL: { price: '270.23', change: '+1.22' },
+    GOOGL: { price: '164.68', change: '+0.94' }
+  };
+  
+  function updateUI(ticker, price, change) {
+    var isUp = parseFloat(change) >= 0;
+    var priceStr = '$' + price;
+    var changeStr = (isUp ? '+' : '') + change + '%';
+    var cls = 'stock-change ' + (isUp ? 'up' : 'down');
+    // Desktop
+    var dp = document.getElementById('stock-' + ticker.toLowerCase() + '-price');
+    var dc = document.getElementById('stock-' + ticker.toLowerCase() + '-change');
+    if (dp) { dp.textContent = priceStr; }
+    if (dc) { dc.textContent = changeStr; dc.className = cls; }
+    // Mobile widget
+    var mp = document.getElementById('mw-stock-' + ticker.toLowerCase() + '-price');
+    var mc = document.getElementById('mw-stock-' + ticker.toLowerCase() + '-change');
+    if (mp) { mp.textContent = priceStr; }
+    if (mc) { mc.textContent = changeStr; mc.className = cls; }
+  }
+  
+  // Set fallback immediately
+  tickers.forEach(function(t) { updateUI(t, fallback[t].price, fallback[t].change); });
+  
+  // Try live data
   tickers.forEach(function(ticker) {
     fetch('https://api.twelvedata.com/quote?symbol=' + ticker + '&apikey=demo')
       .then(function(r) { return r.json(); })
       .then(function(q) {
         if (q && q.close) {
-          var price = parseFloat(q.close).toFixed(2);
-          var change = parseFloat(q.percent_change).toFixed(2);
-          var isUp = parseFloat(change) >= 0;
-          document.getElementById('stock-' + ticker.toLowerCase() + '-price').textContent = '$' + price;
-          var changeEl = document.getElementById('stock-' + ticker.toLowerCase() + '-change');
-          changeEl.textContent = (isUp ? '+' : '') + change + '%';
-          changeEl.className = 'stock-change ' + (isUp ? 'up' : 'down');
+          updateUI(ticker, parseFloat(q.close).toFixed(2), parseFloat(q.percent_change).toFixed(2));
         }
       }).catch(function() {});
   });

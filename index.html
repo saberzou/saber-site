@@ -1455,11 +1455,12 @@ body {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  padding: 12px 14px;
+  padding: 14px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  aspect-ratio: 1;
+  overflow: hidden;
 }
 
 .mobile-widget .widget-title {
@@ -1472,18 +1473,21 @@ body {
 
 .mobile-widget.weather .widget-content {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  text-align: center;
   flex: 1;
+  gap: 4px;
 }
 
 .mobile-widget.weather img {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
 }
 
 .mobile-widget.weather .temp {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 300;
   color: var(--fg);
   line-height: 1;
@@ -1502,28 +1506,26 @@ body {
 .mobile-widget.stocks {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  justify-content: space-between;
 }
 
 .mobile-widget.stocks .stock-item {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .mobile-widget.stocks .stock-symbol {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 600;
   color: var(--fg-muted);
   text-transform: uppercase;
-  min-width: 38px;
 }
 
 .mobile-widget.stocks .stock-price {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--fg);
-  flex: 1;
 }
 
 .mobile-widget.stocks .stock-change {
@@ -3615,12 +3617,10 @@ function initMobileGrid() {
           '<div class="widget-title">Weather</div>' +
           '<div class="widget-content">' +
             '<img id="widget-icon" src="images/weather-icons/clear_day.svg" alt="weather">' +
-            '<div>' +
-              '<div class="temp" id="widget-temp">--°</div>' +
-              '<div class="condition" id="widget-condition">Loading...</div>' +
-            '</div>' +
+            '<div class="temp" id="widget-temp">--°</div>' +
+            '<div class="condition" id="widget-condition">Loading...</div>' +
+            '<div class="location" id="widget-location">Beijing</div>' +
           '</div>' +
-          '<div class="location" id="widget-location">Beijing</div>' +
         '</div>' +
         '<div class="mobile-widget stocks" id="mobile-widget-stocks">' +
           '<div class="widget-title">Stocks</div>' +

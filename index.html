@@ -1447,71 +1447,83 @@ body {
 .mobile-page-widgets {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .mobile-widget {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  padding: 16px;
+  padding: 12px 14px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  aspect-ratio: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 4px;
+}
+
+.mobile-widget .widget-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .mobile-widget.weather .widget-content {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: 8px;
+  gap: 10px;
+  flex: 1;
 }
 
 .mobile-widget.weather img {
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
 }
 
 .mobile-widget.weather .temp {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 300;
   color: var(--fg);
+  line-height: 1;
 }
 
 .mobile-widget.weather .condition {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  color: var(--fg-muted);
+}
+
+.mobile-widget.weather .location {
+  font-size: 0.65rem;
   color: var(--fg-muted);
 }
 
 .mobile-widget.stocks {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 16px;
+  gap: 6px;
 }
 
 .mobile-widget.stocks .stock-item {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  align-items: baseline;
+  gap: 6px;
 }
 
 .mobile-widget.stocks .stock-symbol {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   color: var(--fg-muted);
   text-transform: uppercase;
+  min-width: 38px;
 }
 
 .mobile-widget.stocks .stock-price {
-  font-size: 1.2rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--fg);
+  flex: 1;
 }
 
 .mobile-widget.stocks .stock-change {
@@ -3603,10 +3615,12 @@ function initMobileGrid() {
           '<div class="widget-title">Weather</div>' +
           '<div class="widget-content">' +
             '<img id="widget-icon" src="images/weather-icons/clear_day.svg" alt="weather">' +
-            '<div class="temp" id="widget-temp">--°</div>' +
-            '<div class="condition" id="widget-condition">Loading...</div>' +
-            '<div class="location" id="widget-location">Beijing</div>' +
+            '<div>' +
+              '<div class="temp" id="widget-temp">--°</div>' +
+              '<div class="condition" id="widget-condition">Loading...</div>' +
+            '</div>' +
           '</div>' +
+          '<div class="location" id="widget-location">Beijing</div>' +
         '</div>' +
         '<div class="mobile-widget stocks" id="mobile-widget-stocks">' +
           '<div class="widget-title">Stocks</div>' +

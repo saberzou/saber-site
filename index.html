@@ -3961,8 +3961,8 @@ function renderMobileApp(appId) {
           '</div>' +
         '</div>' +
         '<div style="padding: 12px 16px; border-top: 1px solid #e5e5e5; display: flex; gap: 8px;">' +
-          '<input type="text" placeholder="iMessage" style="flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 20px; font-size: 0.9rem; outline: none;">' +
-          '<button style="width: 40px; height: 40px; border-radius: 50%; background: #007AFF; color: white; border: none; display: flex; align-items: center; justify-content: center;">' +
+          '<input type="text" id="mobile-message-input" placeholder="iMessage" style="flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 20px; font-size: 16px; outline: none;" onkeypress="if(event.key===\'Enter\')sendMobileMessage()">' +
+          '<button onclick="sendMobileMessage()" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: #007AFF; color: white; border: none; display: flex; align-items: center; justify-content: center;">' +
             '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22,2 15,22 11,13 2,9"></polygon></svg>' +
           '</button>' +
         '</div>' +
@@ -4304,6 +4304,44 @@ const chatParticipants = {
 };
 
 let currentChatId = 'group';
+
+var mobileMessageResponses = [
+  { sender: 'Atticus 🐻', text: 'Thanks for saying hi! Feel free to explore the projects above.' },
+  { sender: 'Axel 🐯', text: 'Yo! Check out my art page — tap the Axel Art icon!' },
+  { sender: 'Atticus 🐻', text: 'Did you know this whole site runs as a single HTML file? Pretty wild.' },
+  { sender: 'Axel 🐯', text: 'If you like pixel art, try Pixel Dailies! 🎨' },
+  { sender: 'Atticus 🐻', text: 'Saber built this to feel like a real OS. What do you think?' },
+  { sender: 'Axel 🐯', text: 'The wallpaper app has some cool options — go check it out!' },
+];
+var mobileMsgIdx = 0;
+
+function sendMobileMessage() {
+  var input = document.getElementById('mobile-message-input');
+  if (!input) return;
+  var text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  
+  var chatArea = document.querySelector('.mobile-sheet-content [style*="overflow-y"]');
+  if (!chatArea) return;
+  
+  // Add user bubble
+  var userBubble = '<div style="align-self: flex-end; max-width: 80%; background: #007AFF; color: white; padding: 10px 14px; border-radius: 18px; border-bottom-right-radius: 4px;">' +
+    '<div style="font-size: 0.9rem;">' + text.replace(/</g, '&lt;') + '</div></div>';
+  chatArea.insertAdjacentHTML('beforeend', userBubble);
+  chatArea.scrollTop = chatArea.scrollHeight;
+  
+  // Agent reply after delay
+  setTimeout(function() {
+    var resp = mobileMessageResponses[mobileMsgIdx % mobileMessageResponses.length];
+    mobileMsgIdx++;
+    var replyBubble = '<div style="align-self: flex-start; max-width: 80%; background: #e5e5e5; padding: 10px 14px; border-radius: 18px; border-bottom-left-radius: 4px;">' +
+      '<div style="font-size: 0.7rem; color: #666; margin-bottom: 2px;">' + resp.sender + '</div>' +
+      '<div style="font-size: 0.9rem;">' + resp.text + '</div></div>';
+    chatArea.insertAdjacentHTML('beforeend', replyBubble);
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }, 800 + Math.random() * 800);
+}
 
 function sendMessage() {
   const input = document.getElementById('message-input');

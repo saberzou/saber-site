@@ -4806,16 +4806,23 @@ async function spotifyFetch(url) {
 // ── Load albums from Spotify ──
 async function loadSpotifyAlbums() {
   var loaded = [];
-  var colors = ['#FF1493','#8B0000','#4A4A4A','#FF4500','#2F4F4F','#87CEEB','#F4A460','#DDA0DD'];
   for (var i = 0; i < fallbackAlbums.length; i++) {
     var fb = fallbackAlbums[i];
     try {
-      var q = encodeURIComponent(fb.name + ' ' + fb.artist);
-      var data = await spotifyFetch(SPOTIFY_API + '/search?type=album&limit=1&q=' + q);
-      if (data && data.albums && data.albums.items && data.albums.items.length > 0) {
-        var sa = data.albums.items[0];
-        var artUrl = (sa.images && sa.images.length > 0) ? sa.images[0].url : fb.art;
-        var year = sa.release_date ? sa.release_date.slice(0,4) : fb.year;
+      var q = encodeURIComponent('album:' + fb.name + ' artist:' + fb.artist);
+      var data = await spotifyFetch(SPOTIFY_API + '/search?type=album&limit=3&q=' + q);
+      var sa = null;
+      if (data && data.albums && data.albums.items) {
+        // Pick the best match by comparing album name
+        var fbLow = fb.name.toLowerCase();
+        for (var j = 0; j < data.albums.items.length; j++) {
+          if (data.albums.items[j].name.toLowerCase().indexOf(fbLow) !== -1) {
+            sa = data.albums.items[j]; break;
+          }
+        }
+        if (!sa && data.albums.items.length > 0) sa = data.albums.items[0];
+      }
+      if (sa) {
         var trackData = await spotifyFetch(SPOTIFY_API + '/albums/' + sa.id + '/tracks?limit=50');
         var songs = [];
         if (trackData && trackData.items) {
@@ -4824,7 +4831,8 @@ async function loadSpotifyAlbums() {
           });
         }
         if (songs.length === 0) songs = fb.songs;
-        loaded.push({ id: sa.id, name: sa.name, artist: (sa.artists && sa.artists.length > 0) ? sa.artists[0].name : fb.artist, year: year, color: colors[i % colors.length], art: artUrl, songs: songs, spotifyUri: sa.uri });
+        // Keep local art — don't use Spotify images (they can be wrong)
+        loaded.push({ id: sa.id, name: fb.name, artist: fb.artist, year: fb.year, color: fb.color, art: fb.art, songs: songs, spotifyUri: sa.uri });
       } else {
         loaded.push(fb);
       }
@@ -4870,20 +4878,19 @@ async function initMusicApp() {
   }
 
   if (spotifyToken) {
-    var grid = document.getElementById('music-album-grid');
-    if (grid) grid.innerHTML = '<div style="text-align:center;padding:40px;color:#999;">Loading from Spotify...</div>';
-    musicAlbums = await loadSpotifyAlbums();
-    renderAlbumGrid();
-  } else {
+    // Show albums immediately with local art, load Spotify track data in background
     musicAlbums = fallbackAlbums.slice();
     renderAlbumGrid();
-    var grid = document.getElementById('music-album-grid');
-    if (grid) {
-      var btn = document.createElement('div');
-      btn.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 16px;';
-      btn.innerHTML = '<button onclick="spotifyLogin()" style="background: #1DB954; color: white; border: none; padding: 10px 24px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: var(--sans);">🎵 Connect Spotify</button><div style="font-size:0.75rem;color:#999;margin-top:6px;">For real playback with 30s previews</div>';
-      grid.insertBefore(btn, grid.firstChild);
-    }
+    loadSpotifyAlbums().then(function(albums) {
+      musicAlbums = albums;
+      // Don't re-render grid if user already navigated to song list
+      var songList = document.getElementById('music-song-list');
+      if (!songList || songList.style.display === 'none') renderAlbumGrid();
+    });
+  } else {
+    // No token — auto-redirect to Spotify auth (one-time, token persists in localStorage)
+    spotifyLogin();
+    return;
   }
 }
 

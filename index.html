@@ -3981,25 +3981,7 @@ function initWallpaperApp() {
     thumb.onclick = function() {
       currentWallpaperIdx = i;
       localStorage.setItem('saber-wallpaper', i);
-      // Apply wallpaper to body for mobile
-      if (wp.gradient) {
-        document.body.style.background = wp.gradient;
-      } else {
-        document.body.style.backgroundImage = 'url(' + wp.url + ')';
-        document.body.style.backgroundSize = 'cover';
-        document.body.style.backgroundPosition = 'center';
-      }
-      // Also apply to desktop element if it exists
-      var desktop = document.querySelector('.desktop');
-      if (desktop) {
-        if (wp.gradient) {
-          desktop.style.backgroundImage = wp.gradient;
-        } else {
-          desktop.style.backgroundImage = 'url(' + wp.url + ')';
-        }
-        desktop.style.backgroundSize = 'cover';
-        desktop.style.backgroundPosition = 'center';
-      }
+      applyWallpaper(i);
       if (preview) preview.style.background = getWallpaperBg(wp) + ' center/cover no-repeat';
       // Update selection
       Array.from(grid.children).forEach(function(t, j) {
@@ -4074,6 +4056,17 @@ function applyWallpaper(idx) {
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center';
   }
+  // Force backdrop-filter repaint on blur elements (Safari/iOS caching fix)
+  refreshBackdropBlur();
+}
+
+function refreshBackdropBlur() {
+  var els = document.querySelectorAll('.mobile-dock, .mobile-page-dots, .mobile-widget');
+  els.forEach(function(el) {
+    el.style.display = 'none';
+    el.offsetHeight; // force reflow
+    el.style.display = '';
+  });
 }
 
 

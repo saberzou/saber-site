@@ -3600,22 +3600,30 @@ function initMobileGrid() {
       widgetsDiv.className = 'mobile-page-widgets';
       widgetsDiv.innerHTML = 
         '<div class="mobile-widget weather" id="mobile-widget-weather">' +
+          '<div class="widget-title">Weather</div>' +
           '<div class="widget-content">' +
             '<img id="widget-icon" src="images/weather-icons/clear_day.svg" alt="weather">' +
             '<div class="temp" id="widget-temp">--°</div>' +
             '<div class="condition" id="widget-condition">Loading...</div>' +
+            '<div class="location" id="widget-location">Beijing</div>' +
           '</div>' +
         '</div>' +
         '<div class="mobile-widget stocks" id="mobile-widget-stocks">' +
+          '<div class="widget-title">Stocks</div>' +
+          '<div class="stock-item">' +
+            '<span class="stock-symbol">MSFT</span>' +
+            '<span class="stock-price" id="stock-msft">--</span>' +
+            '<span class="stock-change" id="stock-msft-change">--</span>' +
+          '</div>' +
           '<div class="stock-item">' +
             '<span class="stock-symbol">AAPL</span>' +
             '<span class="stock-price" id="stock-aapl">--</span>' +
             '<span class="stock-change" id="stock-aapl-change">--</span>' +
           '</div>' +
           '<div class="stock-item">' +
-            '<span class="stock-symbol">MSFT</span>' +
-            '<span class="stock-price" id="stock-msft">--</span>' +
-            '<span class="stock-change" id="stock-msft-change">--</span>' +
+            '<span class="stock-symbol">GOOGL</span>' +
+            '<span class="stock-price" id="stock-googl">--</span>' +
+            '<span class="stock-change" id="stock-googl-change">--</span>' +
           '</div>' +
         '</div>';
       page.appendChild(widgetsDiv);
@@ -3891,7 +3899,7 @@ function renderMobileApp(appId) {
         '<div style="padding: 16px;">' +
           '<div id="wp-mobile-preview" style="height: 200px; border-radius: 12px; background: ' + getWallpaperBg(wallpaperList[currentWallpaperIdx]) + ' center/cover no-repeat; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>' +
         '</div>' +
-        '<div style="padding: 8px 16px; font-size: 0.75rem; font-weight: 600; color: #666; text-transform: uppercase;">Choose Wallpaper</div>' +
+        '<div style="padding: 8px 16px; font-size: 0.75rem; font-weight: 600; color: #666; text-transform: uppercase;">Choose a wallpaper</div>' +
         '<div id="wp-mobile-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 8px 16px 16px; overflow-y: auto;"></div>' +
       '</div>';
       
@@ -3901,13 +3909,15 @@ function renderMobileApp(appId) {
         '<h2 style="margin: 0 0 8px; font-size: 1.4rem;">Saber Zou</h2>' +
         '<div style="background: linear-gradient(90deg, #FF8C42, #FF7BAC); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 0.9rem; font-weight: 500; margin-bottom: 24px;">SaberOS 2.0</div>' +
         '<div style="background: rgba(0,0,0,0.03); border-radius: 12px; padding: 16px; margin-bottom: 16px;">' +
-          '<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06);"><span style="color: #666;">Role</span><span style="font-weight: 500;">Design Team Lead</span></div>' +
-          '<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06);"><span style="color: #666;">Company</span><span style="font-weight: 500;">Microsoft</span></div>' +
+          '<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06);"><span style="color: #666;">Role</span><span style="font-weight: 500;">Design Team Lead, Microsoft</span></div>' +
+          '<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06);"><span style="color: #666;">Processor</span><span style="font-weight: 500;">Creative Problem Solving™ v26.0</span></div>' +
+          '<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06);"><span style="color: #666;">Memory</span><span style="font-weight: 500;">70+ designers worth of context</span></div>' +
           '<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06);"><span style="color: #666;">Location</span><span style="font-weight: 500;">Beijing, China</span></div>' +
-          '<div style="display: flex; justify-content: space-between; padding: 12px 0;"><span style="color: #666;">Interests</span><span style="font-weight: 500;">Photography, Sketches</span></div>' +
+          '<div style="display: flex; justify-content: space-between; padding: 12px 0;"><span style="color: #666;">Interests</span><span style="font-weight: 500;">Street photography, iPad sketches</span></div>' +
         '</div>' +
         '<div style="display: flex; gap: 12px; justify-content: center;">' +
           '<a href="https://github.com/saberzou" target="_blank" style="padding: 10px 20px; background: #333; color: white; text-decoration: none; border-radius: 20px; font-size: 0.8rem;">GitHub</a>' +
+          '<a href="https://x.com/saberzou7" target="_blank" style="padding: 10px 20px; background: #1DA1F2; color: white; text-decoration: none; border-radius: 20px; font-size: 0.8rem;">X/Twitter</a>' +
           '<a href="mailto:saberzou@gmail.com" style="padding: 10px 20px; background: #FF8C42; color: white; text-decoration: none; border-radius: 20px; font-size: 0.8rem;">Email</a>' +
         '</div>' +
       '</div>';
@@ -3921,15 +3931,15 @@ function renderMobileApp(appId) {
         '<div style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;">' +
           '<div style="align-self: flex-start; max-width: 80%; background: #e5e5e5; padding: 10px 14px; border-radius: 18px; border-bottom-left-radius: 4px;">' +
             '<div style="font-size: 0.7rem; color: #666; margin-bottom: 2px;">Atticus 🐻</div>' +
-            '<div style="font-size: 0.9rem;">Welcome to the group! Ask us anything.</div>' +
+            '<div style="font-size: 0.9rem;">Welcome to the group! We\'re all here. Ask us anything about Saber\'s work or this site.</div>' +
           '</div>' +
           '<div style="align-self: flex-start; max-width: 80%; background: #e5e5e5; padding: 10px 14px; border-radius: 18px; border-bottom-left-radius: 4px;">' +
             '<div style="font-size: 0.7rem; color: #666; margin-bottom: 2px;">Axel 🐯</div>' +
-            '<div style="font-size: 0.9rem;">Hey there! I\'m Axel — I handle creative stuff.</div>' +
+            '<div style="font-size: 0.9rem;">Hey there! I\'m Axel — I handle creative stuff. Wanna see some cool designs?</div>' +
           '</div>' +
           '<div style="align-self: flex-start; max-width: 80%; background: #e5e5e5; padding: 10px 14px; border-radius: 18px; border-bottom-left-radius: 4px;">' +
             '<div style="font-size: 0.7rem; color: #666; margin-bottom: 2px;">Saber 👤</div>' +
-            '<div style="font-size: 0.9rem;">Hi! Feel free to explore my projects!</div>' +
+            '<div style="font-size: 0.9rem;">Hi! I\'m Saber. Feel free to explore my projects or drop us a message!</div>' +
           '</div>' +
         '</div>' +
         '<div style="padding: 12px 16px; border-top: 1px solid #e5e5e5; display: flex; gap: 8px;">' +

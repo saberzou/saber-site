@@ -2872,8 +2872,8 @@ function renderSystemApp(appId) {
           '<button class="mail-send-btn" style="background: transparent; color: var(--fg-muted); margin-left: 8px;" onclick="cancelCompose()">Cancel</button>' +
         '</div>' +
         '<div class="mail-compose" id="mail-view" style="display: none; flex: 1; padding: 24px;">' +
+          '<a href="#" onclick="backToInbox(); return false;" style="color: var(--blueberry); font-size: 0.85rem; text-decoration: none; display: inline-block; margin-bottom: 16px; cursor: pointer;">← Back</a>' +
           '<div id="mail-view-content"></div>' +
-          '<button class="mail-send-btn" style="margin-top: 20px;" onclick="backToInbox()">← Back</button>' +
         '</div>' +
       '</div>';
       

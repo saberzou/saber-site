@@ -1228,15 +1228,15 @@ body {
     display: flex;
     position: fixed;
     bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 20px;
+    right: 20px;
+    justify-content: space-evenly;
     background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-radius: 24px;
     transition: transform 0.3s var(--ease-out-quart);
     padding: 10px 16px;
-    gap: 16px;
     z-index: 9999;
     pointer-events: auto;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
@@ -3869,7 +3869,7 @@ function closeMobileSheet() {
   document.getElementById('mobile-sheet').classList.remove('active');
   // Show dock again
   var dock = document.getElementById('mobile-dock');
-  if (dock) dock.style.transform = 'translateX(-50%) translateY(0)';
+  if (dock) dock.style.transform = 'translateY(0)';
 }
 
 // ─── Mobile Dock Apps ───
@@ -3903,7 +3903,7 @@ function openMobileApp(appId) {
   sheet.classList.add('active');
   // Hide dock when sheet is open
   var dock = document.getElementById('mobile-dock');
-  if (dock) dock.style.transform = 'translateX(-50%) translateY(120px)';
+  if (dock) dock.style.transform = 'translateY(120px)';
   console.log('sheet activated');
 }
 

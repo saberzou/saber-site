@@ -3668,7 +3668,7 @@ function initMobileGrid() {
       }
       
       const isCircle = app.id === 'me';
-      const isExternal = app.id === 'me';
+      const isExternal = app.type === 'project';
       icon.innerHTML = 
         '<div class="mobile-icon-img" style="' + (isCircle ? 'border-radius:50%;' : '') + '">' +
           '<img src="' + (app.type === 'project' ? app.data.icon : app.data.icon) + '" alt="' + (app.type === 'project' ? app.data.title : app.data.title) + '" style="' + (isCircle ? 'border-radius:50%;' : '') + '" onerror="this.onerror=null; this.style.display=\'none\'">' +

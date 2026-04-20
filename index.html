@@ -3981,8 +3981,26 @@ function initWallpaperApp() {
     thumb.onclick = function() {
       currentWallpaperIdx = i;
       localStorage.setItem('saber-wallpaper', i);
-      document.body.style.background = getWallpaperBg(wp);
-      if (preview) preview.style.backgroundImage = getWallpaperBg(wp);
+      // Apply wallpaper to body for mobile
+      if (wp.gradient) {
+        document.body.style.background = wp.gradient;
+      } else {
+        document.body.style.backgroundImage = 'url(' + wp.url + ')';
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+      }
+      // Also apply to desktop element if it exists
+      var desktop = document.querySelector('.desktop');
+      if (desktop) {
+        if (wp.gradient) {
+          desktop.style.backgroundImage = wp.gradient;
+        } else {
+          desktop.style.backgroundImage = 'url(' + wp.url + ')';
+        }
+        desktop.style.backgroundSize = 'cover';
+        desktop.style.backgroundPosition = 'center';
+      }
+      if (preview) preview.style.background = getWallpaperBg(wp) + ' center/cover no-repeat';
       // Update selection
       Array.from(grid.children).forEach(function(t, j) {
         t.style.borderColor = (j === i) ? '#FF8C42' : 'transparent';
@@ -4043,26 +4061,28 @@ function applyWallpaper(idx) {
   currentWallpaperIdx = idx;
   var wp = wallpaperList[idx];
   var desktop = document.querySelector('.desktop');
-  if (wp.gradient) {
-    desktop.style.backgroundImage = wp.gradient;
-  } else {
-    desktop.style.backgroundImage = 'url(' + wp.url + ')';
+  if (desktop) {
+    desktop.style.backgroundImage = wp.gradient || ('url(' + wp.url + ')');
+    desktop.style.backgroundSize = 'cover';
+    desktop.style.backgroundPosition = 'center';
   }
-  desktop.style.backgroundSize = 'cover';
-  desktop.style.backgroundPosition = 'center';
+  // Also apply to body for mobile
+  if (wp.gradient) {
+    document.body.style.background = wp.gradient;
+  } else {
+    document.body.style.backgroundImage = 'url(' + wp.url + ')';
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+  }
 }
 
 
-// Apply default wallpaper on load (no localStorage persistence)
+// Apply default wallpaper on load
 (function() {
   try {
-    var desktop = document.querySelector('.desktop');
-    if (desktop) {
-      var wp = wallpaperList[currentWallpaperIdx];
-      desktop.style.backgroundImage = wp.gradient || ('url(' + wp.url + ')');
-      desktop.style.backgroundSize = 'cover';
-      desktop.style.backgroundPosition = 'center';
-    }
+    var saved = localStorage.getItem('saber-wallpaper');
+    if (saved !== null) currentWallpaperIdx = parseInt(saved, 10) || 0;
+    applyWallpaper(currentWallpaperIdx);
   } catch(e) {}
 })();
 

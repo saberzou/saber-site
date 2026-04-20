@@ -149,6 +149,14 @@ body {
   font-weight: 500;
   color: #2D1B00;
   box-shadow: inset 0 -1px 1px rgba(255,255,255,0.3), 0 2px 12px rgba(0,0,0,0.06);
+  transition: color 0.3s, background 0.3s, border-color 0.3s;
+}
+
+.menu-bar.menu-bar-dark {
+  color: #FFFFFF;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom-color: rgba(255,255,255,0.12);
+  box-shadow: inset 0 -1px 1px rgba(255,255,255,0.08), 0 2px 12px rgba(0,0,0,0.15);
 }
 
 .menu-bar-left {
@@ -4070,6 +4078,48 @@ function applyWallpaper(idx) {
   }
   // Force backdrop-filter repaint on blur elements (Safari/iOS caching fix)
   refreshBackdropBlur();
+  // Update menu bar text color based on wallpaper luminance
+  updateMenuBarTheme(wp);
+}
+
+function updateMenuBarTheme(wp) {
+  var menuBar = document.getElementById('menu-bar');
+  if (!menuBar) return;
+  if (wp.gradient) {
+    // For gradients, parse first color or default to light
+    menuBar.classList.remove('menu-bar-dark');
+    return;
+  }
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    var canvas = document.createElement('canvas');
+    var w = Math.min(img.naturalWidth, 200);
+    var scale = w / img.naturalWidth;
+    var h = Math.round(img.naturalHeight * scale);
+    canvas.width = w;
+    canvas.height = h;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    // Sample the top strip (menu bar area ~10% of height)
+    var stripH = Math.max(4, Math.round(h * 0.08));
+    var data = ctx.getImageData(0, 0, w, stripH).data;
+    var totalLum = 0;
+    var count = data.length / 4;
+    for (var i = 0; i < data.length; i += 4) {
+      totalLum += 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+    }
+    var avgLum = totalLum / count;
+    if (avgLum < 128) {
+      menuBar.classList.add('menu-bar-dark');
+    } else {
+      menuBar.classList.remove('menu-bar-dark');
+    }
+  };
+  img.onerror = function() {
+    menuBar.classList.remove('menu-bar-dark');
+  };
+  img.src = wp.url;
 }
 
 function refreshBackdropBlur() {

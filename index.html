@@ -169,7 +169,7 @@ body {
   position: fixed;
   top: 40px;
   min-width: 220px;
-  background: rgba(245, 240, 235, 0.55);
+  background: rgba(245, 240, 235, 0.85);
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
   border-radius: 6px;
@@ -4821,7 +4821,8 @@ function toggleMenuDropdown(menuId) {
   
   // Toggle clicked dropdown and position it
   if (!isOpen) {
-    const trigger = menu.previousElementSibling;
+    // Find trigger by data attribute since dropdown may have moved to body
+    const trigger = document.querySelector('[data-dropdown="' + menuId + '"]');
     if (trigger) {
       const rect = trigger.getBoundingClientRect();
       menu.style.left = rect.left + 'px';
@@ -4829,6 +4830,18 @@ function toggleMenuDropdown(menuId) {
     menu.classList.add('show');
   }
 }
+
+// Move dropdowns out of menu-bar to body so backdrop-filter works
+// (nested backdrop-filter is ignored by browsers)
+(function() {
+  document.querySelectorAll('.menu-bar .menu-dropdown').forEach(function(dd) {
+    var trigger = dd.previousElementSibling;
+    if (trigger && trigger.classList.contains('menu-item')) {
+      trigger.setAttribute('data-dropdown', dd.id);
+    }
+    document.body.appendChild(dd);
+  });
+})();
 
 // Close dropdowns when clicking outside
 document.addEventListener('click', function(e) {

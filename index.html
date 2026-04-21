@@ -5153,7 +5153,8 @@ function showKeyboardShortcuts() {
   'use strict';
   
   // Axel pixel art sprite definitions (24x24 grid, scaled up 2x in CSS)
-  // T: transparent, O: orange, B: black, W: white, P: pink
+  // T: transparent, O: orange, B: black, W: white, P: pink/laptop
+  // C: cream (belly), N: pink (nose/ears), D: dark orange (shading)
   const SPRITES = {
     idle1: [
       'TTTTTTTTTTTTTTTTTTTTTTTT',
@@ -5164,17 +5165,17 @@ function showKeyboardShortcuts() {
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
-      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
       'TTTTTTTTOOOTTTTOOOTTTTTT',
       'TTTTTTTTOOBTTOOOBOTTTTTT',
       'TTTTTTTTOOOWTOOWOOTTTTTT',
-      'TTTTTTTTOOOWOOWWOOTTTTTT',
-      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTOOOWOOWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
       'TTTTTTTTTTOOOOOTTTTTTTTT',
       'TTTTTTTTTOOBBBOOTTTTTTTT',
-      'TTTTTTTTOOOBBBOOOTTTTTTT',
-      'TTTTTTTTOOBBBBBBOOTTTTTT',
-      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
       'TTTTTTTOOOOBBBBOOOOTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
@@ -5190,19 +5191,45 @@ function showKeyboardShortcuts() {
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
-      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
       'TTTTTTTTOOOTTTTOOOTTTTTT',
       'TTTTTTTTOOBTTOOOBOTTTTTT',
       'TTTTTTTTOOOWTOOWOOTTTTTT',
-      'TTTTTTTTOOOWOOWWOOTTTTTT',
-      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTOOOWOOWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
       'TTTTTTTTTTOOOOOTTTTTTTTT',
       'TTTTTTTTTTOOOOOTTTTTTTTT',
       'TTTTTTTTTOOBBBOOTTTTTTTT',
-      'TTTTTTTTOOOBBBOOOTTTTTTT',
-      'TTTTTTTTOOBBBBBBOOTTTTTT',
-      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
       'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT'
+    ],
+    idle3: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOOWTOOWOOTTTTTT',
+      'TTTTTTTTOOOWOOWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT'
@@ -5216,17 +5243,17 @@ function showKeyboardShortcuts() {
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
-      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
       'TTTTTTTTOOOTTTTOOOTTTTTT',
       'TTTTTTTTOOBTTOOOBOTTTTTT',
       'TTTTTTTTOOOWTOOWOOTTTTTT',
-      'TTTTTTTTOOOWOOWWOOTTTTTT',
-      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTOOOWOOWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
       'TTTTTTTTTTOOOOOTTTTTTTTT',
       'TTTTTTTTTOOBBBOOTTTTTTTT',
-      'TTTTTTTTOOOBBBOOOTTTTTTT',
-      'TTTTTTTTOOBBBBBBOOTTTTTT',
-      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
       'TTTTTTTOOOOBBBBOOOOTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
@@ -5242,22 +5269,74 @@ function showKeyboardShortcuts() {
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
-      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
       'TTTTTTTTOOOTTTTOOOTTTTTT',
       'TTTTTTTTOOBTTOOOBOTTTTTT',
       'TTTTTTTTOOOWTOOWOOTTTTTT',
-      'TTTTTTTTOOOWOOWWOOTTTTTT',
-      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTOOOWOOWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
       'TTTTTTTTTTOOOOOTTTTTTTTT',
       'TTTTTTTTTOOBBBOOTTTTTTTT',
-      'TTTTTTTTOOOBBBOOOTTTTTTT',
-      'TTTTTTTTOOBBBBBBOOTTTTTT',
-      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT'
+    ],
+    walk3: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOOWTOOWOOTTTTTT',
+      'TTTTTTTTOOOWOOWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
       'TTTTTTTOOOOBBBBOOOOTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
       'TTTTTTTTOOOBBBBOOOOOTTTT',
       'TTTTTTTOOOOBBBBBOOOOOTTT'
+    ],
+    walk4: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOOWTOOWOOTTTTTT',
+      'TTTTTTTTOOOWOOWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT'
     ],
     typing1: [
       'TTTTTTTTTTTTTTTTTTTTTTTT',
@@ -5268,17 +5347,17 @@ function showKeyboardShortcuts() {
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
-      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
       'TTTTTTTTOOOTTTTOOOTTTTTT',
       'TTTTTTTTOOBTTOOOBOTTTTTT',
       'TTTTTTTTOOOWTOOWOOTTTTTT',
-      'TTTTTTTTOOOWOOWWOOTTTTTT',
-      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTOOOWOOWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
       'TTTTTTTTTTOOOOOTTTTTTTTT',
       'TTTTTTTTTOOBBBOOTTTTTTTT',
-      'TTTTTTTTOOOBBBOOOTTTTTTT',
-      'TTTTTTTTOOBBBBBBOOTTTTTT',
-      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
       'TTTTTTTOOOOBBBBOOOOTTTTT',
       'TTTTTTTTBPPPPPPPPTTTTTTT',
       'TTTTTTTTBPPPPPPPPTTTTTTT',
@@ -5294,20 +5373,46 @@ function showKeyboardShortcuts() {
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
-      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
       'TTTTTTTTOOOTTTTOOOTTTTTT',
       'TTTTTTTTOOBTTOOOBOTTTTTT',
       'TTTTTTTTOOOWTOOWOOTTTTTT',
-      'TTTTTTTTOOOWOOWWOOTTTTTT',
-      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTOOOWOOWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
       'TTTTTTTTTTOOOOOTTTTTTTTT',
       'TTTTTTTTTOOBBBOOTTTTTTTT',
-      'TTTTTTTTOOOBBBOOOTTTTTTT',
-      'TTTTTTTTOOBBBBBBOOTTTTTT',
-      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
       'TTTTTTTOOOOBBBBOOOOTTTTT',
       'TTTTTTTTBPPPPPPPPTTTTTTT',
       'TTTTTTTTOBPPPPPPPPTTTTTT',
+      'TTTTTTTTOBPPPPPPPPTTTTTT',
+      'TTTTTTTTPPPPPPPPPPTTTTTT'
+    ],
+    typing3: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOOWTOOWOOTTTTTT',
+      'TTTTTTTTOOOWOOWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOBPPPPPPPPTTTTTT',
+      'TTTTTTTTBPPPPPPPPTTTTTTT',
       'TTTTTTTTOBPPPPPPPPTTTTTT',
       'TTTTTTTTPPPPPPPPPPTTTTTT'
     ],
@@ -5320,17 +5425,17 @@ function showKeyboardShortcuts() {
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
-      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
       'TTTTTTTTOOBTTTTOOBTTTTTT',
       'TTTTTTTTOBBTTOOBBOTTTTTT',
       'TTTTTTTTOOBTOOBBOOTTTTTT',
       'TTTTTTTTOOOOOWWOOOTTTTTT',
-      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
       'TTTTTTTTTTOOOOOTTTTTTTTT',
       'TTTTTTTTTOOBBBOOTTTTTTTT',
-      'TTTTTTTTOOOBBBOOOTTTTTTT',
-      'TTTTTTTTOOBBBBBBOOTTTTTT',
-      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
       'TTTTTTTOOOOBBBBOOOOTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
@@ -5347,18 +5452,44 @@ function showKeyboardShortcuts() {
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
-      'TTTTTTTTOOTTTTTOOTTTTTTT',
-      'TTTTTTTOOBTTTTOOBTTTTTTT',
-      'TTTTTTTOBBTTOOBBOTTTTTTT',
-      'TTTTTTTOOBTOOBBOOTTTTTTT',
-      'TTTTTTTOOOOOWWOOOTTTTTTT',
-      'TTTTTTTTOOBBWBOOTTTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
+      'TTTTTTTTOOBTTTTOOBTTTTTT',
+      'TTTTTTTTOBBTTOOBBOTTTTTT',
+      'TTTTTTTTOOBTOOBBOOTTTTTT',
+      'TTTTTTTTOOOOOWWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
       'TTTTTTTTTTOOOOOTTTTTTTTT',
       'TTTTTTTTTOOBBBOOTTTTTTTT',
-      'TTTTTTTTOOOBBBOOOTTTTTTT',
-      'TTTTTTTTOOBBBBBBOOTTTTTT',
-      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
       'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT'
+    ],
+    music3: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTONDTTTTNODTTTTT',
+      'TTTTTTTTOOBTTTTOOBTTTTTT',
+      'TTTTTTTTOBBTTOOBBOTTTTTT',
+      'TTTTTTTTOOBTOOBBOOTTTTTT',
+      'TTTTTTTTOOBTOOBBOOTTTTTT',
+      'TTTTTTTTOOOOOWWOOOTTTTTT',
+      'TTTTTTTTTOONNNOOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOOCCCCOOTTTTTT',
+      'TTTTTTTTOOBCCCBBDOTTTTTT',
+      'TTTTTTTOOOBBCCBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT',
       'TTTTTTTTOOOBBBBOOOTTTTTT'
@@ -5379,11 +5510,11 @@ function showKeyboardShortcuts() {
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTOOOOOOOTTTTTTTTT',
-      'TTTTTTTOOOOBBBOOOTTTTTTT',
+      'TTTTTTTOOOCBBBDOOTTTTTTT',
       'TTTTTTOOOBBBBBBBOOOTTTTT',
+      'TTTTTTDOBBBBBBBBBBOTTTTT',
       'TTTTTTOOBBBBBBBBBBOTTTTT',
-      'TTTTTTOOBBBBBBBBBBOTTTTT',
-      'TTTTTTOOBBBBBBBBBBOTTTTT',
+      'TTTTTTDOBBBBBBBBBBOTTTTT',
       'TTTTTTOOOBBBBBBBOOOTTTTT',
       'TTTTTTTOOOBBBBBBOOTTTTTT',
       'TTTTTTTTOOBBBBBBOTTTTTTT',
@@ -5404,11 +5535,11 @@ function showKeyboardShortcuts() {
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTTTTTTTTT',
       'TTTTTTTTOOOOOOOTTTTTTTTT',
-      'TTTTTTTOOOOBBBOOOTTTTTTT',
+      'TTTTTTTOOOCBBBDOOTTTTTTT',
       'TTTTTTOOOBBBBBBBOOOTTTTT',
+      'TTTTTTDOBBBBBBBBBBOTTTTT',
       'TTTTTTOOBBBBBBBBBBOTTTTT',
-      'TTTTTTOOBBBBBBBBBBOTTTTT',
-      'TTTTTTOOBBBBBBBBBBOTTTTT',
+      'TTTTTTDOBBBBBBBBBBOTTTTT',
       'TTTTTTOOOBBBBBBBOOOTTTTT',
       'TTTTTTTOOOBBBBBBOOTTTTTT',
       'TTTTTTTTOOBBBBBBOTTTTTTT',
@@ -5417,11 +5548,23 @@ function showKeyboardShortcuts() {
     ]
   };
 
+  // Frame counts per state
+  const FRAME_COUNTS = {
+    idle: 3,
+    walk: 4,
+    typing: 3,
+    music: 3,
+    sleep: 2
+  };
+
   const COLORS = {
     'O': '#FF8C42', // Tiger Orange
     'B': '#2D1B00', // Tiger Black (Stripes)
     'W': '#FFFFFF', // White (Eyes)
     'P': '#E8E8ED', // Pinkish grey (Laptop)
+    'C': '#FFE4B5', // Cream (Belly/Chest)
+    'N': '#FFB6C1', // Pink (Nose/Inner ears)
+    'D': '#CC6B2E', // Dark Orange (Shading)
     'T': 'transparent'
   };
 
@@ -5436,7 +5579,7 @@ function showKeyboardShortcuts() {
       this.zzzElements = this.container.querySelectorAll('.axel-zzz');
       
       // State
-      this.state = 'walk'; // idle, walk, typing, music, sleep
+      this.state = 'walk'; // idle, walk, typing, music, sleep, transition
       this.facingRight = true;
       this.x = window.innerWidth / 2;
       this.y = window.innerHeight - 120;
@@ -5454,6 +5597,19 @@ function showKeyboardShortcuts() {
       this.walkSpeed = 0.8;
       
       this.idleTimer = Date.now();
+      this.stateStartTime = Date.now();
+      
+      // Gravity/spring physics
+      this.velocityY = 0;
+      this.gravity = 0.5;
+      this.bounceDamping = 0.4;
+      this.isFalling = false;
+      this.restY = this.y; // dock-level Y
+      
+      // Transition state
+      this.nextState = null;
+      this.transitionTimer = 0;
+      this.transitionDuration = 200; // ms
       
       this.init();
     }
@@ -5563,12 +5719,25 @@ function showKeyboardShortcuts() {
       this.container.classList.remove('dragging');
       this.idleTimer = Date.now();
       
-      // Check if dropped near dock
-      if (this.isNearDock()) {
-        this.positionOnDock();
-        this.state = 'walk';
+      // Calculate rest position (dock level)
+      const dock = document.getElementById('dock');
+      if (dock && dock.style.display !== 'none') {
+        const rect = dock.getBoundingClientRect();
+        this.restY = rect.top - 46;
       } else {
+        this.restY = window.innerHeight - 120;
+      }
+      
+      // If above rest position, enable gravity fall
+      if (this.y < this.restY - 5) {
+        this.isFalling = true;
+        this.velocityY = 0;
         this.state = 'idle';
+      } else if (this.isNearDock()) {
+        this.positionOnDock();
+        this.switchState('walk');
+      } else {
+        this.switchState('idle');
       }
     }
     
@@ -5581,20 +5750,26 @@ function showKeyboardShortcuts() {
     }
     
     checkMusicState() {
-      if (this.isDragging) return;
+      if (this.isDragging || this.isFalling) return;
       
       const musicWin = windows.get('music');
       const isMusicOpen = musicWin && musicWin.isOpen && !minimizedWindows.has('music');
       
       if (isMusicOpen && this.state !== 'music') {
-        this.state = 'music';
-        this.frameIndex = 0;
-        this.idleTimer = Date.now();
+        this.switchState('music');
         this.zzzElements.forEach(z => z.classList.remove('show'));
       } else if (!isMusicOpen && this.state === 'music') {
-        this.state = this.isNearDock() ? 'walk' : 'idle';
-        this.idleTimer = Date.now();
+        this.switchState(this.isNearDock() ? 'walk' : 'idle');
       }
+    }
+    
+    switchState(newState) {
+      if (this.state === newState) return;
+      // Brief transition pause
+      this.nextState = newState;
+      this.transitionTimer = Date.now();
+      this.state = 'transition';
+      this.frameIndex = 0;
     }
     
     loop() {
@@ -5613,26 +5788,61 @@ function showKeyboardShortcuts() {
       
       const now = Date.now();
       const idleTime = now - this.idleTimer;
+      const stateTime = now - this.stateStartTime;
       
-      // Frame timing
+      // Gravity/spring physics
+      if (this.isFalling) {
+        this.velocityY += this.gravity;
+        this.y += this.velocityY;
+        
+        if (this.y >= this.restY) {
+          this.y = this.restY;
+          this.velocityY = -this.velocityY * this.bounceDamping;
+          
+          // Stop bouncing when velocity is tiny
+          if (Math.abs(this.velocityY) < 1) {
+            this.velocityY = 0;
+            this.isFalling = false;
+            this.positionOnDock();
+            this.switchState('walk');
+          }
+        }
+        return; // skip other logic while falling
+      }
+      
+      // Transition pause
+      if (this.state === 'transition') {
+        if (now - this.transitionTimer >= this.transitionDuration) {
+          this.state = this.nextState;
+          this.nextState = null;
+          this.frameIndex = 0;
+          this.stateStartTime = now;
+          this.idleTimer = now;
+        }
+        return;
+      }
+      
+      // Frame timing — use per-state frame count
       this.frameCount++;
-      const frameSpeed = this.state === 'walk' ? 15 : (this.state === 'music' ? 20 : 30);
+      const frameSpeed = this.state === 'walk' ? 12 : (this.state === 'music' ? 18 : 25);
+      const maxFrames = FRAME_COUNTS[this.state] || 2;
       if (this.frameCount >= frameSpeed) {
         this.frameCount = 0;
-        this.frameIndex = (this.frameIndex + 1) % 2; // Most states have 2 frames
+        this.frameIndex = (this.frameIndex + 1) % maxFrames;
       }
       
       // State transitions based on time
       if (this.state !== 'music' && this.state !== 'sleep') {
         if (idleTime > 60000) { // 60s idle -> sleep
-          this.state = 'sleep';
-          this.zzzElements.forEach((z, i) => {
-            setTimeout(() => z.classList.add('show'), i * 600);
-          });
-        } else if (idleTime > 30000 && this.state === 'idle') { // 30s idle not near dock -> typing
-          if (Math.random() < 0.01) {
-            this.state = 'typing';
-          }
+          this.switchState('sleep');
+          setTimeout(() => {
+            this.zzzElements.forEach((z, i) => {
+              setTimeout(() => z.classList.add('show'), i * 600);
+            });
+          }, this.transitionDuration);
+        } else if (this.state === 'idle' && stateTime > 15000 + Math.random() * 15000) {
+          // 15-30s idle -> typing
+          this.switchState('typing');
         }
       }
       
@@ -5641,7 +5851,6 @@ function showKeyboardShortcuts() {
         this.x += this.walkSpeed * this.walkDirection;
         this.facingRight = this.walkDirection > 0;
         
-        // Boundaries (dock or screen)
         let leftBound = 0;
         let rightBound = window.innerWidth - 48;
         
@@ -5662,26 +5871,22 @@ function showKeyboardShortcuts() {
         
         // Randomly stop and idle
         if (Math.random() < 0.002) {
-          this.state = 'idle';
-          this.idleTimer = Date.now(); // reset timer so we don't instantly sleep
+          this.switchState('idle');
         }
       }
       
       // Idle logic
-      if (this.state === 'idle' && this.isNearDock() && idleTime > 5000) {
-        // Randomly resume walking if near dock
+      if (this.state === 'idle' && this.isNearDock() && stateTime > 5000) {
         if (Math.random() < 0.01) {
-          this.state = 'walk';
+          this.switchState('walk');
           this.walkDirection = Math.random() > 0.5 ? 1 : -1;
         }
       }
       
-      // Typing logic
-      if (this.state === 'typing') {
-        // Randomly go back to idle
-        if (Math.random() < 0.005) {
-          this.state = 'idle';
-          this.idleTimer = Date.now();
+      // Typing logic — min 8s, max 20s
+      if (this.state === 'typing' && stateTime > 8000) {
+        if (stateTime > 20000 || Math.random() < 0.01) {
+          this.switchState('idle');
         }
       }
     }
@@ -5690,7 +5895,9 @@ function showKeyboardShortcuts() {
       this.ctx.clearRect(0, 0, 48, 48);
       
       // Determine which sprite map to use
-      let spriteKey = this.state + (this.frameIndex + 1);
+      let actualState = this.state === 'transition' ? 'idle' : this.state;
+      let spriteKey = actualState + (this.frameIndex + 1);
+      if (!SPRITES[spriteKey]) spriteKey = actualState + '1';
       if (!SPRITES[spriteKey]) spriteKey = 'idle1'; // fallback
       
       const spriteData = SPRITES[spriteKey];

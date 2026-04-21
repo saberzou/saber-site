@@ -2128,6 +2128,65 @@ body {
   white-space: nowrap;
 }
 
+/* ─── Desktop Companion (Axel) ─── */
+.axel-companion {
+  position: fixed;
+  width: 48px;
+  height: 48px;
+  z-index: 150;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  transition: filter 0.2s ease;
+}
+
+.axel-companion:hover {
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+
+.axel-companion.dragging {
+  cursor: grabbing;
+  z-index: 5000;
+}
+
+.axel-canvas {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.axel-zzz {
+  position: absolute;
+  top: -20px;
+  right: -10px;
+  font-size: 14px;
+  color: #8B4513;
+  font-weight: bold;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.axel-zzz.show {
+  animation: zzzFloat 2s ease-in-out infinite;
+}
+
+.axel-zzz.show:nth-child(2) {
+  animation-delay: 0.6s;
+}
+
+.axel-zzz.show:nth-child(3) {
+  animation-delay: 1.2s;
+}
+
+@keyframes zzzFloat {
+  0% { opacity: 0; transform: translateY(0) scale(0.8); }
+  20% { opacity: 1; transform: translateY(-5px) scale(1); }
+  80% { opacity: 1; transform: translateY(-15px) scale(1); }
+  100% { opacity: 0; transform: translateY(-25px) scale(0.8); }
+}
+
 /* ─── Messages App ─── */
 .messages-container {
   display: flex;
@@ -2503,6 +2562,14 @@ body {
 
 <!-- Dock -->
 <div class="dock" id="dock"></div>
+
+<!-- Axel Desktop Companion -->
+<div class="axel-companion" id="axel-companion">
+  <canvas class="axel-canvas" id="axel-canvas" width="48" height="48"></canvas>
+  <div class="axel-zzz">Z</div>
+  <div class="axel-zzz">z</div>
+  <div class="axel-zzz">z</div>
+</div>
 
 <script>
 // ─── Constants & Data ───
@@ -5080,6 +5147,585 @@ function showKeyboardShortcuts() {
   // Open as proper app window
   openApp('shortcuts');
 }
+
+// ─── Axel Desktop Companion ───
+(function() {
+  'use strict';
+  
+  // Axel pixel art sprite definitions (24x24 grid, scaled up 2x in CSS)
+  // T: transparent, O: orange, B: black, W: white, P: pink
+  const SPRITES = {
+    idle1: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOOWTOOWOOTTTTTT',
+      'TTTTTTTTOOOWOOWWOOTTTTTT',
+      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOBBBOOOTTTTTTT',
+      'TTTTTTTTOOBBBBBBOOTTTTTT',
+      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT'
+    ],
+    idle2: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOOWTOOWOOTTTTTT',
+      'TTTTTTTTOOOWOOWWOOTTTTTT',
+      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOBBBOOOTTTTTTT',
+      'TTTTTTTTOOBBBBBBOOTTTTTT',
+      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT'
+    ],
+    walk1: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOOWTOOWOOTTTTTT',
+      'TTTTTTTTOOOWOOWWOOTTTTTT',
+      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOBBBOOOTTTTTTT',
+      'TTTTTTTTOOBBBBBBOOTTTTTT',
+      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTOOOOOBBBBOOOTTTTTT',
+      'TTTTTOOOOOBBBBBOOOOTTTTT'
+    ],
+    walk2: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOOWTOOWOOTTTTTT',
+      'TTTTTTTTOOOWOOWWOOTTTTTT',
+      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOBBBOOOTTTTTTT',
+      'TTTTTTTTOOBBBBBBOOTTTTTT',
+      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOOOTTTT',
+      'TTTTTTTOOOOBBBBBOOOOOTTT'
+    ],
+    typing1: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOOWTOOWOOTTTTTT',
+      'TTTTTTTTOOOWOOWWOOTTTTTT',
+      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOBBBOOOTTTTTTT',
+      'TTTTTTTTOOBBBBBBOOTTTTTT',
+      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTBPPPPPPPPTTTTTTT',
+      'TTTTTTTTBPPPPPPPPTTTTTTT',
+      'TTTTTTTTBPPPPPPPPTTTTTTT',
+      'TTTTTTTTPPPPPPPPPPTTTTTT'
+    ],
+    typing2: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTOOOTTTTOOOTTTTTT',
+      'TTTTTTTTOOBTTOOOBOTTTTTT',
+      'TTTTTTTTOOOWTOOWOOTTTTTT',
+      'TTTTTTTTOOOWOOWWOOTTTTTT',
+      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOBBBOOOTTTTTTT',
+      'TTTTTTTTOOBBBBBBOOTTTTTT',
+      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTBPPPPPPPPTTTTTTT',
+      'TTTTTTTTOBPPPPPPPPTTTTTT',
+      'TTTTTTTTOBPPPPPPPPTTTTTT',
+      'TTTTTTTTPPPPPPPPPPTTTTTT'
+    ],
+    music1: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTOOTTTTTOOTTTTTT',
+      'TTTTTTTTOOBTTTTOOBTTTTTT',
+      'TTTTTTTTOBBTTOOBBOTTTTTT',
+      'TTTTTTTTOOBTOOBBOOTTTTTT',
+      'TTTTTTTTOOOOOWWOOOTTTTTT',
+      'TTTTTTTTTOOBBWBOOTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOBBBOOOTTTTTTT',
+      'TTTTTTTTOOBBBBBBOOTTTTTT',
+      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT'
+    ],
+    music2: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTOOTTTTTOOTTTTTTT',
+      'TTTTTTTOOBTTTTOOBTTTTTTT',
+      'TTTTTTTOBBTTOOBBOTTTTTTT',
+      'TTTTTTTOOBTOOBBOOTTTTTTT',
+      'TTTTTTTOOOOOWWOOOTTTTTTT',
+      'TTTTTTTTOOBBWBOOTTTTTTTT',
+      'TTTTTTTTTTOOOOOTTTTTTTTT',
+      'TTTTTTTTTOOBBBOOTTTTTTTT',
+      'TTTTTTTTOOOBBBOOOTTTTTTT',
+      'TTTTTTTTOOBBBBBBOOTTTTTT',
+      'TTTTTTTOOOBBBBBBBOOTTTTT',
+      'TTTTTTTOOOOBBBBOOOOTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT',
+      'TTTTTTTTOOOBBBBOOOTTTTTT'
+    ],
+    sleep1: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTOOOOOOOTTTTTTTTT',
+      'TTTTTTTOOOOBBBOOOTTTTTTT',
+      'TTTTTTOOOBBBBBBBOOOTTTTT',
+      'TTTTTTOOBBBBBBBBBBOTTTTT',
+      'TTTTTTOOBBBBBBBBBBOTTTTT',
+      'TTTTTTOOBBBBBBBBBBOTTTTT',
+      'TTTTTTOOOBBBBBBBOOOTTTTT',
+      'TTTTTTTOOOBBBBBBOOTTTTTT',
+      'TTTTTTTTOOBBBBBBOTTTTTTT',
+      'TTTTTTTTTOOOOOOOTTTTTTTT'
+    ],
+    sleep2: [
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT',
+      'TTTTTTTTOOOOOOOTTTTTTTTT',
+      'TTTTTTTOOOOBBBOOOTTTTTTT',
+      'TTTTTTOOOBBBBBBBOOOTTTTT',
+      'TTTTTTOOBBBBBBBBBBOTTTTT',
+      'TTTTTTOOBBBBBBBBBBOTTTTT',
+      'TTTTTTOOBBBBBBBBBBOTTTTT',
+      'TTTTTTOOOBBBBBBBOOOTTTTT',
+      'TTTTTTTOOOBBBBBBOOTTTTTT',
+      'TTTTTTTTOOBBBBBBOTTTTTTT',
+      'TTTTTTTTTOOOOOOOTTTTTTTT',
+      'TTTTTTTTTTTTTTTTTTTTTTTT'
+    ]
+  };
+
+  const COLORS = {
+    'O': '#FF8C42', // Tiger Orange
+    'B': '#2D1B00', // Tiger Black (Stripes)
+    'W': '#FFFFFF', // White (Eyes)
+    'P': '#E8E8ED', // Pinkish grey (Laptop)
+    'T': 'transparent'
+  };
+
+  class AxelCompanion {
+    constructor() {
+      this.container = document.getElementById('axel-companion');
+      this.canvas = document.getElementById('axel-canvas');
+      
+      if (!this.container || !this.canvas) return;
+      
+      this.ctx = this.canvas.getContext('2d');
+      this.zzzElements = this.container.querySelectorAll('.axel-zzz');
+      
+      // State
+      this.state = 'walk'; // idle, walk, typing, music, sleep
+      this.facingRight = true;
+      this.x = window.innerWidth / 2;
+      this.y = window.innerHeight - 120;
+      this.targetX = this.x;
+      
+      this.isDragging = false;
+      this.hasDragged = false;
+      this.dragOffsetX = 0;
+      this.dragOffsetY = 0;
+      
+      this.frameIndex = 0;
+      this.frameCount = 0;
+      
+      this.walkDirection = Math.random() > 0.5 ? 1 : -1;
+      this.walkSpeed = 0.8;
+      
+      this.idleTimer = Date.now();
+      
+      this.init();
+    }
+    
+    init() {
+      this.bindEvents();
+      this.positionOnDock();
+      
+      // Start loop
+      requestAnimationFrame(() => this.loop());
+      
+      // Periodic music check
+      setInterval(() => this.checkMusicState(), 2000);
+    }
+    
+    bindEvents() {
+      // Drag events
+      this.container.addEventListener('mousedown', (e) => this.onDragStart(e));
+      this.container.addEventListener('touchstart', (e) => this.onDragStart(e), { passive: false });
+      
+      document.addEventListener('mousemove', (e) => this.onDragMove(e));
+      document.addEventListener('touchmove', (e) => this.onDragMove(e), { passive: false });
+      
+      document.addEventListener('mouseup', () => this.onDragEnd());
+      document.addEventListener('touchend', () => this.onDragEnd());
+      
+      // Click event
+      this.container.addEventListener('click', (e) => {
+        if (!this.hasDragged) {
+          openApp('messages');
+          setTimeout(() => switchChat('axel'), 100);
+          this.wakeUp();
+        }
+      });
+      
+      // Window resize
+      window.addEventListener('resize', () => {
+        if (this.state === 'walk' || this.isNearDock()) {
+          this.positionOnDock();
+        }
+      });
+    }
+    
+    positionOnDock() {
+      const dock = document.getElementById('dock');
+      if (dock && dock.style.display !== 'none') {
+        const rect = dock.getBoundingClientRect();
+        this.y = rect.top - 46; // Rest on top of dock
+        // Keep within dock width
+        if (this.x < rect.left) this.x = rect.left;
+        if (this.x > rect.right - 48) this.x = rect.right - 48;
+      }
+    }
+    
+    isNearDock() {
+      const dock = document.getElementById('dock');
+      if (dock && dock.style.display !== 'none') {
+        const rect = dock.getBoundingClientRect();
+        return Math.abs(this.y - (rect.top - 46)) < 40;
+      }
+      return false;
+    }
+    
+    onDragStart(e) {
+      if (e.target.closest('.window-btn')) return;
+      e.preventDefault();
+      
+      this.isDragging = true;
+      this.hasDragged = false;
+      this.container.classList.add('dragging');
+      this.wakeUp();
+      
+      const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+      
+      const rect = this.container.getBoundingClientRect();
+      this.dragOffsetX = clientX - rect.left;
+      this.dragOffsetY = clientY - rect.top;
+      
+      // Visual feedback
+      this.state = 'idle';
+      this.frameIndex = 0;
+    }
+    
+    onDragMove(e) {
+      if (!this.isDragging) return;
+      e.preventDefault();
+      
+      this.hasDragged = true;
+      
+      const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+      
+      this.x = clientX - this.dragOffsetX;
+      this.y = clientY - this.dragOffsetY;
+      
+      // Bounds
+      this.x = Math.max(0, Math.min(window.innerWidth - 48, this.x));
+      this.y = Math.max(28, Math.min(window.innerHeight - 48, this.y)); // below menu bar
+      
+      this.idleTimer = Date.now();
+    }
+    
+    onDragEnd() {
+      if (!this.isDragging) return;
+      this.isDragging = false;
+      this.container.classList.remove('dragging');
+      this.idleTimer = Date.now();
+      
+      // Check if dropped near dock
+      if (this.isNearDock()) {
+        this.positionOnDock();
+        this.state = 'walk';
+      } else {
+        this.state = 'idle';
+      }
+    }
+    
+    wakeUp() {
+      if (this.state === 'sleep') {
+        this.state = 'idle';
+        this.idleTimer = Date.now();
+        this.zzzElements.forEach(z => z.classList.remove('show'));
+      }
+    }
+    
+    checkMusicState() {
+      if (this.isDragging) return;
+      
+      const musicWin = windows.get('music');
+      const isMusicOpen = musicWin && musicWin.isOpen && !minimizedWindows.has('music');
+      
+      if (isMusicOpen && this.state !== 'music') {
+        this.state = 'music';
+        this.frameIndex = 0;
+        this.idleTimer = Date.now();
+        this.zzzElements.forEach(z => z.classList.remove('show'));
+      } else if (!isMusicOpen && this.state === 'music') {
+        this.state = this.isNearDock() ? 'walk' : 'idle';
+        this.idleTimer = Date.now();
+      }
+    }
+    
+    loop() {
+      this.updateLogic();
+      this.render();
+      
+      // Apply position
+      this.container.style.left = this.x + 'px';
+      this.container.style.top = this.y + 'px';
+      
+      requestAnimationFrame(() => this.loop());
+    }
+    
+    updateLogic() {
+      if (this.isDragging) return;
+      
+      const now = Date.now();
+      const idleTime = now - this.idleTimer;
+      
+      // Frame timing
+      this.frameCount++;
+      const frameSpeed = this.state === 'walk' ? 15 : (this.state === 'music' ? 20 : 30);
+      if (this.frameCount >= frameSpeed) {
+        this.frameCount = 0;
+        this.frameIndex = (this.frameIndex + 1) % 2; // Most states have 2 frames
+      }
+      
+      // State transitions based on time
+      if (this.state !== 'music' && this.state !== 'sleep') {
+        if (idleTime > 60000) { // 60s idle -> sleep
+          this.state = 'sleep';
+          this.zzzElements.forEach((z, i) => {
+            setTimeout(() => z.classList.add('show'), i * 600);
+          });
+        } else if (idleTime > 30000 && this.state === 'idle') { // 30s idle not near dock -> typing
+          if (Math.random() < 0.01) {
+            this.state = 'typing';
+          }
+        }
+      }
+      
+      // Walking logic
+      if (this.state === 'walk') {
+        this.x += this.walkSpeed * this.walkDirection;
+        this.facingRight = this.walkDirection > 0;
+        
+        // Boundaries (dock or screen)
+        let leftBound = 0;
+        let rightBound = window.innerWidth - 48;
+        
+        const dock = document.getElementById('dock');
+        if (dock && dock.style.display !== 'none') {
+          const rect = dock.getBoundingClientRect();
+          leftBound = rect.left;
+          rightBound = rect.right - 48;
+        }
+        
+        if (this.x <= leftBound) {
+          this.x = leftBound;
+          this.walkDirection = 1;
+        } else if (this.x >= rightBound) {
+          this.x = rightBound;
+          this.walkDirection = -1;
+        }
+        
+        // Randomly stop and idle
+        if (Math.random() < 0.002) {
+          this.state = 'idle';
+          this.idleTimer = Date.now(); // reset timer so we don't instantly sleep
+        }
+      }
+      
+      // Idle logic
+      if (this.state === 'idle' && this.isNearDock() && idleTime > 5000) {
+        // Randomly resume walking if near dock
+        if (Math.random() < 0.01) {
+          this.state = 'walk';
+          this.walkDirection = Math.random() > 0.5 ? 1 : -1;
+        }
+      }
+      
+      // Typing logic
+      if (this.state === 'typing') {
+        // Randomly go back to idle
+        if (Math.random() < 0.005) {
+          this.state = 'idle';
+          this.idleTimer = Date.now();
+        }
+      }
+    }
+    
+    render() {
+      this.ctx.clearRect(0, 0, 48, 48);
+      
+      // Determine which sprite map to use
+      let spriteKey = this.state + (this.frameIndex + 1);
+      if (!SPRITES[spriteKey]) spriteKey = 'idle1'; // fallback
+      
+      const spriteData = SPRITES[spriteKey];
+      
+      this.ctx.save();
+      
+      // Flip horizontally if facing left
+      if (!this.facingRight) {
+        this.ctx.translate(48, 0);
+        this.ctx.scale(-1, 1);
+      }
+      
+      // Draw pixel art (24x24 grid, 2x scale)
+      for (let y = 0; y < 24; y++) {
+        for (let x = 0; x < 24; x++) {
+          const colorCode = spriteData[y][x];
+          if (colorCode !== 'T') {
+            this.ctx.fillStyle = COLORS[colorCode];
+            // 2x scale: each pixel in the 24x24 grid becomes 2x2
+            this.ctx.fillRect(x * 2, y * 2, 2, 2);
+          }
+        }
+      }
+      
+      this.ctx.restore();
+    }
+  }
+  
+  // Initialize when DOM is ready
+  window.addEventListener('load', function() {
+    setTimeout(() => {
+      window.axelCompanion = new AxelCompanion();
+    }, 1000); // Start slightly after boot
+  });
+})();
 </script>
 </body>
 </html>

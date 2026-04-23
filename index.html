@@ -3173,6 +3173,13 @@ function renderSystemApp(appId) {
               '<div class="messages-contact-preview">Creative chaos</div>' +
             '</div>' +
           '</div>' +
+          '<div class="messages-contact" data-contact="archer" onclick="switchChat(\'archer\')">' +
+            '<div class="messages-avatar" style="background: #6B5CE7;">🏹</div>' +
+            '<div class="messages-contact-info">' +
+              '<div class="messages-contact-name">Archer</div>' +
+              '<div class="messages-contact-preview">SaberOS mascot & guide</div>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
         '<div class="messages-chat" id="messages-chat-area">' +
           '<div class="messages-header" id="messages-header">' +
@@ -3198,8 +3205,12 @@ function renderSystemApp(appId) {
                 '<div class="message-text">Hi! I\'m Saber. Feel free to explore my projects or drop us a message!</div>' +
               '</div>' +
             '</div>' +
-          '</div>' +
-          '<div class="messages-input-area">' +
+            '<div class="message-group">' +
+              '<div class="message-bubble received">' +
+                '<div class="message-sender">Archer 🏹</div>' +
+                '<div class="message-text">I\'m Archer, your SaberOS guide! Need help finding anything? 🏹</div>' +
+              '</div>' +
+            '</div>' +
             '<input type="text" class="messages-input" id="message-input" placeholder="iMessage" onkeypress="if(event.key===\'Enter\')sendMessage()">' +
             '<button class="messages-send-btn" onclick="sendMessage()">' +
               '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>' +
@@ -4117,6 +4128,10 @@ function renderMobileApp(appId) {
             '<div style="font-size: 0.7rem; color: #666; margin-bottom: 2px;">Saber 👤</div>' +
             '<div style="font-size: 0.9rem;">Hi! I\'m Saber. Feel free to explore my projects or drop us a message!</div>' +
           '</div>' +
+          '<div style="align-self: flex-start; max-width: 80%; background: #e5e5e5; padding: 10px 14px; border-radius: 18px; border-bottom-left-radius: 4px;">' +
+            '<div style="font-size: 0.7rem; color: #666; margin-bottom: 2px;">Archer 🏹</div>' +
+            '<div style="font-size: 0.9rem;">I\'m Archer, your SaberOS guide! Need help finding anything? 🏹</div>' +
+          '</div>' +
         '</div>' +
         '<div style="padding: 12px 16px; border-top: 1px solid #e5e5e5; display: flex; gap: 8px;">' +
           '<input type="text" id="mobile-message-input" placeholder="iMessage" style="flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 20px; font-size: 16px; outline: none;" onkeypress="if(event.key===\'Enter\')sendMobileMessage()">' +
@@ -4512,6 +4527,7 @@ function takePhoto() {
 const chatParticipants = {
   atticus: { name: 'Atticus', emoji: '🐻', color: '#8B4513', personality: 'analytical, warm, decisive INTJ orchestrator' },
   axel: { name: 'Axel', emoji: '🐯', color: '#FF8C42', personality: 'creative, playful, chaotic good ESFP' },
+  archer: { name: 'Archer', emoji: '🏹', color: '#6B5CE7', personality: 'SaberOS mascot, witty guide, Clippy-but-cool' },
   saber: { name: 'Saber', emoji: '👤', color: '#52A5CE', personality: 'Design Team Lead at Microsoft, INTJ, street photography enthusiast' }
 };
 
@@ -4534,7 +4550,7 @@ async function sendMobileMessage() {
   chatArea.scrollTop = chatArea.scrollHeight;
   
   // Pick responder
-  var responders = ['atticus', 'axel', 'saber'];
+  var responders = ['atticus', 'axel', 'saber', 'archer'];
   var responder = responders[Math.floor(Math.random() * responders.length)];
   var p = chatParticipants[responder];
   
@@ -4643,8 +4659,10 @@ async function getAIResponse(userText, chatId) {
       responder = 'axel';
     } else if (lower.includes('help') || lower.includes('how') || lower.includes('what') || lower.includes('who') || lower.includes('site')) {
       responder = 'atticus';
+    } else if (lower.includes('archer') || lower.includes('guide') || lower.includes('tour') || lower.includes('mascot') || lower.includes('navigate')) {
+      responder = 'archer';
     } else {
-      const responders = ['atticus', 'axel', 'saber'];
+      const responders = ['atticus', 'axel', 'saber', 'archer'];
       responder = responders[Math.floor(Math.random() * responders.length)];
     }
   }
@@ -4677,7 +4695,8 @@ async function getAIResponse(userText, chatId) {
     const fallbacks = {
       saber: "Hmm, signal's weak. Try again?",
       atticus: "Lost the thread. Go on.",
-      axel: "Whoops, brain hiccup! 🤪 One more time?"
+      axel: "Whoops, brain hiccup! 🤪 One more time?",
+      archer: "Hmm, my aim's off... 🏹 Try again?"
     };
     const reply = fallbacks[responder] || '...';
     addMessageBubble(reply, 'received', p.name + ' ' + p.emoji);
@@ -4736,6 +4755,12 @@ function switchChat(contactId) {
             '<div class="message-sender">Saber 👤</div>' +
             '<div class="message-text">Hi! I\'m Saber. Feel free to explore my projects or drop us a message!</div>' +
           '</div>' +
+        '</div>' +
+        '<div class="message-group">' +
+          '<div class="message-bubble received">' +
+            '<div class="message-sender">Archer 🏹</div>' +
+            '<div class="message-text">I\'m Archer, your SaberOS guide! Need help finding anything? 🏹</div>' +
+          '</div>' +
         '</div>';
     }
   } else {
@@ -4762,7 +4787,8 @@ function switchChat(contactId) {
         const welcomes = {
           saber: "Hey! It's just us now. What's on your mind?",
           atticus: "Hello. I'm here to help with anything you need.",
-          axel: "Yo! Just you and me. What's up? 🎉"
+          axel: "Yo! Just you and me. What's up? 🎉",
+          archer: "Hey! I'm Archer, your guide to SaberOS. Need a tour, or wanna just chat? 🏹"
         };
         list.innerHTML = '<div class="message-group"><div class="message-bubble received"><div class="message-sender">' + p.name + ' ' + p.emoji + '</div><div class="message-text">' + welcomes[contactId] + '</div></div></div>';
       }

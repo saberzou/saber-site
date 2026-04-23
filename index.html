@@ -902,7 +902,10 @@ body {
 .window-content {
   flex: 1;
   overflow-y: auto;
-  padding: 4px 4px 4px 4px;
+  padding: 4px;
+}
+.window-content.system-app {
+  padding: 0;
 }
 
 .resize-handle {
@@ -2943,7 +2946,7 @@ function createWindow(id, data, options) {
       '<span class="window-title">' + data.title + (isSystemApp ? '' : ' <span class="title-chevron" onclick="toggleProjectDropdown(this, event)">▼</span><div class="project-dropdown">' + (data.detail || data.desc || '') + '</div>') + '</span>' +
       externalLinkBtn +
     '</div>' +
-    '<div class="window-content ' + (id === 'about' ? 'about-mac' : '') + '">' +
+    '<div class="window-content ' + (id === 'about' ? 'about-mac' : '') + (isSystemApp ? ' system-app' : '') + '">' +
       contentHTML +
     '</div>' +
     '<div class="resize-handle resize-nw" data-resize="nw"></div>' +

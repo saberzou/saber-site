@@ -3174,7 +3174,7 @@ function renderSystemApp(appId) {
             '</div>' +
           '</div>' +
           '<div class="messages-contact" data-contact="archer" onclick="switchChat(\'archer\')">' +
-            '<div class="messages-avatar" style="background: #6B5CE7;">🏹</div>' +
+            '<div class="messages-avatar" style="background: #FF6B35; padding: 0; overflow: hidden;"><img src="images/archer-avatar.jpg" style="width: 100%; height: 100%; object-fit: cover;"></div>' +
             '<div class="messages-contact-info">' +
               '<div class="messages-contact-name">Archer</div>' +
               '<div class="messages-contact-preview">SaberOS mascot & guide</div>' +
@@ -4527,7 +4527,7 @@ function takePhoto() {
 const chatParticipants = {
   atticus: { name: 'Atticus', emoji: '🐻', color: '#8B4513', personality: 'analytical, warm, decisive INTJ orchestrator' },
   axel: { name: 'Axel', emoji: '🐯', color: '#FF8C42', personality: 'creative, playful, chaotic good ESFP' },
-  archer: { name: 'Archer', emoji: '🏹', color: '#6B5CE7', personality: 'SaberOS mascot, witty guide, Clippy-but-cool' },
+  archer: { name: 'Archer', emoji: '🏹', color: '#FF6B35', personality: 'SaberOS mascot, witty guide, Clippy-but-cool' },
   saber: { name: 'Saber', emoji: '👤', color: '#52A5CE', personality: 'Design Team Lead at Microsoft, INTJ, street photography enthusiast' }
 };
 
@@ -4768,7 +4768,11 @@ function switchChat(contactId) {
     if (headerName) headerName.textContent = p.name;
     if (headerAvatar) {
       headerAvatar.style.background = p.color;
-      headerAvatar.textContent = p.emoji;
+      if (contactId === 'archer') {
+        headerAvatar.innerHTML = '<img src="images/archer-avatar.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">';
+      } else {
+        headerAvatar.textContent = p.emoji;
+      }
     }
     if (list) {
       list.setAttribute('data-chat', contactId);

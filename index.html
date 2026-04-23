@@ -2433,6 +2433,7 @@ body {
 .messages-send-btn {
   width: 36px;
   height: 36px;
+  min-width: 36px;
   border-radius: 50%;
   border: none;
   background: #007AFF;
@@ -2442,6 +2443,7 @@ body {
   justify-content: center;
   cursor: pointer;
   transition: transform 0.1s;
+  flex-shrink: 0;
 }
 
 .messages-send-btn:hover {
@@ -3211,10 +3213,12 @@ function renderSystemApp(appId) {
                 '<div class="message-text">I\'m Archer, your SaberOS guide! Need help finding anything? 🏹</div>' +
               '</div>' +
             '</div>' +
-            '<input type="text" class="messages-input" id="message-input" placeholder="iMessage" onkeypress="if(event.key===\'Enter\')sendMessage()">' +
-            '<button class="messages-send-btn" onclick="sendMessage()">' +
-              '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>' +
-            '</button>' +
+            '<div class="messages-input-area">' +
+              '<input type="text" class="messages-input" id="message-input" placeholder="Message" onkeypress="if(event.key===\'Enter\')sendMessage()">' +
+              '<button class="messages-send-btn" onclick="sendMessage()">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>' +
+              '</button>' +
+            '</div>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -6265,7 +6269,7 @@ function showKeyboardShortcuts() {
       this.container.addEventListener('click', (e) => {
         if (!this.hasDragged) {
           openApp('messages');
-          setTimeout(() => switchChat('axel'), 100);
+          setTimeout(() => switchChat('archer'), 100);
           this.wakeUp();
         }
       });

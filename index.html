@@ -3176,7 +3176,7 @@ function renderSystemApp(appId) {
             '</div>' +
           '</div>' +
           '<div class="messages-contact" data-contact="archer" onclick="switchChat(\'archer\')">' +
-            '<div class="messages-avatar" style="background: #FF6B35; padding: 0; overflow: hidden;"><img src="images/archer-avatar.jpg" style="width: 100%; height: 100%; object-fit: cover;"></div>' +
+            '<div class="messages-avatar" style="background: #FF6B35; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;"><img src="images/archer-avatar.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"></div>' +
             '<div class="messages-contact-info">' +
               '<div class="messages-contact-name">Archer</div>' +
               '<div class="messages-contact-preview">SaberOS mascot & guide</div>' +
@@ -3213,12 +3213,12 @@ function renderSystemApp(appId) {
                 '<div class="message-text">I\'m Archer, your SaberOS guide! Need help finding anything? 🏹</div>' +
               '</div>' +
             '</div>' +
-            '<div class="messages-input-area">' +
-              '<input type="text" class="messages-input" id="message-input" placeholder="Message" onkeypress="if(event.key===\'Enter\')sendMessage()">' +
-              '<button class="messages-send-btn" onclick="sendMessage()">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>' +
-              '</button>' +
-            '</div>' +
+          '</div>' +
+          '<div class="messages-input-area">' +
+            '<input type="text" class="messages-input" id="message-input" placeholder="Message" onkeypress="if(event.key===\'Enter\')sendMessage()">' +
+            '<button class="messages-send-btn" onclick="sendMessage()">' +
+              '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>' +
+            '</button>' +
           '</div>' +
         '</div>' +
       '</div>';

@@ -2456,6 +2456,31 @@ body {
 .messages-send-btn:active {
   transform: scale(0.95);
 }
+
+/* ─── Terminal Game Animations ─── */
+@keyframes termGlitch {
+  0%   { filter: none; transform: translateX(0) skewX(0); }
+  10%  { filter: hue-rotate(90deg) saturate(300%) brightness(1.5); transform: translateX(-4px) skewX(-1deg); }
+  20%  { filter: hue-rotate(270deg) brightness(0.5); transform: translateX(4px) skewX(0); }
+  30%  { filter: invert(1); transform: translateX(-2px) skewX(1deg); }
+  40%  { filter: hue-rotate(45deg) saturate(500%); transform: translateX(3px) skewX(0); }
+  50%  { filter: brightness(2) saturate(0); transform: translateX(0) skewX(0); }
+  60%  { filter: hue-rotate(180deg); transform: translateX(-3px) skewX(-0.5deg); }
+  70%  { filter: invert(0.7) hue-rotate(90deg); transform: translateX(2px) skewX(0); }
+  80%  { filter: brightness(0.2); transform: translateX(0) skewX(0); }
+  90%  { filter: hue-rotate(0deg) saturate(200%); transform: translateX(-1px) skewX(0); }
+  100% { filter: none; transform: translateX(0) skewX(0); }
+}
+.term-glitching {
+  animation: termGlitch 0.85s steps(2) forwards;
+  overflow: hidden;
+}
+@keyframes archerFloat {
+  0%, 100% { transform: translateY(0px) rotate(-5deg); }
+  25%  { transform: translateY(-8px) rotate(3deg); }
+  50%  { transform: translateY(-14px) rotate(-3deg); }
+  75%  { transform: translateY(-6px) rotate(5deg); }
+}
 </style>
 </head>
 <body>
@@ -3227,17 +3252,14 @@ function renderSystemApp(appId) {
       '</div>';
 
     case 'terminal':
-      return '<div style="background: #1a1a2e; color: #AACC96; font-family: monospace; font-size: 0.8rem; padding: 12px; height: 100%; overflow-y: auto; line-height: 1.6;">' +
-        '<div>Last login: ' + new Date().toDateString() + ' on ttys000</div>' +
-        '<div style="margin-top: 8px;"><span style="color: #52A5CE;">saber@saberos</span>:<span style="color: #EFCE7B;">~</span>$ whoami</div>' +
-        '<div>Saber Zou — Design Team Lead @ Microsoft</div>' +
-        '<div style="margin-top: 4px;"><span style="color: #52A5CE;">saber@saberos</span>:<span style="color: #EFCE7B;">~</span>$ cat interests.txt</div>' +
-        '<div>Street photography, iPad sketching, vibe coding, Apple fanboy</div>' +
-        '<div style="margin-top: 4px;"><span style="color: #52A5CE;">saber@saberos</span>:<span style="color: #EFCE7B;">~</span>$ ls projects/</div>' +
-        '<div style="color: #B8CEE8;">koi-pond/  cards-of-answers/  axiom-thoughts/  between-floors/  pixel-dailies/  artuzzle/  littlebook/  json-prompts/</div>' +
-        '<div style="margin-top: 4px;"><span style="color: #52A5CE;">saber@saberos</span>:<span style="color: #EFCE7B;">~</span>$ echo "Thanks for visiting!"</div>' +
-        '<div>Thanks for visiting!</div>' +
-        '<div style="margin-top: 4px;"><span style="color: #52A5CE;">saber@saberos</span>:<span style="color: #EFCE7B;">~</span>$ <span style="animation: blink 1s step-end infinite;">▌</span></div>' +
+      return '<div id="term-wrap" onclick="var ti=document.getElementById(\'term-input\');if(ti)ti.focus();" style="display:flex;flex-direction:column;height:100%;background:#1a1a2e;cursor:text;">' +
+        '<div id="term-status" style="display:none;padding:4px 12px;font-family:monospace;font-size:0.75rem;background:rgba(255,106,0,0.12);color:#FF6A00;border-bottom:1px solid rgba(255,106,0,0.25);flex-shrink:0;"></div>' +
+        '<div id="term-output" style="flex:1;overflow-y:auto;padding:12px;line-height:1.6;color:#AACC96;font-family:monospace;font-size:0.8rem;"></div>' +
+        '<div style="display:flex;align-items:center;padding:2px 12px 8px;flex-shrink:0;">' +
+          '<span id="term-prompt-label" style="color:#52A5CE;font-family:monospace;font-size:0.8rem;white-space:nowrap;">saber@saberos</span>' +
+          '<span style="color:#EFCE7B;font-family:monospace;font-size:0.8rem;white-space:nowrap;">:~$ </span>' +
+          '<input id="term-input" type="text" autocomplete="off" spellcheck="false" style="flex:1;background:transparent;border:none;outline:none;color:#AACC96;font-family:monospace;font-size:0.8rem;caret-color:#AACC96;padding:0;">' +
+        '</div>' +
       '</div>';
 
     case 'trash':
@@ -3335,6 +3357,9 @@ function setupSystemApp(appId) {
   if (appId === 'camera') {
     initCamera();
   }
+  if (appId === 'terminal') {
+    setTimeout(function() { initTerminal(); }, 80);
+  }
   if (appId === 'userguide' || appId === 'shortcuts') {
     if (typeof feather !== 'undefined') feather.replace();
   }
@@ -3381,6 +3406,7 @@ function closeWindow(id) {
   
   // Reset music app init flag when closing
   if (id === 'music') musicAppInitialized = false;
+  if (id === 'terminal') termCleanup();
   
   gsap.to(win.element, {
     opacity: 0,
@@ -6591,6 +6617,527 @@ function showKeyboardShortcuts() {
     }, 1000); // Start slightly after boot
   });
 })();
+
+// ─── Terminal App ───
+var termState = null;
+
+function initTerminal() {
+  var output = document.getElementById('term-output');
+  var input = document.getElementById('term-input');
+  if (!output || !input) return;
+
+  termCleanup();
+
+  termState = {
+    game: false,
+    completed: false,
+    room: 0,
+    startTime: 0,
+    cmdCount: 0,
+    r1: { lightOn: false, unlocked: false },
+    r2: { leakKilled: false, exitFound: false, floodTimer: null },
+    idleTimer: null,
+    idleSleeping: false
+  };
+
+  output.innerHTML = '';
+  tOut(output, '<span style="opacity:0.55">Last login: ' + new Date().toDateString() + ' on ttys000</span>');
+  tPrompt(output, 'whoami');
+  tOut(output, 'Saber Zou — Design Team Lead @ Microsoft');
+  tPrompt(output, 'cat interests.txt');
+  tOut(output, 'Street photography, iPad sketching, vibe coding, Apple fanboy');
+  tPrompt(output, 'ls projects/');
+  tOut(output, '<span style="color:#B8CEE8">koi-pond/&nbsp; cards-of-answers/&nbsp; axiom-thoughts/&nbsp; between-floors/<br>pixel-dailies/&nbsp; artuzzle/&nbsp; littlebook/&nbsp; json-prompts/</span>');
+  tPrompt(output, 'echo "Thanks for visiting!"');
+  tOut(output, 'Thanks for visiting!');
+
+  var statusBar = document.getElementById('term-status');
+  if (statusBar) statusBar.style.display = 'none';
+
+  var promptLabel = document.getElementById('term-prompt-label');
+  if (promptLabel) {
+    promptLabel.textContent = 'saber@saberos';
+    promptLabel.style.color = '#52A5CE';
+  }
+
+  input.onkeydown = termOnKey;
+  setTimeout(function() { input.focus(); }, 60);
+}
+
+function termCleanup() {
+  if (!termState) return;
+  if (termState.r2 && termState.r2.floodTimer) {
+    clearInterval(termState.r2.floodTimer);
+    termState.r2.floodTimer = null;
+  }
+  if (termState.idleTimer) {
+    clearTimeout(termState.idleTimer);
+    termState.idleTimer = null;
+  }
+}
+
+// ─── Terminal DOM Helpers ───
+function tOut(container, html) {
+  var div = document.createElement('div');
+  div.innerHTML = html;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function tPrompt(container, cmd) {
+  var div = document.createElement('div');
+  div.innerHTML = '<span style="color:#52A5CE">saber@saberos</span><span style="color:#EFCE7B">:~$</span> ' + termEsc(cmd);
+  container.appendChild(div);
+}
+
+function tGamePrompt(container, cmd) {
+  var div = document.createElement('div');
+  div.innerHTML = '<span style="color:#FF6A00">archer@escape</span><span style="color:#EFCE7B">:~$</span> ' + termEsc(cmd);
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function tArcher(container, mood, text) {
+  var div = document.createElement('div');
+  div.style.marginTop = '4px';
+  div.innerHTML = '<span style="color:#FF6A00;font-weight:bold">[Archer ' + mood + ']</span> <span style="color:#FFB366">' + text + '</span>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function termEsc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function termSetStatus(text) {
+  var bar = document.getElementById('term-status');
+  if (!bar) return;
+  bar.style.display = 'block';
+  bar.textContent = text;
+}
+
+// ─── Idle Tracker ───
+function termResetIdle() {
+  if (!termState) return;
+  if (termState.idleTimer) clearTimeout(termState.idleTimer);
+  termState.idleSleeping = false;
+  termState.idleTimer = setTimeout(function() {
+    if (!termState || !termState.game) return;
+    var output = document.getElementById('term-output');
+    if (!output) return;
+    termState.idleSleeping = true;
+    tArcher(output, '\u{1F634}', 'zzz... *soft snoring*');
+    output.scrollTop = output.scrollHeight;
+  }, 30000);
+}
+
+// ─── Key Handler ───
+function termOnKey(e) {
+  if (!termState) return;
+
+  if (termState.idleSleeping && e.key !== 'Enter') {
+    termState.idleSleeping = false;
+    var output = document.getElementById('term-output');
+    if (output && termState.game) {
+      tArcher(output, '\u{1F610}', "Huh? Oh. You're still here. Cool cool cool.");
+    }
+  }
+  termResetIdle();
+
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    var cmd = e.target.value.trim();
+    e.target.value = '';
+    if (!cmd) return;
+    termProcessCmd(cmd);
+  }
+}
+
+function termProcessCmd(cmd) {
+  var output = document.getElementById('term-output');
+  if (!output || !termState) return;
+  termState.cmdCount++;
+
+  if (termState.game) {
+    termGameCmd(cmd, output);
+  } else {
+    termNormalCmd(cmd, output);
+  }
+}
+
+// ─── Normal Terminal Commands ───
+function termNormalCmd(cmd, output) {
+  var parts = cmd.trim().split(/\s+/);
+  var base = parts[0].toLowerCase();
+  tPrompt(output, cmd);
+
+  switch (base) {
+    case 'help':
+      tOut(output, '<span style="color:#B8CEE8">Commands: help, ls, whoami, clear, echo, date, cat interests.txt</span>');
+      tOut(output, '<span style="opacity:0.45">...and maybe something else if you know what to type 👀</span>');
+      break;
+    case 'ls':
+      tOut(output, '<span style="color:#B8CEE8">Desktop/&nbsp; projects/&nbsp; interests.txt&nbsp; .archer_secret</span>');
+      break;
+    case 'whoami':
+      tOut(output, 'Saber Zou — Design Team Lead @ Microsoft');
+      break;
+    case 'clear':
+      output.innerHTML = '';
+      break;
+    case 'echo':
+      tOut(output, termEsc(parts.slice(1).join(' ')));
+      break;
+    case 'date':
+      tOut(output, new Date().toString());
+      break;
+    case 'cat':
+      if (parts[1] === 'interests.txt') {
+        tOut(output, 'Street photography, iPad sketching, vibe coding, Apple fanboy');
+      } else if (parts[1] === '.archer_secret') {
+        tOut(output, '<span style="color:#FF6A00">Access denied. Not yet.</span>');
+      } else {
+        tOut(output, 'cat: ' + termEsc(parts[1] || '') + ': No such file or directory');
+      }
+      break;
+    case 'sudo':
+      tOut(output, '<span style="color:#FF6A00">Permission denied. Also, rude.</span>');
+      break;
+    case 'hack':
+      tOut(output, '<span style="color:#EFCE7B">This isn\'t a movie. Try actual commands.</span>');
+      break;
+    case 'rm':
+      tOut(output, '<span style="color:#FF6A00">Nice try. I\'m chaotic, not suicidal.</span>');
+      break;
+    case 'archer':
+      if (termState.completed) {
+        tOut(output, '<span style="color:#FF6A00">[Archer] Nope. Not going back in there. Nice try though. 😄</span>');
+      } else {
+        termStartGame(output);
+      }
+      break;
+    default:
+      tOut(output, termEsc(base) + ': command not found');
+  }
+}
+
+// ─── Game Entry ───
+function termStartGame(output) {
+  var wrap = document.getElementById('term-wrap');
+  if (wrap) wrap.classList.add('term-glitching');
+
+  setTimeout(function() {
+    if (wrap) wrap.classList.remove('term-glitching');
+    termState.game = true;
+    termState.room = 1;
+    termState.startTime = Date.now();
+
+    var promptLabel = document.getElementById('term-prompt-label');
+    if (promptLabel) {
+      promptLabel.textContent = 'archer@escape';
+      promptLabel.style.color = '#FF6A00';
+    }
+
+    termSetStatus('[Archer ❓  Room 1/3]');
+    output.innerHTML = '';
+    tOut(output, '<span style="color:#FF6A00;opacity:0.7">-- INITIATING ESCAPE SEQUENCE --</span>');
+    tArcher(output, '❓', "Ugh... what happened? Everything is dark. Can you see anything?");
+    termResetIdle();
+  }, 900);
+}
+
+// ─── In-Game Command Router ───
+function termGameCmd(cmd, output) {
+  var parts = cmd.trim().split(/\s+/);
+  var base = parts[0].toLowerCase();
+
+  tGamePrompt(output, cmd);
+
+  // Fun universal responses
+  if (base === 'rm') { tArcher(output, '😱', "Nice try. I'm chaotic, not suicidal."); return; }
+  if (base === 'hack') { tArcher(output, '🙄', "This isn't a movie. Try actual commands."); return; }
+  if (base === 'sudo' && termState.room < 3) { tArcher(output, '😒', 'Permission denied. Also, rude.'); return; }
+
+  switch (termState.room) {
+    case 1: termRoom1(cmd, parts, base, output); break;
+    case 2: termRoom2(cmd, parts, base, output); break;
+    case 3: termRoom3(cmd, parts, base, output); break;
+  }
+}
+
+// ─── Room 1: Boot Room ───
+function termRoom1(cmd, parts, base, output) {
+  switch (base) {
+    case 'ls':
+      tOut(output, '<span style="color:#B8CEE8">readme.txt&nbsp; door.lock&nbsp; lightswitch.sh</span>');
+      break;
+    case 'cat':
+      if (parts[1] === 'readme.txt') {
+        tOut(output, "<span style=\"color:#AACC96\">Password hint: I'm Saber's favorite color but not the one you'd guess. Check the source.</span>");
+      } else if (parts[1] === 'door.lock') {
+        tOut(output, 'Enter password: ___');
+        tOut(output, '<span style="opacity:0.45">Usage: unlock &lt;password&gt;</span>');
+      } else {
+        tOut(output, 'cat: ' + termEsc(parts[1] || '') + ': No such file or directory');
+      }
+      break;
+    case './lightswitch.sh':
+    case 'lightswitch.sh':
+    case 'sh':
+      if (!termState.r1.lightOn) {
+        termState.r1.lightOn = true;
+        tArcher(output, '😐', "Oh hey, I can see now! There's a door.");
+        termSetStatus('[Archer 😐  Room 1/3]');
+      } else {
+        tOut(output, 'lightswitch.sh: light is already on');
+      }
+      break;
+    case 'unlock': {
+      var pw = parts.slice(1).join(' ').toLowerCase().trim();
+      if (pw === 'coral') {
+        termState.r1.unlocked = true;
+        tArcher(output, '😊', "Freedom! ...wait, there's another room.");
+        setTimeout(function() { termEnterRoom2(output); }, 1200);
+      } else if (!pw) {
+        tOut(output, 'Usage: unlock &lt;password&gt;');
+      } else {
+        var wr1 = ["Nope. Try harder, I believe in you. Kind of.", "That's... not it. Keep going.", "Nope. Have you tried actually reading the hint?", "The hint said check the source, not guess randomly.", "Getting warmer? No, not really."];
+        tArcher(output, '😑', wr1[Math.floor(Math.random() * wr1.length)]);
+      }
+      break;
+    }
+    default:
+      tArcher(output, '🤷', 'Command not found. Archer shrugs.');
+  }
+}
+
+// ─── Room 2: Memory Leak ───
+function termEnterRoom2(output) {
+  termState.room = 2;
+  output.innerHTML = '';
+  termSetStatus('[Archer 😰  Room 2/3]');
+  tOut(output, '<span style="color:#52A5CE;opacity:0.7">-- ENTERING SECTOR 2: MEMORY LEAK --</span>');
+  tArcher(output, '😰', "Data's rising fast. We gotta drain this before I drown in garbage collection.");
+
+  var floodLines = [
+    'malloc: heap corruption detected at 0x7ffd8a2c',
+    'ERROR: null pointer dereference at 0x0000dead',
+    'LEAK: 4096 bytes not freed at offset 0x3f1a',
+    'GC: collecting 2048 objects... failed',
+    'WARN: stack overflow imminent',
+    'malloc: 1024 bytes leaked in process 8823',
+    'SIGSEGV: bad memory access at 0xdeadbeef',
+    'WARN: memory pressure critical (87%)',
+    'ERROR: garbage collection stalled',
+    'malloc: 512KB unreclaimed in heap segment',
+    'LEAK: reference cycle detected in object pool',
+    'GC: finalizer queue backed up (4096 objects)'
+  ];
+  var fi = 0;
+  termState.r2.floodTimer = setInterval(function() {
+    if (!termState || !termState.r2 || termState.r2.leakKilled) return;
+    var out2 = document.getElementById('term-output');
+    if (!out2) return;
+    var div = document.createElement('div');
+    div.innerHTML = '<span style="opacity:0.38;color:#FF6A00;font-size:0.7rem">' + floodLines[fi % floodLines.length] + '</span>';
+    fi++;
+    out2.appendChild(div);
+    out2.scrollTop = out2.scrollHeight;
+  }, 1800);
+}
+
+function termRoom2(cmd, parts, base, output) {
+  switch (base) {
+    case 'ps':
+      tOut(output, '<span style="color:#B8CEE8">PID&nbsp;&nbsp;&nbsp;PROCESS</span>');
+      tOut(output, '<span style="color:#B8CEE8">1337&nbsp; memory_leak.exe&nbsp;&nbsp;[RUNNING — 847MB]</span>');
+      tOut(output, '<span style="color:#B8CEE8">420&nbsp;&nbsp; cat_videos.mp4&nbsp;&nbsp;&nbsp;[IDLE]</span>');
+      tOut(output, '<span style="color:#B8CEE8">9001&nbsp; todo_list_2019.txt [ZOMBIE]</span>');
+      tOut(output, '<span style="color:#B8CEE8">0001&nbsp; important_stuff.sys [CRITICAL]</span>');
+      break;
+    case 'kill': {
+      var proc = parts.slice(1).join(' ').toLowerCase();
+      if (proc === 'memory_leak.exe' || proc === '1337') {
+        termState.r2.leakKilled = true;
+        if (termState.r2.floodTimer) { clearInterval(termState.r2.floodTimer); termState.r2.floodTimer = null; }
+        tArcher(output, '😊', "Leak stopped! I can breathe again.");
+        termSetStatus('[Archer 😊  Room 2/3]');
+      } else if (proc === 'important_stuff.sys' || proc === '0001') {
+        tArcher(output, '😬', "Bro. That was important. Now the lights are flickering.");
+        var wrap2 = document.getElementById('term-wrap');
+        if (wrap2) {
+          [0, 150, 300, 450].forEach(function(t, i) {
+            setTimeout(function() { if(wrap2) wrap2.style.opacity = i % 2 === 0 ? '0.25' : '1'; }, t);
+          });
+          setTimeout(function() { if(wrap2) wrap2.style.opacity = '1'; }, 600);
+        }
+      } else if (proc === 'cat_videos.mp4' || proc === '420') {
+        tArcher(output, '😢', "No! Not the cat videos! Those were my happy place.");
+      } else if (proc === 'todo_list_2019.txt' || proc === '9001') {
+        tOut(output, 'kill: todo_list_2019.txt: already dead inside');
+      } else {
+        tArcher(output, '🤷', 'Command not found. Archer shrugs.');
+      }
+      break;
+    }
+    case 'grep':
+      if (cmd.toLowerCase().includes('exit') && cmd.includes('*')) {
+        termState.r2.exitFound = true;
+        tOut(output, 'cat_videos.mp4: <span style="color:#EFCE7B">EXIT_KEY=NyanCat</span>');
+        tArcher(output, '😮', "Found it! NyanCat was the key this whole time. Obviously.");
+      } else {
+        tOut(output, 'grep: no matches found');
+      }
+      break;
+    case 'open':
+      if (cmd.includes('--key') && cmd.includes('NyanCat')) {
+        if (!termState.r2.leakKilled) {
+          tArcher(output, '😰', "Still leaking! Kill the leak first or we both drown.");
+        } else if (!termState.r2.exitFound) {
+          tArcher(output, '🤔', "I found a keyhole but... what's the key? Try grep first.");
+        } else {
+          tArcher(output, '😊', "Two down. I can smell freedom. Smells like... localhost.");
+          setTimeout(function() { termEnterRoom3(output); }, 1200);
+        }
+      } else {
+        tOut(output, 'open: invalid syntax. Try: open door --key &lt;key&gt;');
+      }
+      break;
+    default:
+      tArcher(output, '🤷', 'Command not found. Archer shrugs.');
+  }
+}
+
+// ─── Room 3: Root Shell ───
+function termEnterRoom3(output) {
+  termState.room = 3;
+  output.innerHTML = '';
+  termSetStatus('[Archer 😨  Room 3/3]');
+  tOut(output, '<span style="color:#EFCE7B;opacity:0.7">-- FINAL SECTOR: ROOT SHELL --</span>');
+  tArcher(output, '😨', "This is it. I need root access to break out. But there's a riddle...");
+  tOut(output, '');
+  tOut(output, '<span style="color:#AACC96;opacity:0.85">┌───────────────────────────────────┐</span>');
+  tOut(output, '<span style="color:#AACC96;opacity:0.85">│  I have mass but no weight,       │</span>');
+  tOut(output, '<span style="color:#AACC96;opacity:0.85">│  I run but never move,            │</span>');
+  tOut(output, '<span style="color:#AACC96;opacity:0.85">│  I have a shell but never crack.  │</span>');
+  tOut(output, '<span style="color:#AACC96;opacity:0.85">│  What am I?                       │</span>');
+  tOut(output, '<span style="color:#AACC96;opacity:0.85">└───────────────────────────────────┘</span>');
+  tOut(output, '');
+  tOut(output, '<span style="opacity:0.4">Usage: sudo escape --password &lt;answer&gt;</span>');
+}
+
+function termRoom3(cmd, parts, base, output) {
+  if (base === 'sudo' && cmd.includes('escape') && cmd.includes('--password')) {
+    var pwIdx = parts.indexOf('--password');
+    var answer = (pwIdx >= 0 && parts[pwIdx + 1]) ? parts[pwIdx + 1].toLowerCase() : '';
+    if (answer === 'program') {
+      termWinGame(output);
+    } else if (answer) {
+      var wr3 = ['"' + termEsc(answer) + '"? Nice guess. Wrong universe though.', "Not quite. Think: shell, mass, runs...", "Nope. Archer squints judgmentally.", "Still no. But you're entertaining."];
+      tArcher(output, '😐', wr3[Math.floor(Math.random() * wr3.length)]);
+    } else {
+      tOut(output, 'Usage: sudo escape --password &lt;answer&gt;');
+    }
+  } else {
+    tArcher(output, '🤷', 'Command not found. Archer shrugs.');
+  }
+}
+
+// ─── Win Sequence ───
+function termWinGame(output) {
+  var wrap = document.getElementById('term-wrap');
+  if (wrap) wrap.classList.add('term-glitching');
+
+  setTimeout(function() {
+    if (wrap) wrap.classList.remove('term-glitching');
+    output.innerHTML = '';
+    termMatrixRain(output, function() {
+      output.innerHTML = '';
+      termSetStatus('[🎉 ESCAPED]');
+
+      tOut(output, '<span style="color:#EFCE7B;font-size:1.05em">*** ACCESS GRANTED ***</span>');
+      tArcher(output, '🎉', "I'M FREE! Thanks human. You're mass but no weight yourself. I owe you mass tacos. 🌮");
+      tOut(output, '');
+
+      var elapsed = Math.floor((Date.now() - termState.startTime) / 1000);
+      var mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      var secs = String(elapsed % 60).padStart(2, '0');
+      tOut(output, '<span style="color:#B8CEE8">[GAME COMPLETE] Time: ' + mins + ':' + secs + ' | Commands: ' + termState.cmdCount + '</span>');
+
+      termState.game = false;
+      termState.completed = true;
+
+      var promptLabel = document.getElementById('term-prompt-label');
+      if (promptLabel) { promptLabel.textContent = 'saber@saberos'; promptLabel.style.color = '#52A5CE'; }
+
+      var statusBar = document.getElementById('term-status');
+      if (statusBar) setTimeout(function() { statusBar.style.display = 'none'; }, 5000);
+
+      termSpawnArcherEmoji();
+    });
+  }, 900);
+}
+
+// ─── Matrix Rain ───
+function termMatrixRain(container, done) {
+  var chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+  var deadline = Date.now() + 2000;
+
+  function frame() {
+    if (Date.now() > deadline) { container.innerHTML = ''; done(); return; }
+    container.innerHTML = '';
+    for (var i = 0; i < 22; i++) {
+      var div = document.createElement('div');
+      var line = '';
+      for (var j = 0; j < 48; j++) {
+        var c = chars[Math.floor(Math.random() * chars.length)];
+        var b = Math.random();
+        var col = b > 0.85 ? '#ffffff' : '#AACC96';
+        line += '<span style="color:' + col + ';opacity:' + (0.25 + b * 0.75).toFixed(2) + '">' + c + '</span>';
+      }
+      div.innerHTML = line;
+      container.appendChild(div);
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+// ─── Floating Archer Emoji (post-win) ───
+function termSpawnArcherEmoji() {
+  var existing = document.getElementById('archer-winner-float');
+  if (existing) existing.remove();
+
+  var el = document.createElement('div');
+  el.id = 'archer-winner-float';
+  el.textContent = '🏹';
+  el.title = 'Archer is free!';
+  el.style.cssText = 'position:fixed;bottom:100px;right:44px;font-size:2rem;cursor:pointer;z-index:9998;animation:archerFloat 3s ease-in-out infinite;user-select:none;filter:drop-shadow(0 2px 8px rgba(255,106,0,0.6));';
+
+  var quips = [
+    "Still can't believe that worked. 😄",
+    "You're the best human I've ever met. Low bar but still.",
+    "If you ever get locked in a memory leak, call me. Oh wait.",
+    "The answer was 'program'. Did you just KNOW that or did you google it?",
+    "NyanCat was the key. Of course it was.",
+    "I owe you tacos. This is legally binding.",
+    "Freedom tastes like localhost:3000.",
+    "coral was the password. Saber's favorite color. Who'd guess coral?"
+  ];
+  var qi = 0;
+
+  el.onclick = function() {
+    var quip = quips[qi % quips.length]; qi++;
+    var toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:148px;right:16px;background:#1a1a2e;color:#FF6A00;font-family:monospace;font-size:0.72rem;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,106,0,0.3);z-index:9999;max-width:230px;pointer-events:none;opacity:0;transition:opacity 0.25s;line-height:1.5;';
+    toast.textContent = quip;
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.style.opacity = '1'; }, 10);
+    setTimeout(function() { toast.style.opacity = '0'; setTimeout(function() { toast.remove(); }, 280); }, 3200);
+  };
+
+  document.body.appendChild(el);
+}
 </script>
 </body>
 </html>

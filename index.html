@@ -7219,6 +7219,119 @@ function mazeHit() {
   }
 }
 
+// ─── Archer Sprite ───
+function mazeDrawArcher(ctx, x, y, t, frame, hurt) {
+  var s = t; // tile size
+  var cx = x + s / 2, cy = y + s / 2;
+  var bodyW = s * 0.65, bodyH = s * 0.72;
+  var r = bodyW * 0.35; // corner radius for capsule
+
+  // Hover bob
+  var bob = Math.sin(frame * 0.08) * s * 0.04;
+  cy += bob;
+
+  // Hurt tint
+  var mainColor = hurt ? '#FF9944' : '#FF6A00';
+  var darkColor = hurt ? '#CC7733' : '#D94B0F';
+
+  // === Body (rounded rect / capsule) ===
+  ctx.fillStyle = mainColor;
+  mazeRoundRect(ctx, cx - bodyW / 2, cy - bodyH / 2, bodyW, bodyH, r);
+  ctx.fill();
+
+  // Bottom shadow crescent
+  ctx.fillStyle = darkColor;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + bodyH * 0.28, bodyW * 0.42, bodyH * 0.18, 0, 0, Math.PI);
+  ctx.fill();
+
+  // === Visor (dark horizontal capsule on upper body) ===
+  var visorW = bodyW * 0.78, visorH = bodyH * 0.3;
+  var visorY = cy - bodyH * 0.15;
+  ctx.fillStyle = '#121212';
+  mazeRoundRect(ctx, cx - visorW / 2, visorY - visorH / 2, visorW, visorH, visorH * 0.45);
+  ctx.fill();
+
+  // Visor highlight (top-left glint)
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.beginPath();
+  ctx.ellipse(cx - visorW * 0.25, visorY - visorH * 0.12, visorW * 0.12, visorH * 0.15, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // === Eyes (glowing yellow pills) ===
+  var eyeSpacing = visorW * 0.22;
+  var eyeW = Math.max(1.5, visorW * 0.12);
+  var eyeH = Math.max(2, visorH * 0.5);
+  // Blink every ~180 frames
+  var blinking = frame % 180 < 4;
+  var eyeScale = blinking ? 0.2 : 1;
+
+  ctx.fillStyle = '#FFD966';
+  // Glow
+  ctx.shadowColor = '#FFD966';
+  ctx.shadowBlur = s * 0.08;
+  // Left eye
+  mazeRoundRect(ctx, cx - eyeSpacing - eyeW / 2, visorY - eyeH * eyeScale / 2, eyeW, eyeH * eyeScale, eyeW * 0.4);
+  ctx.fill();
+  // Right eye
+  mazeRoundRect(ctx, cx + eyeSpacing - eyeW / 2, visorY - eyeH * eyeScale / 2, eyeW, eyeH * eyeScale, eyeW * 0.4);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // === Chest symbol </> ===
+  if (s >= 18) {
+    ctx.fillStyle = '#FFD966';
+    var symSize = Math.max(5, s * 0.2);
+    ctx.font = 'bold ' + symSize + 'px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('</>', cx, cy + bodyH * 0.18);
+  }
+
+  // === Floating claws ===
+  var clawFloat = Math.sin(frame * 0.06 + 1) * s * 0.03;
+  var clawSize = s * 0.12;
+  var clawGap = bodyW / 2 + s * 0.1;
+
+  // Left claw
+  mazeDrawClaw(ctx, cx - clawGap, cy + clawFloat + bodyH * 0.05, clawSize, mainColor, darkColor, false);
+  // Right claw
+  mazeDrawClaw(ctx, cx + clawGap, cy + clawFloat + bodyH * 0.05, clawSize, mainColor, darkColor, true);
+}
+
+function mazeDrawClaw(ctx, x, y, size, color, dark, mirror) {
+  // Wrist joint (circle)
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, size, 0, Math.PI * 2);
+  ctx.fill();
+  // Shadow on bottom
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.arc(x, y + size * 0.3, size * 0.7, 0, Math.PI);
+  ctx.fill();
+  // Two pincer fingers
+  var dir = mirror ? 1 : -1;
+  ctx.fillStyle = color;
+  ctx.fillRect(x + dir * size * 0.3, y - size * 1.2, size * 0.5, size * 0.9);
+  ctx.fillRect(x + dir * size * 0.3, y + size * 0.3, size * 0.5, size * 0.9);
+}
+
+function mazeRoundRect(ctx, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
 // ─── Drawing ───
 function mazeDraw(m) {
   var canvas = document.getElementById('maze-canvas');
@@ -7300,20 +7413,9 @@ function mazeDraw(m) {
     ctx.fillRect(bx + t - bpad, by + t * 0.6 + legOff, 2, 2);
   }
 
-  // Draw player (Archer — orange pixel character)
+  // Draw player (Archer — capsule body, visor, glowing eyes, floating claws)
   if (!m.dead && (termState.invincible <= 0 || m.animFrame % 6 < 3)) {
-    var px = m.px * t, py = m.py * t;
-    var pad = Math.floor(t * 0.15);
-    // Body
-    ctx.fillStyle = '#FF6A00';
-    ctx.fillRect(px + pad, py + pad, t - pad * 2, t - pad * 2);
-    // Face: </> in tiny pixels
-    ctx.fillStyle = '#1a1a2e';
-    var fs = Math.max(6, t * 0.4);
-    ctx.font = 'bold ' + fs + 'px monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('</>', px + t / 2, py + t / 2);
+    mazeDrawArcher(ctx, m.px * t, m.py * t, t, m.animFrame, termState.invincible > 0);
   }
 
   // Flash effect (star collect)
@@ -7403,12 +7505,8 @@ function mazeWin() {
 
       // Archer bouncing
       var bounce = Math.abs(Math.sin(frame * 0.08)) * 8;
-      ctx.fillStyle = '#FF6A00';
-      var as = Math.max(20, canvas.width * 0.06);
-      ctx.fillRect(canvas.width / 2 - as / 2, canvas.height * 0.42 - bounce - as / 2, as, as);
-      ctx.fillStyle = '#1a1a2e';
-      ctx.font = 'bold ' + (as * 0.5) + 'px monospace';
-      ctx.fillText('</>', canvas.width / 2, canvas.height * 0.42 - bounce);
+      var as = Math.max(28, canvas.width * 0.1);
+      mazeDrawArcher(ctx, canvas.width / 2 - as / 2, canvas.height * 0.42 - bounce - as / 2, as, frame, false);
 
       // Stats
       ctx.fillStyle = '#AACC96';
@@ -7453,11 +7551,14 @@ function mazeGameOver() {
       ctx.fillText('GAME OVER', canvas.width / 2, canvas.height * 0.35);
 
       ctx.fillStyle = '#FF6A00';
-      var as = Math.max(16, canvas.width * 0.05);
-      ctx.fillRect(canvas.width / 2 - as / 2, canvas.height * 0.47 - as / 2, as, as);
-      ctx.fillStyle = '#1a1a2e';
-      ctx.font = 'bold ' + (as * 0.5) + 'px monospace';
-      ctx.fillText('x_x', canvas.width / 2, canvas.height * 0.47);
+      var as = Math.max(24, canvas.width * 0.08);
+      mazeDrawArcher(ctx, canvas.width / 2 - as / 2, canvas.height * 0.47 - as / 2, as, 0, true);
+      // X eyes overlay
+      ctx.fillStyle = '#FF4444';
+      ctx.font = 'bold ' + (as * 0.3) + 'px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('X  X', canvas.width / 2, canvas.height * 0.47 - as * 0.1);
 
       ctx.fillStyle = '#FFB366';
       ctx.font = Math.max(9, canvas.width * 0.03) + 'px monospace';

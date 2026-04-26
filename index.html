@@ -6631,11 +6631,16 @@ function initTerminal() {
   termState = {
     game: false,
     completed: false,
-    room: 0,
     startTime: 0,
     cmdCount: 0,
-    r1: { lightOn: false, unlocked: false },
-    r2: { leakKilled: false, exitFound: false, floodTimer: null },
+    lives: 3,
+    stars: 0,
+    totalStars: 0,
+    invincible: 0,
+    mazeFloor: 1,
+    maze: null,
+    mazeRaf: null,
+    mazeKeyHandler: null,
     idleTimer: null,
     idleSleeping: false
   };
@@ -6666,14 +6671,14 @@ function initTerminal() {
 
 function termCleanup() {
   if (!termState) return;
-  if (termState.r2 && termState.r2.floodTimer) {
-    clearInterval(termState.r2.floodTimer);
-    termState.r2.floodTimer = null;
-  }
+  if (termState.mazeRaf) cancelAnimationFrame(termState.mazeRaf);
+  if (termState.mazeKeyHandler) document.removeEventListener('keydown', termState.mazeKeyHandler);
   if (termState.idleTimer) {
     clearTimeout(termState.idleTimer);
     termState.idleTimer = null;
   }
+  var gameDiv = document.getElementById('maze-game');
+  if (gameDiv) gameDiv.remove();
 }
 
 // ─── Terminal DOM Helpers ───
@@ -6759,7 +6764,8 @@ function termProcessCmd(cmd) {
   termState.cmdCount++;
 
   if (termState.game) {
-    termGameCmd(cmd, output);
+    // Maze game is canvas-based, no text commands during gameplay
+    return;
   } else {
     termNormalCmd(cmd, output);
   }
@@ -6811,7 +6817,12 @@ function termNormalCmd(cmd, output) {
       break;
     case 'archer':
       if (termState.completed) {
-        tOut(output, '<span style="color:#FF6A00">[Archer] Nope. Not going back in there. Nice try though. 😄</span>');
+        tOut(output, '<span style="color:#FF6A00">[Archer] You already freed me! But sure, let\'s go again. 😄</span>');
+        termState.completed = false;
+        termState.lives = 3;
+        termState.stars = 0;
+        termState.totalStars = 0;
+        termStartGame(output);
       } else {
         termStartGame(output);
       }
@@ -6821,7 +6832,8 @@ function termNormalCmd(cmd, output) {
   }
 }
 
-// ─── Game Entry ───
+// ─── TERMINAL ESCAPE: MAZE GAME ───
+
 function termStartGame(output) {
   var wrap = document.getElementById('term-wrap');
   if (wrap) wrap.classList.add('term-glitching');
@@ -6829,280 +6841,678 @@ function termStartGame(output) {
   setTimeout(function() {
     if (wrap) wrap.classList.remove('term-glitching');
     termState.game = true;
-    termState.room = 1;
     termState.startTime = Date.now();
+    termState.cmdCount = 0;
+    termState.mazeFloor = 1;
+    termState.lives = 3;
+    termState.stars = 0;
+    termState.totalStars = 0;
+    termState.invincible = 0;
 
-    var promptLabel = document.getElementById('term-prompt-label');
-    if (promptLabel) {
-      promptLabel.textContent = 'archer@escape';
-      promptLabel.style.color = '#FF6A00';
+    // Hide terminal text, show canvas
+    var termOutput = document.getElementById('term-output');
+    var termInput = document.getElementById('term-input');
+    var promptRow = termInput ? termInput.parentElement : null;
+    if (termOutput) termOutput.style.display = 'none';
+    if (promptRow) promptRow.style.display = 'none';
+
+    // Create game container
+    var gameDiv = document.createElement('div');
+    gameDiv.id = 'maze-game';
+    gameDiv.style.cssText = 'display:flex;flex-direction:column;height:100%;background:#1a1a2e;';
+    gameDiv.innerHTML =
+      '<div id="maze-hud" style="padding:6px 12px;font-family:monospace;font-size:0.75rem;color:#AACC96;display:flex;justify-content:space-between;flex-shrink:0;border-bottom:1px solid rgba(170,204,150,0.15);">' +
+        '<span id="maze-hud-left">🏹 Archer &nbsp; ♥♥♥ &nbsp; ⭐ 0</span>' +
+        '<span id="maze-hud-right">Floor 1/3 &nbsp; ⏱ 00:00</span>' +
+      '</div>' +
+      '<div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">' +
+        '<canvas id="maze-canvas" style="image-rendering:pixelated;"></canvas>' +
+        '<div id="maze-controls" style="display:none;position:absolute;bottom:12px;right:12px;opacity:0.5;">' +
+          '<div style="display:grid;grid-template-columns:repeat(3,40px);grid-template-rows:repeat(2,40px);gap:4px;justify-items:center;">' +
+            '<div></div>' +
+            '<button class="maze-btn" data-dir="up" style="grid-column:2;">▲</button>' +
+            '<div></div>' +
+            '<button class="maze-btn" data-dir="left">◀</button>' +
+            '<button class="maze-btn" data-dir="down">▼</button>' +
+            '<button class="maze-btn" data-dir="right">▶</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div id="maze-hint" style="text-align:center;font-family:monospace;font-size:0.7rem;color:rgba(170,204,150,0.5);padding:6px;flex-shrink:0;">← → ↑ ↓ to move &nbsp;|&nbsp; ESC to quit</div>';
+    wrap.appendChild(gameDiv);
+
+    // Touch controls
+    if ('ontouchstart' in window) {
+      var controls = document.getElementById('maze-controls');
+      if (controls) controls.style.display = 'block';
+      controls.querySelectorAll('.maze-btn').forEach(function(btn) {
+        btn.style.cssText = 'width:40px;height:40px;border:1px solid rgba(170,204,150,0.3);background:rgba(26,26,46,0.8);color:#AACC96;font-size:1rem;border-radius:6px;cursor:pointer;';
+        btn.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          var dir = btn.getAttribute('data-dir');
+          mazeMove(dir);
+        });
+      });
     }
 
-    termSetStatus('[Archer ❓  Room 1/3]');
-    output.innerHTML = '';
-    tOut(output, '<span style="color:#FF6A00;opacity:0.7">-- INITIATING ESCAPE SEQUENCE --</span>');
-    tArcher(output, '❓', "Ugh... what happened? Everything is dark. Can you see anything?");
-    termResetIdle();
-  }, 900);
+    // Fade hint
+    setTimeout(function() {
+      var hint = document.getElementById('maze-hint');
+      if (hint) hint.style.transition = 'opacity 1s';
+      if (hint) hint.style.opacity = '0';
+    }, 3000);
+
+    // Key handler
+    termState.mazeKeyHandler = function(e) {
+      if (!termState.game) return;
+      var dir = null;
+      if (e.key === 'ArrowUp' || e.key === 'w') dir = 'up';
+      else if (e.key === 'ArrowDown' || e.key === 's') dir = 'down';
+      else if (e.key === 'ArrowLeft' || e.key === 'a') dir = 'left';
+      else if (e.key === 'ArrowRight' || e.key === 'd') dir = 'right';
+      else if (e.key === 'Escape') { mazeQuit(); return; }
+      if (dir) { e.preventDefault(); mazeMove(dir); }
+    };
+    document.addEventListener('keydown', termState.mazeKeyHandler);
+
+    // Start floor 1
+    mazeInitFloor(1);
+    mazeStartLoop();
+  }, 850);
 }
 
-// ─── In-Game Command Router ───
-function termGameCmd(cmd, output) {
-  var parts = cmd.trim().split(/\s+/);
-  var base = parts[0].toLowerCase();
-
-  tGamePrompt(output, cmd);
-
-  // Fun universal responses
-  if (base === 'rm') { tArcher(output, '😱', "Nice try. I'm chaotic, not suicidal."); return; }
-  if (base === 'hack') { tArcher(output, '🙄', "This isn't a movie. Try actual commands."); return; }
-  if (base === 'sudo' && termState.room < 3) { tArcher(output, '😒', 'Permission denied. Also, rude.'); return; }
-
-  switch (termState.room) {
-    case 1: termRoom1(cmd, parts, base, output); break;
-    case 2: termRoom2(cmd, parts, base, output); break;
-    case 3: termRoom3(cmd, parts, base, output); break;
-  }
-}
-
-// ─── Room 1: Boot Room ───
-function termRoom1(cmd, parts, base, output) {
-  switch (base) {
-    case 'ls':
-      tOut(output, '<span style="color:#B8CEE8">readme.txt&nbsp; door.lock&nbsp; lightswitch.sh</span>');
-      break;
-    case 'cat':
-      if (parts[1] === 'readme.txt') {
-        tOut(output, "<span style=\"color:#AACC96\">Password hint: I'm Saber's favorite color but not the one you'd guess. Check the source.</span>");
-      } else if (parts[1] === 'door.lock') {
-        tOut(output, 'Enter password: ___');
-        tOut(output, '<span style="opacity:0.45">Usage: unlock &lt;password&gt;</span>');
-      } else {
-        tOut(output, 'cat: ' + termEsc(parts[1] || '') + ': No such file or directory');
-      }
-      break;
-    case './lightswitch.sh':
-    case 'lightswitch.sh':
-    case 'sh':
-      if (!termState.r1.lightOn) {
-        termState.r1.lightOn = true;
-        tArcher(output, '😐', "Oh hey, I can see now! There's a door.");
-        termSetStatus('[Archer 😐  Room 1/3]');
-      } else {
-        tOut(output, 'lightswitch.sh: light is already on');
-      }
-      break;
-    case 'unlock': {
-      var pw = parts.slice(1).join(' ').toLowerCase().trim();
-      if (pw === 'coral') {
-        termState.r1.unlocked = true;
-        tArcher(output, '😊', "Freedom! ...wait, there's another room.");
-        setTimeout(function() { termEnterRoom2(output); }, 1200);
-      } else if (!pw) {
-        tOut(output, 'Usage: unlock &lt;password&gt;');
-      } else {
-        var wr1 = ["Nope. Try harder, I believe in you. Kind of.", "That's... not it. Keep going.", "Nope. Have you tried actually reading the hint?", "The hint said check the source, not guess randomly.", "Getting warmer? No, not really."];
-        tArcher(output, '😑', wr1[Math.floor(Math.random() * wr1.length)]);
-      }
-      break;
+// ─── Maze Generation (Recursive Backtracker) ───
+function mazeGenerate(cols, rows) {
+  var grid = [];
+  for (var y = 0; y < rows; y++) {
+    grid[y] = [];
+    for (var x = 0; x < cols; x++) {
+      grid[y][x] = { visited: false, walls: { top: true, right: true, bottom: true, left: true } };
     }
-    default:
-      tArcher(output, '🤷', 'Command not found. Archer shrugs.');
   }
-}
+  var stack = [];
+  var cx = 0, cy = 0;
+  grid[cy][cx].visited = true;
+  stack.push([cx, cy]);
 
-// ─── Room 2: Memory Leak ───
-function termEnterRoom2(output) {
-  termState.room = 2;
-  output.innerHTML = '';
-  termSetStatus('[Archer 😰  Room 2/3]');
-  tOut(output, '<span style="color:#52A5CE;opacity:0.7">-- ENTERING SECTOR 2: MEMORY LEAK --</span>');
-  tArcher(output, '😰', "Data's rising fast. We gotta drain this before I drown in garbage collection.");
-
-  var floodLines = [
-    'malloc: heap corruption detected at 0x7ffd8a2c',
-    'ERROR: null pointer dereference at 0x0000dead',
-    'LEAK: 4096 bytes not freed at offset 0x3f1a',
-    'GC: collecting 2048 objects... failed',
-    'WARN: stack overflow imminent',
-    'malloc: 1024 bytes leaked in process 8823',
-    'SIGSEGV: bad memory access at 0xdeadbeef',
-    'WARN: memory pressure critical (87%)',
-    'ERROR: garbage collection stalled',
-    'malloc: 512KB unreclaimed in heap segment',
-    'LEAK: reference cycle detected in object pool',
-    'GC: finalizer queue backed up (4096 objects)'
-  ];
-  var fi = 0;
-  termState.r2.floodTimer = setInterval(function() {
-    if (!termState || !termState.r2 || termState.r2.leakKilled) return;
-    var out2 = document.getElementById('term-output');
-    if (!out2) return;
-    var div = document.createElement('div');
-    div.innerHTML = '<span style="opacity:0.38;color:#FF6A00;font-size:0.7rem">' + floodLines[fi % floodLines.length] + '</span>';
-    fi++;
-    out2.appendChild(div);
-    out2.scrollTop = out2.scrollHeight;
-  }, 1800);
-}
-
-function termRoom2(cmd, parts, base, output) {
-  switch (base) {
-    case 'ps':
-      tOut(output, '<span style="color:#B8CEE8">PID&nbsp;&nbsp;&nbsp;PROCESS</span>');
-      tOut(output, '<span style="color:#B8CEE8">1337&nbsp; memory_leak.exe&nbsp;&nbsp;[RUNNING — 847MB]</span>');
-      tOut(output, '<span style="color:#B8CEE8">420&nbsp;&nbsp; cat_videos.mp4&nbsp;&nbsp;&nbsp;[IDLE]</span>');
-      tOut(output, '<span style="color:#B8CEE8">9001&nbsp; todo_list_2019.txt [ZOMBIE]</span>');
-      tOut(output, '<span style="color:#B8CEE8">0001&nbsp; important_stuff.sys [CRITICAL]</span>');
-      break;
-    case 'kill': {
-      var proc = parts.slice(1).join(' ').toLowerCase();
-      if (proc === 'memory_leak.exe' || proc === '1337') {
-        termState.r2.leakKilled = true;
-        if (termState.r2.floodTimer) { clearInterval(termState.r2.floodTimer); termState.r2.floodTimer = null; }
-        tArcher(output, '😊', "Leak stopped! I can breathe again.");
-        termSetStatus('[Archer 😊  Room 2/3]');
-      } else if (proc === 'important_stuff.sys' || proc === '0001') {
-        tArcher(output, '😬', "Bro. That was important. Now the lights are flickering.");
-        var wrap2 = document.getElementById('term-wrap');
-        if (wrap2) {
-          [0, 150, 300, 450].forEach(function(t, i) {
-            setTimeout(function() { if(wrap2) wrap2.style.opacity = i % 2 === 0 ? '0.25' : '1'; }, t);
-          });
-          setTimeout(function() { if(wrap2) wrap2.style.opacity = '1'; }, 600);
-        }
-      } else if (proc === 'cat_videos.mp4' || proc === '420') {
-        tArcher(output, '😢', "No! Not the cat videos! Those were my happy place.");
-      } else if (proc === 'todo_list_2019.txt' || proc === '9001') {
-        tOut(output, 'kill: todo_list_2019.txt: already dead inside');
-      } else {
-        tArcher(output, '🤷', 'Command not found. Archer shrugs.');
+  while (stack.length > 0) {
+    var neighbors = [];
+    var dirs = [
+      [0, -1, 'top', 'bottom'],
+      [1, 0, 'right', 'left'],
+      [0, 1, 'bottom', 'top'],
+      [-1, 0, 'left', 'right']
+    ];
+    for (var d = 0; d < dirs.length; d++) {
+      var nx = cx + dirs[d][0], ny = cy + dirs[d][1];
+      if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && !grid[ny][nx].visited) {
+        neighbors.push(dirs[d]);
       }
-      break;
     }
-    case 'grep':
-      if (cmd.toLowerCase().includes('exit') && cmd.includes('*')) {
-        termState.r2.exitFound = true;
-        tOut(output, 'cat_videos.mp4: <span style="color:#EFCE7B">EXIT_KEY=NyanCat</span>');
-        tArcher(output, '😮', "Found it! NyanCat was the key this whole time. Obviously.");
-      } else {
-        tOut(output, 'grep: no matches found');
-      }
-      break;
-    case 'open':
-      if (cmd.includes('--key') && cmd.includes('NyanCat')) {
-        if (!termState.r2.leakKilled) {
-          tArcher(output, '😰', "Still leaking! Kill the leak first or we both drown.");
-        } else if (!termState.r2.exitFound) {
-          tArcher(output, '🤔', "I found a keyhole but... what's the key? Try grep first.");
-        } else {
-          tArcher(output, '😊', "Two down. I can smell freedom. Smells like... localhost.");
-          setTimeout(function() { termEnterRoom3(output); }, 1200);
-        }
-      } else {
-        tOut(output, 'open: invalid syntax. Try: open door --key &lt;key&gt;');
-      }
-      break;
-    default:
-      tArcher(output, '🤷', 'Command not found. Archer shrugs.');
-  }
-}
-
-// ─── Room 3: Root Shell ───
-function termEnterRoom3(output) {
-  termState.room = 3;
-  output.innerHTML = '';
-  termSetStatus('[Archer 😨  Room 3/3]');
-  tOut(output, '<span style="color:#EFCE7B;opacity:0.7">-- FINAL SECTOR: ROOT SHELL --</span>');
-  tArcher(output, '😨', "This is it. I need root access to break out. But there's a riddle...");
-  tOut(output, '');
-  tOut(output, '<span style="color:#AACC96;opacity:0.85">┌───────────────────────────────────┐</span>');
-  tOut(output, '<span style="color:#AACC96;opacity:0.85">│  I have mass but no weight,       │</span>');
-  tOut(output, '<span style="color:#AACC96;opacity:0.85">│  I run but never move,            │</span>');
-  tOut(output, '<span style="color:#AACC96;opacity:0.85">│  I have a shell but never crack.  │</span>');
-  tOut(output, '<span style="color:#AACC96;opacity:0.85">│  What am I?                       │</span>');
-  tOut(output, '<span style="color:#AACC96;opacity:0.85">└───────────────────────────────────┘</span>');
-  tOut(output, '');
-  tOut(output, '<span style="opacity:0.4">Usage: sudo escape --password &lt;answer&gt;</span>');
-}
-
-function termRoom3(cmd, parts, base, output) {
-  if (base === 'sudo' && cmd.includes('escape') && cmd.includes('--password')) {
-    var pwIdx = parts.indexOf('--password');
-    var answer = (pwIdx >= 0 && parts[pwIdx + 1]) ? parts[pwIdx + 1].toLowerCase() : '';
-    if (answer === 'program') {
-      termWinGame(output);
-    } else if (answer) {
-      var wr3 = ['"' + termEsc(answer) + '"? Nice guess. Wrong universe though.', "Not quite. Think: shell, mass, runs...", "Nope. Archer squints judgmentally.", "Still no. But you're entertaining."];
-      tArcher(output, '😐', wr3[Math.floor(Math.random() * wr3.length)]);
+    if (neighbors.length > 0) {
+      var chosen = neighbors[Math.floor(Math.random() * neighbors.length)];
+      var nx2 = cx + chosen[0], ny2 = cy + chosen[1];
+      grid[cy][cx].walls[chosen[2]] = false;
+      grid[ny2][nx2].walls[chosen[3]] = false;
+      grid[ny2][nx2].visited = true;
+      stack.push([cx, cy]);
+      cx = nx2; cy = ny2;
     } else {
-      tOut(output, 'Usage: sudo escape --password &lt;answer&gt;');
+      var prev = stack.pop();
+      cx = prev[0]; cy = prev[1];
     }
-  } else {
-    tArcher(output, '🤷', 'Command not found. Archer shrugs.');
   }
+  return grid;
 }
 
-// ─── Win Sequence ───
-function termWinGame(output) {
-  var wrap = document.getElementById('term-wrap');
-  if (wrap) wrap.classList.add('term-glitching');
+// ─── Floor Initialization ───
+function mazeInitFloor(floor) {
+  var canvas = document.getElementById('maze-canvas');
+  if (!canvas) return;
+  var parent = canvas.parentElement;
+  var pw = parent.clientWidth;
+  var ph = parent.clientHeight;
 
-  setTimeout(function() {
-    if (wrap) wrap.classList.remove('term-glitching');
-    output.innerHTML = '';
-    termMatrixRain(output, function() {
-      output.innerHTML = '';
-      termSetStatus('[🎉 ESCAPED]');
+  // Grid sizes per floor
+  var sizes = { 1: [12, 9], 2: [16, 11], 3: [20, 13] };
+  var size = sizes[floor] || sizes[3];
+  var cols = size[0], rows = size[1];
 
-      tOut(output, '<span style="color:#EFCE7B;font-size:1.05em">*** ACCESS GRANTED ***</span>');
-      tArcher(output, '🎉', "I'M FREE! Thanks human. You're mass but no weight yourself. I owe you mass tacos. 🌮");
-      tOut(output, '');
+  // Calculate tile size to fit
+  var tileW = Math.floor((pw - 20) / cols);
+  var tileH = Math.floor((ph - 20) / rows);
+  var tile = Math.min(tileW, tileH, 32);
+  tile = Math.max(tile, 12);
 
-      var elapsed = Math.floor((Date.now() - termState.startTime) / 1000);
-      var mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
-      var secs = String(elapsed % 60).padStart(2, '0');
-      tOut(output, '<span style="color:#B8CEE8">[GAME COMPLETE] Time: ' + mins + ':' + secs + ' | Commands: ' + termState.cmdCount + '</span>');
+  canvas.width = cols * tile;
+  canvas.height = rows * tile;
+  canvas.style.width = canvas.width + 'px';
+  canvas.style.height = canvas.height + 'px';
 
-      termState.game = false;
-      termState.completed = true;
+  var grid = mazeGenerate(cols, rows);
 
-      var promptLabel = document.getElementById('term-prompt-label');
-      if (promptLabel) { promptLabel.textContent = 'saber@saberos'; promptLabel.style.color = '#52A5CE'; }
+  // Place player at top-left
+  var px = 0, py = 0;
+  // Place exit at bottom-right
+  var ex = cols - 1, ey = rows - 1;
 
-      var statusBar = document.getElementById('term-status');
-      if (statusBar) setTimeout(function() { statusBar.style.display = 'none'; }, 5000);
+  // Place stars (in random open cells, not start/exit)
+  var starCount = floor + 2; // 3, 4, 5
+  var starCells = [];
+  var attempts = 0;
+  while (starCells.length < starCount && attempts < 200) {
+    var sx = Math.floor(Math.random() * cols);
+    var sy = Math.floor(Math.random() * rows);
+    if ((sx === px && sy === py) || (sx === ex && sy === ey)) { attempts++; continue; }
+    var dup = false;
+    for (var i = 0; i < starCells.length; i++) {
+      if (starCells[i][0] === sx && starCells[i][1] === sy) { dup = true; break; }
+    }
+    if (!dup) starCells.push([sx, sy]);
+    attempts++;
+  }
 
-      termSpawnArcherEmoji();
-    });
-  }, 900);
+  // Place bugs (patrol horizontally or vertically)
+  var bugCount = floor + 1; // 2, 3, 4
+  var bugs = [];
+  attempts = 0;
+  while (bugs.length < bugCount && attempts < 300) {
+    var bx = Math.floor(Math.random() * cols);
+    var by = Math.floor(Math.random() * rows);
+    if ((bx === px && by === py) || (bx === ex && by === ey)) { attempts++; continue; }
+    // Determine patrol direction — find a straight corridor
+    var canH = false, canV = false;
+    if (bx > 0 && !grid[by][bx].walls.left) canH = true;
+    if (bx < cols - 1 && !grid[by][bx].walls.right) canH = true;
+    if (by > 0 && !grid[by][bx].walls.top) canV = true;
+    if (by < rows - 1 && !grid[by][bx].walls.bottom) canV = true;
+
+    if (canH || canV) {
+      var dir = canH && canV ? (Math.random() < 0.5 ? 'h' : 'v') : (canH ? 'h' : 'v');
+      bugs.push({ x: bx, y: by, dir: dir, forward: true, timer: 0 });
+    }
+    attempts++;
+  }
+
+  termState.maze = {
+    grid: grid,
+    cols: cols,
+    rows: rows,
+    tile: tile,
+    px: px,
+    py: py,
+    ex: ex,
+    ey: ey,
+    stars: starCells,
+    bugs: bugs,
+    floor: floor,
+    floorStars: starCells.length,
+    animFrame: 0,
+    shake: 0,
+    flash: 0,
+    showFloor: 60, // show floor title for ~1s
+    won: false,
+    dead: false
+  };
+
+  termState.totalStars += starCells.length;
+  mazeUpdateHud();
 }
 
-// ─── Matrix Rain ───
-function termMatrixRain(container, done) {
-  var chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
-  var deadline = Date.now() + 2000;
+function mazeUpdateHud() {
+  var m = termState.maze;
+  if (!m) return;
+  var hearts = '';
+  for (var i = 0; i < 3; i++) hearts += i < termState.lives ? '♥' : '♡';
+  var elapsed = Math.floor((Date.now() - termState.startTime) / 1000);
+  var mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  var secs = String(elapsed % 60).padStart(2, '0');
 
-  function frame() {
-    if (Date.now() > deadline) { container.innerHTML = ''; done(); return; }
-    container.innerHTML = '';
-    for (var i = 0; i < 22; i++) {
-      var div = document.createElement('div');
-      var line = '';
-      for (var j = 0; j < 48; j++) {
-        var c = chars[Math.floor(Math.random() * chars.length)];
-        var b = Math.random();
-        var col = b > 0.85 ? '#ffffff' : '#AACC96';
-        line += '<span style="color:' + col + ';opacity:' + (0.25 + b * 0.75).toFixed(2) + '">' + c + '</span>';
+  var hudL = document.getElementById('maze-hud-left');
+  var hudR = document.getElementById('maze-hud-right');
+  if (hudL) hudL.textContent = '🏹 Archer  ' + hearts + '  ⭐ ' + termState.stars;
+  if (hudR) hudR.textContent = 'Floor ' + m.floor + '/3  ⏱ ' + mins + ':' + secs;
+}
+
+// ─── Game Loop ───
+function mazeStartLoop() {
+  var tickRate = 8; // bugs move every 8 frames (~60fps / 8 = ~7.5 ticks/s)
+  var tickCounter = 0;
+
+  function loop() {
+    if (!termState.game) return;
+    var m = termState.maze;
+    if (!m) return;
+
+    tickCounter++;
+    m.animFrame++;
+
+    // Tick bugs
+    if (tickCounter % tickRate === 0 && !m.won && !m.dead && m.showFloor <= 0) {
+      mazeBugTick(m);
+    }
+
+    // Check collision with bugs
+    if (!m.won && !m.dead && m.showFloor <= 0 && termState.invincible <= 0) {
+      for (var i = 0; i < m.bugs.length; i++) {
+        if (m.bugs[i].x === m.px && m.bugs[i].y === m.py) {
+          mazeHit();
+          break;
+        }
       }
-      div.innerHTML = line;
-      container.appendChild(div);
     }
-    requestAnimationFrame(frame);
+
+    if (termState.invincible > 0) termState.invincible--;
+    if (m.shake > 0) m.shake--;
+    if (m.flash > 0) m.flash--;
+    if (m.showFloor > 0) m.showFloor--;
+
+    mazeUpdateHud();
+    mazeDraw(m);
+
+    termState.mazeRaf = requestAnimationFrame(loop);
   }
-  requestAnimationFrame(frame);
+  termState.mazeRaf = requestAnimationFrame(loop);
 }
 
+function mazeBugTick(m) {
+  for (var i = 0; i < m.bugs.length; i++) {
+    var b = m.bugs[i];
+    b.timer++;
+    if (b.timer < 2) continue; // move every 2 ticks
+    b.timer = 0;
+
+    var nx = b.x, ny = b.y;
+    if (b.dir === 'h') {
+      if (b.forward) {
+        if (b.x < m.cols - 1 && !m.grid[b.y][b.x].walls.right) nx = b.x + 1;
+        else b.forward = false;
+      }
+      if (!b.forward) {
+        if (b.x > 0 && !m.grid[b.y][b.x].walls.left) nx = b.x - 1;
+        else b.forward = true;
+      }
+    } else {
+      if (b.forward) {
+        if (b.y < m.rows - 1 && !m.grid[b.y][b.x].walls.bottom) ny = b.y + 1;
+        else b.forward = false;
+      }
+      if (!b.forward) {
+        if (b.y > 0 && !m.grid[b.y][b.x].walls.top) ny = b.y - 1;
+        else b.forward = true;
+      }
+    }
+    b.x = nx;
+    b.y = ny;
+  }
+}
+
+// ─── Player Movement ───
+function mazeMove(dir) {
+  var m = termState.maze;
+  if (!m || m.won || m.dead || m.showFloor > 0) return;
+
+  var cell = m.grid[m.py][m.px];
+  var moved = false;
+
+  if (dir === 'up' && !cell.walls.top) { m.py--; moved = true; }
+  else if (dir === 'down' && !cell.walls.bottom) { m.py++; moved = true; }
+  else if (dir === 'left' && !cell.walls.left) { m.px--; moved = true; }
+  else if (dir === 'right' && !cell.walls.right) { m.px++; moved = true; }
+
+  if (!moved) return;
+
+  // Collect star
+  for (var i = m.stars.length - 1; i >= 0; i--) {
+    if (m.stars[i][0] === m.px && m.stars[i][1] === m.py) {
+      m.stars.splice(i, 1);
+      termState.stars++;
+      mazeBeep(800, 0.08, 0.05);
+      m.flash = 6;
+      break;
+    }
+  }
+
+  // Check exit
+  if (m.px === m.ex && m.py === m.ey) {
+    if (m.floor < 3) {
+      // Next floor
+      m.won = true;
+      mazeBeep(600, 0.1, 0.1);
+      setTimeout(function() { mazeBeep(800, 0.1, 0.1); }, 120);
+      setTimeout(function() { mazeBeep(1000, 0.15, 0.12); }, 240);
+      setTimeout(function() {
+        mazeInitFloor(m.floor + 1);
+      }, 1200);
+    } else {
+      // Game won!
+      m.won = true;
+      mazeWin();
+    }
+  }
+
+  // Check bug collision
+  if (termState.invincible <= 0) {
+    for (var j = 0; j < m.bugs.length; j++) {
+      if (m.bugs[j].x === m.px && m.bugs[j].y === m.py) {
+        mazeHit();
+        break;
+      }
+    }
+  }
+}
+
+function mazeHit() {
+  termState.lives--;
+  termState.invincible = 90; // ~1.5s at 60fps
+  var m = termState.maze;
+  m.shake = 15;
+  mazeBeep(200, 0.12, 0.15);
+
+  if (termState.lives <= 0) {
+    m.dead = true;
+    mazeGameOver();
+  } else {
+    // Respawn at floor start
+    m.px = 0;
+    m.py = 0;
+  }
+}
+
+// ─── Drawing ───
+function mazeDraw(m) {
+  var canvas = document.getElementById('maze-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var t = m.tile;
+
+  // Shake offset
+  var sx = m.shake > 0 ? (Math.random() - 0.5) * 4 : 0;
+  var sy = m.shake > 0 ? (Math.random() - 0.5) * 4 : 0;
+
+  ctx.save();
+  ctx.translate(sx, sy);
+
+  // Background
+  ctx.fillStyle = '#0f0f1e';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw walls
+  ctx.strokeStyle = '#3a3a5e';
+  ctx.lineWidth = 2;
+  for (var y = 0; y < m.rows; y++) {
+    for (var x = 0; x < m.cols; x++) {
+      var cell = m.grid[y][x];
+      var cx = x * t, cy = y * t;
+      if (cell.walls.top) { ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + t, cy); ctx.stroke(); }
+      if (cell.walls.right) { ctx.beginPath(); ctx.moveTo(cx + t, cy); ctx.lineTo(cx + t, cy + t); ctx.stroke(); }
+      if (cell.walls.bottom) { ctx.beginPath(); ctx.moveTo(cx, cy + t); ctx.lineTo(cx + t, cy + t); ctx.stroke(); }
+      if (cell.walls.left) { ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy + t); ctx.stroke(); }
+    }
+  }
+
+  // Draw exit (pulsing green)
+  var pulse = 0.5 + 0.5 * Math.sin(m.animFrame * 0.08);
+  ctx.fillStyle = 'rgba(170, 204, 150, ' + (0.3 + pulse * 0.5) + ')';
+  ctx.fillRect(m.ex * t + 2, m.ey * t + 2, t - 4, t - 4);
+  ctx.fillStyle = '#AACC96';
+  ctx.font = Math.max(8, t * 0.45) + 'px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('>>', m.ex * t + t / 2, m.ey * t + t / 2);
+
+  // Draw stars
+  for (var i = 0; i < m.stars.length; i++) {
+    var star = m.stars[i];
+    var sp = 0.7 + 0.3 * Math.sin(m.animFrame * 0.1 + i);
+    ctx.fillStyle = 'rgba(255, 217, 102, ' + sp + ')';
+    var sc = t * 0.3;
+    ctx.beginPath();
+    var scx = star[0] * t + t / 2, scy = star[1] * t + t / 2;
+    // Diamond shape
+    ctx.moveTo(scx, scy - sc);
+    ctx.lineTo(scx + sc, scy);
+    ctx.lineTo(scx, scy + sc);
+    ctx.lineTo(scx - sc, scy);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Draw bugs
+  for (var j = 0; j < m.bugs.length; j++) {
+    var bug = m.bugs[j];
+    var bx = bug.x * t, by = bug.y * t;
+    // Simple bug: red body with legs
+    ctx.fillStyle = '#FF4444';
+    var bpad = Math.floor(t * 0.2);
+    ctx.fillRect(bx + bpad, by + bpad, t - bpad * 2, t - bpad * 2);
+    // Eyes
+    ctx.fillStyle = '#fff';
+    var es = Math.max(2, t * 0.12);
+    ctx.fillRect(bx + bpad + 2, by + bpad + 2, es, es);
+    ctx.fillRect(bx + t - bpad - 2 - es, by + bpad + 2, es, es);
+    // Legs (alternating animation)
+    ctx.fillStyle = '#FF4444';
+    var legOff = m.animFrame % 20 < 10 ? 1 : -1;
+    ctx.fillRect(bx + bpad - 2, by + t * 0.4 + legOff, 2, 2);
+    ctx.fillRect(bx + t - bpad, by + t * 0.4 - legOff, 2, 2);
+    ctx.fillRect(bx + bpad - 2, by + t * 0.6 - legOff, 2, 2);
+    ctx.fillRect(bx + t - bpad, by + t * 0.6 + legOff, 2, 2);
+  }
+
+  // Draw player (Archer — orange pixel character)
+  if (!m.dead && (termState.invincible <= 0 || m.animFrame % 6 < 3)) {
+    var px = m.px * t, py = m.py * t;
+    var pad = Math.floor(t * 0.15);
+    // Body
+    ctx.fillStyle = '#FF6A00';
+    ctx.fillRect(px + pad, py + pad, t - pad * 2, t - pad * 2);
+    // Face: </> in tiny pixels
+    ctx.fillStyle = '#1a1a2e';
+    var fs = Math.max(6, t * 0.4);
+    ctx.font = 'bold ' + fs + 'px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('</>', px + t / 2, py + t / 2);
+  }
+
+  // Flash effect (star collect)
+  if (m.flash > 0) {
+    ctx.fillStyle = 'rgba(255, 217, 102, ' + (m.flash / 10) + ')';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Floor title overlay
+  if (m.showFloor > 0) {
+    ctx.fillStyle = 'rgba(15, 15, 30, ' + Math.min(1, m.showFloor / 30) + ')';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#FF6A00';
+    ctx.font = 'bold ' + Math.max(16, canvas.width * 0.08) + 'px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('FLOOR ' + m.floor, canvas.width / 2, canvas.height / 2 - 10);
+    ctx.fillStyle = '#AACC96';
+    ctx.font = Math.max(10, canvas.width * 0.035) + 'px monospace';
+    var floorHints = ['Find the exit...', 'Watch out for bugs!', 'Almost there...'];
+    ctx.fillText(floorHints[m.floor - 1] || '', canvas.width / 2, canvas.height / 2 + 20);
+  }
+
+  ctx.restore();
+}
+
+// ─── Win / Game Over ───
+function mazeWin() {
+  setTimeout(function() {
+    var elapsed = Math.floor((Date.now() - termState.startTime) / 1000);
+    var mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    var secs = String(elapsed % 60).padStart(2, '0');
+
+    // Play victory jingle
+    mazeBeep(523, 0.1, 0.08);
+    setTimeout(function() { mazeBeep(659, 0.1, 0.08); }, 100);
+    setTimeout(function() { mazeBeep(784, 0.1, 0.08); }, 200);
+    setTimeout(function() { mazeBeep(1047, 0.15, 0.12); }, 300);
+
+    // Draw win screen on canvas
+    var canvas = document.getElementById('maze-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+
+    // Confetti state
+    var confetti = [];
+    var colors = ['#FF6A00', '#FFD966', '#AACC96', '#52A5CE', '#FF7BAC', '#fff'];
+    for (var i = 0; i < 60; i++) {
+      confetti.push({
+        x: Math.random() * canvas.width,
+        y: -Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 2,
+        vy: Math.random() * 3 + 1,
+        size: Math.random() * 4 + 2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rot: Math.random() * Math.PI * 2
+      });
+    }
+
+    var frame = 0;
+    function drawWin() {
+      frame++;
+      ctx.fillStyle = '#0f0f1e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Confetti
+      for (var c = 0; c < confetti.length; c++) {
+        var p = confetti[c];
+        p.y += p.vy;
+        p.x += p.vx;
+        p.rot += 0.05;
+        if (p.y > canvas.height + 10) { p.y = -10; p.x = Math.random() * canvas.width; }
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        ctx.restore();
+      }
+
+      // Title
+      ctx.fillStyle = '#FF6A00';
+      ctx.font = 'bold ' + Math.max(18, canvas.width * 0.07) + 'px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('ARCHER ESCAPED!', canvas.width / 2, canvas.height * 0.3);
+
+      // Archer bouncing
+      var bounce = Math.abs(Math.sin(frame * 0.08)) * 8;
+      ctx.fillStyle = '#FF6A00';
+      var as = Math.max(20, canvas.width * 0.06);
+      ctx.fillRect(canvas.width / 2 - as / 2, canvas.height * 0.42 - bounce - as / 2, as, as);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.font = 'bold ' + (as * 0.5) + 'px monospace';
+      ctx.fillText('</>', canvas.width / 2, canvas.height * 0.42 - bounce);
+
+      // Stats
+      ctx.fillStyle = '#AACC96';
+      ctx.font = Math.max(10, canvas.width * 0.035) + 'px monospace';
+      ctx.fillText('Time: ' + mins + ':' + secs + '  |  Stars: ' + termState.stars + '/' + termState.totalStars, canvas.width / 2, canvas.height * 0.62);
+
+      ctx.fillStyle = 'rgba(170,204,150,0.4)';
+      ctx.font = Math.max(9, canvas.width * 0.028) + 'px monospace';
+      ctx.fillText('"I\'m free! Thanks, human. I owe you mass tacos."', canvas.width / 2, canvas.height * 0.75);
+
+      ctx.fillStyle = 'rgba(170,204,150,0.25)';
+      ctx.fillText('Press ESC to return to terminal', canvas.width / 2, canvas.height * 0.88);
+
+      if (termState.game && termState.maze && termState.maze.won) {
+        requestAnimationFrame(drawWin);
+      }
+    }
+    drawWin();
+
+    termState.completed = true;
+    termSpawnArcherEmoji();
+  }, 600);
+}
+
+function mazeGameOver() {
+  setTimeout(function() {
+    mazeBeep(300, 0.15, 0.2);
+    setTimeout(function() { mazeBeep(200, 0.2, 0.25); }, 200);
+
+    var canvas = document.getElementById('maze-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+
+    function drawDead() {
+      ctx.fillStyle = '#0f0f1e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#FF4444';
+      ctx.font = 'bold ' + Math.max(16, canvas.width * 0.06) + 'px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('GAME OVER', canvas.width / 2, canvas.height * 0.35);
+
+      ctx.fillStyle = '#FF6A00';
+      var as = Math.max(16, canvas.width * 0.05);
+      ctx.fillRect(canvas.width / 2 - as / 2, canvas.height * 0.47 - as / 2, as, as);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.font = 'bold ' + (as * 0.5) + 'px monospace';
+      ctx.fillText('x_x', canvas.width / 2, canvas.height * 0.47);
+
+      ctx.fillStyle = '#FFB366';
+      ctx.font = Math.max(9, canvas.width * 0.03) + 'px monospace';
+      ctx.fillText('"Segfault. Core dumped."', canvas.width / 2, canvas.height * 0.62);
+
+      ctx.fillStyle = 'rgba(170,204,150,0.35)';
+      ctx.fillText('Press ESC to return, type archer to retry', canvas.width / 2, canvas.height * 0.76);
+    }
+    drawDead();
+  }, 300);
+}
+
+function mazeQuit() {
+  // Stop game loop
+  if (termState.mazeRaf) cancelAnimationFrame(termState.mazeRaf);
+  if (termState.mazeKeyHandler) document.removeEventListener('keydown', termState.mazeKeyHandler);
+
+  // Remove game div, restore terminal
+  var gameDiv = document.getElementById('maze-game');
+  if (gameDiv) gameDiv.remove();
+
+  var termOutput = document.getElementById('term-output');
+  var termInput = document.getElementById('term-input');
+  var promptRow = termInput ? termInput.parentElement : null;
+  if (termOutput) termOutput.style.display = '';
+  if (promptRow) promptRow.style.display = '';
+
+  termState.game = false;
+  if (!termState.completed) {
+    var output = document.getElementById('term-output');
+    if (output) tOut(output, '<span style="color:#FF6A00">[Archer] Escaped back to the terminal. Type archer to try again.</span>');
+  } else {
+    var output2 = document.getElementById('term-output');
+    if (output2) tOut(output2, '<span style="color:#FF6A00">[Archer] Thanks for playing! I\'m free now. 🏹</span>');
+  }
+
+  if (termInput) { termInput.focus(); }
+}
+
+// ─── Sound ───
+function mazeBeep(freq, duration, vol) {
+  try {
+    var ac = window._mazeAudioCtx || (window._mazeAudioCtx = new (window.AudioContext || window.webkitAudioContext)());
+    var osc = ac.createOscillator();
+    var gain = ac.createGain();
+    osc.connect(gain);
+    gain.connect(ac.destination);
+    osc.frequency.value = freq;
+    osc.type = 'square';
+    gain.gain.value = vol || 0.08;
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + (duration || 0.1));
+    osc.stop(ac.currentTime + (duration || 0.1) + 0.01);
+  } catch (e) {}
+}
 // ─── Floating Archer Emoji (post-win) ───
 function termSpawnArcherEmoji() {
   var existing = document.getElementById('archer-winner-float');

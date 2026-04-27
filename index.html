@@ -6974,7 +6974,7 @@ function mazeInitFloor(floor) {
   var ph = parent.clientHeight;
 
   // Grid sizes per floor
-  var sizes = { 1: [12, 9], 2: [16, 11], 3: [20, 13] };
+  var sizes = { 1: [10, 7], 2: [13, 9], 3: [16, 11] };
   var size = sizes[floor] || sizes[3];
   var cols = size[0], rows = size[1];
 
@@ -7013,13 +7013,17 @@ function mazeInitFloor(floor) {
   }
 
   // Place bugs (patrol horizontally or vertically)
-  var bugCount = floor + 1; // 2, 3, 4
+  var bugCount = floor; // 1, 2, 3
   var bugs = [];
   attempts = 0;
   while (bugs.length < bugCount && attempts < 300) {
     var bx = Math.floor(Math.random() * cols);
     var by = Math.floor(Math.random() * rows);
     if ((bx === px && by === py) || (bx === ex && by === ey)) { attempts++; continue; }
+    // Keep bugs away from start and exit (minimum 2 cells)
+    var distStart = Math.abs(bx - px) + Math.abs(by - py);
+    var distExit = Math.abs(bx - ex) + Math.abs(by - ey);
+    if (distStart < 3 || distExit < 3) { attempts++; continue; }
     // Determine patrol direction — find a straight corridor
     var canH = false, canV = false;
     if (bx > 0 && !grid[by][bx].walls.left) canH = true;
@@ -7350,8 +7354,13 @@ function mazeDraw(m) {
   ctx.fillStyle = '#0f0f1e';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  // Draw outer border
+  ctx.strokeStyle = '#7a7aae';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(0, 0, m.cols * t, m.rows * t);
+
   // Draw walls
-  ctx.strokeStyle = '#3a3a5e';
+  ctx.strokeStyle = '#5a5a8e';
   ctx.lineWidth = 2;
   for (var y = 0; y < m.rows; y++) {
     for (var x = 0; x < m.cols; x++) {

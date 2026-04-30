@@ -2659,7 +2659,40 @@ body {
 
 <script>
 // ─── Constants & Data ───
-const ICON_BASE = 'images/icons';
+// Icon theme system
+var iconTheme = localStorage.getItem('saberOS-iconTheme') || 'default';
+function getIconBase() { return iconTheme === 'default' ? 'images/icons' : 'images/icons-' + iconTheme; }
+const ICON_BASE = getIconBase();
+
+function switchIconTheme(theme) {
+  iconTheme = theme;
+  localStorage.setItem('saberOS-iconTheme', theme);
+  var newBase = getIconBase();
+  // Update all dock icons
+  document.querySelectorAll('.dock-item img, .mobile-dock-item img').forEach(function(img) {
+    img.src = img.src.replace(/images\/icons[^/]*/, newBase);
+  });
+  // Update all desktop icons
+  document.querySelectorAll('.desktop-icon img').forEach(function(img) {
+    img.src = img.src.replace(/images\/icons[^/]*/, newBase);
+  });
+  // Update window title bar icons
+  document.querySelectorAll('.title-bar img, .window-icon').forEach(function(img) {
+    if (img.src && img.src.includes('images/icons')) {
+      img.src = img.src.replace(/images\/icons[^/]*/, newBase);
+    }
+  });
+  // Re-render theme picker buttons
+  var themePicker = document.getElementById('icon-theme-picker');
+  if (themePicker) {
+    themePicker.querySelectorAll('button').forEach(function(btn, i) {
+      var isActive = (i === 0 && theme === 'default') || (i === 1 && theme === 'pixel');
+      btn.style.border = '1.5px solid ' + (isActive ? 'var(--accent, #FF8C42)' : 'rgba(0,0,0,0.1)');
+      btn.style.background = isActive ? 'rgba(255,140,66,0.1)' : 'transparent';
+      btn.style.fontWeight = isActive ? '600' : '400';
+    });
+  }
+}
 const IMAGE_BASE = 'images';
 
 // All 12 projects with assigned colors
@@ -3146,6 +3179,8 @@ function renderSystemApp(appId) {
         '</div>' +
         '<div style="padding: 0 12px 4px; font-family: var(--sans); font-size: 0.7rem; font-weight: 500; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.05em;">Choose a wallpaper</div>' +
         '<div id="wp-app-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 4px 12px 12px; overflow-y: auto; flex: 1;"></div>' +
+        '<div style="padding: 8px 12px 4px; border-top: 1px solid rgba(0,0,0,0.06); font-family: var(--sans); font-size: 0.7rem; font-weight: 500; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.05em;">Icon Theme</div>' +
+        '<div id="icon-theme-picker" style="display: flex; gap: 8px; padding: 8px 12px 16px;"></div>' +
       '</div>';
 
     case 'music':
@@ -3384,6 +3419,19 @@ function setupSystemApp(appId) {
       thumb.onmouseleave = function() { if (preview) preview.style.backgroundImage = getWallpaperBg(wallpaperList[currentWallpaperIdx]); };
       grid.appendChild(thumb);
     });
+    // Icon theme picker
+    var themePicker = document.getElementById('icon-theme-picker');
+    if (themePicker) {
+      var themes = [{id: 'default', label: 'Default'}, {id: 'pixel', label: 'Pixel Art'}];
+      themePicker.innerHTML = '';
+      themes.forEach(function(t) {
+        var btn = document.createElement('button');
+        btn.textContent = t.label;
+        btn.style.cssText = 'padding: 6px 14px; border-radius: 6px; border: 1.5px solid ' + (iconTheme === t.id ? 'var(--accent, #FF8C42)' : 'rgba(0,0,0,0.1)') + '; background: ' + (iconTheme === t.id ? 'rgba(255,140,66,0.1)' : 'transparent') + '; font-size: 0.78rem; font-family: var(--sans); cursor: pointer; font-weight: ' + (iconTheme === t.id ? '600' : '400') + '; color: var(--fg); transition: all 0.2s;';
+        btn.onclick = function() { switchIconTheme(t.id); };
+        themePicker.appendChild(btn);
+      });
+    }
   }
 }
 

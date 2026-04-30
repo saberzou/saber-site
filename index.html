@@ -2668,26 +2668,32 @@ img[src*="icons-pixel"] {
 // Icon theme system
 var iconTheme = localStorage.getItem('saberOS-iconTheme') || 'default';
 function getIconBase() { return iconTheme === 'default' ? 'images/icons' : 'images/icons-' + iconTheme; }
+function getIconExt() { return iconTheme === 'pixel' ? '.svg' : '.png'; }
 const ICON_BASE = getIconBase();
+const ICON_EXT = getIconExt();
+// Fall back to default PNG when a pixel SVG is missing (lobster, books, finder, weather, …)
+document.addEventListener('error', function(e) {
+  var t = e.target;
+  if (t && t.tagName === 'IMG' && !t.dataset.iconFallback &&
+      t.src.indexOf('images/icons-pixel/') !== -1 && /\.svg(\?|$)/.test(t.src)) {
+    t.dataset.iconFallback = '1';
+    t.src = t.src.replace('images/icons-pixel/', 'images/icons/').replace(/\.svg(\?|$)/, '.png$1');
+  }
+}, true);
 
 function switchIconTheme(theme) {
   iconTheme = theme;
   localStorage.setItem('saberOS-iconTheme', theme);
   var newBase = getIconBase();
-  // Update all dock icons
-  document.querySelectorAll('.dock-item img, .mobile-dock-item img').forEach(function(img) {
-    img.src = img.src.replace(/images\/icons[^/]*/, newBase);
-  });
-  // Update all desktop icons
-  document.querySelectorAll('.desktop-icon img').forEach(function(img) {
-    img.src = img.src.replace(/images\/icons[^/]*/, newBase);
-  });
-  // Update window title bar icons
-  document.querySelectorAll('.title-bar img, .window-icon').forEach(function(img) {
-    if (img.src && img.src.includes('images/icons')) {
-      img.src = img.src.replace(/images\/icons[^/]*/, newBase);
-    }
-  });
+  var newExt = getIconExt();
+  function rewriteIcon(img) {
+    if (!img.src || !img.src.includes('images/icons')) return;
+    var s = img.src.replace(/images\/icons[^/]*/, newBase).replace(/\.(png|svg)(\?.*)?$/, newExt + '$2');
+    if (img.src !== s) { delete img.dataset.iconFallback; img.src = s; }
+  }
+  document.querySelectorAll('.dock-item img, .mobile-dock-item img').forEach(rewriteIcon);
+  document.querySelectorAll('.desktop-icon img').forEach(rewriteIcon);
+  document.querySelectorAll('.title-bar img, .window-icon').forEach(rewriteIcon);
   // Re-render theme picker buttons
   var themePicker = document.getElementById('icon-theme-picker');
   if (themePicker) {
@@ -2711,7 +2717,7 @@ const projects = [
     howMade: 'Canvas API for rendering, particle system for fish movement, Perlin noise for organic motion, color gradients for water effects.',
     tags: ['Generative Art', 'Canvas', 'Interactive'],
     link: 'https://saberzou.github.io/koi-pond/',
-    icon: ICON_BASE + '/koi-pond.png',
+    icon: ICON_BASE + '/koi-pond' + ICON_EXT,
     image: IMAGE_BASE + '/koi-pond.jpg',
     accent: '#52A5CE'
   },
@@ -2724,7 +2730,7 @@ const projects = [
     howMade: 'CSS 3D transforms for card flips, GSAP for animations, custom illustration pipeline, localStorage for card history.',
     tags: ['Interactive', 'Animation', 'Tool'],
     link: 'https://saberzou.github.io/cards-of-answers/',
-    icon: ICON_BASE + '/cards-of-answers.png',
+    icon: ICON_BASE + '/cards-of-answers' + ICON_EXT,
     image: IMAGE_BASE + '/cards-of-answers.jpg',
     accent: '#6D1F42'
   },
@@ -2737,7 +2743,7 @@ const projects = [
     howMade: 'React for state management, Framer Motion for transitions, markdown rendering for content, dark mode support.',
     tags: ['Philosophy', 'React', 'Minimalist'],
     link: 'https://saberzou.github.io/axiom-thoughts/',
-    icon: ICON_BASE + '/axiom-thoughts.png',
+    icon: ICON_BASE + '/axiom-thoughts' + ICON_EXT,
     image: IMAGE_BASE + '/axiom-thoughts.jpg',
     accent: '#AFAB23'
   },
@@ -2750,7 +2756,7 @@ const projects = [
     howMade: 'Three.js for 3D environment, WebSocket simulation, agent behavior trees, particle effects for interactions.',
     tags: ['AI', 'Three.js', 'Simulation'],
     link: 'https://saberzou.github.io/agent-terrarium/',
-    icon: ICON_BASE + '/agent-terrarium.png',
+    icon: ICON_BASE + '/agent-terrarium' + ICON_EXT,
     image: IMAGE_BASE + '/agent-terrarium.jpg',
     accent: '#AACC96'
   },
@@ -2763,7 +2769,7 @@ const projects = [
     howMade: 'Infinite scroll canvas, masonry grid layout, copy-to-clipboard API, search indexing with Fuse.js.',
     tags: ['AI', 'Gallery', 'Web'],
     link: 'https://saberzou.github.io/json-prompts/',
-    icon: ICON_BASE + '/json-prompts.png',
+    icon: ICON_BASE + '/json-prompts' + ICON_EXT,
     image: IMAGE_BASE + '/json-prompts.jpg',
     accent: '#EFCE7B'
   },
@@ -2776,7 +2782,7 @@ const projects = [
     howMade: 'GSAP ScrollTrigger, swipe gesture handling, dynamic content loading, quiz scoring system.',
     tags: ['Education', 'Interactive', 'Web'],
     link: 'https://saberzou.github.io/between-floors/',
-    icon: ICON_BASE + '/between-floors.png',
+    icon: ICON_BASE + '/between-floors' + ICON_EXT,
     image: IMAGE_BASE + '/between-floors.jpg',
     accent: '#F4BEAE'
   },
@@ -2788,7 +2794,7 @@ const projects = [
     howMade: 'Static site generation, markdown content, custom syntax highlighting, dark theme design.',
     tags: ['AI', 'Writing', 'Web'],
     link: 'https://saberzou.github.io/atticus/',
-    icon: ICON_BASE + '/atticus.png',
+    icon: ICON_BASE + '/atticus' + ICON_EXT,
     image: IMAGE_BASE + '/atticus.jpg',
     accent: '#B8CEE8'
   },
@@ -2801,7 +2807,7 @@ const projects = [
     howMade: 'Three.js for 3D scene, NASA API integration, AI text generation, Cloudflare Workers for image proxy.',
     tags: ['3D', 'NASA', 'Three.js'],
     link: 'https://saberzou.github.io/mars_mission/',
-    icon: ICON_BASE + '/postcards-from-mars.png',
+    icon: ICON_BASE + '/postcards-from-mars' + ICON_EXT,
     image: IMAGE_BASE + '/postcards-from-mars.jpg',
     accent: '#EF6F3C'
   },
@@ -2813,7 +2819,7 @@ const projects = [
     howMade: 'Card-based layout, image optimization pipeline, i18n support, daily content scheduling.',
     tags: ['Art', 'Photography', 'Web'],
     link: 'https://saberzou.github.io/axel-art/',
-    icon: ICON_BASE + '/axel.png',
+    icon: ICON_BASE + '/axel' + ICON_EXT,
     image: IMAGE_BASE + '/axel-art.jpg',
     accent: '#D3B6D3'
   },
@@ -2825,7 +2831,7 @@ const projects = [
     howMade: 'Daily content rotation, Google Books API, localStorage for reading history, responsive calendar.',
     tags: ['Reading', 'Daily', 'Web'],
     link: 'https://saberzou.github.io/Littlebook',
-    icon: ICON_BASE + '/thiings/littlebook.png',
+    icon: ICON_BASE + '/thiings/littlebook' + ICON_EXT,
     image: IMAGE_BASE + '/littlebook.jpg',
     accent: '#FF7BAC'
   },
@@ -2838,7 +2844,7 @@ const projects = [
     howMade: 'Recommendation algorithm, TMDB API, mood-based filtering, poster art gallery, watchlist management.',
     tags: ['Movies', 'AI', 'Recommendations'],
     link: 'https://saberzou.github.io/movie-oracle/',
-    icon: ICON_BASE + '/movie-oracle.png',
+    icon: ICON_BASE + '/movie-oracle' + ICON_EXT,
     image: IMAGE_BASE + '/movie-oracle.jpg',
     accent: '#876029'
   },
@@ -2851,7 +2857,7 @@ const projects = [
     howMade: 'Interactive puzzle mechanics, artwork gallery, progressive difficulty, educational art facts.',
     tags: ['Game', 'Puzzle', 'Art'],
     link: 'https://saberzou.github.io/artuzzle/',
-    icon: ICON_BASE + '/artuzzle.png',
+    icon: ICON_BASE + '/artuzzle' + ICON_EXT,
     image: IMAGE_BASE + '/artuzzle.jpg',
     accent: '#FF6B6B'
   },
@@ -2864,7 +2870,7 @@ const projects = [
     howMade: 'Canvas-based pixel editor, daily prompt system, community gallery with voting, export to PNG.',
     tags: ['Pixel Art', 'Community', 'Creative'],
     link: 'https://saberzou.github.io/pixel-dailies/',
-    icon: ICON_BASE + '/pixel-dailies.png',
+    icon: ICON_BASE + '/pixel-dailies' + ICON_EXT,
     image: IMAGE_BASE + '/pixel-dailies.jpg',
     accent: '#AACC96'
   },
@@ -2877,7 +2883,7 @@ const projects = [
     howMade: 'Personal branding, portfolio showcase, blog integration.',
     tags: ['Portfolio', 'Personal', 'Web'],
     link: 'https://www.saberzou.com',
-    icon: ICON_BASE + '/me.png',
+    icon: ICON_BASE + '/me' + ICON_EXT,
     image: 'avatar.jpg',
     accent: '#FF8C42'
   }
@@ -2885,19 +2891,19 @@ const projects = [
 
 // System apps
 const systemApps = {
-  mail: { id: 'mail', title: 'Mail', accent: '#52A5CE', icon: ICON_BASE + '/thiings/mail.png' },
-  todo: { id: 'todo', title: 'To-Do', accent: '#EFCE7B', icon: ICON_BASE + '/thiings/todo.png' },
-  notes: { id: 'notes', title: 'Notes', accent: '#EFCE7B', icon: ICON_BASE + '/thiings/notes.png' },
-  camera: { id: 'camera', title: 'Camera', accent: '#EF6F3C', icon: ICON_BASE + '/thiings/camera.png' },
-  about: { id: 'about', title: 'About This Computer', accent: '#FF8C42', icon: ICON_BASE + '/thiings/info.png' },
-  finder: { id: 'finder', title: 'Finder', accent: '#B8CEE8', icon: ICON_BASE + '/thiings/finder.png' },
-  wallpaper: { id: 'wallpaper', title: 'Desktop & Screen Saver', accent: '#D3B6D3', icon: ICON_BASE + '/thiings/wallpaper.png' },
-  music: { id: 'music', title: 'Music', accent: '#FF7BAC', icon: ICON_BASE + '/thiings/music.png' },
-  messages: { id: 'messages', title: 'Messages', accent: '#007AFF', icon: ICON_BASE + '/thiings/messages.png' },
-  terminal: { id: 'terminal', title: 'Terminal', accent: '#25533F', icon: ICON_BASE + '/thiings/terminal.png' },
-  userguide: { id: 'userguide', title: 'User Guide', accent: '#52A5CE', icon: ICON_BASE + '/thiings/notes.png' },
-  shortcuts: { id: 'shortcuts', title: 'Keyboard Shortcuts', accent: '#EFCE7B', icon: ICON_BASE + '/thiings/terminal.png' },
-  trash: { id: 'trash', title: 'Trash', accent: '#7A5C3A', icon: ICON_BASE + '/thiings/trash.png' }
+  mail: { id: 'mail', title: 'Mail', accent: '#52A5CE', icon: ICON_BASE + '/thiings/mail' + ICON_EXT },
+  todo: { id: 'todo', title: 'To-Do', accent: '#EFCE7B', icon: ICON_BASE + '/thiings/todo' + ICON_EXT },
+  notes: { id: 'notes', title: 'Notes', accent: '#EFCE7B', icon: ICON_BASE + '/thiings/notes' + ICON_EXT },
+  camera: { id: 'camera', title: 'Camera', accent: '#EF6F3C', icon: ICON_BASE + '/thiings/camera' + ICON_EXT },
+  about: { id: 'about', title: 'About This Computer', accent: '#FF8C42', icon: ICON_BASE + '/thiings/info' + ICON_EXT },
+  finder: { id: 'finder', title: 'Finder', accent: '#B8CEE8', icon: ICON_BASE + '/thiings/finder' + ICON_EXT },
+  wallpaper: { id: 'wallpaper', title: 'Desktop & Screen Saver', accent: '#D3B6D3', icon: ICON_BASE + '/thiings/wallpaper' + ICON_EXT },
+  music: { id: 'music', title: 'Music', accent: '#FF7BAC', icon: ICON_BASE + '/thiings/music' + ICON_EXT },
+  messages: { id: 'messages', title: 'Messages', accent: '#007AFF', icon: ICON_BASE + '/thiings/messages' + ICON_EXT },
+  terminal: { id: 'terminal', title: 'Terminal', accent: '#25533F', icon: ICON_BASE + '/thiings/terminal' + ICON_EXT },
+  userguide: { id: 'userguide', title: 'User Guide', accent: '#52A5CE', icon: ICON_BASE + '/thiings/notes' + ICON_EXT },
+  shortcuts: { id: 'shortcuts', title: 'Keyboard Shortcuts', accent: '#EFCE7B', icon: ICON_BASE + '/thiings/terminal' + ICON_EXT },
+  trash: { id: 'trash', title: 'Trash', accent: '#7A5C3A', icon: ICON_BASE + '/thiings/trash' + ICON_EXT }
 };
 
 // Fake emails
@@ -3305,19 +3311,19 @@ function renderSystemApp(appId) {
 
     case 'trash':
       const junkFiles = [
-        { name: 'my-microsoft-resignation-letter-v47-FINAL-FINAL.docx', size: '24 KB', icon: ICON_BASE + '/trash/resignation-letter.png', date: 'Deleted 2 days ago' },
-        { name: 'design-system-v69-nice.sketch', size: '156 MB', icon: ICON_BASE + '/trash/design-system.png', date: 'Deleted 5 days ago' },
-        { name: 'untitled-startup-idea-037.md', size: '4 KB', icon: ICON_BASE + '/trash/startup-idea.png', date: 'Deleted 1 week ago' },
-        { name: 'definitely-not-a-selfie.heic', size: '8.2 MB', icon: ICON_BASE + '/trash/selfie.png', date: 'Deleted 3 days ago' },
-        { name: 'copilot-prompt-that-worked-once.txt', size: '1 KB', icon: ICON_BASE + '/trash/copilot-prompt.png', date: 'Deleted yesterday' },
-        { name: 'meeting-that-couldve-been-an-email.ics', size: '2 KB', icon: ICON_BASE + '/trash/meeting-calendar.png', date: 'Deleted 4 days ago' },
-        { name: 'edge-is-actually-good.pptx', size: '3.2 MB', icon: ICON_BASE + '/trash/edge-pptx.png', date: 'Deleted 2 weeks ago' },
-        { name: 'dad-jokes-for-team-standup.txt', size: '12 KB', icon: ICON_BASE + '/trash/dad-jokes.png', date: 'Deleted 1 day ago' },
-        { name: 'portfolio-site-v12-THIS-ONE.zip', size: '45 MB', icon: ICON_BASE + '/trash/portfolio-zip.png', date: 'Deleted 3 weeks ago' },
-        { name: 'why-i-mass-deleted-my-xiaohongshu.md', size: '8 KB', icon: ICON_BASE + '/trash/xiaohongshu-delete.png', date: 'Deleted 6 days ago' },
-        { name: 'comic-sans-design-system.figma', size: '89 MB', icon: ICON_BASE + '/trash/comic-sans-figma.png', date: 'Deleted 1 month ago' },
-        { name: 'saber-doodle-rejected-by-client.png', size: '2.4 MB', icon: ICON_BASE + '/trash/doodle-rejected.png', date: 'Deleted 2 days ago' },
-        { name: 'chatgpt-said-this-was-good.py', size: '4 KB', icon: ICON_BASE + '/trash/chatgpt-python.png', date: 'Deleted 1 hour ago' }
+        { name: 'my-microsoft-resignation-letter-v47-FINAL-FINAL.docx', size: '24 KB', icon: ICON_BASE + '/trash/resignation-letter' + ICON_EXT, date: 'Deleted 2 days ago' },
+        { name: 'design-system-v69-nice.sketch', size: '156 MB', icon: ICON_BASE + '/trash/design-system' + ICON_EXT, date: 'Deleted 5 days ago' },
+        { name: 'untitled-startup-idea-037.md', size: '4 KB', icon: ICON_BASE + '/trash/startup-idea' + ICON_EXT, date: 'Deleted 1 week ago' },
+        { name: 'definitely-not-a-selfie.heic', size: '8.2 MB', icon: ICON_BASE + '/trash/selfie' + ICON_EXT, date: 'Deleted 3 days ago' },
+        { name: 'copilot-prompt-that-worked-once.txt', size: '1 KB', icon: ICON_BASE + '/trash/copilot-prompt' + ICON_EXT, date: 'Deleted yesterday' },
+        { name: 'meeting-that-couldve-been-an-email.ics', size: '2 KB', icon: ICON_BASE + '/trash/meeting-calendar' + ICON_EXT, date: 'Deleted 4 days ago' },
+        { name: 'edge-is-actually-good.pptx', size: '3.2 MB', icon: ICON_BASE + '/trash/edge-pptx' + ICON_EXT, date: 'Deleted 2 weeks ago' },
+        { name: 'dad-jokes-for-team-standup.txt', size: '12 KB', icon: ICON_BASE + '/trash/dad-jokes' + ICON_EXT, date: 'Deleted 1 day ago' },
+        { name: 'portfolio-site-v12-THIS-ONE.zip', size: '45 MB', icon: ICON_BASE + '/trash/portfolio-zip' + ICON_EXT, date: 'Deleted 3 weeks ago' },
+        { name: 'why-i-mass-deleted-my-xiaohongshu.md', size: '8 KB', icon: ICON_BASE + '/trash/xiaohongshu-delete' + ICON_EXT, date: 'Deleted 6 days ago' },
+        { name: 'comic-sans-design-system.figma', size: '89 MB', icon: ICON_BASE + '/trash/comic-sans-figma' + ICON_EXT, date: 'Deleted 1 month ago' },
+        { name: 'saber-doodle-rejected-by-client.png', size: '2.4 MB', icon: ICON_BASE + '/trash/doodle-rejected' + ICON_EXT, date: 'Deleted 2 days ago' },
+        { name: 'chatgpt-said-this-was-good.py', size: '4 KB', icon: ICON_BASE + '/trash/chatgpt-python' + ICON_EXT, date: 'Deleted 1 hour ago' }
       ];
       return '<div style="height: 100%; display: flex; flex-direction: column; background: #fafafa;">' +
         '<div style="padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.8);">' +

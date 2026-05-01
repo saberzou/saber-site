@@ -398,6 +398,11 @@ img[src*="icons-pixel"] {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
+/* Flip pixel SVGs to white on dark wallpapers for legibility.
+   Only targets .svg (vector) icons; raster fallbacks keep their colors. */
+body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
+  filter: invert(1);
+}
 
 /* ─── Desktop Wallpaper ─── */
 
@@ -4335,10 +4340,9 @@ function applyWallpaper(idx) {
 
 function updateMenuBarTheme(wp) {
   var menuBar = document.getElementById('menu-bar');
-  if (!menuBar) return;
   if (wp.gradient) {
-    // For gradients, parse first color or default to light
-    menuBar.classList.remove('menu-bar-dark');
+    if (menuBar) menuBar.classList.remove('menu-bar-dark');
+    document.body.classList.remove('wallpaper-dark');
     return;
   }
   var img = new Image();
@@ -4352,23 +4356,22 @@ function updateMenuBarTheme(wp) {
     canvas.height = h;
     var ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0, w, h);
-    // Sample the top strip (menu bar area ~10% of height)
+    function avgLum(data) {
+      var total = 0, count = data.length / 4;
+      for (var i = 0; i < data.length; i += 4) {
+        total += 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+      }
+      return total / count;
+    }
     var stripH = Math.max(4, Math.round(h * 0.08));
-    var data = ctx.getImageData(0, 0, w, stripH).data;
-    var totalLum = 0;
-    var count = data.length / 4;
-    for (var i = 0; i < data.length; i += 4) {
-      totalLum += 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-    }
-    var avgLum = totalLum / count;
-    if (avgLum < 128) {
-      menuBar.classList.add('menu-bar-dark');
-    } else {
-      menuBar.classList.remove('menu-bar-dark');
-    }
+    var topLum = avgLum(ctx.getImageData(0, 0, w, stripH).data);
+    if (menuBar) menuBar.classList.toggle('menu-bar-dark', topLum < 128);
+    var fullLum = avgLum(ctx.getImageData(0, 0, w, h).data);
+    document.body.classList.toggle('wallpaper-dark', fullLum < 128);
   };
   img.onerror = function() {
-    menuBar.classList.remove('menu-bar-dark');
+    if (menuBar) menuBar.classList.remove('menu-bar-dark');
+    document.body.classList.remove('wallpaper-dark');
   };
   img.src = wp.url;
 }

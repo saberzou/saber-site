@@ -401,7 +401,6 @@ img[src*="icons-pixel"] {
 /* Pixel icons read large on the desktop — scale them to 0.8 visually
    while keeping the original click target. */
 .desktop-icon-img img[src*="icons-pixel"],
-.dock-item img[src*="icons-pixel"],
 .mobile-dock-item img[src*="icons-pixel"] {
   transform: scale(0.8);
 }
@@ -646,7 +645,6 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
 .desktop-icon-img {
   width: 64px;
   height: 64px;
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1151,11 +1149,10 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
 }
 
 .dock-item img {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
   pointer-events: none;
-  border-radius: 10px;
 }
 
 .dock-tooltip {
@@ -1292,7 +1289,6 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    border-radius: 12px;
   }
   
   .mobile-menu-btn {
@@ -1359,7 +1355,6 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 12px;
   }
   
   .desktop-icons {

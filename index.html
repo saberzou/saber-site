@@ -398,6 +398,11 @@ img[src*="icons-pixel"] {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
+/* Pixel icons read large on the desktop — scale them to 0.8 visually
+   while keeping the original click target. */
+.desktop-icon-img img[src*="icons-pixel"] {
+  transform: scale(0.8);
+}
 /* Flip pixel SVGs to white on dark wallpapers for legibility.
    Only targets .svg (vector) icons; raster fallbacks keep their colors. */
 body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {

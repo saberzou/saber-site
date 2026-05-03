@@ -1149,10 +1149,15 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
 }
 
 .dock-item img {
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
   pointer-events: none;
+}
+/* Pixel icons are visually heavier — render them smaller in the dock. */
+.dock-item img[src*="icons-pixel"] {
+  width: 40px;
+  height: 40px;
 }
 
 .dock-tooltip {

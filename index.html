@@ -2499,6 +2499,58 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   50%  { transform: translateY(-14px) rotate(-3deg); }
   75%  { transform: translateY(-6px) rotate(5deg); }
 }
+/* Archer dock welcome */
+.dock-item.archer-dock img {
+  border-radius: 50%;
+  object-fit: cover;
+}
+@keyframes archerWave {
+  0%, 100% { transform: translateY(0) scale(1); }
+  20%  { transform: translateY(-22px) scale(1.08); }
+  40%  { transform: translateY(0) scale(1); }
+  55%  { transform: translateY(-14px) scale(1.05); }
+  70%  { transform: translateY(0) scale(1); }
+}
+.dock-item.archer-waving img {
+  animation: archerWave 1.4s ease-in-out 2;
+  transform-origin: center bottom;
+}
+.archer-bubble {
+  position: fixed;
+  bottom: 110px;
+  z-index: 9999;
+  background: rgba(255,255,255,0.95);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  color: #2a1a0e;
+  padding: 10px 16px;
+  border-radius: 18px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,140,66,0.3);
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px) scale(0.9);
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap;
+  max-width: 80vw;
+}
+.archer-bubble.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.archer-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 1px 1px 0 rgba(255,140,66,0.3);
+}
 </style>
 </head>
 <body>
@@ -3725,6 +3777,60 @@ function initDock() {
   trashBtn.onclick = function() { openApp('trash'); };
   dock.appendChild(trashBtn);
   permanentDockItems.add('trash');
+
+  // Insert Archer dock item before the trash separator
+  var archerBtn = document.createElement('button');
+  archerBtn.className = 'dock-item archer-dock';
+  archerBtn.dataset.id = 'archer';
+  archerBtn.innerHTML = '<img src="images/archer-avatar.jpg" alt="Archer"><div class="dock-tooltip">Archer 🏹</div><div class="dock-indicator"></div>';
+  archerBtn.onclick = function() {
+    openApp('messages');
+    setTimeout(function() { if (typeof switchChat === 'function') switchChat('archer'); }, 120);
+    var b = document.getElementById('archer-welcome-bubble');
+    if (b) b.classList.remove('show');
+  };
+  dock.insertBefore(archerBtn, trashSep);
+  permanentDockItems.add('archer');
+}
+
+function archerWelcome() {
+  var dock = document.getElementById('dock');
+  if (!dock) return;
+  var btn = dock.querySelector('.dock-item.archer-dock');
+  if (!btn) return;
+  // Wave animation
+  btn.classList.add('archer-waving');
+  setTimeout(function() { btn.classList.remove('archer-waving'); }, 3000);
+
+  // Speech bubble — first visit gets the longer hello, returners get a brief wave
+  var seen = localStorage.getItem('saberOS-archerHello');
+  var msg = seen ? "Welcome back 🏹" : "Hey, I'm Archer — welcome to SaberOS 🏹";
+  localStorage.setItem('saberOS-archerHello', '1');
+
+  var bubble = document.createElement('div');
+  bubble.id = 'archer-welcome-bubble';
+  bubble.className = 'archer-bubble';
+  bubble.textContent = msg;
+  document.body.appendChild(bubble);
+
+  // Position above the dock button
+  function positionBubble() {
+    var r = btn.getBoundingClientRect();
+    bubble.style.left = (r.left + r.width/2 - bubble.offsetWidth/2) + 'px';
+    bubble.style.bottom = (window.innerHeight - r.top + 14) + 'px';
+  }
+  requestAnimationFrame(function() {
+    positionBubble();
+    bubble.classList.add('show');
+  });
+  window.addEventListener('resize', positionBubble);
+
+  bubble.onclick = function() { btn.click(); };
+
+  setTimeout(function() {
+    bubble.classList.remove('show');
+    setTimeout(function() { if (bubble.parentNode) bubble.parentNode.removeChild(bubble); }, 500);
+  }, seen ? 3000 : 5500);
 }
 
 function addTempDockItem(id, data) {
@@ -5075,8 +5181,8 @@ window.addEventListener('load', function() {
     document.getElementById('boot-screen').classList.add('fade-out');
     setTimeout(function() {
       document.getElementById('boot-screen').style.display = 'none';
-      // Open About app after boot
-      openApp('about');
+      // Archer waves hello from the dock instead of opening the About app
+      archerWelcome();
     }, 600);
   }, 1500);
   

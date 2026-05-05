@@ -3764,58 +3764,35 @@ function initDock() {
   permanentDockItems.add('trash');
 }
 
-// ─── Floating Archer Welcome (post-boot) ───
+// ─── Archer welcome ─── use the existing pixel character's thought bubble
 function archerWelcome() {
-  // Remove any prior instance
-  var prior = document.getElementById('archer-welcome-float');
-  if (prior) prior.remove();
-  var priorBubble = document.getElementById('archer-welcome-bubble');
-  if (priorBubble) priorBubble.remove();
-
   var seen = localStorage.getItem('saberOS-archerHello');
   var msg = seen ? "Welcome back 🏹" : "Hey, I'm Archer — welcome to SaberOS 🏹";
   localStorage.setItem('saberOS-archerHello', '1');
-
-  // Floating Archer avatar (bottom-right, above dock)
-  var avatar = document.createElement('div');
-  avatar.id = 'archer-welcome-float';
-  avatar.title = 'Archer';
-  avatar.style.cssText = 'position:fixed;bottom:120px;right:44px;width:64px;height:64px;border-radius:50%;background:#FF6B35 url(images/archer-avatar.jpg) center/175% no-repeat;background-position:50% 30%;cursor:pointer;z-index:9998;animation:archerFloat 3s ease-in-out infinite;box-shadow:0 8px 28px rgba(255,107,53,0.45),0 0 0 3px rgba(255,255,255,0.6);transition:transform 0.2s;';
-  avatar.onmouseenter = function() { avatar.style.transform = 'scale(1.08)'; };
-  avatar.onmouseleave = function() { avatar.style.transform = ''; };
-
-  // Speech bubble
-  var bubble = document.createElement('div');
-  bubble.id = 'archer-welcome-bubble';
-  bubble.className = 'archer-bubble';
-  bubble.textContent = msg;
-  bubble.style.right = '44px';
-  bubble.style.left = 'auto';
-  bubble.style.bottom = '195px';
-
-  document.body.appendChild(avatar);
-  document.body.appendChild(bubble);
-  requestAnimationFrame(function() { bubble.classList.add('show'); });
-
-  function dismiss() {
-    bubble.classList.remove('show');
-    avatar.style.transition = 'opacity 0.4s, transform 0.4s';
-    avatar.style.opacity = '0';
-    avatar.style.transform = 'scale(0.6) translateY(20px)';
+  // Wait a tick for the Archer character to mount, then push our greeting through its thought bubble
+  function tryGreet(attempt) {
+    var el = document.getElementById('axel-thought');
+    if (!el) {
+      if (attempt < 30) return setTimeout(function(){ tryGreet(attempt+1); }, 200);
+      return;
+    }
+    el.textContent = msg;
+    el.classList.add('show');
+    // Hook into the character instance to keep it from auto-overwriting our greeting
+    if (window.__archerInstance) {
+      window.__archerInstance.thoughtVisible = true;
+      window.__archerInstance.lastThought = Date.now();
+      window.__archerInstance.thoughtIndex = 1; // skip the default first thought
+    }
     setTimeout(function() {
-      if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
-      if (avatar.parentNode) avatar.parentNode.removeChild(avatar);
-    }, 500);
+      el.classList.remove('show');
+      if (window.__archerInstance) {
+        window.__archerInstance.thoughtVisible = false;
+        window.__archerInstance.nextThoughtTime = Date.now() + 8000;
+      }
+    }, seen ? 3500 : 5500);
   }
-
-  avatar.onclick = function() {
-    openApp('messages');
-    setTimeout(function() { if (typeof switchChat === 'function') switchChat('archer'); }, 120);
-    dismiss();
-  };
-  bubble.onclick = avatar.onclick;
-
-  setTimeout(dismiss, seen ? 3500 : 6000);
+  tryGreet(0);
 }
 
 function addTempDockItem(id, data) {
@@ -5166,7 +5143,7 @@ window.addEventListener('load', function() {
     document.getElementById('boot-screen').classList.add('fade-out');
     setTimeout(function() {
       document.getElementById('boot-screen').style.display = 'none';
-      // Archer waves hello from the dock instead of opening the About app
+      // Archer waves hello — first visit gets the longer hello, returners get a brief wave
       archerWelcome();
     }, 600);
   }, 1500);
@@ -6788,6 +6765,7 @@ function showKeyboardShortcuts() {
   window.addEventListener('load', function() {
     setTimeout(() => {
       window.axelCompanion = new AxelCompanion();
+      window.__archerInstance = window.axelCompanion;
     }, 1000); // Start slightly after boot
   });
 })();

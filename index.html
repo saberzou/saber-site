@@ -2499,22 +2499,7 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   50%  { transform: translateY(-14px) rotate(-3deg); }
   75%  { transform: translateY(-6px) rotate(5deg); }
 }
-/* Archer dock welcome */
-.dock-item.archer-dock img {
-  border-radius: 50%;
-  object-fit: cover;
-}
-@keyframes archerWave {
-  0%, 100% { transform: translateY(0) scale(1); }
-  20%  { transform: translateY(-22px) scale(1.08); }
-  40%  { transform: translateY(0) scale(1); }
-  55%  { transform: translateY(-14px) scale(1.05); }
-  70%  { transform: translateY(0) scale(1); }
-}
-.dock-item.archer-waving img {
-  animation: archerWave 1.4s ease-in-out 2;
-  transform-origin: center bottom;
-}
+/* Archer floating welcome */
 .archer-bubble {
   position: fixed;
   bottom: 110px;
@@ -3777,60 +3762,60 @@ function initDock() {
   trashBtn.onclick = function() { openApp('trash'); };
   dock.appendChild(trashBtn);
   permanentDockItems.add('trash');
-
-  // Insert Archer dock item before the trash separator
-  var archerBtn = document.createElement('button');
-  archerBtn.className = 'dock-item archer-dock';
-  archerBtn.dataset.id = 'archer';
-  archerBtn.innerHTML = '<img src="images/archer-avatar.jpg" alt="Archer"><div class="dock-tooltip">Archer 🏹</div><div class="dock-indicator"></div>';
-  archerBtn.onclick = function() {
-    openApp('messages');
-    setTimeout(function() { if (typeof switchChat === 'function') switchChat('archer'); }, 120);
-    var b = document.getElementById('archer-welcome-bubble');
-    if (b) b.classList.remove('show');
-  };
-  dock.insertBefore(archerBtn, trashSep);
-  permanentDockItems.add('archer');
 }
 
+// ─── Floating Archer Welcome (post-boot) ───
 function archerWelcome() {
-  var dock = document.getElementById('dock');
-  if (!dock) return;
-  var btn = dock.querySelector('.dock-item.archer-dock');
-  if (!btn) return;
-  // Wave animation
-  btn.classList.add('archer-waving');
-  setTimeout(function() { btn.classList.remove('archer-waving'); }, 3000);
+  // Remove any prior instance
+  var prior = document.getElementById('archer-welcome-float');
+  if (prior) prior.remove();
+  var priorBubble = document.getElementById('archer-welcome-bubble');
+  if (priorBubble) priorBubble.remove();
 
-  // Speech bubble — first visit gets the longer hello, returners get a brief wave
   var seen = localStorage.getItem('saberOS-archerHello');
   var msg = seen ? "Welcome back 🏹" : "Hey, I'm Archer — welcome to SaberOS 🏹";
   localStorage.setItem('saberOS-archerHello', '1');
 
+  // Floating Archer avatar (bottom-right, above dock)
+  var avatar = document.createElement('div');
+  avatar.id = 'archer-welcome-float';
+  avatar.title = 'Archer';
+  avatar.style.cssText = 'position:fixed;bottom:120px;right:44px;width:64px;height:64px;border-radius:50%;background:#FF6B35 url(images/archer-avatar.jpg) center/175% no-repeat;background-position:50% 30%;cursor:pointer;z-index:9998;animation:archerFloat 3s ease-in-out infinite;box-shadow:0 8px 28px rgba(255,107,53,0.45),0 0 0 3px rgba(255,255,255,0.6);transition:transform 0.2s;';
+  avatar.onmouseenter = function() { avatar.style.transform = 'scale(1.08)'; };
+  avatar.onmouseleave = function() { avatar.style.transform = ''; };
+
+  // Speech bubble
   var bubble = document.createElement('div');
   bubble.id = 'archer-welcome-bubble';
   bubble.className = 'archer-bubble';
   bubble.textContent = msg;
+  bubble.style.right = '44px';
+  bubble.style.left = 'auto';
+  bubble.style.bottom = '195px';
+
+  document.body.appendChild(avatar);
   document.body.appendChild(bubble);
+  requestAnimationFrame(function() { bubble.classList.add('show'); });
 
-  // Position above the dock button
-  function positionBubble() {
-    var r = btn.getBoundingClientRect();
-    bubble.style.left = (r.left + r.width/2 - bubble.offsetWidth/2) + 'px';
-    bubble.style.bottom = (window.innerHeight - r.top + 14) + 'px';
-  }
-  requestAnimationFrame(function() {
-    positionBubble();
-    bubble.classList.add('show');
-  });
-  window.addEventListener('resize', positionBubble);
-
-  bubble.onclick = function() { btn.click(); };
-
-  setTimeout(function() {
+  function dismiss() {
     bubble.classList.remove('show');
-    setTimeout(function() { if (bubble.parentNode) bubble.parentNode.removeChild(bubble); }, 500);
-  }, seen ? 3000 : 5500);
+    avatar.style.transition = 'opacity 0.4s, transform 0.4s';
+    avatar.style.opacity = '0';
+    avatar.style.transform = 'scale(0.6) translateY(20px)';
+    setTimeout(function() {
+      if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
+      if (avatar.parentNode) avatar.parentNode.removeChild(avatar);
+    }, 500);
+  }
+
+  avatar.onclick = function() {
+    openApp('messages');
+    setTimeout(function() { if (typeof switchChat === 'function') switchChat('archer'); }, 120);
+    dismiss();
+  };
+  bubble.onclick = avatar.onclick;
+
+  setTimeout(dismiss, seen ? 3500 : 6000);
 }
 
 function addTempDockItem(id, data) {

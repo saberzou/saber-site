@@ -3211,7 +3211,8 @@ function renderSystemApp(appId) {
     case 'camera':
       return '<div style="padding: 20px;">' +
         '<div class="camera-viewfinder" id="camera-viewfinder">' +
-          '<video class="camera-video" id="camera-video" autoplay playsinline style="display: none;"></video>' +
+          '<video class="camera-video" id="camera-video" autoplay playsinline muted style="display: none;"></video>' +
+          '<canvas class="camera-ascii" id="camera-ascii" style="display:none;"></canvas>' +
           '<div class="camera-placeholder" id="camera-placeholder">' +
             '<div class="camera-placeholder-bear">🐻</div>' +
             '<p>No camera? No worries.<br>Here\'s a photo of a bear.</p>' +
@@ -3223,6 +3224,7 @@ function renderSystemApp(appId) {
         '<div class="camera-preview" id="camera-preview" style="display: none;">' +
           '<p style="font-size: 0.8rem; color: var(--fg-muted); margin-bottom: 8px;">Last captured:</p>' +
           '<img id="camera-preview-img" src="" alt="Captured">' +
+          '<div style="margin-top:8px;"><a id="camera-preview-download" href="#" download="ascii-cam.png" style="font-size:0.85rem;color:var(--blood-orange);text-decoration:none;">↓ Download PNG</a></div>' +
         '</div>' +
       '</div>';
       
@@ -4686,43 +4688,124 @@ function resetNotesToDefaults() {
   if (notesData.length > 0) loadNote(notesData[0].id);
 }
 
-// ─── Camera App Functions ───
+// ─── Camera App ─ ASCII Cam ───
+// Live webcam → grid sample → colored ASCII chars rendered on a canvas.
+// Tight density, color per pixel. Capture freezes the current frame as PNG.
 let cameraStream = null;
+let cameraRAF = null;
+let cameraSampleCanvas = null;
+let cameraSampleCtx = null;
+
+const ASCII_RAMP = ' .,:;i1tfLCG08@'; // dark → light, tight density
+const ASCII_COLS = 140;                 // horizontal char count (tight)
+const ASCII_CELL_W = 6;                 // px per char on output canvas
+const ASCII_CELL_H = 10;                // taller than wide — monospace ratio
 
 function initCamera() {
   const video = document.getElementById('camera-video');
   const placeholder = document.getElementById('camera-placeholder');
-  
-  if (!video || !placeholder) return;
-  
-  navigator.mediaDevices.getUserMedia({ video: true })
+  const ascii = document.getElementById('camera-ascii');
+  if (!video || !placeholder || !ascii) return;
+
+  if (cameraStream) { startAsciiLoop(); return; } // already running
+
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
     .then(function(stream) {
       cameraStream = stream;
       video.srcObject = stream;
-      video.style.display = 'block';
-      placeholder.style.display = 'none';
+      video.onloadedmetadata = function() {
+        video.play();
+        placeholder.style.display = 'none';
+        ascii.style.display = 'block';
+        startAsciiLoop();
+      };
     })
     .catch(function() {
       // Keep bear placeholder on error
     });
 }
 
-function takePhoto() {
+function startAsciiLoop() {
   const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('camera-ascii');
+  if (!video || !canvas || !video.videoWidth) return;
+
+  // Match output canvas to viewfinder aspect, scaled by char cell size
+  const aspect = video.videoHeight / video.videoWidth;
+  const cols = ASCII_COLS;
+  const rows = Math.round(cols * aspect * (ASCII_CELL_W / ASCII_CELL_H));
+  canvas.width = cols * ASCII_CELL_W;
+  canvas.height = rows * ASCII_CELL_H;
+
+  if (!cameraSampleCanvas) {
+    cameraSampleCanvas = document.createElement('canvas');
+    cameraSampleCtx = cameraSampleCanvas.getContext('2d', { willReadFrequently: true });
+  }
+  cameraSampleCanvas.width = cols;
+  cameraSampleCanvas.height = rows;
+
+  const outCtx = canvas.getContext('2d');
+  outCtx.font = ASCII_CELL_H + 'px ui-monospace, Menlo, Consolas, monospace';
+  outCtx.textBaseline = 'top';
+
+  function frame() {
+    if (!cameraStream || !document.getElementById('camera-ascii')) {
+      cameraRAF = null;
+      return;
+    }
+    drawAsciiFrame(video, canvas, outCtx, cols, rows);
+    cameraRAF = requestAnimationFrame(frame);
+  }
+  if (cameraRAF) cancelAnimationFrame(cameraRAF);
+  cameraRAF = requestAnimationFrame(frame);
+}
+
+function drawAsciiFrame(video, canvas, ctx, cols, rows) {
+  // Draw video downscaled into the sample canvas (fast luminance + color sampling)
+  // Mirror horizontally so it feels like a selfie cam.
+  cameraSampleCtx.save();
+  cameraSampleCtx.translate(cols, 0);
+  cameraSampleCtx.scale(-1, 1);
+  cameraSampleCtx.drawImage(video, 0, 0, cols, rows);
+  cameraSampleCtx.restore();
+
+  const data = cameraSampleCtx.getImageData(0, 0, cols, rows).data;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const rampLen = ASCII_RAMP.length - 1;
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const i = (y * cols + x) * 4;
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      // Perceptual luminance → char
+      const lum = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+      const ch = ASCII_RAMP[Math.floor(lum * rampLen)];
+      if (ch === ' ') continue;
+      // Boost saturation a touch so colors pop on black
+      ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+      ctx.fillText(ch, x * ASCII_CELL_W, y * ASCII_CELL_H);
+    }
+  }
+}
+
+function takePhoto() {
+  const ascii = document.getElementById('camera-ascii');
   const preview = document.getElementById('camera-preview');
   const previewImg = document.getElementById('camera-preview-img');
-  
-  if (video && video.style.display !== 'none') {
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    previewImg.src = canvas.toDataURL('image/png');
+  const dl = document.getElementById('camera-preview-download');
+
+  if (cameraStream && ascii && ascii.style.display !== 'none') {
+    const dataUrl = ascii.toDataURL('image/png');
+    previewImg.src = dataUrl;
+    if (dl) {
+      dl.href = dataUrl;
+      dl.download = 'ascii-cam-' + Date.now() + '.png';
+    }
   } else {
-    // Bear mode - capture the bear
-    previewImg.src = 'data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"200\"><text x=\"50%\" y=\"50%\" font-size=\"100\" text-anchor=\"middle\" dominant-baseline=\"middle\">🐻</text></svg>';
+    previewImg.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><text x="50%" y="50%" font-size="100" text-anchor="middle" dominant-baseline="middle">🐻</text></svg>';
+    if (dl) dl.removeAttribute('href');
   }
-  
   preview.style.display = 'block';
 }
 

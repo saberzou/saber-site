@@ -823,48 +823,30 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
 }
 
 .window-btn.close::before {
-  content: '×';
-  color: rgba(0,0,0,0.5);
-  font-size: 10px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  transform: none;
+  content: '';
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 13'><line x1='4' y1='4' x2='9' y2='9' stroke='%23000' stroke-opacity='0.6' stroke-width='1.4' stroke-linecap='round'/><line x1='9' y1='4' x2='4' y2='9' stroke='%23000' stroke-opacity='0.6' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 13px 13px;
+  top: 0; left: 0; right: 0; bottom: 0;
 }
 
 .window-btn.minimize::before {
-  content: '−';
-  color: rgba(0,0,0,0.5);
-  font-size: 10px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  transform: none;
+  content: '';
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 13'><line x1='3.5' y1='6.5' x2='9.5' y2='6.5' stroke='%23000' stroke-opacity='0.6' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 13px 13px;
+  top: 0; left: 0; right: 0; bottom: 0;
 }
 
 .window-btn.maximize::before {
-  content: '+';
-  color: rgba(0,0,0,0.5);
-  font-size: 10px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  transform: none;
+  content: '';
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 13'><line x1='3.5' y1='6.5' x2='9.5' y2='6.5' stroke='%23000' stroke-opacity='0.6' stroke-width='1.4' stroke-linecap='round'/><line x1='6.5' y1='3.5' x2='6.5' y2='9.5' stroke='%23000' stroke-opacity='0.6' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 13px 13px;
+  top: 0; left: 0; right: 0; bottom: 0;
 }
 
 .window-btn:hover::before {

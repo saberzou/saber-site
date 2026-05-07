@@ -1917,15 +1917,23 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   opacity: 0.5;
 }
 
-/* Camera App */
+/* Camera App — immersive */
+.camera-app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  border-radius: 0 0 12px 12px;
+}
+
 .camera-viewfinder {
-  background: #1a1a1a;
-  aspect-ratio: 4/3;
+  position: absolute;
+  inset: 0;
+  background: #0a0a0a;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  border-radius: 8px;
   overflow: hidden;
 }
 
@@ -1933,6 +1941,16 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.camera-ascii {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #000;
+  object-fit: contain;
 }
 
 .camera-placeholder {
@@ -1947,40 +1965,73 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
 }
 
 .camera-controls {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 20px 24px 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  gap: 20px;
+  gap: 24px;
+  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%);
+  pointer-events: none;
+  z-index: 5;
 }
+.camera-controls > * { pointer-events: auto; }
 
 .camera-shutter {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  border: 4px solid var(--blood-orange);
-  background: white;
+  border: 4px solid rgba(255,255,255,0.95);
+  background: rgba(255,255,255,0.95);
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: transform 0.1s, background 0.15s;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.35), 0 4px 18px rgba(0,0,0,0.5);
 }
-
-.camera-shutter:active {
-  transform: scale(0.95);
-}
+.camera-shutter:hover { background: var(--blood-orange); border-color: var(--blood-orange); }
+.camera-shutter:active { transform: scale(0.92); }
 
 .camera-preview {
-  margin-top: 20px;
-  padding: 16px;
-  background: rgba(45, 27, 0, 0.03);
-  border-radius: 8px;
-  text-align: center;
+  position: absolute;
+  left: 18px;
+  bottom: 22px;
+  width: 84px;
+  height: 84px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #111;
+  border: 2px solid rgba(255,255,255,0.85);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  display: none;
+  z-index: 6;
+  cursor: pointer;
 }
-
 .camera-preview img {
-  max-width: 100%;
-  border-radius: 6px;
-  margin-bottom: 8px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
+.camera-preview-download {
+  position: absolute;
+  right: 18px;
+  bottom: 38px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  color: white;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 18px;
+  border: 1px solid rgba(255,255,255,0.25);
+  z-index: 6;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.camera-preview-download:hover { background: var(--blood-orange); }
 
 /* About This Mac */
 .about-mac {
@@ -3209,7 +3260,7 @@ function renderSystemApp(appId) {
       '</div>';
       
     case 'camera':
-      return '<div style="padding: 20px;">' +
+      return '<div class="camera-app">' +
         '<div class="camera-viewfinder" id="camera-viewfinder">' +
           '<video class="camera-video" id="camera-video" autoplay playsinline muted style="display: none;"></video>' +
           '<canvas class="camera-ascii" id="camera-ascii" style="display:none;"></canvas>' +
@@ -3218,13 +3269,12 @@ function renderSystemApp(appId) {
             '<p>No camera? No worries.<br>Here\'s a photo of a bear.</p>' +
           '</div>' +
         '</div>' +
-        '<div class="camera-controls">' +
-          '<button class="camera-shutter" id="camera-shutter" onclick="takePhoto()"></button>' +
-        '</div>' +
-        '<div class="camera-preview" id="camera-preview" style="display: none;">' +
-          '<p style="font-size: 0.8rem; color: var(--fg-muted); margin-bottom: 8px;">Last captured:</p>' +
+        '<div class="camera-preview" id="camera-preview" onclick="openCapturedPhoto()" title="View capture">' +
           '<img id="camera-preview-img" src="" alt="Captured">' +
-          '<div style="margin-top:8px;"><a id="camera-preview-download" href="#" download="ascii-cam.png" style="font-size:0.85rem;color:var(--blood-orange);text-decoration:none;">↓ Download PNG</a></div>' +
+        '</div>' +
+        '<a class="camera-preview-download" id="camera-preview-download" href="#" download="ascii-cam.png" title="Download PNG" onclick="event.stopPropagation()">↓</a>' +
+        '<div class="camera-controls">' +
+          '<button class="camera-shutter" id="camera-shutter" onclick="takePhoto()" title="Capture"></button>' +
         '</div>' +
       '</div>';
       
@@ -3877,7 +3927,11 @@ function openApp(id) {
   // Check if it's a system app
   const sysApp = systemApps[id];
   if (sysApp) {
-    createWindow(id, sysApp, { isSystemApp: true, width: id === 'about' ? '400px' : '600px' });
+    createWindow(id, sysApp, {
+      isSystemApp: true,
+      width: id === 'about' ? '400px' : (id === 'camera' ? '720px' : '600px'),
+      height: id === 'camera' ? '620px' : undefined
+    });
     if (id === 'music') {
       setTimeout(initMusicApp, 200);
     }
@@ -4795,18 +4849,39 @@ function takePhoto() {
   const previewImg = document.getElementById('camera-preview-img');
   const dl = document.getElementById('camera-preview-download');
 
-  if (cameraStream && ascii && ascii.style.display !== 'none') {
-    const dataUrl = ascii.toDataURL('image/png');
-    previewImg.src = dataUrl;
-    if (dl) {
-      dl.href = dataUrl;
-      dl.download = 'ascii-cam-' + Date.now() + '.png';
-    }
-  } else {
-    previewImg.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><text x="50%" y="50%" font-size="100" text-anchor="middle" dominant-baseline="middle">🐻</text></svg>';
-    if (dl) dl.removeAttribute('href');
+  // Quick flash effect on the viewfinder
+  const vf = document.getElementById('camera-viewfinder');
+  if (vf) {
+    const flash = document.createElement('div');
+    flash.style.cssText = 'position:absolute;inset:0;background:#fff;opacity:0.85;pointer-events:none;z-index:4;transition:opacity 0.4s;';
+    vf.appendChild(flash);
+    requestAnimationFrame(function() { flash.style.opacity = '0'; });
+    setTimeout(function() { flash.remove(); }, 450);
   }
+
+  let dataUrl = null;
+  if (cameraStream && ascii && ascii.style.display !== 'none') {
+    dataUrl = ascii.toDataURL('image/png');
+  } else {
+    dataUrl = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><text x="50%" y="50%" font-size="100" text-anchor="middle" dominant-baseline="middle">🐻</text></svg>';
+  }
+  previewImg.src = dataUrl;
+  window._lastAsciiCapture = dataUrl;
   preview.style.display = 'block';
+  if (dl) {
+    dl.href = dataUrl;
+    dl.download = 'ascii-cam-' + Date.now() + '.png';
+    dl.style.display = 'flex';
+  }
+}
+
+function openCapturedPhoto() {
+  const url = window._lastAsciiCapture;
+  if (!url) return;
+  const w = window.open('', '_blank');
+  if (!w) return;
+  w.document.write('<html><head><title>ASCII capture</title><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;}</style></head><body><img src="' + url + '"></body></html>');
+  w.document.close();
 }
 
 // ─── Messages App Functions ───

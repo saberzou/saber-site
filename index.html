@@ -2968,6 +2968,25 @@ const systemApps = {
   trash: { id: 'trash', title: 'Trash', accent: '#7A5C3A', icon: ICON_BASE + '/thiings/trash' + ICON_EXT }
 };
 
+// ─── Asset preload (fires immediately during Hello screen) ───
+// Warms the browser cache so project icons + wallpapers are ready by the time
+// the boot screen fades out. Fire-and-forget — never blocks entry.
+(function preloadAssets() {
+  var warm = function(src) { var img = new Image(); img.src = src; };
+  // Project + system app icons — available now
+  projects.forEach(function(p) { if (p.icon) warm(p.icon); });
+  Object.keys(systemApps).forEach(function(k) { if (systemApps[k].icon) warm(systemApps[k].icon); });
+  // Wallpapers are defined later in the script — defer to next tick so the
+  // picker preview + initial wallpaper are warm before anyone opens settings.
+  setTimeout(function() {
+    try {
+      if (typeof wallpaperList !== 'undefined') {
+        wallpaperList.forEach(function(w) { if (w && w.url) warm(w.url); });
+      }
+    } catch (e) {}
+  }, 0);
+})();
+
 // Fake emails
 const fakeEmails = [
   {
@@ -5154,11 +5173,8 @@ window.addEventListener('load', function() {
   initMobileGrid();
   initWeather();
   
-  // Preload all app icons during boot
-  var allIcons = [];
-  projects.forEach(function(p) { if (p.icon) allIcons.push(p.icon); });
-  Object.keys(systemApps).forEach(function(k) { if (systemApps[k].icon) allIcons.push(systemApps[k].icon); });
-  allIcons.forEach(function(src) { var img = new Image(); img.src = src; });
+  // Preload handled earlier (right after systemApps is defined) so assets warm
+  // during the Hello screen instead of after window.load.
   initStocks();
   renderTodos();
   populateGoMenu();

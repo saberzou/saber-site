@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stop Burning Tokens. Start Making Impact. — Saber Zou</title>
+<meta name="description" content="The real test of AI agents isn't how clever the workflow is. It's whether anything changed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #F5F3EF;
+  --fg: #2D2A27;
+  --fg-muted: #5C5955;
+  --fg-light: #8A8783;
+  --accent: #2D2A27;
+  --border: #E4E0DA;
+  --serif: 'PT Serif', Georgia, serif;
+  --sans: 'Bricolage Grotesque', -apple-system, sans-serif;
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+body.ready { opacity: 1; }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 310;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 24px 40px; pointer-events: none;
+}
+nav > * { pointer-events: auto; }
+
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  width: 28px; height: 28px;
+  cursor: pointer; background: none; border: none;
+  padding: 0; z-index: 310;
+  position: relative;
+}
+.menu-toggle span {
+  display: block; width: 100%; height: 1.5px;
+  background: var(--fg); transition: transform 0.4s ease, opacity 0.3s ease;
+  transform-origin: center;
+}
+.menu-toggle.open span:first-child { transform: translateY(3.75px) rotate(45deg); }
+.menu-toggle.open span:last-child { transform: translateY(-3.75px) rotate(-45deg); }
+
+.mobile-menu-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 300;
+  background: var(--bg);
+  flex-direction: column; justify-content: center; align-items: center;
+  gap: 0;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.mobile-menu-overlay.open {
+  opacity: 1; pointer-events: auto;
+}
+.mobile-menu-overlay a {
+  font-family: var(--sans);
+  font-size: 1.5rem; font-weight: 400;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--fg); text-decoration: none;
+  padding: 16px 0;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.4s ease, transform 0.4s ease, color 0.3s;
+}
+.mobile-menu-overlay.open a {
+  opacity: 1; transform: translateY(0);
+}
+.mobile-menu-overlay.open a:nth-child(1) { transition-delay: 0.1s; }
+.mobile-menu-overlay.open a:nth-child(2) { transition-delay: 0.15s; }
+.mobile-menu-overlay.open a:nth-child(3) { transition-delay: 0.2s; }
+.mobile-menu-overlay a:hover { color: var(--fg-muted); }
+
+.nav-back {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.85rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--fg-muted); text-decoration: none;
+  cursor: pointer;
+}
+.nav-back:hover { color: var(--fg); }
+
+.nav-left { display: none; }
+
+.nav-avatar-small {
+  width: 32px; height: 32px;
+  border-radius: 50%; overflow: hidden; flex-shrink: 0;
+}
+.nav-avatar-small img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.nav-name {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg);
+  transition: color 0.3s;
+  text-decoration: none;
+}
+.nav-left:hover .nav-name { color: var(--fg-muted); }
+
+.nav-right-group {
+  display: flex; align-items: center; gap: 28px;
+}
+
+.nav-right {
+  font-family: var(--sans);
+  font-size: 0.8rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--fg); cursor: pointer;
+  text-decoration: none; transition: color 0.3s;
+}
+.nav-right:hover { color: var(--fg-muted); }
+
+.article-wrapper {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 120px 40px 80px;
+}
+
+.article-meta {
+  margin-bottom: 48px;
+}
+
+.article-date {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-light);
+  margin-bottom: 16px;
+}
+
+.article-title {
+  font-family: var(--sans);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 12px;
+}
+
+.article-author {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+}
+
+.article-body {
+  border-top: 1px solid var(--border);
+  padding-top: 40px;
+}
+
+.article-body p {
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--fg-muted);
+  font-weight: 300;
+  margin-bottom: 1.5em;
+}
+
+.article-body p.lede {
+  font-size: 1.15rem;
+  color: var(--fg);
+  font-weight: 400;
+}
+
+.article-body p.kicker {
+  font-family: var(--sans);
+  font-size: 1rem;
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.article-body p:last-child { margin-bottom: 0; }
+
+@media (max-width: 768px) {
+  nav { padding: 20px 24px; }
+  .nav-right-group { display: none; }
+  .menu-toggle { display: flex; }
+  .mobile-menu-overlay { display: flex; }
+  .article-wrapper { padding: 100px 24px 60px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-back" href="../index.html">← Back</a>
+  <a class="nav-left" href="../index.html">
+    <div class="nav-avatar-small"><img src="../avatar.jpg" alt="Saber Zou"></div>
+    <span class="nav-name">Saber Zou</span>
+  </a>
+  <div class="nav-right-group">
+    <a class="nav-right" href="../index.html">Home</a>
+  </div>
+  <button class="menu-toggle" id="menu-toggle" aria-label="Menu">
+    <span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu-overlay" id="mobile-menu-overlay">
+  <a href="../index.html">Home</a>
+</div>
+
+<main class="article-wrapper">
+  <header class="article-meta">
+    <div class="article-date">May 12, 2026</div>
+    <h1 class="article-title">Stop Burning Tokens. Start Making Impact.</h1>
+    <div class="article-author">Saber Zou</div>
+  </header>
+
+  <div class="article-body">
+    <p class="lede">Everyone's excited about AI agents right now. The demos are wild. The Twitter threads are long. People are building pipelines, chaining tools, generating millions of tokens.</p>
+
+    <p>But here's the question nobody's asking: so what?</p>
+
+    <p>Did it make money? Did it save time that actually mattered? Did someone's life get meaningfully better because of what you built?</p>
+
+    <p>Most of the buzz is about process. "Look at this agent that does X." "I built a pipeline that does Y automatically." Cool. But what's the concrete outcome? What value did it create for an actual human being?</p>
+
+    <p>Burning compute isn't the same as creating value. A fancy workflow nobody uses isn't a product. An agent that generates outputs nobody reads isn't impact.</p>
+
+    <p class="kicker">The hard question to ask yourself: if I turned this off tomorrow, would anyone notice?</p>
+
+    <p>If the answer is no, you're not building something that matters. You're just playing with fire.</p>
+
+    <p>Focus on outcome. Everything else is noise.</p>
+  </div>
+</main>
+
+<script>
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => document.body.classList.add('ready'));
+} else {
+  window.addEventListener('load', () => document.body.classList.add('ready'));
+}
+
+const menuToggle = document.getElementById('menu-toggle');
+const menuOverlay = document.getElementById('mobile-menu-overlay');
+if (menuToggle && menuOverlay) {
+  menuToggle.addEventListener('click', () => {
+    menuToggle.classList.toggle('open');
+    menuOverlay.classList.toggle('open');
+  });
+  menuOverlay.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      menuToggle.classList.remove('open');
+      menuOverlay.classList.remove('open');
+    });
+  });
+}
+</script>
+</body>
+</html>

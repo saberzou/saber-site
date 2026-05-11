@@ -5270,11 +5270,11 @@ function initWeather() {
 
 function initStocks() {
   var tickers = ['MSFT', 'AAPL', 'GOOGL'];
-  // Fallback data (updated periodically)
+  // Fallback data (last-known, refreshed when this file is edited)
   var fallback = {
-    MSFT: { price: '449.26', change: '0.85' },
-    AAPL: { price: '270.23', change: '1.22' },
-    GOOGL: { price: '164.68', change: '0.94' }
+    MSFT: { price: '412.69', change: '0.42' },
+    AAPL: { price: '292.68', change: '-0.20' },
+    GOOGL: { price: '388.64', change: '-0.91' }
   };
   
   function updateUI(ticker, price, change) {
@@ -5297,14 +5297,19 @@ function initStocks() {
   // Set fallback immediately
   tickers.forEach(function(t) { updateUI(t, fallback[t].price, fallback[t].change); });
   
-  // Try live data
+  // Try live data via Yahoo Finance chart API (CORS-friendly, no key)
   tickers.forEach(function(ticker) {
-    fetch('https://api.twelvedata.com/quote?symbol=' + ticker + '&apikey=demo')
-      .then(function(r) { return r.json(); })
-      .then(function(q) {
-        if (q && q.close) {
-          updateUI(ticker, parseFloat(q.close).toFixed(2), parseFloat(q.percent_change).toFixed(2));
-        }
+    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + ticker + '?interval=1d&range=1d';
+    fetch(url)
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data || !data.chart || !data.chart.result || !data.chart.result[0]) return;
+        var meta = data.chart.result[0].meta;
+        var price = meta.regularMarketPrice;
+        var prev = meta.chartPreviousClose || meta.previousClose;
+        if (price == null || prev == null) return;
+        var pct = ((price - prev) / prev * 100).toFixed(2);
+        updateUI(ticker, price.toFixed(2), pct);
       }).catch(function() {});
   });
 }

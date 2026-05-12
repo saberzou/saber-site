@@ -1701,6 +1701,7 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   flex: 1;
   overflow-y: auto;
   padding: 0;
+  position: relative;
 }
 
 .mobile-sheet-content img {
@@ -4262,6 +4263,7 @@ function openMobileSheet(data, isSystemApp) {
     setTimeout(function() {
       if (data.id === 'camera') initCamera();
       if (data.id === 'notes') initNotesApp();
+      if (data.id === 'notes' && document.getElementById('mobile-notes-list')) mobileInitNotesApp();
     }, 100);
   } else {
     contentHTML = '<img src="' + data.image + '" alt="' + data.title + '">' +
@@ -4309,7 +4311,7 @@ function openMobileApp(appId) {
   // Init app-specific functions
   setTimeout(function() {
     if (appId === 'camera') initCamera();
-    if (appId === 'notes') initNotesApp();
+    if (appId === 'notes') mobileInitNotesApp();
     if (appId === 'wallpaper') initWallpaperApp();
     if (appId === 'music') initMusicApp();
   }, 100);
@@ -4384,9 +4386,182 @@ function renderMobileApp(appId) {
         '</div>' +
       '</div>';
       
+    case 'mail':
+      return '<div id="mobile-mail-root" style="display: flex; flex-direction: column; height: 100%; background: #fff;">' +
+        '<div id="mobile-mail-list" style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;">' +
+          fakeEmails.map(function(email, i) {
+            return '<div onclick="mobileShowEmail(' + i + ')" style="padding: 14px 18px; border-bottom: 1px solid rgba(0,0,0,0.06); cursor: pointer; display: flex; gap: 12px; align-items: flex-start;">' +
+              '<div style="width: 8px; height: 8px; border-radius: 50%; background: #007AFF; flex-shrink: 0; margin-top: 8px;"></div>' +
+              '<div style="flex: 1; min-width: 0;">' +
+                '<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">' +
+                  '<div style="font-weight: 600; font-size: 1rem; color: #000;">' + email.sender + '</div>' +
+                  '<div style="font-size: 0.72rem; color: #8e8e93; flex-shrink: 0; margin-left: 8px;">Yesterday</div>' +
+                '</div>' +
+                '<div style="font-size: 0.9rem; color: #000; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + email.subject + '</div>' +
+                '<div style="font-size: 0.85rem; color: #8e8e93; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">' + email.preview + '</div>' +
+              '</div>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<button onclick="mobileShowCompose()" aria-label="Compose" style="position: absolute; bottom: 24px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #007AFF; color: white; border: none; box-shadow: 0 6px 20px rgba(0,122,255,0.45); display: flex; align-items: center; justify-content: center; cursor: pointer;">' +
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+        '</button>' +
+        '<div id="mobile-mail-detail" style="display: none; position: absolute; inset: 0; background: #fff; flex-direction: column;">' +
+          '<div style="display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid rgba(0,0,0,0.08); background: #f8f8f8;">' +
+            '<button onclick="mobileBackToInbox()" style="background: none; border: none; color: #007AFF; font-size: 1rem; display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 8px;">' +
+              '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Inbox' +
+            '</button>' +
+          '</div>' +
+          '<div id="mobile-mail-detail-body" style="flex: 1; overflow-y: auto; padding: 20px;"></div>' +
+        '</div>' +
+        '<div id="mobile-mail-compose" style="display: none; position: absolute; inset: 0; background: #fff; flex-direction: column;">' +
+          '<div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid rgba(0,0,0,0.08); background: #f8f8f8;">' +
+            '<button onclick="mobileCancelCompose()" style="background: none; border: none; color: #007AFF; font-size: 0.95rem; cursor: pointer; padding: 4px 8px;">Cancel</button>' +
+            '<span style="font-weight: 600;">New Message</span>' +
+            '<button onclick="mobileSendEmail()" style="background: #007AFF; color: white; border: none; border-radius: 14px; padding: 6px 14px; font-size: 0.9rem; cursor: pointer;">Send</button>' +
+          '</div>' +
+          '<input type="text" id="mobile-compose-to" value="saberzou@gmail.com" readonly style="padding: 12px 16px; border: none; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 1rem; outline: none; color: #555;">' +
+          '<input type="text" id="mobile-compose-subject" placeholder="Subject" style="padding: 12px 16px; border: none; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 1rem; outline: none;">' +
+          '<textarea id="mobile-compose-body" placeholder="iPhone from Saber" style="flex: 1; padding: 14px 16px; border: none; resize: none; font-size: 1rem; outline: none; font-family: inherit;"></textarea>' +
+        '</div>' +
+      '</div>';
+
+    case 'notes':
+      return '<div id="mobile-notes-root" style="display: flex; flex-direction: column; height: 100%; background: #FFFEF5;">' +
+        '<div id="mobile-notes-list-view" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">' +
+          '<div style="padding: 12px 18px 6px; display: flex; align-items: baseline; justify-content: space-between;">' +
+            '<span style="font-size: 1.6rem; font-weight: 700; color: #2D1B00;">Notes</span>' +
+            '<span id="mobile-notes-count" style="font-size: 0.78rem; color: #8a8783;"></span>' +
+          '</div>' +
+          '<div id="mobile-notes-list" style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 0 80px;"></div>' +
+        '</div>' +
+        '<button onclick="mobileNewNote()" aria-label="New note" style="position: absolute; bottom: 24px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #FF8C42; color: white; border: none; box-shadow: 0 6px 20px rgba(255,140,66,0.45); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.6rem; line-height: 1;">+</button>' +
+        '<div id="mobile-notes-editor" style="display: none; position: absolute; inset: 0; background: #FFFEF5; flex-direction: column;">' +
+          '<div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,0.06); background: #FFFEF5;">' +
+            '<button onclick="mobileNotesBack()" style="background: none; border: none; color: #FF8C42; font-size: 1rem; display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 8px;">' +
+              '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Notes' +
+            '</button>' +
+            '<span style="font-size: 0.75rem; color: #8a8783;">Auto-saved</span>' +
+            '<button onclick="mobileDeleteCurrentNote()" aria-label="Delete" style="background: none; border: none; color: #d11; cursor: pointer; padding: 4px 8px;">' +
+              '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>' +
+            '</button>' +
+          '</div>' +
+          '<input type="text" id="mobile-note-title" placeholder="Title" style="padding: 14px 18px 6px; border: none; outline: none; font-size: 1.25rem; font-weight: 600; background: transparent; color: #2D1B00; width: 100%; box-sizing: border-box;">' +
+          '<textarea id="mobile-note-content" placeholder="Start writing..." style="flex: 1; padding: 6px 18px 18px; border: none; outline: none; resize: none; font-family: \'PT Serif\', Georgia, serif; font-size: 1.02rem; line-height: 1.65; background: transparent; color: #2D1B00;"></textarea>' +
+        '</div>' +
+      '</div>';
+
     default:
       return renderSystemApp(appId);
   }
+}
+
+// ─── Mobile Mail handlers ───
+function mobileShowEmail(index) {
+  var email = fakeEmails[index];
+  if (!email) return;
+  var detail = document.getElementById('mobile-mail-detail');
+  var body = document.getElementById('mobile-mail-detail-body');
+  if (!detail || !body) return;
+  body.innerHTML =
+    '<div style="font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; color: #000;">' + email.subject + '</div>' +
+    '<div style="display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.06); margin-bottom: 16px;">' +
+      '<div style="width: 36px; height: 36px; border-radius: 50%; background: #007AFF; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">' + email.sender.charAt(0) + '</div>' +
+      '<div style="flex: 1;"><div style="font-weight: 600;">' + email.sender + '</div><div style="font-size: 0.78rem; color: #8e8e93;">to saberzou@gmail.com</div></div>' +
+    '</div>' +
+    '<div style="font-size: 1rem; line-height: 1.65; color: #111;">' + email.body + '</div>';
+  detail.style.display = 'flex';
+}
+function mobileBackToInbox() {
+  var d = document.getElementById('mobile-mail-detail'); if (d) d.style.display = 'none';
+}
+function mobileShowCompose() {
+  var c = document.getElementById('mobile-mail-compose'); if (c) c.style.display = 'flex';
+}
+function mobileCancelCompose() {
+  var c = document.getElementById('mobile-mail-compose'); if (c) c.style.display = 'none';
+  var s = document.getElementById('mobile-compose-subject'); if (s) s.value = '';
+  var b = document.getElementById('mobile-compose-body'); if (b) b.value = '';
+}
+function mobileSendEmail() {
+  showNotification && showNotification('Message sent ✉️');
+  mobileCancelCompose();
+}
+
+// ─── Mobile Notes handlers ───
+function mobileRenderNotesList() {
+  var list = document.getElementById('mobile-notes-list');
+  var count = document.getElementById('mobile-notes-count');
+  if (!list) return;
+  if (count) count.textContent = notesData.length + ' Notes';
+  list.innerHTML = notesData.map(function(n) {
+    var preview = (n.content || '').replace(/\n/g, ' ').substring(0, 80);
+    var d = n.date ? new Date(n.date) : new Date();
+    var dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    return '<div onclick="mobileOpenNote(' + n.id + ')" style="padding: 12px 18px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05);">' +
+      '<div style="font-weight: 600; font-size: 1rem; color: #2D1B00; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + (n.title || 'New Note') + '</div>' +
+      '<div style="display: flex; gap: 8px; font-size: 0.82rem; color: #8a8783;">' +
+        '<span style="flex-shrink: 0;">' + dateStr + '</span>' +
+        '<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + preview + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function mobileOpenNote(id) {
+  var n = notesData.find(function(x) { return x.id === id; });
+  if (!n) return;
+  currentNoteId = id;
+  var t = document.getElementById('mobile-note-title');
+  var c = document.getElementById('mobile-note-content');
+  if (t) t.value = n.title || '';
+  if (c) c.value = n.content || '';
+  var ed = document.getElementById('mobile-notes-editor');
+  if (ed) ed.style.display = 'flex';
+}
+function mobileNotesBack() {
+  mobileSaveCurrentNote();
+  var ed = document.getElementById('mobile-notes-editor');
+  if (ed) ed.style.display = 'none';
+  mobileRenderNotesList();
+}
+function mobileSaveCurrentNote() {
+  if (!currentNoteId) return;
+  var t = document.getElementById('mobile-note-title');
+  var c = document.getElementById('mobile-note-content');
+  var n = notesData.find(function(x) { return x.id === currentNoteId; });
+  if (n) {
+    if (t) n.title = t.value;
+    if (c) n.content = c.value;
+    n.date = new Date().toISOString();
+    localStorage.setItem('saberos-notes', JSON.stringify(notesData));
+  }
+}
+function mobileNewNote() {
+  var n = { id: Date.now(), title: '', content: '', date: new Date().toISOString() };
+  notesData.unshift(n);
+  localStorage.setItem('saberos-notes', JSON.stringify(notesData));
+  mobileOpenNote(n.id);
+  setTimeout(function() {
+    var t = document.getElementById('mobile-note-title');
+    if (t) t.focus();
+  }, 80);
+}
+function mobileDeleteCurrentNote() {
+  if (!currentNoteId) return;
+  notesData = notesData.filter(function(x) { return x.id !== currentNoteId; });
+  localStorage.setItem('saberos-notes', JSON.stringify(notesData));
+  currentNoteId = null;
+  var ed = document.getElementById('mobile-notes-editor');
+  if (ed) ed.style.display = 'none';
+  mobileRenderNotesList();
+}
+function mobileInitNotesApp() {
+  mobileRenderNotesList();
+  // Wire autosave
+  var t = document.getElementById('mobile-note-title');
+  var c = document.getElementById('mobile-note-content');
+  if (t) t.addEventListener('input', debounce(mobileSaveCurrentNote, 400));
+  if (c) c.addEventListener('input', debounce(mobileSaveCurrentNote, 400));
 }
 
 // ─── Mobile Wallpaper Init ───

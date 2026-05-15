@@ -3821,7 +3821,12 @@ function initDock() {
 // ─── Archer welcome ─── use the existing pixel character's thought bubble
 function archerWelcome() {
   var seen = localStorage.getItem('saberOS-archerHello');
-  var msg = seen ? "Welcome back 🏹" : "Hey, I'm Archer — welcome to SaberOS 🏹";
+  var msg;
+  if (_vipData) {
+    msg = _vipData.archerGreeting;
+  } else {
+    msg = seen ? "Welcome back 🏹" : "Hey, I'm Archer — welcome to SaberOS 🏹";
+  }
   localStorage.setItem('saberOS-archerHello', '1');
   // Wait a tick for the Archer character to mount, then push our greeting through its thought bubble
   function tryGreet(attempt) {
@@ -3844,7 +3849,7 @@ function archerWelcome() {
         window.__archerInstance.thoughtVisible = false;
         window.__archerInstance.nextThoughtTime = Date.now() + 8000;
       }
-    }, seen ? 3500 : 5500);
+    }, (_vipData || !seen) ? 6000 : 3500);
   }
   tryGreet(0);
 }
@@ -5065,6 +5070,8 @@ const chatParticipants = {
 let currentChatId = 'group';
 
 async function sendMobileMessage() {
+  // include visitorKey if VIP
+  const _vipKeyMobile = _vipData ? _vipKey.toLowerCase() : null;
   var input = document.getElementById('mobile-message-input');
   if (!input) return;
   var text = input.value.trim();
@@ -5096,7 +5103,7 @@ async function sendMobileMessage() {
     var res = await fetch(CHAT_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ character: responder, messages: [{ text: text, sender: 'user' }], chatId: 'group' })
+      body: JSON.stringify({ character: responder, messages: [{ text: text, sender: 'user' }], chatId: 'group', visitorKey: _vipKeyMobile })
     });
     var data = await res.json();
     var el = document.getElementById('mobile-typing');
@@ -5165,6 +5172,23 @@ function addMessageBubble(text, type, sender) {
 
 const CHAT_API_URL = 'https://saber-site-chat.vercel.app/api/chat';
 
+// ─── VIP Visitor Detection ───
+const VIP_VISITORS = {
+  mike: {
+    name: 'Mike Davidson',
+    archerGreeting: "Oh wow. Mike Davidson just walked in. I don't get starstruck easily, but... 🏹✨",
+    groupOpener: [
+      { sender: 'archer', text: "Mike! THE Mike Davidson is here. Saber's gonna flip — welcome to SaberOS 🏹" },
+      { sender: 'axel', text: "OK I'm literally screaming rn 🐯 Mike!! Welcome welcome welcome!! Look around, everything here is Saber's work — he's been building this for YOU to see" },
+      { sender: 'atticus', text: "Mike. Good to finally have you here. Saber speaks highly of you. Browse freely — this place reflects him well. 🐻" }
+    ]
+  }
+};
+
+const _urlParams = new URLSearchParams(window.location.search);
+const _vipKey = _urlParams.get('hello') || '';
+const _vipData = VIP_VISITORS[_vipKey.toLowerCase()] || null;
+
 function showTypingIndicator(senderName) {
   const list = document.getElementById('messages-list');
   if (!list) return null;
@@ -5213,7 +5237,7 @@ async function getAIResponse(userText, chatId) {
     const res = await fetch(CHAT_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ character: responder, messages: history, chatId: chatId })
+      body: JSON.stringify({ character: responder, messages: history, chatId: chatId, visitorKey: _vipData ? _vipKey.toLowerCase() : null })
     });
     const data = await res.json();
     if (typingEl) typingEl.remove();
@@ -5268,7 +5292,20 @@ function switchChat(contactId) {
     }
     if (list) {
       list.setAttribute('data-chat', 'group');
-      list.innerHTML = 
+      
+      // VIP: Mike Davidson gets a special welcome from all agents
+      if (_vipData && contactId === 'group') {
+        list.innerHTML = _vipData.groupOpener.map(function(m) {
+          const p = chatParticipants[m.sender];
+          return '<div class="message-group">' +
+            '<div class="message-bubble received">' +
+              '<div class="message-sender">' + p.name + ' ' + p.emoji + '</div>' +
+              '<div class="message-text">' + m.text + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      } else {
+        list.innerHTML = 
         '<div class="message-group">' +
           '<div class="message-bubble received">' +
             '<div class="message-sender">Atticus 🐻</div>' +
@@ -5293,6 +5330,7 @@ function switchChat(contactId) {
             '<div class="message-text">I\'m Archer, your SaberOS guide! Need help finding anything? 🏹</div>' +
           '</div>' +
         '</div>';
+      }
     }
   } else {
     const p = chatParticipants[contactId];

@@ -5136,6 +5136,13 @@ function sendMessage() {
   
   // Save to localStorage
   saveMessage(text, 'user', currentChatId);
+
+  // VIP auto-detect from what visitor typed
+  const _detected = detectVipFromText(text);
+  if (_detected && !_vipData) {
+    _vipData = VIP_VISITORS[_detected] || _vipData;
+    try { localStorage.setItem('saberos-vip-key', _detected); } catch(e) {}
+  }
   
   // Get AI response after a short delay (only for 1:1 chats, or random in group)
   setTimeout(function() {
@@ -5186,8 +5193,21 @@ const VIP_VISITORS = {
 };
 
 const _urlParams = new URLSearchParams(window.location.search);
-const _vipKey = _urlParams.get('hello') || '';
-const _vipData = VIP_VISITORS[_vipKey.toLowerCase()] || null;
+const _vipKey = _urlParams.get('hello') || localStorage.getItem('saberos-vip-key') || '';
+let _vipData = VIP_VISITORS[_vipKey.toLowerCase()] || null;
+if (_vipData) localStorage.setItem('saberos-vip-key', _vipKey.toLowerCase());
+
+// Auto-detect VIPs (e.g. Mike) from what the visitor types
+const _VIP_DETECTORS = [
+  { key: 'mike', patterns: [/\bmike\s+davidson\b/i, /\b(i'?m|i am|this is|it'?s)\s+mike\b/i, /\bmdavidson\b/i, /@mikeindustries\b/i] }
+];
+function detectVipFromText(text) {
+  if (!text) return null;
+  for (const d of _VIP_DETECTORS) {
+    if (d.patterns.some(function(re){ return re.test(text); })) return d.key;
+  }
+  return null;
+}
 
 function showTypingIndicator(senderName) {
   const list = document.getElementById('messages-list');
@@ -5237,7 +5257,7 @@ async function getAIResponse(userText, chatId) {
     const res = await fetch(CHAT_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ character: responder, messages: history, chatId: chatId, visitorKey: _vipData ? _vipKey.toLowerCase() : null })
+      body: JSON.stringify({ character: responder, messages: history, chatId: chatId, visitorKey: _vipData ? (localStorage.getItem('saberos-vip-key') || _vipKey.toLowerCase()) : null })
     });
     const data = await res.json();
     if (typingEl) typingEl.remove();

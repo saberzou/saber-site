@@ -4190,48 +4190,68 @@ function loadMobileWidgets() {
       });
   }
   
-  // Load stocks
-  const aaplPrice = document.getElementById('stock-aapl');
-  const aaplChange = document.getElementById('stock-aapl-change');
-  const msftPrice = document.getElementById('stock-msft');
-  const msftChange = document.getElementById('stock-msft-change');
-  
-  if (aaplPrice && msftPrice) {
-    // Use a simple API or fallback to mock data
-    fetch('https://query1.finance.yahoo.com/v8/finance/chart/AAPL,MSFT?interval=1d&range=1d')
+  // Load stocks — fetched live from Stooq via CORS proxy, refresh every 60s
+  initStockWidget();
+}
+
+function initStockWidget() {
+  const tickers = ['AAPL', 'MSFT', 'GOOGL'];
+  // Only run if any stock element exists (desktop or mobile)
+  if (!document.getElementById('stock-aapl-price') && !document.getElementById('mw-stock-aapl-price')) return;
+
+  function setQuote(sym, price, changePct) {
+    const key = sym.toLowerCase();
+    const priceTxt = (price != null && isFinite(price)) ? '$' + Number(price).toFixed(2) : '--';
+    const up = (changePct >= 0);
+    const changeTxt = (changePct == null || !isFinite(changePct))
+      ? '--'
+      : (up ? '+' : '') + Number(changePct).toFixed(2) + '%';
+    ['stock-' + key + '-price', 'mw-stock-' + key + '-price'].forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = priceTxt;
+    });
+    ['stock-' + key + '-change', 'mw-stock-' + key + '-change'].forEach(function(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = changeTxt;
+      el.className = el.className.replace(/\b(up|down)\b/g, '').trim() + ' ' + (up ? 'up' : 'down');
+    });
+  }
+
+  function fetchOne(sym) {
+    // Yahoo Finance v8 chart endpoint, routed through allorigins CORS proxy.
+    // Returns regularMarketPrice + chartPreviousClose in one call.
+    const yahoo = 'https://query1.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=5d';
+    const proxy = 'https://api.allorigins.win/raw?url=';
+    return fetch(proxy + encodeURIComponent(yahoo))
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        if (data.chart && data.chart.result) {
-          data.chart.result.forEach(function(stock) {
-            const symbol = stock.meta.symbol;
-            const price = stock.meta.regularMarketPrice;
-            const prevClose = stock.meta.previousClose;
-            const change = price - prevClose;
-            const changePct = (change / prevClose * 100).toFixed(2);
-            const changeStr = (change >= 0 ? '+' : '') + change.toFixed(2) + ' (' + changePct + '%)';
-            
-            if (symbol === 'AAPL') {
-              aaplPrice.textContent = '$' + price.toFixed(2);
-              aaplChange.textContent = changeStr;
-              aaplChange.className = 'stock-change ' + (change >= 0 ? 'up' : 'down');
-            } else if (symbol === 'MSFT') {
-              msftPrice.textContent = '$' + price.toFixed(2);
-              msftChange.textContent = changeStr;
-              msftChange.className = 'stock-change ' + (change >= 0 ? 'up' : 'down');
-            }
-          });
-        }
+        const meta = data && data.chart && data.chart.result && data.chart.result[0] && data.chart.result[0].meta;
+        if (!meta) throw new Error('no-meta');
+        const price = Number(meta.regularMarketPrice);
+        const prev  = Number(meta.chartPreviousClose != null ? meta.chartPreviousClose : meta.previousClose);
+        const changePct = (isFinite(price) && isFinite(prev) && prev !== 0)
+          ? ((price - prev) / prev) * 100
+          : null;
+        setQuote(sym, price, changePct);
       })
       .catch(function() {
-        // Fallback data
-        aaplPrice.textContent = '$270.23';
-        aaplChange.textContent = '+2.59%';
-        aaplChange.className = 'stock-change up';
-        msftPrice.textContent = '$425.00';
-        msftChange.textContent = '+1.20%';
-        msftChange.className = 'stock-change up';
+        // Leave existing values in place on failure; don't blank out a previously-good quote.
       });
   }
+
+  function refresh() {
+    tickers.forEach(fetchOne);
+  }
+
+  refresh();
+  // Refresh every 60s; only when tab is visible to be polite.
+  setInterval(function() {
+    if (document.visibilityState === 'visible') refresh();
+  }, 60000);
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') refresh();
+  });
 }
 
 // Calculate contrast color (black or white) based on background

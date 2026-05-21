@@ -63,7 +63,7 @@ async function yahooQuote(sym) {
 }
 
 async function stooqBatch(symbols) {
-  // Single CSV call for all tickers; gives today's close (no prev close).
+  // Single CSV call for all tickers; gives today's close + the date it's for.
   const s = symbols.map((x) => x.toLowerCase() + '.us').join('+');
   const url = `https://stooq.com/q/l/?s=${s}&f=sd2t2ohlcvn&h&e=csv`;
   const res = await fetch(url, { headers: { 'User-Agent': UA } });
@@ -74,13 +74,13 @@ async function stooqBatch(symbols) {
   for (const line of lines) {
     const cols = line.split(',');
     const sym = (cols[0] || '').replace(/\.US$/i, '').toUpperCase();
+    const date = cols[1];
     const close = Number(cols[6]);
     if (sym && isFinite(close)) {
       out[sym] = {
         symbol: sym,
         price: Number(close.toFixed(2)),
-        previousClose: null,
-        changePct: null,
+        date,
         currency: 'USD',
         source: 'stooq',
       };
@@ -112,23 +112,35 @@ async function stooqBatch(symbols) {
     } catch (e) {
       console.error(`yahoo ${sym} failed: ${e.message}`);
       if (stooq[sym]) {
-        // Preserve prev-known changePct/prevClose if we had one; refresh price.
+        // Roll prev-close forward when Stooq reports a new trading date.
+        // Stored shape: { price, previousClose, changePct, date, lastDate }.
         const prevKnown = merged[sym] || {};
+        const newPrice = stooq[sym].price;
+        const newDate = stooq[sym].date;
+        let previousClose = prevKnown.previousClose ?? null;
+        if (
+          prevKnown.price != null &&
+          prevKnown.date &&
+          newDate &&
+          prevKnown.date !== newDate
+        ) {
+          // New trading day rolled in: yesterday's close becomes prev.
+          previousClose = prevKnown.price;
+        }
+        const changePct =
+          previousClose && newPrice != null
+            ? Number((((newPrice - previousClose) / previousClose) * 100).toFixed(2))
+            : null;
         merged[sym] = {
-          ...stooq[sym],
-          previousClose: prevKnown.previousClose ?? null,
-          changePct:
-            stooq[sym].price != null && prevKnown.previousClose
-              ? Number(
-                  (
-                    ((stooq[sym].price - prevKnown.previousClose) /
-                      prevKnown.previousClose) *
-                    100
-                  ).toFixed(2)
-                )
-              : prevKnown.changePct ?? null,
+          symbol: sym,
+          price: newPrice,
+          previousClose,
+          changePct,
+          date: newDate,
+          currency: 'USD',
+          source: 'stooq',
         };
-        console.log(`ok stooq ${sym} ${merged[sym].price}`);
+        console.log(`ok stooq ${sym} ${newPrice} (${changePct == null ? '?' : changePct + '%'})`);
       } else {
         console.error(`no fallback for ${sym}, keeping last-known`);
       }

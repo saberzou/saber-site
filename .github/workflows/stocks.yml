@@ -1,0 +1,38 @@
+name: Refresh stock quotes
+on:
+  schedule:
+    # Every 15 minutes during US market hours (M-F, 13:30-21:00 UTC ≈ 9:30-17:00 ET, plus a buffer).
+    - cron: '*/15 13-21 * * 1-5'
+    # Hourly outside market hours so the file stays fresh-ish on weekends / overnight.
+    - cron: '7 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stocks-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch quotes from Yahoo Finance
+        run: node scripts/fetch-stocks.js
+        env:
+          NODE_OPTIONS: --no-warnings
+
+      - name: Commit if changed
+        run: |
+          git config user.name  'stocks-bot'
+          git config user.email 'stocks-bot@users.noreply.github.com'
+          if [[ -n "$(git status --porcelain stocks.json)" ]]; then
+            git add stocks.json
+            git commit -m "chore(stocks): refresh quotes [skip ci]"
+            git push
+          else
+            echo "no change"
+          fi

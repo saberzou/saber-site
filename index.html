@@ -4218,37 +4218,29 @@ function initStockWidget() {
     });
   }
 
-  function fetchOne(sym) {
-    // Yahoo Finance v8 chart endpoint, routed through allorigins CORS proxy.
-    // Returns regularMarketPrice + chartPreviousClose in one call.
-    const yahoo = 'https://query1.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=5d';
-    const proxy = 'https://api.allorigins.win/raw?url=';
-    return fetch(proxy + encodeURIComponent(yahoo))
+  function refresh() {
+    // Pull from our own same-origin JSON, refreshed by a GitHub Action cron.
+    // No CORS proxy needed, no third-party flakiness.
+    return fetch('stocks.json?t=' + Date.now(), { cache: 'no-store' })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        const meta = data && data.chart && data.chart.result && data.chart.result[0] && data.chart.result[0].meta;
-        if (!meta) throw new Error('no-meta');
-        const price = Number(meta.regularMarketPrice);
-        const prev  = Number(meta.chartPreviousClose != null ? meta.chartPreviousClose : meta.previousClose);
-        const changePct = (isFinite(price) && isFinite(prev) && prev !== 0)
-          ? ((price - prev) / prev) * 100
-          : null;
-        setQuote(sym, price, changePct);
+        const quotes = (data && data.quotes) || {};
+        tickers.forEach(function(sym) {
+          const q = quotes[sym];
+          if (!q) return;
+          setQuote(sym, q.price, q.changePct);
+        });
       })
       .catch(function() {
-        // Leave existing values in place on failure; don't blank out a previously-good quote.
+        // Leave existing values in place on failure.
       });
   }
 
-  function refresh() {
-    tickers.forEach(fetchOne);
-  }
-
   refresh();
-  // Refresh every 60s; only when tab is visible to be polite.
+  // Refresh every 5 min; only when tab is visible.
   setInterval(function() {
     if (document.visibilityState === 'visible') refresh();
-  }, 60000);
+  }, 5 * 60 * 1000);
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible') refresh();
   });
@@ -5521,51 +5513,9 @@ function initWeather() {
     });
 }
 
-function initStocks() {
-  var tickers = ['MSFT', 'AAPL', 'GOOGL'];
-  // Fallback data (last-known, refreshed when this file is edited)
-  var fallback = {
-    MSFT: { price: '412.69', change: '0.42' },
-    AAPL: { price: '292.68', change: '-0.20' },
-    GOOGL: { price: '388.64', change: '-0.91' }
-  };
-  
-  function updateUI(ticker, price, change) {
-    var isUp = parseFloat(change) >= 0;
-    var priceStr = '$' + price;
-    var changeStr = (isUp ? '+' : '') + change + '%';
-    var cls = 'stock-change ' + (isUp ? 'up' : 'down');
-    // Desktop
-    var dp = document.getElementById('stock-' + ticker.toLowerCase() + '-price');
-    var dc = document.getElementById('stock-' + ticker.toLowerCase() + '-change');
-    if (dp) { dp.textContent = priceStr; }
-    if (dc) { dc.textContent = changeStr; dc.className = cls; }
-    // Mobile widget
-    var mp = document.getElementById('mw-stock-' + ticker.toLowerCase() + '-price');
-    var mc = document.getElementById('mw-stock-' + ticker.toLowerCase() + '-change');
-    if (mp) { mp.textContent = priceStr; }
-    if (mc) { mc.textContent = changeStr; mc.className = cls; }
-  }
-  
-  // Set fallback immediately
-  tickers.forEach(function(t) { updateUI(t, fallback[t].price, fallback[t].change); });
-  
-  // Try live data via Yahoo Finance chart API (CORS-friendly, no key)
-  tickers.forEach(function(ticker) {
-    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + ticker + '?interval=1d&range=1d';
-    fetch(url)
-      .then(function(r) { return r.ok ? r.json() : null; })
-      .then(function(data) {
-        if (!data || !data.chart || !data.chart.result || !data.chart.result[0]) return;
-        var meta = data.chart.result[0].meta;
-        var price = meta.regularMarketPrice;
-        var prev = meta.chartPreviousClose || meta.previousClose;
-        if (price == null || prev == null) return;
-        var pct = ((price - prev) / prev * 100).toFixed(2);
-        updateUI(ticker, price.toFixed(2), pct);
-      }).catch(function() {});
-  });
-}
+// Legacy initStocks() removed — stocks are now driven by initStockWidget()
+// which reads same-origin stocks.json (refreshed by .github/workflows/stocks.yml).
+function initStocks() { /* no-op; see initStockWidget */ }
 
 // ─── Boot Animation ───
 // Fire on DOMContentLoaded (not window.load) so background image preloads

@@ -1,31 +1,32 @@
 {
-  "updatedAt": "2026-05-21T15:42:29.694Z",
+  "updatedAt": "2026-05-21T16:13:54.701Z",
   "quotes": {
     "AAPL": {
       "symbol": "AAPL",
-      "price": 303.15,
+      "price": 303.85,
       "previousClose": 302.25,
-      "changePct": 0.3,
+      "changePct": 0.53,
       "date": "2026-05-21",
       "currency": "USD",
       "source": "stooq"
     },
     "MSFT": {
       "symbol": "MSFT",
-      "price": 418.52,
+      "price": 418.37,
       "previousClose": 421.06,
-      "changePct": -0.6,
+      "changePct": -0.64,
       "date": "2026-05-21",
       "currency": "USD",
       "source": "stooq"
     },
     "GOOGL": {
       "symbol": "GOOGL",
-      "price": 389.88,
+      "price": 389.68,
       "previousClose": 401.07,
-      "changePct": -2.79,
+      "changePct": -2.84,
+      "date": "2026-05-21",
       "currency": "USD",
-      "source": "yahoo"
+      "source": "stooq"
     }
   }
 }

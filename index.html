@@ -5513,9 +5513,9 @@ function initWeather() {
     });
 }
 
-// Legacy initStocks() removed — stocks are now driven by initStockWidget()
+// Legacy initStocks() removed — stocks now driven by initStockWidget()
 // which reads same-origin stocks.json (refreshed by .github/workflows/stocks.yml).
-function initStocks() { /* no-op; see initStockWidget */ }
+function initStocks() { initStockWidget(); }
 
 // ─── Boot Animation ───
 // Fire on DOMContentLoaded (not window.load) so background image preloads

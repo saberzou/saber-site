@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-06-02T00:23:01.664Z",
+  "updatedAt": "2026-06-02T05:54:32.600Z",
   "quotes": {
     "AAPL": {
       "symbol": "AAPL",
-      "price": 306.3,
+      "price": 306.31,
       "previousClose": 312.06,
-      "changePct": -1.85,
+      "changePct": -1.84,
       "date": "2026-06-01",
       "currency": "USD",
       "source": "stooq"
@@ -15,8 +15,9 @@
       "price": 460.52,
       "previousClose": 418.57,
       "changePct": 10.02,
+      "date": "2026-06-01",
       "currency": "USD",
-      "source": "yahoo"
+      "source": "stooq"
     },
     "GOOGL": {
       "symbol": "GOOGL",

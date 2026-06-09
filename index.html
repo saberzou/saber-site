@@ -725,7 +725,7 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   max-width: 90vw;
   max-height: 80vh;
   background: var(--bg);
-  border-radius: 8px;
+  border-radius: 16px;
   box-shadow: 
     0 4px 24px rgba(45, 27, 0, 0.12),
     0 16px 48px rgba(45, 27, 0, 0.08);
@@ -736,6 +736,30 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   pointer-events: none;
   z-index: 100;
   overflow: hidden;
+}
+
+/* Web-project windows (iframe content): hide chrome, reveal on hover */
+.window.web-project .window-header {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 10;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s var(--ease-out-quart), transform 0.2s var(--ease-out-quart);
+  border-radius: 16px 16px 0 0;
+}
+.window.web-project:hover .window-header,
+.window.web-project.dragging .window-header,
+.window.web-project .window-header:focus-within {
+  opacity: 1;
+  transform: translateY(0);
+}
+.window.web-project .window-content {
+  border-radius: 16px;
+  overflow: hidden;
+}
+.window.web-project iframe {
+  border-radius: 16px;
 }
 
 .window.active {
@@ -3097,7 +3121,7 @@ function createWindow(id, data, options) {
   }
 
   const windowEl = document.createElement('div');
-  windowEl.className = 'window active';
+  windowEl.className = 'window active' + (isSystemApp ? '' : ' web-project');
   windowEl.id = 'window-' + id;
   windowEl.style.zIndex = ++zIndexCounter;
   

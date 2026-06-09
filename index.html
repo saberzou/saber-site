@@ -738,28 +738,9 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   overflow: hidden;
 }
 
-/* Web-project windows (iframe content): hide chrome, reveal on hover */
-.window.web-project .window-header {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  z-index: 10;
-  opacity: 0;
-  transform: translateY(-4px);
-  transition: opacity 0.2s var(--ease-out-quart), transform 0.2s var(--ease-out-quart);
-  border-radius: 16px 16px 0 0;
-}
-.window.web-project:hover .window-header,
-.window.web-project.dragging .window-header,
-.window.web-project .window-header:focus-within {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* Web-project windows (iframe content): drop the frame padding around the iframe, just like system apps */
 .window.web-project .window-content {
-  border-radius: 16px;
-  overflow: hidden;
-}
-.window.web-project iframe {
-  border-radius: 16px;
+  padding: 0;
 }
 
 .window.active {

@@ -416,7 +416,7 @@ img[src*="icons-pixel"] {
 .weather-widget .weather-desc,
 .weather-widget .weather-location { color: rgba(45,27,0,0.62); text-shadow: 0 1px 1px rgba(255,255,255,0.45); }
 .todo-empty-default { color: rgba(45,27,0,0.55); text-shadow: 0 1px 1px rgba(255,255,255,0.45); }
-.stock-widget-title { color: rgba(45,27,0,0.55); }
+.stock-widget-title { color: rgba(45,27,0,0.78); }
 
 /* Dark wallpaper override — light text reads against the dark substrate. */
 body.wallpaper-dark .weather-widget,
@@ -482,10 +482,7 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   user-select: none;
   transition: transform 0.2s ease;
   min-height: fit-content;
-  /* Widget text reads on both dark and light wallpapers through liquid glass.
-     Light foreground + dark text-shadow halo — standard "overlay over arbitrary substrate" pattern. */
-  color: #FFFFFF;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+  /* Color is set by adaptive rules at the top of the stylesheet — do NOT hardcode here */
 }
 .widget-stack {
   position: absolute;
@@ -496,7 +493,6 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   gap: 12px;
   z-index: 5;
   width: 220px;
-  color: #fff;
 }
 .widget-stack > * { width: 100%; }
 .weather-widget:hover { transform: scale(1.02); }
@@ -512,14 +508,13 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   cursor: default;
   user-select: none;
   transition: transform 0.2s ease;
-  /* Light-on-arbitrary-substrate text pattern (see weather-widget). */
-  color: #FFFFFF;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+  /* Color is set by adaptive rules at the top of the stylesheet */
 }
 .stock-widget:hover { transform: scale(1.02); }
 .stock-widget-title {
-  font-size: 0.65rem; color: inherit; opacity: 0.7;
+  font-size: 0.65rem; color: inherit; opacity: 0.85;
   text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
+  font-weight: 500;
 }
 .stock-row {
   display: flex; justify-content: space-between; align-items: center;
@@ -548,9 +543,7 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   box-shadow: 0 4px 20px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1);
   cursor: default;
   user-select: none;
-  /* Light-on-arbitrary-substrate text pattern (see weather-widget). */
-  color: #FFFFFF;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+  /* Color is set by adaptive rules at the top of the stylesheet */
 }
 .todo-header {
   display: flex;

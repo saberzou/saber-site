@@ -8317,10 +8317,40 @@ function termSpawnArcherEmoji() {
       shadow: '0 8px 32px rgba(0,0,0,0.10)'
     };
 
-    if (weather) LiquidGlass.applyGlass(weather, widgetOpts);
-    if (stock) LiquidGlass.applyGlass(stock, widgetOpts);
-    if (todo) LiquidGlass.applyGlass(todo, widgetOpts);
-    if (dock) LiquidGlass.applyGlass(dock, dockOpts);
+    if (weather) var weatherGlass = LiquidGlass.applyGlass(weather, widgetOpts);
+    if (stock) var stockGlass = LiquidGlass.applyGlass(stock, widgetOpts);
+    if (todo) var todoGlass = LiquidGlass.applyGlass(todo, widgetOpts);
+    if (dock) var dockGlass = LiquidGlass.applyGlass(dock, dockOpts);
+
+    // Per-substrate chroma: dark wallpapers carry the chromatic-rim signal
+    // beautifully (showpiece effect), light/low-chroma wallpapers expose it
+    // as bezel banding. Flip chroma based on body.wallpaper-dark presence.
+    var WIDGET_CHROMA_DARK = 1.0;   // Aave-exact 8% R/B spread, sings on dark
+    var WIDGET_CHROMA_LIGHT = 0.3;  // ~2.4% spread, no banding on bright/pastel
+    var DOCK_CHROMA_DARK = 1.0;
+    var DOCK_CHROMA_LIGHT = 0.3;
+    function updateChromaForSubstrate(){
+      var isDark = document.body.classList.contains('wallpaper-dark');
+      var widgetChroma = isDark ? WIDGET_CHROMA_DARK : WIDGET_CHROMA_LIGHT;
+      var dockChroma = isDark ? DOCK_CHROMA_DARK : DOCK_CHROMA_LIGHT;
+      if (weatherGlass) weatherGlass.update({ chroma: widgetChroma });
+      if (stockGlass) stockGlass.update({ chroma: widgetChroma });
+      if (todoGlass) todoGlass.update({ chroma: widgetChroma });
+      if (dockGlass) dockGlass.update({ chroma: dockChroma });
+    }
+    // Initial sync (default opts had 0.4; pull to per-state value now).
+    updateChromaForSubstrate();
+    // Watch body.classList for .wallpaper-dark add/remove. This is decoupled
+    // from the async img-onload luminance check inside updateMenuBarTheme().
+    var bodyClassObserver = new MutationObserver(function(mutations){
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].attributeName === 'class') {
+          updateChromaForSubstrate();
+          return;
+        }
+      }
+    });
+    bodyClassObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
     return true;
   }

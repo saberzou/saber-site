@@ -8331,9 +8331,9 @@ function termSpawnArcherEmoji() {
     // CSS rim on light. The .clean-rim class on body (added when light)
     // triggers the CSS border + inset highlight.
     var WIDGET_DARK_OPTS = { chroma: 1.0, specStrength: 1.0, edgeHighlight: 0.18, glow: 0.10, depth: 6, curvature: 2.0 };
-    var WIDGET_LIGHT_OPTS = { chroma: 0.0, specStrength: 0.20, edgeHighlight: 0.0, glow: 0.0, depth: 2, curvature: 0.8 };
+    var WIDGET_LIGHT_OPTS = { chroma: 0.3, specStrength: 0.35, edgeHighlight: 0.08, glow: 0.04, depth: 2, curvature: 0.8 };
     var DOCK_DARK_OPTS = { chroma: 1.0, specStrength: 1.2, edgeHighlight: 0.22, glow: 0.10, depth: 5, curvature: 2.2 };
-    var DOCK_LIGHT_OPTS = { chroma: 0.0, specStrength: 0.30, edgeHighlight: 0.0, glow: 0.0, depth: 2, curvature: 1.0 };
+    var DOCK_LIGHT_OPTS = { chroma: 0.3, specStrength: 0.45, edgeHighlight: 0.10, glow: 0.05, depth: 2, curvature: 1.0 };
     function updateChromaForSubstrate(){
       var isDark = document.body.classList.contains('wallpaper-dark');
       var widgetTuning = isDark ? WIDGET_DARK_OPTS : WIDGET_LIGHT_OPTS;

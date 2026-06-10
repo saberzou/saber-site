@@ -35,16 +35,18 @@
  * Tunable defaults (matching Axel's screenshot of the Aave playground):
  *   borderRadius   24  (CSS px)
  *   scale          0.10
- *   depth          10  (CSS px push at lens edge)
+ *   depth          6   (CSS px push at lens edge)
  *   curvature      2.0 (edge-to-center falloff power)
  *   splay          1.0
- *   chroma         0.20 (R/B aberration spread, 0 = no fringe)
- *   blur           0
+ *   chroma         1.0 (R/B aberration spread; 1.0 = Aave's 8%, 0 = none)
+ *   preBlur        0.5 ("wet edge" smoothing before displacement)
+ *   blur           0   (extra blur for milky-glass variants)
+ *   specStrength   1.0 (specular highlight intensity)
  *   glow           0.10
- *   edgeHighlight  0.25
+ *   edgeHighlight  0.18 (CSS gloss-layer top highlight)
  *   specAngle      45
- *   tint           rgba(255,248,240,0.18)
- *   rim            rgba(255,255,255,0.45)
+ *   tint           rgba(255,248,240,0.14)
+ *   rim            rgba(255,255,255,0.40)
  */
 
 (function (global) {
@@ -212,19 +214,33 @@
   /* ------------------------------------------------------------------ */
 
   function buildFilterSvg(id, mapDataUrl, opts, w, h) {
-    /* Aave's `scale` attribute is in userSpaceOnUse pixels — equal to the
-       max push at the lens edge. We scale our authored `depth` by `scale`
-       so the playground UI feels intuitive (depth = px, scale = strength). */
+    /* Aave's `scale` attribute is in userSpaceOnUse pixels. We expose two
+       tunables: `depth` (max edge displacement in px) and `chroma`
+       (R/B aberration spread). Per Aave: R=1.04x, G=1.0x, B=0.926x of the
+       base scale gives the natural-looking ~3.7% per-channel split. */
     const baseScale = opts.scale * opts.depth * 10;
-    const chroma = Math.max(0, Math.min(1, opts.chroma));
-    const scaleR = baseScale * (1 + chroma * 0.4);
+    const chroma = Math.max(0, Math.min(1.5, opts.chroma));
+    /* chroma=1.0 = Aave's ratio (8% R/B spread). 0 = no fringe. >1 = exaggerated. */
+    const spread = 0.074 * chroma;
+    const scaleR = baseScale * (1 + spread);
     const scaleG = baseScale;
-    const scaleB = baseScale * (1 - chroma * 0.4);
-    const blur = opts.blur;
+    const scaleB = baseScale * (1 - spread);
 
-    const blurStr = blur > 0
-      ? '<feGaussianBlur in="SourceGraphic" stdDeviation="' + blur + '" result="blurred"/>'
+    /* Pre-blur: "wet edge" smoothing before displacement (Aave default).
+       Their 0.00065 0.00136 in objectBoundingBox units becomes ~0.5px on a
+       widget-scale lens. opts.blur controls extra blur on top. */
+    const preBlur = Math.max(0, opts.preBlur);
+    const extraBlur = Math.max(0, opts.blur);
+    const totalBlur = preBlur + extraBlur;
+    const blurStr = totalBlur > 0
+      ? '<feGaussianBlur in="SourceGraphic" stdDeviation="' + totalBlur + '" result="blurred"/>'
       : '<feOffset in="SourceGraphic" dx="0" dy="0" result="blurred"/>';
+
+    /* Specular highlight: extract B channel of displacement map, threshold
+       it to surface the brightest band (Aave step 12). The highlight traces
+       the lens-bend region itself, not a CSS gradient. */
+    const specBias = -0.5019607843137255;
+    const specStrength = Math.max(0, Math.min(1, opts.specStrength));
 
     return ''
       + '<svg width="0" height="0" style="position:absolute;width:0;height:0;pointer-events:none;overflow:hidden;" aria-hidden="true">'
@@ -252,6 +268,11 @@
       +     '<feComposite in="dispR" in2="dispG" operator="arithmetic" '
       +       'k1="0" k2="1" k3="1" k4="0" result="dispRG"/>'
       +     '<feComposite in="dispRG" in2="dispB" operator="arithmetic" '
+      +       'k1="0" k2="1" k3="1" k4="0" result="lensRefract"/>'
+      +     '<feColorMatrix in="map" type="matrix" '
+      +       'values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 ' + specStrength
+      +       ' 0 ' + specBias + '" result="specMask"/>'
+      +     '<feComposite in="specMask" in2="lensRefract" operator="arithmetic" '
       +       'k1="0" k2="1" k3="1" k4="0" result="lensResult"/>'
       +   '</filter>'
       + '</svg>';
@@ -311,16 +332,18 @@
     const opts = Object.assign({
       borderRadius: 24,
       scale: 0.10,
-      depth: 10,
+      depth: 6,
       curvature: 2.0,
       splay: 1.0,
-      chroma: 0.20,
-      blur: 0,
+      chroma: 1.0,           /* Aave default ratio = 1.0 (~8% R/B spread) */
+      preBlur: 0.5,          /* Aave "wet edge" pre-displacement smoothing */
+      blur: 0,               /* Extra blur (for milky-glass variants) */
+      specStrength: 1.0,     /* Specular highlight intensity */
       glow: 0.10,
-      edgeHighlight: 0.25,
+      edgeHighlight: 0.18,   /* CSS top-edge highlight on gloss layer */
       specAngle: 45,
-      tint: 'rgba(255,248,240,0.20)',
-      rim: 'rgba(255,255,255,0.45)',
+      tint: 'rgba(255,248,240,0.14)',
+      rim: 'rgba(255,255,255,0.40)',
       shadow: '0 6px 24px rgba(45,27,0,0.10)',
     }, userOpts || {});
 

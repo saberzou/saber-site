@@ -458,6 +458,10 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   user-select: none;
   transition: transform 0.2s ease;
   min-height: fit-content;
+  /* Widget text reads on both dark and light wallpapers through liquid glass.
+     Light foreground + dark text-shadow halo — standard "overlay over arbitrary substrate" pattern. */
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
 }
 .widget-stack {
   position: absolute;
@@ -484,6 +488,9 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   cursor: default;
   user-select: none;
   transition: transform 0.2s ease;
+  /* Light-on-arbitrary-substrate text pattern (see weather-widget). */
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
 }
 .stock-widget:hover { transform: scale(1.02); }
 .stock-widget-title {
@@ -497,9 +504,9 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
 .stock-row + .stock-row { border-top: 1px solid rgba(0,0,0,0.04); }
 .stock-ticker { font-weight: 500; color: inherit; font-family: var(--sans); }
 .stock-price { color: inherit; opacity: 0.8; font-family: var(--sans); }
-.stock-change { font-size: 0.7rem; font-weight: 500; padding: 2px 6px; border-radius: 4px; }
-.stock-change.up { color: #A8E6CF; background: rgba(168,230,207,0.2); }
-.stock-change.down { color: #FFB7B2; background: rgba(255,183,178,0.2); }
+.stock-change { font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; text-shadow: 0 1px 1px rgba(0,0,0,0.25); }
+.stock-change.up { color: #FFFFFF; background: rgba(40,167,96,0.78); }
+.stock-change.down { color: #FFFFFF; background: rgba(220,72,72,0.78); }
 .weather-icon { width: 40px; height: 40px; flex-shrink: 0; }
 .weather-icon svg { width: 100%; height: 100%; }
 .weather-temp { font-size: 1.5rem; font-weight: 500; color: inherit; line-height: 1.2; }
@@ -517,6 +524,9 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   box-shadow: 0 4px 20px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1);
   cursor: default;
   user-select: none;
+  /* Light-on-arbitrary-substrate text pattern (see weather-widget). */
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
 }
 .todo-header {
   display: flex;
@@ -5463,7 +5473,7 @@ function renderTodos() {
   var todos = getTodos();
   var list = document.getElementById('todo-list');
   if (!todos.length) {
-    list.innerHTML = '<li style="font-size:0.7rem;color:#FFD93D;opacity:0.9;">No tasks yet</li>';
+    list.innerHTML = '<li style="font-size:0.7rem;color:#FFFFFF;opacity:0.85;text-shadow:0 1px 2px rgba(0,0,0,0.35);">No tasks yet</li>';
     return;
   }
   list.innerHTML = todos.map(function(t, i) {

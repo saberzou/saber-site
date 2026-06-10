@@ -8325,12 +8325,17 @@ function termSpawnArcherEmoji() {
     // Per-substrate tuning: dark wallpapers carry chromatic rim + spec
     // highlight + edge glow beautifully (Hubble showpiece signal). Light
     // wallpapers expose those same effects as quilted/scalloped bezel rims
-    // (per Saber's #16665 feedback on cream wallpaper). Flip all three
-    // dispersion+highlight axes based on body.wallpaper-dark presence.
+    // (per Saber's #16665 + #16668 feedback on cream wallpaper). v13:
+    // even at chroma 0.3 + reduced spec, corner displacement still produces
+    // visible R/G/B stitching at the corner radius. Kill chroma entirely on
+    // light substrates — Saber's 'clean rim with subtle highlight'. The
+    // lensing/refraction geometry still bends the substrate, just without
+    // per-channel separation. Result: monochromatic 'frosted glass' on light,
+    // full chromatic 'wet edge halo' on dark.
     var WIDGET_DARK_OPTS = { chroma: 1.0, specStrength: 1.0, edgeHighlight: 0.18, glow: 0.10 };
-    var WIDGET_LIGHT_OPTS = { chroma: 0.3, specStrength: 0.35, edgeHighlight: 0.08, glow: 0.04 };
+    var WIDGET_LIGHT_OPTS = { chroma: 0.0, specStrength: 0.25, edgeHighlight: 0.06, glow: 0.03 };
     var DOCK_DARK_OPTS = { chroma: 1.0, specStrength: 1.2, edgeHighlight: 0.22, glow: 0.10 };
-    var DOCK_LIGHT_OPTS = { chroma: 0.3, specStrength: 0.45, edgeHighlight: 0.10, glow: 0.05 };
+    var DOCK_LIGHT_OPTS = { chroma: 0.0, specStrength: 0.35, edgeHighlight: 0.08, glow: 0.04 };
     function updateChromaForSubstrate(){
       var isDark = document.body.classList.contains('wallpaper-dark');
       var widgetTuning = isDark ? WIDGET_DARK_OPTS : WIDGET_LIGHT_OPTS;

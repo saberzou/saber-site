@@ -8322,21 +8322,23 @@ function termSpawnArcherEmoji() {
     if (todo) var todoGlass = LiquidGlass.applyGlass(todo, widgetOpts);
     if (dock) var dockGlass = LiquidGlass.applyGlass(dock, dockOpts);
 
-    // Per-substrate chroma: dark wallpapers carry the chromatic-rim signal
-    // beautifully (showpiece effect), light/low-chroma wallpapers expose it
-    // as bezel banding. Flip chroma based on body.wallpaper-dark presence.
-    var WIDGET_CHROMA_DARK = 1.0;   // Aave-exact 8% R/B spread, sings on dark
-    var WIDGET_CHROMA_LIGHT = 0.3;  // ~2.4% spread, no banding on bright/pastel
-    var DOCK_CHROMA_DARK = 1.0;
-    var DOCK_CHROMA_LIGHT = 0.3;
+    // Per-substrate tuning: dark wallpapers carry chromatic rim + spec
+    // highlight + edge glow beautifully (Hubble showpiece signal). Light
+    // wallpapers expose those same effects as quilted/scalloped bezel rims
+    // (per Saber's #16665 feedback on cream wallpaper). Flip all three
+    // dispersion+highlight axes based on body.wallpaper-dark presence.
+    var WIDGET_DARK_OPTS = { chroma: 1.0, specStrength: 1.0, edgeHighlight: 0.18, glow: 0.10 };
+    var WIDGET_LIGHT_OPTS = { chroma: 0.3, specStrength: 0.35, edgeHighlight: 0.08, glow: 0.04 };
+    var DOCK_DARK_OPTS = { chroma: 1.0, specStrength: 1.2, edgeHighlight: 0.22, glow: 0.10 };
+    var DOCK_LIGHT_OPTS = { chroma: 0.3, specStrength: 0.45, edgeHighlight: 0.10, glow: 0.05 };
     function updateChromaForSubstrate(){
       var isDark = document.body.classList.contains('wallpaper-dark');
-      var widgetChroma = isDark ? WIDGET_CHROMA_DARK : WIDGET_CHROMA_LIGHT;
-      var dockChroma = isDark ? DOCK_CHROMA_DARK : DOCK_CHROMA_LIGHT;
-      if (weatherGlass) weatherGlass.update({ chroma: widgetChroma });
-      if (stockGlass) stockGlass.update({ chroma: widgetChroma });
-      if (todoGlass) todoGlass.update({ chroma: widgetChroma });
-      if (dockGlass) dockGlass.update({ chroma: dockChroma });
+      var widgetTuning = isDark ? WIDGET_DARK_OPTS : WIDGET_LIGHT_OPTS;
+      var dockTuning = isDark ? DOCK_DARK_OPTS : DOCK_LIGHT_OPTS;
+      if (weatherGlass) weatherGlass.update(widgetTuning);
+      if (stockGlass) stockGlass.update(widgetTuning);
+      if (todoGlass) todoGlass.update(widgetTuning);
+      if (dockGlass) dockGlass.update(dockTuning);
     }
     // Initial sync (default opts had 0.4; pull to per-state value now).
     updateChromaForSubstrate();

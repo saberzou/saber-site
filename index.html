@@ -407,6 +407,30 @@ img[src*="icons-pixel"] {
 }
 /* Flip pixel SVGs to white on dark wallpapers for legibility.
    Only targets .svg (vector) icons; raster fallbacks keep their colors. */
+/* ─── Adaptive widget text: dark text on light wallpapers, light text on dark wallpapers ─── */
+/* Default state (light wallpaper, no .wallpaper-dark) — dark text reads against the bright substrate. */
+.weather-widget, .stock-widget, .todo-widget {
+  color: rgba(45,27,0,0.78);
+  text-shadow: 0 1px 1px rgba(255,255,255,0.45);
+}
+.weather-widget .weather-desc,
+.weather-widget .weather-location { color: rgba(45,27,0,0.62); text-shadow: 0 1px 1px rgba(255,255,255,0.45); }
+.todo-empty-default { color: rgba(45,27,0,0.55); text-shadow: 0 1px 1px rgba(255,255,255,0.45); }
+.stock-widget-title { color: rgba(45,27,0,0.55); }
+
+/* Dark wallpaper override — light text reads against the dark substrate. */
+body.wallpaper-dark .weather-widget,
+body.wallpaper-dark .stock-widget,
+body.wallpaper-dark .todo-widget {
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+}
+body.wallpaper-dark .weather-widget .weather-desc,
+body.wallpaper-dark .weather-widget .weather-location { color: rgba(255,255,255,0.88); text-shadow: 0 1px 2px rgba(0,0,0,0.45); }
+body.wallpaper-dark .todo-empty-default { color: rgba(255,255,255,0.85); text-shadow: 0 1px 2px rgba(0,0,0,0.45); }
+body.wallpaper-dark .stock-widget-title { color: rgba(255,255,255,0.7); }
+
+/* Inverted SVG icons (legacy targeting): keep as-is. */
 body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   filter: invert(1);
 }
@@ -510,8 +534,8 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
 .weather-icon { width: 40px; height: 40px; flex-shrink: 0; }
 .weather-icon svg { width: 100%; height: 100%; }
 .weather-temp { font-size: 1.5rem; font-weight: 500; color: inherit; line-height: 1.2; }
-.weather-desc { font-size: 0.75rem; color: #FFFFFF; opacity: 0.92; line-height: 1.3; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.45); }
-.weather-location { font-size: 0.65rem; color: #FFFFFF; opacity: 0.85; line-height: 1.3; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.45); }
+.weather-desc { font-size: 0.75rem; line-height: 1.3; font-weight: 500; }
+.weather-location { font-size: 0.65rem; line-height: 1.3; font-weight: 500; }
 
 /* ─── Todo Widget ─── */
 .todo-widget {
@@ -5473,7 +5497,7 @@ function renderTodos() {
   var todos = getTodos();
   var list = document.getElementById('todo-list');
   if (!todos.length) {
-    list.innerHTML = '<li style="font-size:0.7rem;color:#FFFFFF;opacity:0.88;font-weight:500;text-shadow:0 1px 2px rgba(0,0,0,0.45);">No tasks yet</li>';
+    list.innerHTML = '<li class="todo-empty-default" style="font-size:0.7rem;font-weight:500;">No tasks yet</li>';
     return;
   }
   list.innerHTML = todos.map(function(t, i) {
@@ -8268,7 +8292,7 @@ function termSpawnArcherEmoji() {
       depth: 6,
       curvature: 2.0,
       splay: 1.0,
-      chroma: 1.0,
+      chroma: 0.4,
       preBlur: 0.5,
       blur: 0,
       specStrength: 1.0,
@@ -8288,7 +8312,7 @@ function termSpawnArcherEmoji() {
       depth: 5,
       curvature: 2.2,
       splay: 1.0,
-      chroma: 1.0,
+      chroma: 0.4,
       preBlur: 0.5,
       blur: 0,
       specStrength: 1.2,

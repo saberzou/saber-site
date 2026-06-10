@@ -428,11 +428,22 @@
     });
 
     /* Optional: remove the original backdrop-filter blur on the host —
-       the refraction layer carries the wallpaper paint now. */
+       the refraction layer carries the wallpaper paint now. Also stash
+       and clear any opaque/translucent host background that would occlude
+       the refract layer. */
     const priorBackdrop = el.style.backdropFilter || '';
     const priorWebkitBackdrop = el.style.webkitBackdropFilter || '';
+    const priorBackground = el.style.background || '';
+    const priorBackgroundColor = el.style.backgroundColor || '';
+    const priorBorder = el.style.border || '';
     el.style.backdropFilter = 'none';
     el.style.webkitBackdropFilter = 'none';
+    el.style.background = 'transparent';
+    el.style.backgroundColor = 'transparent';
+    /* The gloss layer carries the rim; suppress any host border. */
+    if (cs.borderStyle && cs.borderStyle !== 'none' && cs.borderWidth !== '0px') {
+      el.style.border = 'none';
+    }
 
     let currentId = null;
 
@@ -539,6 +550,9 @@
         gloss.remove();
         el.style.backdropFilter = priorBackdrop;
         el.style.webkitBackdropFilter = priorWebkitBackdrop;
+        el.style.background = priorBackground;
+        el.style.backgroundColor = priorBackgroundColor;
+        el.style.border = priorBorder;
         el.classList.remove('liquid-glass-host');
         _registry.delete(el);
       },

@@ -504,14 +504,14 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
 .stock-row + .stock-row { border-top: 1px solid rgba(0,0,0,0.04); }
 .stock-ticker { font-weight: 500; color: inherit; font-family: var(--sans); }
 .stock-price { color: inherit; opacity: 0.8; font-family: var(--sans); }
-.stock-change { font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; text-shadow: 0 1px 1px rgba(0,0,0,0.25); }
-.stock-change.up { color: #FFFFFF; background: rgba(40,167,96,0.78); }
-.stock-change.down { color: #FFFFFF; background: rgba(220,72,72,0.78); }
+.stock-change { font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+.stock-change.up { color: #FFFFFF; background: rgba(48,209,88,0.92); }
+.stock-change.down { color: #FFFFFF; background: rgba(255,59,48,0.92); }
 .weather-icon { width: 40px; height: 40px; flex-shrink: 0; }
 .weather-icon svg { width: 100%; height: 100%; }
 .weather-temp { font-size: 1.5rem; font-weight: 500; color: inherit; line-height: 1.2; }
-.weather-desc { font-size: 0.75rem; color: inherit; opacity: 0.85; line-height: 1.3; }
-.weather-location { font-size: 0.65rem; color: inherit; opacity: 0.7; line-height: 1.3; }
+.weather-desc { font-size: 0.75rem; color: rgba(0,0,0,0.55); line-height: 1.3; font-weight: 500; }
+.weather-location { font-size: 0.65rem; color: rgba(0,0,0,0.55); line-height: 1.3; font-weight: 500; }
 
 /* ─── Todo Widget ─── */
 .todo-widget {
@@ -5473,7 +5473,7 @@ function renderTodos() {
   var todos = getTodos();
   var list = document.getElementById('todo-list');
   if (!todos.length) {
-    list.innerHTML = '<li style="font-size:0.7rem;color:#FFFFFF;opacity:0.85;text-shadow:0 1px 2px rgba(0,0,0,0.35);">No tasks yet</li>';
+    list.innerHTML = '<li style="font-size:0.7rem;color:rgba(0,0,0,0.55);font-weight:500;">No tasks yet</li>';
     return;
   }
   list.innerHTML = todos.map(function(t, i) {

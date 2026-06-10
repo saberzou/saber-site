@@ -19,15 +19,17 @@
  *       gloss layer    : light cream tint + specular gradient + rim border
  *   - Widget content stays in normal flow on top.
  *
- * Wallpaper is painted with `background-attachment: fixed`, so the bit of
- * wallpaper shown in the overlay automatically lines up with the bit of
- * wallpaper directly behind the widget. No JS positioning needed.
+ * Wallpaper painting uses a viewport-sized `background-size: 100vw 100vh`
+ * with `background-position` re-synced to the host's viewport offset on
+ * every render. This emulates `background-attachment: fixed` but works
+ * around the iOS Safari bug that silently downgrades `fixed` to `scroll`.
  *
  * Cross-browser quirks handled:
  *   - Fresh filter ID on every regenerate (Safari caches feImage by ID).
  *   - Map computed at lens dimensions, not the source-graphic ceiling.
  *   - ResizeObserver re-renders the displacement map on size changes.
- *   - `attachment: fixed` falls back gracefully on iOS (paints once).
+ *   - JS-synced `background-position` instead of `attachment: fixed`
+ *     (iOS Safari downgrades `fixed` to `scroll` silently).
  *
  * Public API:
  *   applyGlass(el, opts) -> { destroy(), update(opts), regenerate() }
@@ -54,6 +56,7 @@
 
   let _idCounter = 0;
   const _registry = new WeakMap();
+  const _imgCache = new Map();
   const WALLPAPER_VAR = '--wallpaper-url';
 
   /* ------------------------------------------------------------------ */
@@ -362,22 +365,25 @@
       'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;';
     document.body.appendChild(svgHolder);
 
-    /* Refraction layer: painted wallpaper, displacement filtered. */
+    /* Refraction layer: painted wallpaper, displacement filtered.
+       Wallpaper is sized to the viewport and re-positioned on every
+       render so it lines up with the bit of wallpaper directly behind
+       the host (emulates `background-attachment: fixed` without the
+       iOS Safari bug). */
     const refract = document.createElement('div');
     refract.setAttribute('data-glass-layer', 'refract');
     refract.style.cssText = ''
       + 'position:absolute;inset:0;'
       + 'border-radius:inherit;'
       + 'background-image:var(' + WALLPAPER_VAR + ');'
-      + 'background-attachment:fixed;'
-      + 'background-size:cover;'
-      + 'background-position:center;'
+      + 'background-size:100vw 100vh;'
       + 'background-repeat:no-repeat;'
+      + 'background-position:0 0;'
       + 'pointer-events:none;'
       + 'z-index:0;'
       + 'overflow:hidden;'
       + 'transform:translateZ(0);'
-      + 'will-change:filter;';
+      + 'will-change:filter,background-position;';
 
     /* Gloss layer: light cream tint + top specular highlight + rim border. */
     const gloss = document.createElement('div');
@@ -430,6 +436,59 @@
 
     let currentId = null;
 
+    /* Match the body's actual background sizing/positioning so the paint
+       in the refract layer aligns with the wallpaper behind it. saberzou.ai
+       uses `center/cover`; if a host page differs, override via the data-attr. */
+    function syncWallpaperPaint() {
+      const rect = el.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      /* Reproduce `background-size: cover; background-position: center;`
+         on a viewport-sized canvas, then translate so the slice under
+         the host's bbox is visible. */
+      const wpEl = document.body;
+      const bgImg = new Image();
+      /* We need the natural wallpaper aspect to compute `cover`. Try the
+         CSS variable URL; fall back to body's computed background-image. */
+      let url = getComputedStyle(document.documentElement).getPropertyValue(WALLPAPER_VAR).trim();
+      if (!url || url === '') {
+        url = getComputedStyle(wpEl).backgroundImage;
+      }
+      const match = url.match(/url\(\s*["']?([^"')]+)["']?\s*\)/);
+      if (!match) {
+        /* Gradient or unknown — use cover/center on viewport size. */
+        refract.style.backgroundSize = vw + 'px ' + vh + 'px';
+        refract.style.backgroundPosition = (-rect.left) + 'px ' + (-rect.top) + 'px';
+        return;
+      }
+      const src = match[1];
+      if (!_imgCache.has(src)) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function () {
+          _imgCache.set(src, { w: img.naturalWidth, h: img.naturalHeight });
+          syncWallpaperPaint();
+        };
+        img.src = src;
+        /* Until loaded, fall back to a safe cover sizing. */
+        refract.style.backgroundSize = vw + 'px ' + vh + 'px';
+        refract.style.backgroundPosition = (-rect.left) + 'px ' + (-rect.top) + 'px';
+        return;
+      }
+      const dim = _imgCache.get(src);
+      /* Compute the `cover` size for this viewport. */
+      const scale = Math.max(vw / dim.w, vh / dim.h);
+      const drawW = dim.w * scale;
+      const drawH = dim.h * scale;
+      /* Cover + center: image placed at (vw-drawW)/2, (vh-drawH)/2 on viewport. */
+      const offX = (vw - drawW) / 2;
+      const offY = (vh - drawH) / 2;
+      /* In the refract div, translate so that pixel (rect.left, rect.top) of
+         the viewport ends up at (0, 0) of the div. */
+      refract.style.backgroundSize = drawW + 'px ' + drawH + 'px';
+      refract.style.backgroundPosition = (offX - rect.left) + 'px ' + (offY - rect.top) + 'px';
+    }
+
     function render() {
       const rect = el.getBoundingClientRect();
       const w = Math.max(8, Math.round(rect.width));
@@ -440,12 +499,28 @@
       svgHolder.innerHTML = buildFilterSvg(id, mapUrl, opts, w, h);
       refract.style.filter = 'url(#' + id + ')';
       currentId = id;
+      syncWallpaperPaint();
     }
 
     render();
 
     const ro = new ResizeObserver(function () { render(); });
     ro.observe(el);
+
+    /* Window scroll/resize: re-sync background-position so the painted
+       wallpaper slice stays aligned. saberzou.ai has no scroll, but this
+       makes the rig portable to scrolling pages. Throttled via rAF. */
+    let rafPending = false;
+    function onViewportChange() {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(function () {
+        rafPending = false;
+        syncWallpaperPaint();
+      });
+    }
+    window.addEventListener('scroll', onViewportChange, { passive: true });
+    window.addEventListener('resize', onViewportChange, { passive: true });
 
     /* If the wallpaper variable changes, the refract layer will auto-update
        (CSS variable cascade), but Safari needs a filter ID swap to refresh
@@ -457,6 +532,8 @@
       destroy: function () {
         ro.disconnect();
         document.removeEventListener('liquidglass:wallpaper', onWallpaperChange);
+        window.removeEventListener('scroll', onViewportChange);
+        window.removeEventListener('resize', onViewportChange);
         svgHolder.remove();
         refract.remove();
         gloss.remove();

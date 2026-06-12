@@ -1,50 +1,56 @@
 /**
- * liquid-glass.js v2 — real refractive liquid glass.
+ * liquid-glass.js v3 — refractive liquid glass, after Aave's
+ * "Building Glass for the Web" (https://aave.com/design/building-glass-for-the-web)
  *
- * Architecture
- * ------------
- * Where supported (Chromium), each glass element gets an inner "lens"
- * layer with `backdrop-filter: url(#displacementFilter)`. The browser
- * hands the filter the live backdrop — wallpaper, windows, icons,
- * anything painted behind the element — so the refraction is always
- * pixel-aligned with reality. No wallpaper painting, no scroll syncing.
+ * Aave's recipe, which this file follows:
+ *   - Generate a displacement map PNG on the fly from the glass's shape
+ *     and size. R encodes horizontal bend, G vertical bend; everything
+ *     outside the lens region stays neutral so only pixels under the
+ *     glass move.
+ *   - Feed the map to an SVG feDisplacementMap filter over the page
+ *     background, run once per RGB channel at staggered scales
+ *     (R 1.04x / G 1.0x / B 0.926x) for the chromatic fringe.
+ *   - A light pre-displacement blur ("wet edge") smooths the bend.
+ *   - The specular highlight is extracted from the map's B channel by
+ *     threshold, so the glint hugs the lens geometry itself.
+ *   - Safari caches SVG filter output by ID — mint a fresh filter ID on
+ *     every regenerate.
  *
- * The SVG filter pipeline (per element, sized to it):
- *   1. feGaussianBlur        — frosted-glass body blur
- *   2. feDisplacementMap ×3  — lens-edge refraction, run per RGB channel
- *                              at slightly different scales for chromatic
- *                              aberration (the "wet edge" fringe)
- *   3. feColorMatrix saturate — vibrancy boost behind the glass
- *   4. specular band          — the displacement map's B channel encodes
- *                              bend strength × top-light incidence; it is
- *                              thresholded to a white rim glint that hugs
- *                              the lens geometry
+ * Where we diverge: Aave filters a *painted copy* of the page background
+ * inside the glass (their background is a controlled hero graphic, so a
+ * copy is easy to align). SaberOS is a desktop: windows and icons drift
+ * behind the glass and the wallpaper is user-switchable, so a painted
+ * copy can only ever approximate the backdrop. We therefore pick the
+ * richest mode the browser supports:
  *
- * The displacement map is generated on canvas from the signed-distance
- * field of the element's rounded rect: a `bezelWidth`-px band along the
- * border bends sampling outward (R/G encode the outward normal scaled by
- * a smooth falloff), the center stays optically flat.
+ *   backdrop — Chromium. `backdrop-filter: url(#filter)` hands the SVG
+ *              pipeline the live backdrop: wallpaper, windows, icons,
+ *              all refracted, pixel-aligned for free.
+ *   painted  — Safari/Firefox (no url() in backdrop-filter). Aave's
+ *              architecture: a wallpaper copy painted into the glass
+ *              with `filter: url(#filter)`. The copy is painted with a
+ *              bleed margin inside a clipping layer so rim displacement
+ *              never samples transparent pixels (the v1 edge-smear bug),
+ *              and is re-aligned to the viewport cover/center wallpaper
+ *              on scroll/resize. Only the wallpaper refracts; windows
+ *              passing behind the glass are covered by the copy.
+ *   frost    — anything else: backdrop-filter blur+saturate.
  *
- * On top of the lens sit two CSS layers:
- *   gloss — tint + vertical sheen + soft inset highlights
- *   rim   — 1px gradient ring (bright top-left, faint bottom-right),
- *           masked to the border so it reads as a polished glass edge
+ * All modes share the same CSS gloss (tint + sheen) and masked gradient
+ * rim ring. Debug override: append ?glassmode=backdrop|painted|frost.
  *
- * Browsers without `backdrop-filter: url()` (Safari, Firefox) fall back
- * to `backdrop-filter: blur() saturate()` under the same gloss/rim
- * layers — clean iOS-style frosted glass, minus the refraction.
- *
- * Public API (unchanged from v1):
+ * Public API:
  *   applyGlass(el, opts) -> { destroy(), update(opts), regenerate() }
- *   ensureRootWallpaperVar(), notifyWallpaperChanged() — kept as
- *   compatibility no-ops; the live backdrop makes them unnecessary.
+ *   ensureRootWallpaperVar()   — seed --wallpaper-url from the body
+ *   notifyWallpaperChanged()   — re-render painted-mode lenses
  *
  * Tunables:
  *   borderRadius   24    CSS px, should match the element's radius
  *   bezelWidth     16    px width of the refractive edge band
  *   refraction     22    max px the rim bends the backdrop
  *   curvature      1.5   bezel falloff shaping (higher = tighter rim)
- *   chroma         0.8   chromatic aberration spread (0 = none)
+ *   chroma         1.0   chromatic aberration spread (1 = Aave's ratios)
+ *   preBlur        0.5   Aave "wet edge" smoothing before displacement
  *   blur           12    frosted body blur, px
  *   saturate       1.5   backdrop saturation boost
  *   specStrength   0.9   white rim-glint intensity (0 = off)
@@ -59,31 +65,52 @@
 
   let _idCounter = 0;
   const _registry = new WeakMap();
+  const _imgCache = new Map();
+  const WALLPAPER_VAR = '--wallpaper-url';
 
-  /* `backdrop-filter: url()` renders correctly only in Chromium today.
-     Safari and Firefox parse it (so CSS.supports lies) but draw either
-     nothing or an unfiltered backdrop — UA-gate them to the blur path. */
-  const REFRACTION_SUPPORTED = (function () {
+  /* ------------------------------------------------------------------ */
+  /* Mode detection                                                      */
+  /* ------------------------------------------------------------------ */
+
+  const MODE = (function () {
     try {
-      if (typeof CSS === 'undefined' || !CSS.supports) return false;
+      const qs = (global.location && global.location.search) || '';
+      const forced = /[?&]glassmode=(backdrop|painted|frost)/.exec(qs);
+      if (forced) return forced[1];
+    } catch (e) { /* non-fatal */ }
+    try {
+      if (typeof CSS === 'undefined' || !CSS.supports) return 'frost';
+      const ua = navigator.userAgent;
+      const isChromium = /Chrom(e|ium)|Edg\/|OPR\//.test(ua);
+      /* `backdrop-filter: url()` renders correctly only in Chromium.
+         Safari and Firefox parse it (CSS.supports lies) but draw nothing
+         or an unfiltered backdrop. */
       const parses = CSS.supports('backdrop-filter', 'url(#lg)') ||
                      CSS.supports('-webkit-backdrop-filter', 'url(#lg)');
-      if (!parses) return false;
-      const ua = navigator.userAgent;
-      const isFirefox = /Firefox\//.test(ua);
-      const isChromium = /Chrom(e|ium)|Edg\/|OPR\//.test(ua);
-      const isSafari = /AppleWebKit/.test(ua) && !isChromium;
-      return !isFirefox && !isSafari;
-    } catch (e) {
-      return false;
-    }
+      if (isChromium && parses) return 'backdrop';
+      /* Aave's painted-copy path needs `filter: url()` + feDisplacementMap
+         + feImage, present in every modern engine. */
+      if (typeof SVGFEDisplacementMapElement !== 'undefined' &&
+          typeof SVGFEImageElement !== 'undefined' &&
+          CSS.supports('filter', 'url(#lg)')) return 'painted';
+    } catch (e) { /* fall through */ }
+    return 'frost';
   })();
 
   /* ------------------------------------------------------------------ */
   /* Displacement-map generator                                          */
   /* ------------------------------------------------------------------ */
 
-  function buildDisplacementMap(w, h, opts) {
+  /**
+   * Map for a W×H input layer whose lens (rounded rect) is inset by
+   * `inset` px on every side. R/G encode the outward surface normal
+   * scaled by a smooth bezel falloff; B encodes bend strength times
+   * incidence toward a top-left light (specular potential). Outside the
+   * lens the map is neutral — per Aave, only pixels under the glass move,
+   * which is what lets the painted mode bleed safely.
+   */
+  function buildDisplacementMap(W, H, opts, inset) {
+    const w = W - 2 * inset, h = H - 2 * inset;
     const radius = Math.max(1, Math.min(opts.borderRadius, w / 2, h / 2));
     const minDim = Math.min(w, h);
     /* Keep an optically-flat center even on short elements. */
@@ -95,10 +122,10 @@
 
     /* Half-res for perf — feImage stretches it back up, and the map is
        smooth so the upscale is invisible. */
-    const mapW = Math.max(2, Math.round(w / 2));
-    const mapH = Math.max(2, Math.round(h / 2));
-    const sx = mapW / w;
-    const sy = mapH / h;
+    const mapW = Math.max(2, Math.round(W / 2));
+    const mapH = Math.max(2, Math.round(H / 2));
+    const sx = mapW / W;
+    const sy = mapH / H;
 
     const canvas = document.createElement('canvas');
     canvas.width = mapW;
@@ -107,7 +134,7 @@
     const img = ctx.createImageData(mapW, mapH);
     const data = img.data;
 
-    const cx = w / 2, cy = h / 2;
+    const cx = W / 2, cy = H / 2;
     const coreX = w / 2 - radius, coreY = h / 2 - radius;
 
     for (let py = 0; py < mapH; py++) {
@@ -116,7 +143,7 @@
         const x = (px + 0.5) / sx;
         const i = (py * mapW + px) * 4;
 
-        /* Signed distance to the rounded-rect border (negative inside). */
+        /* Signed distance to the lens border (negative inside). */
         const qx = Math.abs(x - cx) - coreX;
         const qy = Math.abs(y - cy) - coreY;
         const ax = Math.max(qx, 0), ay = Math.max(qy, 0);
@@ -151,8 +178,7 @@
           r8 = Math.round(128 + nx * m * 127);
           g8 = Math.round(128 + ny * m * 127);
 
-          /* B: specular potential — bend strength × incidence toward the
-             light, so the glint sits on the top/left rim. */
+          /* B: specular potential. */
           const lambert = Math.max(0, nx * lightX + ny * lightY);
           b8 = Math.round(255 * m * (0.2 + 0.8 * lambert));
         }
@@ -172,18 +198,19 @@
   /* SVG filter builder                                                  */
   /* ------------------------------------------------------------------ */
 
-  function buildFilterSvg(id, mapDataUrl, opts, w, h) {
+  function buildFilterSvg(id, mapDataUrl, opts, W, H) {
     /* The map encodes the outward normal at half amplitude (127/255), so
        feDisplacementMap shifts by ~scale/2 at the rim. Double `refraction`
        to make the option mean "max bend in px". */
     const scaleBase = 2 * Math.max(0, opts.refraction);
     const chroma = Math.max(0, Math.min(2, opts.chroma));
-    const spread = 0.055 * chroma;
-    const scaleR = scaleBase * (1 + spread);
+    /* Aave's production ratios: R 1.04x, G 1.0x, B 0.926x at chroma 1. */
+    const scaleR = scaleBase * (1 + 0.040 * chroma);
     const scaleG = scaleBase;
-    const scaleB = scaleBase * (1 - spread);
+    const scaleB = scaleBase * (1 - 0.074 * chroma);
 
-    const blur = Math.max(0, opts.blur);
+    /* Wet-edge smoothing + frosted body blur, both before displacement. */
+    const blur = Math.max(0, opts.preBlur) + Math.max(0, opts.blur);
     const sat = Math.max(0, opts.saturate);
     const ss = Math.max(0, Math.min(1.5, opts.specStrength));
 
@@ -203,7 +230,7 @@
          spec" (B=0) instead of transparent. */
       +     '<feFlood flood-color="rgb(128,128,0)" flood-opacity="1" result="mapBg"/>'
       +     '<feImage href="' + mapDataUrl + '" preserveAspectRatio="none" '
-      +       'result="rawMap" x="0" y="0" width="' + w + '" height="' + h + '"/>'
+      +       'result="rawMap" x="0" y="0" width="' + W + '" height="' + H + '"/>'
       +     '<feComposite in="rawMap" in2="mapBg" operator="over" result="map"/>'
       +     blurStr;
 
@@ -253,6 +280,47 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* Wallpaper plumbing (painted mode)                                   */
+  /* ------------------------------------------------------------------ */
+
+  function ensureRootWallpaperVar() {
+    const root = document.documentElement;
+    if (root.style.getPropertyValue(WALLPAPER_VAR)) return;
+    const computed = getComputedStyle(document.body).backgroundImage;
+    if (computed && computed !== 'none') {
+      root.style.setProperty(WALLPAPER_VAR, computed);
+    }
+  }
+
+  /* Wrap the page's applyWallpaper(idx) so wallpaper switches keep
+     --wallpaper-url fresh and painted lenses re-render. Idempotent. */
+  function bindToWallpaperApp() {
+    if (global._liquidGlassBound) return;
+    if (typeof global.applyWallpaper !== 'function') return;
+    const original = global.applyWallpaper;
+    global.applyWallpaper = function (idx) {
+      const result = original.apply(this, arguments);
+      try {
+        const wp = global.wallpaperList && global.wallpaperList[idx];
+        if (wp && wp.url) {
+          document.documentElement.style.setProperty(
+            WALLPAPER_VAR, 'url("' + wp.url + '")'
+          );
+        } else if (wp && wp.gradient) {
+          document.documentElement.style.setProperty(WALLPAPER_VAR, wp.gradient);
+        }
+        notifyWallpaperChanged();
+      } catch (e) { /* non-fatal */ }
+      return result;
+    };
+    global._liquidGlassBound = true;
+  }
+
+  function notifyWallpaperChanged() {
+    document.dispatchEvent(new CustomEvent('liquidglass:wallpaper'));
+  }
+
+  /* ------------------------------------------------------------------ */
   /* Per-element wiring                                                  */
   /* ------------------------------------------------------------------ */
 
@@ -268,7 +336,8 @@
       bezelWidth: 16,
       refraction: 22,
       curvature: 1.5,
-      chroma: 0.8,
+      chroma: 1.0,
+      preBlur: 0.5,
       blur: 12,
       saturate: 1.5,
       specStrength: 0.9,
@@ -277,6 +346,11 @@
       rim: 'rgba(255,255,255,0.55)',
       shadow: '0 8px 32px rgba(0,0,0,0.18)',
     }, userOpts || {});
+
+    if (MODE === 'painted') {
+      ensureRootWallpaperVar();
+      bindToWallpaperApp();
+    }
 
     const cs = getComputedStyle(el);
     if (cs.position === 'static') el.style.position = 'relative';
@@ -289,7 +363,8 @@
       'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;';
     document.body.appendChild(svgHolder);
 
-    /* Lens layer: live backdrop, refracted (or just frosted on fallback). */
+    /* Lens layer. In backdrop/frost modes it carries the backdrop-filter
+       itself; in painted mode it clips an oversized paint layer. */
     const lens = document.createElement('div');
     lens.setAttribute('data-glass-layer', 'lens');
     lens.style.cssText = ''
@@ -299,6 +374,25 @@
       + 'z-index:0;'
       + 'overflow:hidden;'
       + 'transform:translateZ(0);';
+
+    /* Painted mode: wallpaper copy with a bleed margin so the rim always
+       has real pixels to displace into (Aave paints their hero background
+       the same way; the bleed is our fix for the edge smear). */
+    let paint = null;
+    let bleed = 0;
+    if (MODE === 'painted') {
+      bleed = Math.ceil(Math.max(24, opts.refraction * 1.5, (opts.blur + opts.preBlur) * 2));
+      paint = document.createElement('div');
+      paint.setAttribute('data-glass-layer', 'paint');
+      paint.style.cssText = ''
+        + 'position:absolute;'
+        + 'inset:' + (-bleed) + 'px;'
+        + 'background-image:var(' + WALLPAPER_VAR + ');'
+        + 'background-repeat:no-repeat;'
+        + 'pointer-events:none;'
+        + 'will-change:filter;';
+      lens.appendChild(paint);
+    }
 
     /* Gloss layer: tint + vertical sheen + soft inset highlights. */
     const gloss = document.createElement('div');
@@ -360,8 +454,8 @@
       }
     });
 
-    /* The lens carries the backdrop filter and the gloss carries tint +
-       rim, so neutralize the host's own treatment (stashed for destroy). */
+    /* The lens carries the backdrop and the gloss carries tint + rim, so
+       neutralize the host's own treatment (stashed for destroy). */
     const priorBackdrop = el.style.backdropFilter || '';
     const priorWebkitBackdrop = el.style.webkitBackdropFilter || '';
     const priorBackground = el.style.background || '';
@@ -375,20 +469,71 @@
       el.style.border = 'none';
     }
 
+    /* Painted mode: align the copy with the real wallpaper, which is
+       painted cover/center across the viewport by applyWallpaper(). */
+    function syncWallpaperPaint() {
+      if (!paint) return;
+      const rect = el.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const fallback = function () {
+        paint.style.backgroundSize = vw + 'px ' + vh + 'px';
+        paint.style.backgroundPosition =
+          (bleed - rect.left) + 'px ' + (bleed - rect.top) + 'px';
+      };
+      let url = getComputedStyle(document.documentElement)
+        .getPropertyValue(WALLPAPER_VAR).trim();
+      if (!url) url = getComputedStyle(document.body).backgroundImage;
+      const match = url.match(/url\(\s*["']?([^"')]+)["']?\s*\)/);
+      if (!match) { fallback(); return; } /* gradient — viewport-stretch */
+      const src = match[1];
+      if (!_imgCache.has(src)) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function () {
+          _imgCache.set(src, { w: img.naturalWidth, h: img.naturalHeight });
+          syncWallpaperPaint();
+        };
+        img.src = src;
+        fallback();
+        return;
+      }
+      const dim = _imgCache.get(src);
+      /* Reproduce cover/center for this viewport... */
+      const scale = Math.max(vw / dim.w, vh / dim.h);
+      const drawW = dim.w * scale;
+      const drawH = dim.h * scale;
+      const offX = (vw - drawW) / 2;
+      const offY = (vh - drawH) / 2;
+      /* ...then shift so viewport pixel (rect.left, rect.top) lands at
+         (bleed, bleed) inside the oversized paint layer. */
+      paint.style.backgroundSize = drawW + 'px ' + drawH + 'px';
+      paint.style.backgroundPosition =
+        (offX - rect.left + bleed) + 'px ' + (offY - rect.top + bleed) + 'px';
+    }
+
     function render() {
       /* offsetWidth/Height ignore transforms (hover scale etc.). */
       const w = Math.max(8, Math.round(el.offsetWidth) || 8);
       const h = Math.max(8, Math.round(el.offsetHeight) || 8);
 
-      if (REFRACTION_SUPPORTED) {
+      if (MODE === 'backdrop') {
         /* Fresh ID on every regenerate — engines cache feImage by ID. */
         const id = 'glass-' + (++_idCounter) + '-' + Date.now().toString(36);
-        const mapUrl = buildDisplacementMap(w, h, opts);
+        const mapUrl = buildDisplacementMap(w, h, opts, 0);
         svgHolder.innerHTML = buildFilterSvg(id, mapUrl, opts, w, h);
         lens.style.backdropFilter = 'url(#' + id + ')';
         lens.style.webkitBackdropFilter = 'url(#' + id + ')';
+      } else if (MODE === 'painted') {
+        const id = 'glass-' + (++_idCounter) + '-' + Date.now().toString(36);
+        const W = w + 2 * bleed, H = h + 2 * bleed;
+        const mapUrl = buildDisplacementMap(W, H, opts, bleed);
+        svgHolder.innerHTML = buildFilterSvg(id, mapUrl, opts, W, H);
+        paint.style.filter = 'url(#' + id + ')';
+        syncWallpaperPaint();
       } else {
-        const fb = 'blur(' + Math.max(0, opts.blur) + 'px) saturate(' + Math.max(0, opts.saturate) + ')';
+        const fb = 'blur(' + Math.max(0, opts.blur) + 'px) saturate(' +
+          Math.max(0, opts.saturate) + ')';
         lens.style.backdropFilter = fb;
         lens.style.webkitBackdropFilter = fb;
       }
@@ -399,9 +544,32 @@
     const ro = new ResizeObserver(function () { render(); });
     ro.observe(el);
 
+    /* Painted mode listeners: keep the copy aligned on viewport changes,
+       re-render (fresh Safari filter ID) on wallpaper switches. */
+    let rafPending = false;
+    function onViewportChange() {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(function () {
+        rafPending = false;
+        syncWallpaperPaint();
+      });
+    }
+    function onWallpaperChange() { render(); }
+    if (MODE === 'painted') {
+      window.addEventListener('scroll', onViewportChange, { passive: true });
+      window.addEventListener('resize', onViewportChange, { passive: true });
+      document.addEventListener('liquidglass:wallpaper', onWallpaperChange);
+    }
+
     const api = {
       destroy: function () {
         ro.disconnect();
+        if (MODE === 'painted') {
+          window.removeEventListener('scroll', onViewportChange);
+          window.removeEventListener('resize', onViewportChange);
+          document.removeEventListener('liquidglass:wallpaper', onWallpaperChange);
+        }
         svgHolder.remove();
         lens.remove();
         gloss.remove();
@@ -428,10 +596,8 @@
 
   global.LiquidGlass = {
     applyGlass: applyGlass,
-    refractionSupported: REFRACTION_SUPPORTED,
-    /* v1 compatibility shims. The lens reads the live backdrop, so there
-       is no wallpaper state to mirror or invalidate anymore. */
-    ensureRootWallpaperVar: function () {},
-    notifyWallpaperChanged: function () {},
+    mode: MODE,
+    ensureRootWallpaperVar: ensureRootWallpaperVar,
+    notifyWallpaperChanged: notifyWallpaperChanged,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

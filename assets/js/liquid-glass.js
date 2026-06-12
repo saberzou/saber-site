@@ -150,9 +150,11 @@
           r8 = Math.round(128 + nx * m * 127);
           g8 = Math.round(128 + ny * m * 127);
 
-          /* B: specular potential. */
+          /* B: specular potential. Squash the profile (m^2.8) so the
+             glint hugs the outermost sliver of the bezel instead of
+             washing across the whole band. */
           const lambert = Math.max(0, nx * lightX + ny * lightY);
-          b8 = Math.round(255 * m * (0.2 + 0.8 * lambert));
+          b8 = Math.round(255 * Math.pow(m, 2.8) * (0.15 + 0.85 * lambert));
         }
 
         data[i] = Math.max(0, Math.min(255, r8));
@@ -234,13 +236,13 @@
     f += '<feColorMatrix in="refracted" type="saturate" values="' + sat + '" result="vibrant"/>';
 
     if (ss > 0.001) {
-      /* White rim glint: threshold the map's B channel so only the
-         strong-bend, light-facing band survives, soften, then add. */
+      /* White rim glint: steep threshold on the map's B channel so only
+         the thin, strong-bend, light-facing sliver survives. */
       f += ''
         + '<feColorMatrix in="map" type="matrix" '
-        +   'values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 ' + (2.2 * ss)
-        +   ' 0 ' + (-0.9 * ss) + '" result="specMask"/>'
-        + '<feGaussianBlur in="specMask" stdDeviation="0.6" result="specSoft"/>'
+        +   'values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 ' + (3.0 * ss)
+        +   ' 0 ' + (-1.5 * ss) + '" result="specMask"/>'
+        + '<feGaussianBlur in="specMask" stdDeviation="0.4" result="specSoft"/>'
         + '<feComposite in="specSoft" in2="vibrant" operator="arithmetic" '
         +   'k1="0" k2="1" k3="1" k4="0" result="lensResult"/>';
     } else {
@@ -316,14 +318,13 @@
         + 'pointer-events:none;'
         + 'z-index:1;'
         + 'background:'
-        +   'linear-gradient(180deg, rgba(255,255,255,' + ha + ') 0%, '
-        +     'rgba(255,255,255,' + (ha * 0.25) + ') 14%, rgba(255,255,255,0) 40%, '
-        +     'rgba(255,255,255,0) 72%, rgba(255,255,255,' + (ha * 0.35) + ') 100%),'
+        +   'linear-gradient(180deg, rgba(255,255,255,' + (ha * 0.7) + ') 0%, '
+        +     'rgba(255,255,255,' + (ha * 0.15) + ') 8%, rgba(255,255,255,0) 30%, '
+        +     'rgba(255,255,255,0) 78%, rgba(255,255,255,' + (ha * 0.25) + ') 100%),'
         +   opts.tint + ';'
         + 'box-shadow:'
-        +   'inset 0 1px 1px rgba(255,255,255,' + (ha * 0.9) + '),'
-        +   'inset 0 -1px 1px rgba(255,255,255,' + (ha * 0.3) + '),'
-        +   'inset 0 0 18px rgba(255,255,255,' + (ha * 0.18) + '),'
+        +   'inset 0 1px 0 rgba(255,255,255,' + (ha * 0.8) + '),'
+        +   'inset 0 -1px 0 rgba(255,255,255,' + (ha * 0.25) + '),'
         +   opts.shadow + ';';
     }
 
@@ -333,10 +334,10 @@
         + 'border-radius:inherit;'
         + 'pointer-events:none;'
         + 'z-index:1;'
-        + 'padding:1.2px;'
+        + 'padding:1px;'
         + 'background:linear-gradient(150deg, ' + opts.rim + ' 0%, '
-        +   'rgba(255,255,255,0.10) 38%, rgba(255,255,255,0.04) 60%, '
-        +   'rgba(255,255,255,0.28) 100%);'
+        +   'rgba(255,255,255,0.30) 35%, rgba(255,255,255,0.18) 60%, '
+        +   'rgba(255,255,255,0.42) 100%);'
         + '-webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);'
         + '-webkit-mask-composite:xor;'
         + 'mask:linear-gradient(#fff 0 0) content-box exclude, linear-gradient(#fff 0 0);';

@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500&family=PT+Serif:ital,wght@0,400;1,400&family=Quicksand:wght@700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://unpkg.com/feather-icons"></script>
-<script src="assets/js/liquid-glass.js?v=8"></script>
+<script src="assets/js/liquid-glass.js?v=9"></script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -8250,11 +8250,12 @@ function termSpawnArcherEmoji() {
 }
 
 // ─── Liquid Glass initialization ────────────────────────────────────────
-// Apply real refractive liquid glass (v2) to the widget stack + dock.
-// In Chromium the lens uses backdrop-filter: url(#svgFilter) on the live
-// backdrop, so windows/icons behind the glass refract too and alignment
-// is automatic. Safari/Firefox fall back to frosted blur + the same
-// gloss/rim layers.
+// Apply refractive liquid glass to the widget stack + dock. The lens is
+// backdrop-filter: url(#svgFilter) over the live backdrop (Chromium), so
+// it is fully background-agnostic: wallpaper switches, windows, and icons
+// behind the glass all refract with no syncing. Safari/Firefox fall back
+// to frosted blur + the same gloss/rim layers. One universal tuning —
+// no per-wallpaper special-casing.
 (function initLiquidGlass(){
   function tryInit(){
     if (typeof LiquidGlass === 'undefined' || !LiquidGlass.applyGlass) return false;
@@ -8276,11 +8277,11 @@ function termSpawnArcherEmoji() {
       chroma: 0.8,
       blur: 12,
       saturate: 1.5,
-      specStrength: 0.9,
-      edgeHighlight: 0.16,
-      tint: 'rgba(10,10,14,0.20)',
-      rim: 'rgba(255,255,255,0.50)',
-      shadow: '0 6px 24px rgba(45,27,0,0.12)'
+      specStrength: 0.8,
+      edgeHighlight: 0.14,
+      tint: 'rgba(160,160,170,0.14)',
+      rim: 'rgba(255,255,255,0.55)',
+      shadow: '0 6px 24px rgba(0,0,0,0.14)'
     };
 
     // Dock pill — larger radius, slightly clearer glass so the wallpaper
@@ -8293,49 +8294,17 @@ function termSpawnArcherEmoji() {
       chroma: 0.8,
       blur: 10,
       saturate: 1.6,
-      specStrength: 1.0,
-      edgeHighlight: 0.22,
-      tint: 'rgba(255,255,255,0.10)',
+      specStrength: 0.9,
+      edgeHighlight: 0.18,
+      tint: 'rgba(200,200,210,0.12)',
       rim: 'rgba(255,255,255,0.55)',
       shadow: '0 8px 32px rgba(0,0,0,0.12)'
     };
 
-    if (weather) var weatherGlass = LiquidGlass.applyGlass(weather, widgetOpts);
-    if (stock) var stockGlass = LiquidGlass.applyGlass(stock, widgetOpts);
-    if (todo) var todoGlass = LiquidGlass.applyGlass(todo, widgetOpts);
-    if (dock) var dockGlass = LiquidGlass.applyGlass(dock, dockOpts);
-
-    // Per-substrate tuning. Dark wallpapers carry the chromatic fringe and
-    // rim glint beautifully, and the widgets keep a slight dark tint so
-    // their light text stays readable. Light wallpapers get a milkier
-    // white tint, softer spec, and reduced chroma (strong fringe reads as
-    // a dirty rim on cream backgrounds).
-    var WIDGET_DARK_OPTS = { chroma: 1.0, specStrength: 0.9, edgeHighlight: 0.16, tint: 'rgba(10,10,14,0.22)', rim: 'rgba(255,255,255,0.50)' };
-    var WIDGET_LIGHT_OPTS = { chroma: 0.45, specStrength: 0.5, edgeHighlight: 0.10, tint: 'rgba(255,255,255,0.30)', rim: 'rgba(255,255,255,0.75)' };
-    var DOCK_DARK_OPTS = { chroma: 1.0, specStrength: 1.1, edgeHighlight: 0.22, tint: 'rgba(255,255,255,0.08)', rim: 'rgba(255,255,255,0.55)' };
-    var DOCK_LIGHT_OPTS = { chroma: 0.45, specStrength: 0.6, edgeHighlight: 0.12, tint: 'rgba(255,255,255,0.28)', rim: 'rgba(255,255,255,0.80)' };
-    function updateChromaForSubstrate(){
-      var isDark = document.body.classList.contains('wallpaper-dark');
-      var widgetTuning = isDark ? WIDGET_DARK_OPTS : WIDGET_LIGHT_OPTS;
-      var dockTuning = isDark ? DOCK_DARK_OPTS : DOCK_LIGHT_OPTS;
-      if (weatherGlass) weatherGlass.update(widgetTuning);
-      if (stockGlass) stockGlass.update(widgetTuning);
-      if (todoGlass) todoGlass.update(widgetTuning);
-      if (dockGlass) dockGlass.update(dockTuning);
-    }
-    // Initial sync (default opts had 0.4; pull to per-state value now).
-    updateChromaForSubstrate();
-    // Watch body.classList for .wallpaper-dark add/remove. This is decoupled
-    // from the async img-onload luminance check inside updateMenuBarTheme().
-    var bodyClassObserver = new MutationObserver(function(mutations){
-      for (var i = 0; i < mutations.length; i++) {
-        if (mutations[i].attributeName === 'class') {
-          updateChromaForSubstrate();
-          return;
-        }
-      }
-    });
-    bodyClassObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    if (weather) LiquidGlass.applyGlass(weather, widgetOpts);
+    if (stock) LiquidGlass.applyGlass(stock, widgetOpts);
+    if (todo) LiquidGlass.applyGlass(todo, widgetOpts);
+    if (dock) LiquidGlass.applyGlass(dock, dockOpts);
 
     return true;
   }

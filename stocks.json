@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-12T05:53:58.219Z",
+  "updatedAt": "2026-06-12T10:23:57.923Z",
   "quotes": {
     "AAPL": {
       "symbol": "AAPL",
@@ -19,9 +19,9 @@
     },
     "GOOGL": {
       "symbol": "GOOGL",
-      "price": 356.38,
-      "previousClose": 358.99,
-      "changePct": -0.73,
+      "price": 357.77,
+      "previousClose": 372.19,
+      "changePct": -3.87,
       "currency": "USD",
       "source": "yahoo"
     }

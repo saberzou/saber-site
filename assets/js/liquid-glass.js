@@ -389,7 +389,9 @@
         lens.style.backdropFilter = 'url(#' + id + ')';
         lens.style.webkitBackdropFilter = 'url(#' + id + ')';
       } else {
-        const fb = 'blur(' + Math.max(0, opts.blur) + 'px) saturate(' +
+        /* No refraction available here — floor the blur so clear-glass
+           tunings (blur 0) still read as glass instead of nothing. */
+        const fb = 'blur(' + Math.max(8, opts.blur) + 'px) saturate(' +
           Math.max(0, opts.saturate) + ')';
         lens.style.backdropFilter = fb;
         lens.style.webkitBackdropFilter = fb;

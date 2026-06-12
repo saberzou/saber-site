@@ -1,54 +1,57 @@
 /**
- * liquid-glass.js — Aave-style cross-browser refractive glass.
- *
- * Implements the technique described in
- * https://aave.com/design/building-glass-for-the-web
+ * liquid-glass.js v2 — real refractive liquid glass.
  *
  * Architecture
  * ------------
- * `backdrop-filter: url(#svgFilter)` is Safari-only. For cross-browser
- * support, Aave paints a clipped copy of the page background into an
- * absolutely-positioned overlay inside the glass container, then applies
- * `filter: url(#displacement)` to that overlay. The widget content sits
- * on top, unrefracted.
+ * Where supported (Chromium), each glass element gets an inner "lens"
+ * layer with `backdrop-filter: url(#displacementFilter)`. The browser
+ * hands the filter the live backdrop — wallpaper, windows, icons,
+ * anything painted behind the element — so the refraction is always
+ * pixel-aligned with reality. No wallpaper painting, no scroll syncing.
  *
- * We adapt this for SaberOS:
- *   - The body wallpaper URL is mirrored to `--wallpaper-url` on :root.
- *   - Each glass element gets two ::before-style overlay layers:
- *       refract layer  : painted wallpaper, displacement filtered
- *       gloss layer    : light cream tint + specular gradient + rim border
- *   - Widget content stays in normal flow on top.
+ * The SVG filter pipeline (per element, sized to it):
+ *   1. feGaussianBlur        — frosted-glass body blur
+ *   2. feDisplacementMap ×3  — lens-edge refraction, run per RGB channel
+ *                              at slightly different scales for chromatic
+ *                              aberration (the "wet edge" fringe)
+ *   3. feColorMatrix saturate — vibrancy boost behind the glass
+ *   4. specular band          — the displacement map's B channel encodes
+ *                              bend strength × top-light incidence; it is
+ *                              thresholded to a white rim glint that hugs
+ *                              the lens geometry
  *
- * Wallpaper painting uses a viewport-sized `background-size: 100vw 100vh`
- * with `background-position` re-synced to the host's viewport offset on
- * every render. This emulates `background-attachment: fixed` but works
- * around the iOS Safari bug that silently downgrades `fixed` to `scroll`.
+ * The displacement map is generated on canvas from the signed-distance
+ * field of the element's rounded rect: a `bezelWidth`-px band along the
+ * border bends sampling outward (R/G encode the outward normal scaled by
+ * a smooth falloff), the center stays optically flat.
  *
- * Cross-browser quirks handled:
- *   - Fresh filter ID on every regenerate (Safari caches feImage by ID).
- *   - Map computed at lens dimensions, not the source-graphic ceiling.
- *   - ResizeObserver re-renders the displacement map on size changes.
- *   - JS-synced `background-position` instead of `attachment: fixed`
- *     (iOS Safari downgrades `fixed` to `scroll` silently).
+ * On top of the lens sit two CSS layers:
+ *   gloss — tint + vertical sheen + soft inset highlights
+ *   rim   — 1px gradient ring (bright top-left, faint bottom-right),
+ *           masked to the border so it reads as a polished glass edge
  *
- * Public API:
+ * Browsers without `backdrop-filter: url()` (Safari, Firefox) fall back
+ * to `backdrop-filter: blur() saturate()` under the same gloss/rim
+ * layers — clean iOS-style frosted glass, minus the refraction.
+ *
+ * Public API (unchanged from v1):
  *   applyGlass(el, opts) -> { destroy(), update(opts), regenerate() }
+ *   ensureRootWallpaperVar(), notifyWallpaperChanged() — kept as
+ *   compatibility no-ops; the live backdrop makes them unnecessary.
  *
- * Tunable defaults (matching Axel's screenshot of the Aave playground):
- *   borderRadius   24  (CSS px)
- *   scale          0.10
- *   depth          6   (CSS px push at lens edge)
- *   curvature      2.0 (edge-to-center falloff power)
- *   splay          1.0
- *   chroma         1.0 (R/B aberration spread; 1.0 = Aave's 8%, 0 = none)
- *   preBlur        0.5 ("wet edge" smoothing before displacement)
- *   blur           0   (extra blur for milky-glass variants)
- *   specStrength   1.0 (specular highlight intensity)
- *   glow           0.10
- *   edgeHighlight  0.18 (CSS gloss-layer top highlight)
- *   specAngle      45
- *   tint           rgba(255,248,240,0.14)
- *   rim            rgba(255,255,255,0.40)
+ * Tunables:
+ *   borderRadius   24    CSS px, should match the element's radius
+ *   bezelWidth     16    px width of the refractive edge band
+ *   refraction     22    max px the rim bends the backdrop
+ *   curvature      1.5   bezel falloff shaping (higher = tighter rim)
+ *   chroma         0.8   chromatic aberration spread (0 = none)
+ *   blur           12    frosted body blur, px
+ *   saturate       1.5   backdrop saturation boost
+ *   specStrength   0.9   white rim-glint intensity (0 = off)
+ *   edgeHighlight  0.20  CSS sheen/inset highlight alpha
+ *   tint           rgba()  glass body tint
+ *   rim            rgba()  brightest color of the rim ring
+ *   shadow         outer drop shadow
  */
 
 (function (global) {
@@ -56,19 +59,42 @@
 
   let _idCounter = 0;
   const _registry = new WeakMap();
-  const _imgCache = new Map();
-  const WALLPAPER_VAR = '--wallpaper-url';
+
+  /* `backdrop-filter: url()` renders correctly only in Chromium today.
+     Safari and Firefox parse it (so CSS.supports lies) but draw either
+     nothing or an unfiltered backdrop — UA-gate them to the blur path. */
+  const REFRACTION_SUPPORTED = (function () {
+    try {
+      if (typeof CSS === 'undefined' || !CSS.supports) return false;
+      const parses = CSS.supports('backdrop-filter', 'url(#lg)') ||
+                     CSS.supports('-webkit-backdrop-filter', 'url(#lg)');
+      if (!parses) return false;
+      const ua = navigator.userAgent;
+      const isFirefox = /Firefox\//.test(ua);
+      const isChromium = /Chrom(e|ium)|Edg\/|OPR\//.test(ua);
+      const isSafari = /AppleWebKit/.test(ua) && !isChromium;
+      return !isFirefox && !isSafari;
+    } catch (e) {
+      return false;
+    }
+  })();
 
   /* ------------------------------------------------------------------ */
   /* Displacement-map generator                                          */
   /* ------------------------------------------------------------------ */
 
   function buildDisplacementMap(w, h, opts) {
-    const r = Math.min(opts.borderRadius, w / 2, h / 2);
-    const curvature = Math.max(0.1, opts.curvature);
-    const splay = opts.splay;
+    const radius = Math.max(1, Math.min(opts.borderRadius, w / 2, h / 2));
+    const minDim = Math.min(w, h);
+    /* Keep an optically-flat center even on short elements. */
+    const bezel = Math.max(2, Math.min(opts.bezelWidth, minDim / 3));
+    const curvature = Math.max(0.2, opts.curvature);
 
-    /* Half-res for perf — feImage stretches it back up. */
+    /* Light direction for the specular band (from top, slightly left). */
+    const lightX = -0.35, lightY = -0.94;
+
+    /* Half-res for perf — feImage stretches it back up, and the map is
+       smooth so the upscale is invisible. */
     const mapW = Math.max(2, Math.round(w / 2));
     const mapH = Math.max(2, Math.round(h / 2));
     const sx = mapW / w;
@@ -81,129 +107,59 @@
     const img = ctx.createImageData(mapW, mapH);
     const data = img.data;
 
-    const halfW = w / 2;
-    const halfH = h / 2;
+    const cx = w / 2, cy = h / 2;
+    const coreX = w / 2 - radius, coreY = h / 2 - radius;
 
     for (let py = 0; py < mapH; py++) {
-      const y = py / sy;
+      const y = (py + 0.5) / sy;
       for (let px = 0; px < mapW; px++) {
-        const x = px / sx;
+        const x = (px + 0.5) / sx;
         const i = (py * mapW + px) * 4;
 
-        /* Are we inside the rounded rectangle? */
-        let inside = true;
-        let radialBendX = 0;
-        let radialBendY = 0;
-        let isCorner = false;
+        /* Signed distance to the rounded-rect border (negative inside). */
+        const qx = Math.abs(x - cx) - coreX;
+        const qy = Math.abs(y - cy) - coreY;
+        const ax = Math.max(qx, 0), ay = Math.max(qy, 0);
+        const outer = Math.hypot(ax, ay);
+        const dist = outer + Math.min(Math.max(qx, qy), 0) - radius;
 
-        if (x < r && y < r) {
-          /* top-left corner */
-          isCorner = true;
-          const dx = r - x;
-          const dy = r - y;
-          const d = Math.hypot(dx, dy);
-          if (d > r) {
-            inside = false;
+        let r8 = 128, g8 = 128, b8 = 0;
+
+        const edgeDist = -dist;
+        if (dist < 0 && edgeDist < bezel) {
+          /* Inside the refractive bezel band. */
+          const t = edgeDist / bezel;                  /* 0 rim → 1 inner */
+          const sm = 0.5 + 0.5 * Math.cos(Math.PI * t); /* C1-smooth 1→0 */
+          const m = Math.pow(sm, curvature);
+
+          /* Outward normal = gradient of the SDF. */
+          let nx, ny;
+          if (qx > 0 && qy > 0) {
+            const len = outer || 1;
+            nx = ((x < cx ? -1 : 1) * ax) / len;
+            ny = ((y < cy ? -1 : 1) * ay) / len;
+          } else if (qx > qy) {
+            nx = x < cx ? -1 : 1;
+            ny = 0;
           } else {
-            const t = d / r; /* 0 at corner-arc center, 1 at lens edge */
-            const fall = Math.pow(t, curvature);
-            const len = Math.max(d, 0.0001);
-            radialBendX = (dx / len) * fall * splay;
-            radialBendY = (dy / len) * fall * splay;
+            nx = 0;
+            ny = y < cy ? -1 : 1;
           }
-        } else if (x > w - r && y < r) {
-          isCorner = true;
-          const dx = x - (w - r);
-          const dy = r - y;
-          const d = Math.hypot(dx, dy);
-          if (d > r) {
-            inside = false;
-          } else {
-            const t = d / r;
-            const fall = Math.pow(t, curvature);
-            const len = Math.max(d, 0.0001);
-            radialBendX = -(dx / len) * fall * splay;
-            radialBendY = (dy / len) * fall * splay;
-          }
-        } else if (x < r && y > h - r) {
-          isCorner = true;
-          const dx = r - x;
-          const dy = y - (h - r);
-          const d = Math.hypot(dx, dy);
-          if (d > r) {
-            inside = false;
-          } else {
-            const t = d / r;
-            const fall = Math.pow(t, curvature);
-            const len = Math.max(d, 0.0001);
-            radialBendX = (dx / len) * fall * splay;
-            radialBendY = -(dy / len) * fall * splay;
-          }
-        } else if (x > w - r && y > h - r) {
-          isCorner = true;
-          const dx = x - (w - r);
-          const dy = y - (h - r);
-          const d = Math.hypot(dx, dy);
-          if (d > r) {
-            inside = false;
-          } else {
-            const t = d / r;
-            const fall = Math.pow(t, curvature);
-            const len = Math.max(d, 0.0001);
-            radialBendX = -(dx / len) * fall * splay;
-            radialBendY = -(dy / len) * fall * splay;
-          }
+
+          /* R/G: bend sampling outward — the rim shows a compressed band
+             of what lies just beyond the glass, like a thick lens edge. */
+          r8 = Math.round(128 + nx * m * 127);
+          g8 = Math.round(128 + ny * m * 127);
+
+          /* B: specular potential — bend strength × incidence toward the
+             light, so the glint sits on the top/left rim. */
+          const lambert = Math.max(0, nx * lightX + ny * lightY);
+          b8 = Math.round(255 * m * (0.2 + 0.8 * lambert));
         }
 
-        if (!inside) {
-          data[i] = 128;
-          data[i + 1] = 128;
-          data[i + 2] = 128;
-          data[i + 3] = 255;
-          continue;
-        }
-
-        let bendX, bendY;
-        if (isCorner) {
-          bendX = radialBendX;
-          bendY = radialBendY;
-        } else {
-          /* Straight-edge region: bend driven by distance to nearest edge. */
-          const dl = x, dr = w - x;
-          const dt = y, db = h - y;
-          const distVert = Math.min(dl, dr);
-          const distHoriz = Math.min(dt, db);
-
-          /* 0 at edge, 1 at lens center. */
-          const tx = Math.min(1, distVert / halfW);
-          const ty = Math.min(1, distHoriz / halfH);
-
-          /* Edge has max bend, center has none. */
-          const fallX = Math.pow(1 - tx, curvature);
-          const fallY = Math.pow(1 - ty, curvature);
-
-          const signX = (x < halfW) ? 1 : -1;
-          const signY = (y < halfH) ? 1 : -1;
-
-          /* When near a horizontal edge, vertical bend should dominate. */
-          if (distHoriz < distVert) {
-            bendX = 0;
-            bendY = signY * fallY * splay;
-          } else if (distVert < distHoriz) {
-            bendX = signX * fallX * splay;
-            bendY = 0;
-          } else {
-            bendX = signX * fallX * splay * 0.7;
-            bendY = signY * fallY * splay * 0.7;
-          }
-        }
-
-        const r8 = Math.max(0, Math.min(255, Math.round(128 - bendX * 127)));
-        const g8 = Math.max(0, Math.min(255, Math.round(128 - bendY * 127)));
-
-        data[i] = r8;
-        data[i + 1] = g8;
-        data[i + 2] = 128;
+        data[i] = Math.max(0, Math.min(255, r8));
+        data[i + 1] = Math.max(0, Math.min(255, g8));
+        data[i + 2] = Math.max(0, Math.min(255, b8));
         data[i + 3] = 255;
       }
     }
@@ -217,113 +173,88 @@
   /* ------------------------------------------------------------------ */
 
   function buildFilterSvg(id, mapDataUrl, opts, w, h) {
-    /* Aave's `scale` attribute is in userSpaceOnUse pixels. We expose two
-       tunables: `depth` (max edge displacement in px) and `chroma`
-       (R/B aberration spread). Per Aave: R=1.04x, G=1.0x, B=0.926x of the
-       base scale gives the natural-looking ~3.7% per-channel split. */
-    const baseScale = opts.scale * opts.depth * 10;
-    const chroma = Math.max(0, Math.min(1.5, opts.chroma));
-    /* chroma=1.0 = Aave's ratio (8% R/B spread). 0 = no fringe. >1 = exaggerated. */
-    const spread = 0.074 * chroma;
-    const scaleR = baseScale * (1 + spread);
-    const scaleG = baseScale;
-    const scaleB = baseScale * (1 - spread);
+    /* The map encodes the outward normal at half amplitude (127/255), so
+       feDisplacementMap shifts by ~scale/2 at the rim. Double `refraction`
+       to make the option mean "max bend in px". */
+    const scaleBase = 2 * Math.max(0, opts.refraction);
+    const chroma = Math.max(0, Math.min(2, opts.chroma));
+    const spread = 0.055 * chroma;
+    const scaleR = scaleBase * (1 + spread);
+    const scaleG = scaleBase;
+    const scaleB = scaleBase * (1 - spread);
 
-    /* Pre-blur: "wet edge" smoothing before displacement (Aave default).
-       Their 0.00065 0.00136 in objectBoundingBox units becomes ~0.5px on a
-       widget-scale lens. opts.blur controls extra blur on top. */
-    const preBlur = Math.max(0, opts.preBlur);
-    const extraBlur = Math.max(0, opts.blur);
-    const totalBlur = preBlur + extraBlur;
-    const blurStr = totalBlur > 0
-      ? '<feGaussianBlur in="SourceGraphic" stdDeviation="' + totalBlur + '" result="blurred"/>'
-      : '<feOffset in="SourceGraphic" dx="0" dy="0" result="blurred"/>';
+    const blur = Math.max(0, opts.blur);
+    const sat = Math.max(0, opts.saturate);
+    const ss = Math.max(0, Math.min(1.5, opts.specStrength));
 
-    /* Specular highlight: extract B channel of displacement map, threshold
-       it to surface the brightest band (Aave step 12). The highlight traces
-       the lens-bend region itself, not a CSS gradient. */
-    const specBias = -0.5019607843137255;
-    const specStrength = Math.max(0, Math.min(1, opts.specStrength));
+    const blurStr = blur > 0
+      ? '<feGaussianBlur in="SourceGraphic" stdDeviation="' + blur + '" result="frosted"/>'
+      : '<feOffset in="SourceGraphic" dx="0" dy="0" result="frosted"/>';
 
-    return ''
+    /* Expand the filter region so rim sampling beyond the border box has
+       real backdrop pixels to pull from (kills the edge smear). */
+    let f = ''
       + '<svg width="0" height="0" style="position:absolute;width:0;height:0;pointer-events:none;overflow:hidden;" aria-hidden="true">'
-      +   '<filter id="' + id + '" x="0" y="0" width="100%" height="100%" '
+      +   '<filter id="' + id + '" x="-25%" y="-25%" width="150%" height="150%" '
       +     'color-interpolation-filters="sRGB" '
       +     'filterUnits="objectBoundingBox" '
       +     'primitiveUnits="userSpaceOnUse">'
-      +     '<feFlood flood-color="rgb(128,128,128)" flood-opacity="1" result="mapBg"/>'
+      /* Neutral backing so anything outside the feImage is "no bend, no
+         spec" (B=0) instead of transparent. */
+      +     '<feFlood flood-color="rgb(128,128,0)" flood-opacity="1" result="mapBg"/>'
       +     '<feImage href="' + mapDataUrl + '" preserveAspectRatio="none" '
       +       'result="rawMap" x="0" y="0" width="' + w + '" height="' + h + '"/>'
       +     '<feComposite in="rawMap" in2="mapBg" operator="over" result="map"/>'
-      +     blurStr
-      +     '<feDisplacementMap in="blurred" in2="map" scale="' + scaleR
-      +       '" xChannelSelector="R" yChannelSelector="G" result="dispRall"/>'
-      +     '<feColorMatrix in="dispRall" type="matrix" '
-      +       'values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="dispR"/>'
-      +     '<feDisplacementMap in="blurred" in2="map" scale="' + scaleG
-      +       '" xChannelSelector="R" yChannelSelector="G" result="dispGall"/>'
-      +     '<feColorMatrix in="dispGall" type="matrix" '
-      +       'values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="dispG"/>'
-      +     '<feDisplacementMap in="blurred" in2="map" scale="' + scaleB
-      +       '" xChannelSelector="R" yChannelSelector="G" result="dispBall"/>'
-      +     '<feColorMatrix in="dispBall" type="matrix" '
-      +       'values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="dispB"/>'
-      +     '<feComposite in="dispR" in2="dispG" operator="arithmetic" '
-      +       'k1="0" k2="1" k3="1" k4="0" result="dispRG"/>'
-      +     '<feComposite in="dispRG" in2="dispB" operator="arithmetic" '
-      +       'k1="0" k2="1" k3="1" k4="0" result="lensRefract"/>'
-      +     '<feColorMatrix in="map" type="matrix" '
-      +       'values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 ' + specStrength
-      +       ' 0 ' + specBias + '" result="specMask"/>'
-      +     '<feComposite in="specMask" in2="lensRefract" operator="arithmetic" '
-      +       'k1="0" k2="1" k3="1" k4="0" result="lensResult"/>'
-      +   '</filter>'
-      + '</svg>';
-  }
+      +     blurStr;
 
-  /* ------------------------------------------------------------------ */
-  /* Per-element wiring                                                   */
-  /* ------------------------------------------------------------------ */
-
-  function ensureRootWallpaperVar() {
-    /* If the page already exposes --wallpaper-url, do nothing. Otherwise
-       extract it from body's computed background-image and mirror it. */
-    const root = document.documentElement;
-    if (root.style.getPropertyValue(WALLPAPER_VAR)) return;
-    const computed = getComputedStyle(document.body).backgroundImage;
-    if (computed && computed !== 'none') {
-      root.style.setProperty(WALLPAPER_VAR, computed);
+    if (chroma > 0.001) {
+      /* Per-channel displacement at staggered scales = chromatic fringe. */
+      f += ''
+        + '<feDisplacementMap in="frosted" in2="map" scale="' + scaleR
+        +   '" xChannelSelector="R" yChannelSelector="G" result="dispRall"/>'
+        + '<feColorMatrix in="dispRall" type="matrix" '
+        +   'values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="dispR"/>'
+        + '<feDisplacementMap in="frosted" in2="map" scale="' + scaleG
+        +   '" xChannelSelector="R" yChannelSelector="G" result="dispGall"/>'
+        + '<feColorMatrix in="dispGall" type="matrix" '
+        +   'values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="dispG"/>'
+        + '<feDisplacementMap in="frosted" in2="map" scale="' + scaleB
+        +   '" xChannelSelector="R" yChannelSelector="G" result="dispBall"/>'
+        + '<feColorMatrix in="dispBall" type="matrix" '
+        +   'values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="dispB"/>'
+        + '<feComposite in="dispR" in2="dispG" operator="arithmetic" '
+        +   'k1="0" k2="1" k3="1" k4="0" result="dispRG"/>'
+        + '<feComposite in="dispRG" in2="dispB" operator="arithmetic" '
+        +   'k1="0" k2="1" k3="1" k4="0" result="refracted"/>';
+    } else {
+      f += ''
+        + '<feDisplacementMap in="frosted" in2="map" scale="' + scaleG
+        +   '" xChannelSelector="R" yChannelSelector="G" result="refracted"/>';
     }
+
+    f += '<feColorMatrix in="refracted" type="saturate" values="' + sat + '" result="vibrant"/>';
+
+    if (ss > 0.001) {
+      /* White rim glint: threshold the map's B channel so only the
+         strong-bend, light-facing band survives, soften, then add. */
+      f += ''
+        + '<feColorMatrix in="map" type="matrix" '
+        +   'values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 ' + (2.2 * ss)
+        +   ' 0 ' + (-0.9 * ss) + '" result="specMask"/>'
+        + '<feGaussianBlur in="specMask" stdDeviation="0.6" result="specSoft"/>'
+        + '<feComposite in="specSoft" in2="vibrant" operator="arithmetic" '
+        +   'k1="0" k2="1" k3="1" k4="0" result="lensResult"/>';
+    } else {
+      f += '<feOffset in="vibrant" dx="0" dy="0" result="lensResult"/>';
+    }
+
+    f += '</filter></svg>';
+    return f;
   }
 
-  /**
-   * Hook the existing `applyWallpaper(idx)` global to keep
-   * `--wallpaper-url` in sync. Idempotent.
-   */
-  function bindToWallpaperApp() {
-    if (global._liquidGlassBound) return;
-    if (typeof global.applyWallpaper !== 'function') return;
-    const original = global.applyWallpaper;
-    global.applyWallpaper = function (idx) {
-      const result = original.apply(this, arguments);
-      try {
-        const wp = global.wallpaperList && global.wallpaperList[idx];
-        if (wp && wp.url) {
-          document.documentElement.style.setProperty(
-            WALLPAPER_VAR, 'url("' + wp.url + '")'
-          );
-        } else if (wp && wp.gradient) {
-          document.documentElement.style.setProperty(
-            WALLPAPER_VAR, wp.gradient
-          );
-        }
-      } catch (e) {
-        /* non-fatal */
-      }
-      return result;
-    };
-    global._liquidGlassBound = true;
-  }
+  /* ------------------------------------------------------------------ */
+  /* Per-element wiring                                                  */
+  /* ------------------------------------------------------------------ */
 
   function applyGlass(el, userOpts) {
     if (!el || el.nodeType !== 1) {
@@ -334,26 +265,19 @@
 
     const opts = Object.assign({
       borderRadius: 24,
-      scale: 0.10,
-      depth: 6,
-      curvature: 2.0,
-      splay: 1.0,
-      chroma: 1.0,           /* Aave default ratio = 1.0 (~8% R/B spread) */
-      preBlur: 0.5,          /* Aave "wet edge" pre-displacement smoothing */
-      blur: 0,               /* Extra blur (for milky-glass variants) */
-      specStrength: 1.0,     /* Specular highlight intensity */
-      glow: 0.10,
-      edgeHighlight: 0.18,   /* CSS top-edge highlight on gloss layer */
-      specAngle: 45,
-      tint: 'rgba(255,248,240,0.14)',
-      rim: 'rgba(255,255,255,0.40)',
-      shadow: '0 6px 24px rgba(45,27,0,0.10)',
+      bezelWidth: 16,
+      refraction: 22,
+      curvature: 1.5,
+      chroma: 0.8,
+      blur: 12,
+      saturate: 1.5,
+      specStrength: 0.9,
+      edgeHighlight: 0.20,
+      tint: 'rgba(255,255,255,0.12)',
+      rim: 'rgba(255,255,255,0.55)',
+      shadow: '0 8px 32px rgba(0,0,0,0.18)',
     }, userOpts || {});
 
-    ensureRootWallpaperVar();
-    bindToWallpaperApp();
-
-    /* Make sure the host element can host absolute children. */
     const cs = getComputedStyle(el);
     if (cs.position === 'static') el.style.position = 'relative';
     el.classList.add('liquid-glass-host');
@@ -365,61 +289,70 @@
       'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;';
     document.body.appendChild(svgHolder);
 
-    /* Refraction layer: painted wallpaper, displacement filtered.
-       Wallpaper is sized to the viewport and re-positioned on every
-       render so it lines up with the bit of wallpaper directly behind
-       the host (emulates `background-attachment: fixed` without the
-       iOS Safari bug). */
-    const refract = document.createElement('div');
-    refract.setAttribute('data-glass-layer', 'refract');
-    refract.style.cssText = ''
+    /* Lens layer: live backdrop, refracted (or just frosted on fallback). */
+    const lens = document.createElement('div');
+    lens.setAttribute('data-glass-layer', 'lens');
+    lens.style.cssText = ''
       + 'position:absolute;inset:0;'
       + 'border-radius:inherit;'
-      + 'background-image:var(' + WALLPAPER_VAR + ');'
-      + 'background-size:100vw 100vh;'
-      + 'background-repeat:no-repeat;'
-      + 'background-position:0 0;'
       + 'pointer-events:none;'
       + 'z-index:0;'
       + 'overflow:hidden;'
-      + 'transform:translateZ(0);'
-      + 'will-change:filter,background-position;';
+      + 'transform:translateZ(0);';
 
-    /* Gloss layer: light cream tint + top specular highlight + rim border. */
+    /* Gloss layer: tint + vertical sheen + soft inset highlights. */
     const gloss = document.createElement('div');
     gloss.setAttribute('data-glass-layer', 'gloss');
-    const highlightAlpha = opts.edgeHighlight;
-    const glowAlpha = opts.glow;
-    gloss.style.cssText = ''
-      + 'position:absolute;inset:0;'
-      + 'border-radius:inherit;'
-      + 'pointer-events:none;'
-      + 'z-index:1;'
-      + 'background:'
-      +   'linear-gradient(180deg, rgba(255,255,255,' + highlightAlpha
-      +     ') 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 65%, '
-      +     'rgba(255,255,255,' + (highlightAlpha * 0.3) + ') 100%),'
-      +   opts.tint + ';'
-      + 'box-shadow:'
-      +   'inset 0 0.5px 0 0 ' + opts.rim + ','
-      +   'inset 0 -0.5px 0 0 rgba(0,0,0,0.08),'
-      +   'inset 0.5px 0 0 0 rgba(255,255,255,' + (highlightAlpha * 0.6) + '),'
-      +   'inset -0.5px 0 0 0 rgba(0,0,0,0.05),'
-      +   opts.shadow + ';'
-      + 'mix-blend-mode:normal;';
 
-    /* Inject before existing children so the original content sits on top. */
-    if (el.firstChild) {
-      el.insertBefore(gloss, el.firstChild);
-      el.insertBefore(refract, gloss);
-    } else {
-      el.appendChild(refract);
-      el.appendChild(gloss);
+    /* Rim layer: 1px gradient ring masked to the border. */
+    const rim = document.createElement('div');
+    rim.setAttribute('data-glass-layer', 'rim');
+
+    function styleGloss() {
+      const ha = opts.edgeHighlight;
+      gloss.style.cssText = ''
+        + 'position:absolute;inset:0;'
+        + 'border-radius:inherit;'
+        + 'pointer-events:none;'
+        + 'z-index:1;'
+        + 'background:'
+        +   'linear-gradient(180deg, rgba(255,255,255,' + ha + ') 0%, '
+        +     'rgba(255,255,255,' + (ha * 0.25) + ') 14%, rgba(255,255,255,0) 40%, '
+        +     'rgba(255,255,255,0) 72%, rgba(255,255,255,' + (ha * 0.35) + ') 100%),'
+        +   opts.tint + ';'
+        + 'box-shadow:'
+        +   'inset 0 1px 1px rgba(255,255,255,' + (ha * 0.9) + '),'
+        +   'inset 0 -1px 1px rgba(255,255,255,' + (ha * 0.3) + '),'
+        +   'inset 0 0 18px rgba(255,255,255,' + (ha * 0.18) + '),'
+        +   opts.shadow + ';';
     }
 
-    /* Make sure non-layer children sit above z-index 1. */
+    function styleRim() {
+      rim.style.cssText = ''
+        + 'position:absolute;inset:0;'
+        + 'border-radius:inherit;'
+        + 'pointer-events:none;'
+        + 'z-index:1;'
+        + 'padding:1.2px;'
+        + 'background:linear-gradient(150deg, ' + opts.rim + ' 0%, '
+        +   'rgba(255,255,255,0.10) 38%, rgba(255,255,255,0.04) 60%, '
+        +   'rgba(255,255,255,0.28) 100%);'
+        + '-webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);'
+        + '-webkit-mask-composite:xor;'
+        + 'mask:linear-gradient(#fff 0 0) content-box exclude, linear-gradient(#fff 0 0);';
+    }
+
+    styleGloss();
+    styleRim();
+
+    /* Inject below existing children so the original content sits on top. */
+    el.insertBefore(rim, el.firstChild);
+    el.insertBefore(gloss, rim);
+    el.insertBefore(lens, gloss);
+
+    /* Make sure non-layer children sit above the glass layers. */
     Array.prototype.forEach.call(el.children, function (child) {
-      if (child === refract || child === gloss) return;
+      if (child === lens || child === gloss || child === rim) return;
       const css = getComputedStyle(child);
       if (css.position === 'static') child.style.position = 'relative';
       if (!child.style.zIndex || parseInt(child.style.zIndex, 10) < 2) {
@@ -427,10 +360,8 @@
       }
     });
 
-    /* Optional: remove the original backdrop-filter blur on the host —
-       the refraction layer carries the wallpaper paint now. Also stash
-       and clear any opaque/translucent host background that would occlude
-       the refract layer. */
+    /* The lens carries the backdrop filter and the gloss carries tint +
+       rim, so neutralize the host's own treatment (stashed for destroy). */
     const priorBackdrop = el.style.backdropFilter || '';
     const priorWebkitBackdrop = el.style.webkitBackdropFilter || '';
     const priorBackground = el.style.background || '';
@@ -440,77 +371,27 @@
     el.style.webkitBackdropFilter = 'none';
     el.style.background = 'transparent';
     el.style.backgroundColor = 'transparent';
-    /* The gloss layer carries the rim; suppress any host border. */
     if (cs.borderStyle && cs.borderStyle !== 'none' && cs.borderWidth !== '0px') {
       el.style.border = 'none';
     }
 
-    let currentId = null;
-
-    /* Match the body's actual background sizing/positioning so the paint
-       in the refract layer aligns with the wallpaper behind it. saberzou.ai
-       uses `center/cover`; if a host page differs, override via the data-attr. */
-    function syncWallpaperPaint() {
-      const rect = el.getBoundingClientRect();
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      /* Reproduce `background-size: cover; background-position: center;`
-         on a viewport-sized canvas, then translate so the slice under
-         the host's bbox is visible. */
-      const wpEl = document.body;
-      const bgImg = new Image();
-      /* We need the natural wallpaper aspect to compute `cover`. Try the
-         CSS variable URL; fall back to body's computed background-image. */
-      let url = getComputedStyle(document.documentElement).getPropertyValue(WALLPAPER_VAR).trim();
-      if (!url || url === '') {
-        url = getComputedStyle(wpEl).backgroundImage;
-      }
-      const match = url.match(/url\(\s*["']?([^"')]+)["']?\s*\)/);
-      if (!match) {
-        /* Gradient or unknown — use cover/center on viewport size. */
-        refract.style.backgroundSize = vw + 'px ' + vh + 'px';
-        refract.style.backgroundPosition = (-rect.left) + 'px ' + (-rect.top) + 'px';
-        return;
-      }
-      const src = match[1];
-      if (!_imgCache.has(src)) {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = function () {
-          _imgCache.set(src, { w: img.naturalWidth, h: img.naturalHeight });
-          syncWallpaperPaint();
-        };
-        img.src = src;
-        /* Until loaded, fall back to a safe cover sizing. */
-        refract.style.backgroundSize = vw + 'px ' + vh + 'px';
-        refract.style.backgroundPosition = (-rect.left) + 'px ' + (-rect.top) + 'px';
-        return;
-      }
-      const dim = _imgCache.get(src);
-      /* Compute the `cover` size for this viewport. */
-      const scale = Math.max(vw / dim.w, vh / dim.h);
-      const drawW = dim.w * scale;
-      const drawH = dim.h * scale;
-      /* Cover + center: image placed at (vw-drawW)/2, (vh-drawH)/2 on viewport. */
-      const offX = (vw - drawW) / 2;
-      const offY = (vh - drawH) / 2;
-      /* In the refract div, translate so that pixel (rect.left, rect.top) of
-         the viewport ends up at (0, 0) of the div. */
-      refract.style.backgroundSize = drawW + 'px ' + drawH + 'px';
-      refract.style.backgroundPosition = (offX - rect.left) + 'px ' + (offY - rect.top) + 'px';
-    }
-
     function render() {
-      const rect = el.getBoundingClientRect();
-      const w = Math.max(8, Math.round(rect.width));
-      const h = Math.max(8, Math.round(rect.height));
+      /* offsetWidth/Height ignore transforms (hover scale etc.). */
+      const w = Math.max(8, Math.round(el.offsetWidth) || 8);
+      const h = Math.max(8, Math.round(el.offsetHeight) || 8);
 
-      const id = 'glass-' + (++_idCounter) + '-' + Date.now().toString(36);
-      const mapUrl = buildDisplacementMap(w, h, opts);
-      svgHolder.innerHTML = buildFilterSvg(id, mapUrl, opts, w, h);
-      refract.style.filter = 'url(#' + id + ')';
-      currentId = id;
-      syncWallpaperPaint();
+      if (REFRACTION_SUPPORTED) {
+        /* Fresh ID on every regenerate — engines cache feImage by ID. */
+        const id = 'glass-' + (++_idCounter) + '-' + Date.now().toString(36);
+        const mapUrl = buildDisplacementMap(w, h, opts);
+        svgHolder.innerHTML = buildFilterSvg(id, mapUrl, opts, w, h);
+        lens.style.backdropFilter = 'url(#' + id + ')';
+        lens.style.webkitBackdropFilter = 'url(#' + id + ')';
+      } else {
+        const fb = 'blur(' + Math.max(0, opts.blur) + 'px) saturate(' + Math.max(0, opts.saturate) + ')';
+        lens.style.backdropFilter = fb;
+        lens.style.webkitBackdropFilter = fb;
+      }
     }
 
     render();
@@ -518,36 +399,13 @@
     const ro = new ResizeObserver(function () { render(); });
     ro.observe(el);
 
-    /* Window scroll/resize: re-sync background-position so the painted
-       wallpaper slice stays aligned. saberzou.ai has no scroll, but this
-       makes the rig portable to scrolling pages. Throttled via rAF. */
-    let rafPending = false;
-    function onViewportChange() {
-      if (rafPending) return;
-      rafPending = true;
-      requestAnimationFrame(function () {
-        rafPending = false;
-        syncWallpaperPaint();
-      });
-    }
-    window.addEventListener('scroll', onViewportChange, { passive: true });
-    window.addEventListener('resize', onViewportChange, { passive: true });
-
-    /* If the wallpaper variable changes, the refract layer will auto-update
-       (CSS variable cascade), but Safari needs a filter ID swap to refresh
-       its cached feImage. Listen on document for a custom event. */
-    function onWallpaperChange() { render(); }
-    document.addEventListener('liquidglass:wallpaper', onWallpaperChange);
-
     const api = {
       destroy: function () {
         ro.disconnect();
-        document.removeEventListener('liquidglass:wallpaper', onWallpaperChange);
-        window.removeEventListener('scroll', onViewportChange);
-        window.removeEventListener('resize', onViewportChange);
         svgHolder.remove();
-        refract.remove();
+        lens.remove();
         gloss.remove();
+        rim.remove();
         el.style.backdropFilter = priorBackdrop;
         el.style.webkitBackdropFilter = priorWebkitBackdrop;
         el.style.background = priorBackground;
@@ -559,19 +417,8 @@
       regenerate: render,
       update: function (newOpts) {
         Object.assign(opts, newOpts || {});
-        /* Rebuild gloss styles in case tint/rim/shadow changed. */
-        const ha = opts.edgeHighlight;
-        gloss.style.background = ''
-          + 'linear-gradient(180deg, rgba(255,255,255,' + ha
-          +   ') 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 65%, '
-          +   'rgba(255,255,255,' + (ha * 0.3) + ') 100%),'
-          + opts.tint;
-        gloss.style.boxShadow = ''
-          + 'inset 0 0.5px 0 0 ' + opts.rim + ','
-          + 'inset 0 -0.5px 0 0 rgba(0,0,0,0.08),'
-          + 'inset 0.5px 0 0 0 rgba(255,255,255,' + (ha * 0.6) + '),'
-          + 'inset -0.5px 0 0 0 rgba(0,0,0,0.05),'
-          + opts.shadow;
+        styleGloss();
+        styleRim();
         render();
       },
     };
@@ -581,9 +428,10 @@
 
   global.LiquidGlass = {
     applyGlass: applyGlass,
-    ensureRootWallpaperVar: ensureRootWallpaperVar,
-    notifyWallpaperChanged: function () {
-      document.dispatchEvent(new CustomEvent('liquidglass:wallpaper'));
-    },
+    refractionSupported: REFRACTION_SUPPORTED,
+    /* v1 compatibility shims. The lens reads the live backdrop, so there
+       is no wallpaper state to mirror or invalidate anymore. */
+    ensureRootWallpaperVar: function () {},
+    notifyWallpaperChanged: function () {},
   };
 })(typeof window !== 'undefined' ? window : globalThis);

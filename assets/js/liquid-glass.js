@@ -34,9 +34,10 @@
  *
  * Tunables:
  *   borderRadius   24    CSS px, should match the element's radius
- *   bezelWidth     16    px width of the refractive edge band
+ *   bezelWidth     16    px width of the specular rim band
  *   refraction     22    max px the rim bends the backdrop
- *   curvature      1.5   bezel falloff shaping (higher = tighter rim)
+ *   curvature      2.5   lens profile (higher = flatter center,
+ *                        steeper bend at the rim)
  *   chroma         1.0   chromatic aberration spread (1 = Aave's ratios)
  *   preBlur        0.5   Aave "wet edge" smoothing before displacement
  *   blur           12    frosted body blur, px
@@ -82,14 +83,25 @@
   /* Displacement-map generator                                          */
   /* ------------------------------------------------------------------ */
 
+  /**
+   * Convex-lens displacement map. R/G encode an inward (magnifying)
+   * displacement that is zero along the shape's medial axis and grows
+   * toward the rim with a `curvature`-shaped profile — like Apple's
+   * Liquid Glass, the warp covers the whole surface, not just an edge
+   * band. B encodes a thin specular band hugging the rim, lit as two
+   * arcs (light-facing and opposite pole). Outside the shape the map is
+   * neutral so only pixels under the glass move.
+   */
   function buildDisplacementMap(w, h, opts) {
     const radius = Math.max(1, Math.min(opts.borderRadius, w / 2, h / 2));
     const minDim = Math.min(w, h);
-    /* Keep an optically-flat center even on short elements. */
+    /* Full-lens depth: distance from rim to the medial axis. */
+    const maxDepth = minDim / 2;
+    /* bezelWidth now scopes only the specular band. */
     const bezel = Math.max(2, Math.min(opts.bezelWidth, minDim / 3));
     const curvature = Math.max(0.2, opts.curvature);
 
-    /* Light direction for the specular band (from top, slightly left). */
+    /* Light direction for the specular arcs (from top, slightly left). */
     const lightX = -0.35, lightY = -0.94;
 
     /* Half-res for perf — feImage stretches it back up, and the map is
@@ -125,11 +137,10 @@
         let r8 = 128, g8 = 128, b8 = 0;
 
         const edgeDist = -dist;
-        if (dist < 0 && edgeDist < bezel) {
-          /* Inside the refractive bezel band. */
-          const t = edgeDist / bezel;                  /* 0 rim → 1 inner */
-          const sm = 0.5 + 0.5 * Math.cos(Math.PI * t); /* C1-smooth 1→0 */
-          const m = Math.pow(sm, curvature);
+        if (dist < 0) {
+          /* 0 along the medial axis → 1 at the rim. */
+          const rn = Math.min(1, Math.max(0, 1 - edgeDist / maxDepth));
+          const m = Math.pow(rn, curvature);
 
           /* Outward normal = gradient of the SDF. */
           let nx, ny;
@@ -145,16 +156,20 @@
             ny = y < cy ? -1 : 1;
           }
 
-          /* R/G: bend sampling outward — the rim shows a compressed band
-             of what lies just beyond the glass, like a thick lens edge. */
-          r8 = Math.round(128 + nx * m * 127);
-          g8 = Math.round(128 + ny * m * 127);
+          /* R/G: bend sampling inward — a convex lens magnifies, so each
+             pixel shows content from nearer the center, increasingly so
+             toward the rim. */
+          r8 = Math.round(128 - nx * m * 127);
+          g8 = Math.round(128 - ny * m * 127);
 
-          /* B: specular potential. Squash the profile (m^2.8) so the
-             glint hugs the outermost sliver of the bezel instead of
-             washing across the whole band. */
-          const lambert = Math.max(0, nx * lightX + ny * lightY);
-          b8 = Math.round(255 * Math.pow(m, 2.8) * (0.15 + 0.85 * lambert));
+          /* B: specular potential — a thin band hugging the rim, lit as
+             two arcs via |incidence| (light-facing pole and its mirror). */
+          if (edgeDist < bezel) {
+            const ts = edgeDist / bezel;
+            const sms = 0.5 + 0.5 * Math.cos(Math.PI * ts);
+            const inc = Math.pow(Math.abs(nx * lightX + ny * lightY), 1.3);
+            b8 = Math.round(255 * Math.pow(sms, 2.8) * (0.1 + 0.9 * inc));
+          }
         }
 
         data[i] = Math.max(0, Math.min(255, r8));
@@ -165,6 +180,20 @@
     }
 
     ctx.putImageData(img, 0, 0);
+
+    /* Soften the map so the displacement field is C1 everywhere — kills
+       the diagonal ridge where the rect SDF normal flips axes, and adds
+       a touch of Aave's "wet edge" to the rim. */
+    if (typeof ctx.filter === 'string') {
+      const tmp = document.createElement('canvas');
+      tmp.width = mapW;
+      tmp.height = mapH;
+      tmp.getContext('2d').drawImage(canvas, 0, 0);
+      ctx.filter = 'blur(1px)';
+      ctx.drawImage(tmp, 0, 0);
+      ctx.filter = 'none';
+    }
+
     return canvas.toDataURL('image/png');
   }
 

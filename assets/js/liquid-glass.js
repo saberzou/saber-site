@@ -168,7 +168,7 @@
             const ts = edgeDist / bezel;
             const sms = 0.5 + 0.5 * Math.cos(Math.PI * ts);
             const inc = Math.pow(Math.abs(nx * lightX + ny * lightY), 1.3);
-            b8 = Math.round(255 * Math.pow(sms, 2.8) * (0.1 + 0.9 * inc));
+            b8 = Math.round(255 * Math.pow(sms, 4.5) * (0.1 + 0.9 * inc));
           }
         }
 
@@ -266,12 +266,13 @@
 
     if (ss > 0.001) {
       /* White rim glint: steep threshold on the map's B channel so only
-         the thin, strong-bend, light-facing sliver survives. */
+         the thin, strong-bend, light-facing sliver survives. Higher
+         bias = higher cutoff = thinner band. */
       f += ''
         + '<feColorMatrix in="map" type="matrix" '
-        +   'values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 ' + (3.0 * ss)
-        +   ' 0 ' + (-1.5 * ss) + '" result="specMask"/>'
-        + '<feGaussianBlur in="specMask" stdDeviation="0.4" result="specSoft"/>'
+        +   'values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 ' + (3.4 * ss)
+        +   ' 0 ' + (-2.2 * ss) + '" result="specMask"/>'
+        + '<feGaussianBlur in="specMask" stdDeviation="0.35" result="specSoft"/>'
         + '<feComposite in="specSoft" in2="vibrant" operator="arithmetic" '
         +   'k1="0" k2="1" k3="1" k4="0" result="lensResult"/>';
     } else {
@@ -347,13 +348,13 @@
         + 'pointer-events:none;'
         + 'z-index:1;'
         + 'background:'
-        +   'linear-gradient(180deg, rgba(255,255,255,' + (ha * 0.7) + ') 0%, '
-        +     'rgba(255,255,255,' + (ha * 0.15) + ') 8%, rgba(255,255,255,0) 30%, '
-        +     'rgba(255,255,255,0) 78%, rgba(255,255,255,' + (ha * 0.25) + ') 100%),'
+        +   'linear-gradient(180deg, rgba(255,255,255,' + (ha * 0.45) + ') 0%, '
+        +     'rgba(255,255,255,0) 4%, rgba(255,255,255,0) 88%, '
+        +     'rgba(255,255,255,' + (ha * 0.15) + ') 100%),'
         +   opts.tint + ';'
         + 'box-shadow:'
-        +   'inset 0 1px 0 rgba(255,255,255,' + (ha * 0.8) + '),'
-        +   'inset 0 -1px 0 rgba(255,255,255,' + (ha * 0.25) + '),'
+        +   'inset 0 1px 0 rgba(255,255,255,' + (ha * 0.6) + '),'
+        +   'inset 0 -1px 0 rgba(255,255,255,' + (ha * 0.18) + '),'
         +   opts.shadow + ';';
     }
 

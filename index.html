@@ -3063,12 +3063,20 @@ const systemApps = {
 
 // ─── Asset preload (fires immediately during Hello screen) ───
 // Warms the browser cache so project icons + wallpapers are ready by the time
-// the boot screen fades out. Fire-and-forget — never blocks entry.
-(function preloadAssets() {
+// the boot screen fades out. Exposes window.__assetsReady — a promise that
+// resolves once every first-paint icon (dock + desktop + launchpad) has
+// loaded — so the boot screen can wait for them instead of a blind timer.
+// Wallpapers stay fire-and-forget (not needed for first paint).
+window.__assetsReady = (function preloadAssets() {
   var warm = function(src) { var img = new Image(); img.src = src; };
-  // Project + system app icons — available now
-  projects.forEach(function(p) { if (p.icon) warm(p.icon); });
-  Object.keys(systemApps).forEach(function(k) { if (systemApps[k].icon) warm(systemApps[k].icon); });
+  // First-paint icons: every project + system app icon. Dedupe so a
+  // shared icon isn't counted twice.
+  var firstPaint = [];
+  var seen = {};
+  var add = function(src) { if (src && !seen[src]) { seen[src] = 1; firstPaint.push(src); } };
+  projects.forEach(function(p) { add(p.icon); });
+  Object.keys(systemApps).forEach(function(k) { add(systemApps[k].icon); });
+
   // Wallpapers are defined later in the script — defer to next tick so the
   // picker preview + initial wallpaper are warm before anyone opens settings.
   setTimeout(function() {
@@ -3078,7 +3086,22 @@ const systemApps = {
       }
     } catch (e) {}
   }, 0);
+
+  return new Promise(function(resolve) {
+    var pending = firstPaint.length;
+    if (pending === 0) { resolve(); return; }
+    firstPaint.forEach(function(src) {
+      var img = new Image();
+      var settled = false;
+      var done = function() { if (settled) return; settled = true; if (--pending <= 0) resolve(); };
+      img.onload = done;
+      img.onerror = done;          // a missing icon must not stall boot
+      img.src = src;
+      if (img.complete) done();    // already cached
+    });
+  });
 })();
+
 
 // Fake emails
 const fakeEmails = [
@@ -5577,18 +5600,33 @@ function initWeather() {
 function initStocks() { initStockWidget(); }
 
 // ─── Boot Animation ───
-// Fire on DOMContentLoaded (not window.load) so background image preloads
-// don't gate the Hello fade-out on slow connections.
+// Fire on DOMContentLoaded (not window.load) so we don't wait on every page
+// asset. The Hello screen holds until the first-paint icons are loaded
+// (window.__assetsReady) so the desktop never appears with icons still
+// streaming in — bounded by MIN (let the Hello animation play) and MAX
+// (never hang entry if an icon is slow/missing).
 document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(function() {
-    document.getElementById('boot-screen').classList.add('fade-out');
+  var BOOT_MIN = 1500;   // keep the Hello animation on screen at least this long
+  var BOOT_MAX = 6000;   // hard cap — reveal the desktop even if icons aren't done
+  var bootStart = Date.now();
+  function finishBoot() {
+    var boot = document.getElementById('boot-screen');
+    if (!boot || boot.dataset.done) return;
+    boot.dataset.done = '1';
+    boot.classList.add('fade-out');
     setTimeout(function() {
-      document.getElementById('boot-screen').style.display = 'none';
+      boot.style.display = 'none';
       // Archer waves hello — first visit gets the longer hello, returners get a brief wave
       archerWelcome();
     }, 600);
-  }, 1500);
-  
+  }
+  var ready = (window.__assetsReady || Promise.resolve());
+  var capped = new Promise(function(res) { setTimeout(res, BOOT_MAX); });
+  Promise.race([ready, capped]).then(function() {
+    var wait = Math.max(0, BOOT_MIN - (Date.now() - bootStart));
+    setTimeout(finishBoot, wait);
+  });
+
   initDock();
   initDesktopIcons();
   initLaunchpad();

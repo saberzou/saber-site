@@ -1326,6 +1326,33 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   }
 }
 
+/* ─── iPad Landscape (desktop layout, touch-tuned) ─── */
+/* iPads in landscape report 1024–1366px logical width, so they fall into the
+   desktop layout. Scale icons/dock/windows down for touch + avoid dock collision. */
+@media (min-width: 1024px) and (max-width: 1366px) and (pointer: coarse) {
+  /* Smaller, tighter desktop icon grid that fits above the dock */
+  .desktop-icons {
+    top: 56px;
+    right: 28px;
+    grid-template-columns: repeat(4, 64px);
+    gap: 16px 12px;
+    max-height: calc(100vh - 56px - 120px); /* leave room for dock + breathing space */
+    overflow: visible;
+  }
+  .desktop-icon { padding: 6px; gap: 5px; }
+  .desktop-icon-img { width: 52px; height: 52px; }
+  .desktop-icon-label { font-size: 0.65rem; max-width: 78px; }
+
+  /* Dock: slightly smaller, lifted, and capped so it never overlaps icons */
+  .dock { bottom: 20px; padding: 8px 14px; gap: 8px; }
+  .dock-item { width: 54px; height: 54px; }
+  .dock-item img { width: 46px; height: 46px; }
+  .dock-item img[src*="icons-pixel"] { width: 34px; height: 34px; }
+
+  /* Tap-friendly window controls */
+  .window-btn { width: 14px; height: 14px; }
+}
+
 /* ─── Mobile Layout ─── */
 @media (max-width: 767px) {
   .weather-widget { display: none; }
@@ -3175,15 +3202,26 @@ function createWindow(id, data, options) {
   const desktop = document.getElementById('desktop');
   const deskW = desktop.clientWidth;
   const deskH = desktop.clientHeight;
+  // On smaller desktop viewports (e.g. iPad landscape), clamp the default window
+  // size so it doesn't dominate the screen. Honors explicit options.width/height.
+  const isTouchDesktop = window.matchMedia('(max-width: 1366px) and (pointer: coarse)').matches;
+  let effWidth = winWidth;
+  let effHeight = winHeight;
+  if (!options.width && isTouchDesktop) {
+    effWidth = Math.min(winWidth, Math.round(deskW * (isSystemApp ? 0.55 : 0.7)));
+  }
+  if (!options.height && isTouchDesktop) {
+    effHeight = Math.min(winHeight, Math.round(deskH * 0.72));
+  }
   // Position window at upper-center (12% from top, centered horizontally)
   const offsetStepX = (windows.size % 6) * 25;
   const offsetStepY = Math.floor(windows.size / 6) * 25;
-  const baseX = Math.max(20, Math.round((deskW - winWidth) / 2) + offsetStepX);
+  const baseX = Math.max(20, Math.round((deskW - effWidth) / 2) + offsetStepX);
   const baseY = Math.max(50, Math.round(deskH * 0.12) + offsetStepY);
   windowEl.style.left = baseX + 'px';
   windowEl.style.top = baseY + 'px';
-  windowEl.style.width = (options.width || (isSystemApp ? '480px' : '800px'));
-  windowEl.style.height = (options.height || '600px');
+  windowEl.style.width = effWidth + 'px';
+  windowEl.style.height = effHeight + 'px';
   
   const headerColor = data.accent || '#FF8C42';
   

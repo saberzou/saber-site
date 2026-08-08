@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-08T05:03:51.224Z",
+  "updatedAt": "2026-08-08T05:49:14.718Z",
   "quotes": {
     "AAPL": {
       "symbol": "AAPL",
@@ -11,9 +11,9 @@
     },
     "MSFT": {
       "symbol": "MSFT",
-      "price": 503.42,
+      "price": 499.99,
       "previousClose": 464.72,
-      "changePct": 8.33,
+      "changePct": 7.59,
       "currency": "USD",
       "source": "yahoo"
     },

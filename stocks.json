@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-09-01T17:05:55.912Z",
+  "updatedAt": "2026-09-01T17:45:26.036Z",
   "quotes": {
     "AAPL": {
       "symbol": "AAPL",
-      "price": 316.85,
-      "previousClose": 310.34,
-      "changePct": 2.1,
+      "price": 324.85,
+      "previousClose": 309.9,
+      "changePct": 4.82,
       "currency": "USD",
       "source": "yahoo"
     },
@@ -19,9 +19,9 @@
     },
     "GOOGL": {
       "symbol": "GOOGL",
-      "price": 339.35,
-      "previousClose": 348.06,
-      "changePct": -2.5,
+      "price": 335.23,
+      "previousClose": 346.96,
+      "changePct": -3.38,
       "currency": "USD",
       "source": "yahoo"
     }

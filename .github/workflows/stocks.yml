@@ -19,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Fetch quotes from Yahoo Finance
         run: node scripts/fetch-stocks.js
@@ -29,10 +32,14 @@ jobs:
         run: |
           git config user.name  'stocks-bot'
           git config user.email 'stocks-bot@users.noreply.github.com'
+          branch=$(git rev-parse --abbrev-ref HEAD)
           if [[ -n "$(git status --porcelain stocks.json)" ]]; then
             git add stocks.json
             git commit -m "chore(stocks): refresh quotes [skip ci]"
-            git push
+            # fetch remote updates for the current branch and rebase to avoid push rejection
+            git fetch origin "$branch"
+            git rebase "origin/$branch" || { echo "Rebase failed (conflict) — aborting push"; git rebase --abort || true; exit 1; }
+            git push origin "$branch"
           else
             echo "no change"
           fi

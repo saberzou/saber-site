@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://saberzou.github.io; connect-src 'self' https://api.open-meteo.com https://wttr.in https://saber-site-chat.vercel.app; frame-src https://saberzou.github.io https://open.spotify.com https://www.saberzou.com; object-src 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://saberzou.github.io; connect-src 'self' https://api.open-meteo.com https://wttr.in https://saber-site-chat.vercel.app; frame-src https://saberzou.github.io https://open.spotify.com https://www.saberzou.com https://archer-travel.vercel.app https://bug-explorer.vercel.app; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
 <title>SaberOS — Saber Zou</title>
@@ -13,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500&family=PT+Serif:ital,wght@0,400;1,400&family=Quicksand:wght@700&display=swap" rel="stylesheet">
 <script src="vendor/gsap.min.js"></script>
 <script src="vendor/feather.min.js"></script>
+<script src="assets/js/liquid-glass.js?v=14"></script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -410,6 +411,30 @@ img[src*="icons-pixel"] {
 }
 /* Flip pixel SVGs to white on dark wallpapers for legibility.
    Only targets .svg (vector) icons; raster fallbacks keep their colors. */
+/* ─── Adaptive widget text: dark text on light wallpapers, light text on dark wallpapers ─── */
+/* Default state (light wallpaper, no .wallpaper-dark) — dark text reads against the bright substrate. */
+.weather-widget, .stock-widget, .todo-widget {
+  color: rgba(45,27,0,0.78);
+  text-shadow: 0 1px 1px rgba(255,255,255,0.45);
+}
+.weather-widget .weather-desc,
+.weather-widget .weather-location { color: rgba(45,27,0,0.62); text-shadow: 0 1px 1px rgba(255,255,255,0.45); }
+.todo-empty-default { color: rgba(45,27,0,0.55); text-shadow: 0 1px 1px rgba(255,255,255,0.45); }
+.stock-widget-title { color: rgba(45,27,0,0.78); }
+
+/* Dark wallpaper override — light text reads against the dark substrate. */
+body.wallpaper-dark .weather-widget,
+body.wallpaper-dark .stock-widget,
+body.wallpaper-dark .todo-widget {
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+}
+body.wallpaper-dark .weather-widget .weather-desc,
+body.wallpaper-dark .weather-widget .weather-location { color: rgba(255,255,255,0.88); text-shadow: 0 1px 2px rgba(0,0,0,0.45); }
+body.wallpaper-dark .todo-empty-default { color: rgba(255,255,255,0.85); text-shadow: 0 1px 2px rgba(0,0,0,0.45); }
+body.wallpaper-dark .stock-widget-title { color: rgba(255,255,255,0.7); }
+
+/* Inverted SVG icons (legacy targeting): keep as-is. */
 body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   filter: invert(1);
 }
@@ -461,6 +486,7 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   user-select: none;
   transition: transform 0.2s ease;
   min-height: fit-content;
+  /* Color is set by adaptive rules at the top of the stylesheet — do NOT hardcode here */
 }
 .widget-stack {
   position: absolute;
@@ -471,7 +497,6 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   gap: 12px;
   z-index: 5;
   width: 220px;
-  color: #fff;
 }
 .widget-stack > * { width: 100%; }
 .weather-widget:hover { transform: scale(1.02); }
@@ -487,11 +512,13 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   cursor: default;
   user-select: none;
   transition: transform 0.2s ease;
+  /* Color is set by adaptive rules at the top of the stylesheet */
 }
 .stock-widget:hover { transform: scale(1.02); }
 .stock-widget-title {
-  font-size: 0.65rem; color: inherit; opacity: 0.7;
+  font-size: 0.65rem; color: inherit; opacity: 0.85;
   text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
+  font-weight: 500;
 }
 .stock-row {
   display: flex; justify-content: space-between; align-items: center;
@@ -500,14 +527,14 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
 .stock-row + .stock-row { border-top: 1px solid rgba(0,0,0,0.04); }
 .stock-ticker { font-weight: 500; color: inherit; font-family: var(--sans); }
 .stock-price { color: inherit; opacity: 0.8; font-family: var(--sans); }
-.stock-change { font-size: 0.7rem; font-weight: 500; padding: 2px 6px; border-radius: 4px; }
-.stock-change.up { color: #A8E6CF; background: rgba(168,230,207,0.2); }
-.stock-change.down { color: #FFB7B2; background: rgba(255,183,178,0.2); }
+.stock-change { font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+.stock-change.up { color: #FFFFFF; background: rgba(48,209,88,0.92); }
+.stock-change.down { color: #FFFFFF; background: rgba(255,59,48,0.92); }
 .weather-icon { width: 40px; height: 40px; flex-shrink: 0; }
 .weather-icon svg { width: 100%; height: 100%; }
 .weather-temp { font-size: 1.5rem; font-weight: 500; color: inherit; line-height: 1.2; }
-.weather-desc { font-size: 0.75rem; color: inherit; opacity: 0.85; line-height: 1.3; }
-.weather-location { font-size: 0.65rem; color: inherit; opacity: 0.7; line-height: 1.3; }
+.weather-desc { font-size: 0.75rem; line-height: 1.3; font-weight: 500; }
+.weather-location { font-size: 0.65rem; line-height: 1.3; font-weight: 500; }
 
 /* ─── Todo Widget ─── */
 .todo-widget {
@@ -520,6 +547,7 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
   box-shadow: 0 4px 20px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1);
   cursor: default;
   user-select: none;
+  /* Color is set by adaptive rules at the top of the stylesheet */
 }
 .todo-header {
   display: flex;
@@ -1300,6 +1328,33 @@ body.wallpaper-dark img[src*="icons-pixel"][src$=".svg"] {
     max-width: 600px;
     max-height: 80vh;
   }
+}
+
+/* ─── iPad Landscape (desktop layout, touch-tuned) ─── */
+/* iPads in landscape report 1024–1366px logical width, so they fall into the
+   desktop layout. Scale icons/dock/windows down for touch + avoid dock collision. */
+@media (min-width: 1024px) and (max-width: 1366px) and (pointer: coarse) {
+  /* Smaller, tighter desktop icon grid that fits above the dock */
+  .desktop-icons {
+    top: 56px;
+    right: 28px;
+    grid-template-columns: repeat(4, 64px);
+    gap: 16px 12px;
+    max-height: calc(100vh - 56px - 120px); /* leave room for dock + breathing space */
+    overflow: visible;
+  }
+  .desktop-icon { padding: 6px; gap: 5px; }
+  .desktop-icon-img { width: 52px; height: 52px; }
+  .desktop-icon-label { font-size: 0.65rem; max-width: 78px; }
+
+  /* Dock: slightly smaller, lifted, and capped so it never overlaps icons */
+  .dock { bottom: 20px; padding: 8px 14px; gap: 8px; }
+  .dock-item { width: 54px; height: 54px; }
+  .dock-item img { width: 46px; height: 46px; }
+  .dock-item img[src*="icons-pixel"] { width: 34px; height: 34px; }
+
+  /* Tap-friendly window controls */
+  .window-btn { width: 14px; height: 14px; }
 }
 
 /* ─── Mobile Layout ─── */
@@ -2866,6 +2921,19 @@ const projects = [
     accent: '#AACC96'
   },
   {
+    id: 'bug-explorer',
+    title: 'Bug Explorer',
+    shortTitle: 'Bugs',
+    description: 'A curio cabinet of 60 specimens — drag to roam, tap to inspect.',
+    detail: 'A draggable curio cabinet of 60 insect specimens. Roam an infinite cork-board of bugs — from the glasswing butterfly to the Hercules beetle — and tap any one to read its field card. A quiet, tactile little wunderkammer.',
+    howMade: 'Canvas-driven pan/zoom layout, lazy-loaded specimen art, soft fisheye on the active card, per-bug field-card detail pages.',
+    tags: ['Nature', 'Interactive', 'Web'],
+    link: 'https://bug-explorer.vercel.app',
+    icon: ICON_BASE + '/thiings/bug-explorer' + ICON_EXT,
+    image: IMAGE_BASE + '/bug-explorer.jpg',
+    accent: '#AFAB23'
+  },
+  {
     id: 'json-prompts',
     title: 'JSON Prompts',
     shortTitle: 'Prompts',
@@ -3026,12 +3094,20 @@ const systemApps = {
 
 // ─── Asset preload (fires immediately during Hello screen) ───
 // Warms the browser cache so project icons + wallpapers are ready by the time
-// the boot screen fades out. Fire-and-forget — never blocks entry.
-(function preloadAssets() {
+// the boot screen fades out. Exposes window.__assetsReady — a promise that
+// resolves once every first-paint icon (dock + desktop + launchpad) has
+// loaded — so the boot screen can wait for them instead of a blind timer.
+// Wallpapers stay fire-and-forget (not needed for first paint).
+window.__assetsReady = (function preloadAssets() {
   var warm = function(src) { var img = new Image(); img.src = src; };
-  // Project + system app icons — available now
-  projects.forEach(function(p) { if (p.icon) warm(p.icon); });
-  Object.keys(systemApps).forEach(function(k) { if (systemApps[k].icon) warm(systemApps[k].icon); });
+  // First-paint icons: every project + system app icon. Dedupe so a
+  // shared icon isn't counted twice.
+  var firstPaint = [];
+  var seen = {};
+  var add = function(src) { if (src && !seen[src]) { seen[src] = 1; firstPaint.push(src); } };
+  projects.forEach(function(p) { add(p.icon); });
+  Object.keys(systemApps).forEach(function(k) { add(systemApps[k].icon); });
+
   // Wallpapers are defined later in the script — defer to next tick so the
   // picker preview + initial wallpaper are warm before anyone opens settings.
   setTimeout(function() {
@@ -3041,7 +3117,22 @@ const systemApps = {
       }
     } catch (e) {}
   }, 0);
+
+  return new Promise(function(resolve) {
+    var pending = firstPaint.length;
+    if (pending === 0) { resolve(); return; }
+    firstPaint.forEach(function(src) {
+      var img = new Image();
+      var settled = false;
+      var done = function() { if (settled) return; settled = true; if (--pending <= 0) resolve(); };
+      img.onload = done;
+      img.onerror = done;          // a missing icon must not stall boot
+      img.src = src;
+      if (img.complete) done();    // already cached
+    });
+  });
 })();
+
 
 // Fake emails
 const fakeEmails = [
@@ -3115,15 +3206,26 @@ function createWindow(id, data, options) {
   const desktop = document.getElementById('desktop');
   const deskW = desktop.clientWidth;
   const deskH = desktop.clientHeight;
+  // On smaller desktop viewports (e.g. iPad landscape), clamp the default window
+  // size so it doesn't dominate the screen. Honors explicit options.width/height.
+  const isTouchDesktop = window.matchMedia('(max-width: 1366px) and (pointer: coarse)').matches;
+  let effWidth = winWidth;
+  let effHeight = winHeight;
+  if (!options.width && isTouchDesktop) {
+    effWidth = Math.min(winWidth, Math.round(deskW * (isSystemApp ? 0.55 : 0.7)));
+  }
+  if (!options.height && isTouchDesktop) {
+    effHeight = Math.min(winHeight, Math.round(deskH * 0.72));
+  }
   // Position window at upper-center (12% from top, centered horizontally)
   const offsetStepX = (windows.size % 6) * 25;
   const offsetStepY = Math.floor(windows.size / 6) * 25;
-  const baseX = Math.max(20, Math.round((deskW - winWidth) / 2) + offsetStepX);
+  const baseX = Math.max(20, Math.round((deskW - effWidth) / 2) + offsetStepX);
   const baseY = Math.max(50, Math.round(deskH * 0.12) + offsetStepY);
   windowEl.style.left = baseX + 'px';
   windowEl.style.top = baseY + 'px';
-  windowEl.style.width = (options.width || (isSystemApp ? '480px' : '800px'));
-  windowEl.style.height = (options.height || '600px');
+  windowEl.style.width = effWidth + 'px';
+  windowEl.style.height = effHeight + 'px';
   
   const headerColor = data.accent || '#FF8C42';
   
@@ -5453,7 +5555,7 @@ function renderTodos() {
   var todos = getTodos();
   var list = document.getElementById('todo-list');
   if (!todos.length) {
-    list.innerHTML = '<li style="font-size:0.7rem;color:#FFD93D;opacity:0.9;">No tasks yet</li>';
+    list.innerHTML = '<li class="todo-empty-default" style="font-size:0.7rem;font-weight:500;">No tasks yet</li>';
     return;
   }
   list.innerHTML = todos.map(function(t, i) {
@@ -5540,18 +5642,33 @@ function initWeather() {
 function initStocks() { initStockWidget(); }
 
 // ─── Boot Animation ───
-// Fire on DOMContentLoaded (not window.load) so background image preloads
-// don't gate the Hello fade-out on slow connections.
+// Fire on DOMContentLoaded (not window.load) so we don't wait on every page
+// asset. The Hello screen holds until the first-paint icons are loaded
+// (window.__assetsReady) so the desktop never appears with icons still
+// streaming in — bounded by MIN (let the Hello animation play) and MAX
+// (never hang entry if an icon is slow/missing).
 document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(function() {
-    document.getElementById('boot-screen').classList.add('fade-out');
+  var BOOT_MIN = 1500;   // keep the Hello animation on screen at least this long
+  var BOOT_MAX = 6000;   // hard cap — reveal the desktop even if icons aren't done
+  var bootStart = Date.now();
+  function finishBoot() {
+    var boot = document.getElementById('boot-screen');
+    if (!boot || boot.dataset.done) return;
+    boot.dataset.done = '1';
+    boot.classList.add('fade-out');
     setTimeout(function() {
-      document.getElementById('boot-screen').style.display = 'none';
+      boot.style.display = 'none';
       // Archer waves hello — first visit gets the longer hello, returners get a brief wave
       archerWelcome();
     }, 600);
-  }, 1500);
-  
+  }
+  var ready = (window.__assetsReady || Promise.resolve());
+  var capped = new Promise(function(res) { setTimeout(res, BOOT_MAX); });
+  Promise.race([ready, capped]).then(function() {
+    var wait = Math.max(0, BOOT_MIN - (Date.now() - bootStart));
+    setTimeout(finishBoot, wait);
+  });
+
   initDock();
   initDesktopIcons();
   initLaunchpad();
@@ -8211,6 +8328,83 @@ function termSpawnArcherEmoji() {
 
   document.body.appendChild(el);
 }
+
+// ─── Liquid Glass initialization ────────────────────────────────────────
+// Apply refractive liquid glass to the widget stack + dock. The lens is
+// backdrop-filter: url(#svgFilter) over the live backdrop (Chromium), so
+// it is fully background-agnostic: wallpaper switches, windows, and icons
+// behind the glass all refract with no syncing. Safari/Firefox fall back
+// to frosted blur + the same gloss/rim layers. One universal tuning —
+// no per-wallpaper special-casing.
+(function initLiquidGlass(){
+  function tryInit(){
+    if (typeof LiquidGlass === 'undefined' || !LiquidGlass.applyGlass) return false;
+    // Don't apply on small mobile — the widgets are display:none there.
+    if (window.matchMedia('(max-width: 768px)').matches) return true;
+
+    var weather = document.getElementById('weather-widget');
+    var stock = document.querySelector('.stock-widget');
+    var todo = document.querySelector('.todo-widget');
+    var dock = document.getElementById('dock');
+
+    // Widgets: clear convex-lens glass — the warp covers the whole
+    // surface (magnifying toward the rim) like Apple's Liquid Glass.
+    // A touch of blur (2px) keeps text legible over busy wallpapers;
+    // set blur: 0 for fully clear.
+    var widgetOpts = {
+      borderRadius: 16,
+      bezelWidth: 12,
+      refraction: 16,
+      curvature: 3,
+      chroma: 0.3,
+      blur: 2,
+      saturate: 1.15,
+      specStrength: 0.8,
+      edgeHighlight: 0.14,
+      tint: 'rgba(255,255,255,0.12)',
+      rim: 'rgba(255,255,255,0.65)',
+      shadow: '0 6px 24px rgba(0,0,0,0.14)'
+    };
+
+    // Dock pill — fully clear center so the desktop reads through under
+    // the icons, slightly deeper lens for the pill curvature.
+    var dockOpts = {
+      borderRadius: 24,
+      bezelWidth: 13,
+      refraction: 18,
+      curvature: 3.2,
+      chroma: 0.3,
+      blur: 0,
+      saturate: 1.2,
+      specStrength: 0.9,
+      edgeHighlight: 0.18,
+      tint: 'rgba(255,255,255,0.10)',
+      rim: 'rgba(255,255,255,0.65)',
+      shadow: '0 8px 32px rgba(0,0,0,0.12)'
+    };
+
+    if (weather) LiquidGlass.applyGlass(weather, widgetOpts);
+    if (stock) LiquidGlass.applyGlass(stock, widgetOpts);
+    if (todo) LiquidGlass.applyGlass(todo, widgetOpts);
+    if (dock) LiquidGlass.applyGlass(dock, dockOpts);
+
+    return true;
+  }
+
+  function attempt(){
+    if (!tryInit()) {
+      // Library not loaded yet — try again on next frame.
+      requestAnimationFrame(attempt);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attempt);
+  } else {
+    attempt();
+  }
+})();
+
 </script>
 </body>
 </html>

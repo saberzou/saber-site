@@ -290,8 +290,9 @@ body {
 .archer {
   position: absolute;
   top: 0; left: 0;
-  width: 66px;
-  height: 66px;
+  /* Sized from JS to track the current sticker size. */
+  width: var(--archer-size, 66px);
+  height: var(--archer-size, 66px);
   z-index: 45;
   pointer-events: none;
   will-change: transform;
@@ -301,8 +302,9 @@ body {
 
 .archer-shadow {
   position: absolute;
-  bottom: -5px; left: 50%;
-  width: 34px; height: 7px;
+  /* Proportional, and sat just under the body (which ends at ~76% of the box). */
+  bottom: 18%; left: 50%;
+  width: 50%; height: 9%;
   transform: translateX(-50%);
   background: rgba(45, 27, 0, 0.17);
   border-radius: 50%;
@@ -655,6 +657,7 @@ body {
     });
 
     board.style.height = boardHeight(m) + 'px';
+    syncArcherSize();
   }
 
   /* ───────────────────────────────────────
@@ -663,6 +666,7 @@ body {
   function relayout() {
     var m = boardMetrics();
     board.style.height = boardHeight(m) + 'px';
+    syncArcherSize();
 
     stickers.forEach(function (s, i) {
       s.el.style.setProperty('--size', m.size + 'px');
@@ -910,6 +914,13 @@ body {
   }
 
   var ax = 0, ay = 0;
+  var archerSize = 66;
+
+  // Archer matches the sticker size so he reads as one of the crowd, not a bug on the board.
+  function syncArcherSize() {
+    archerSize = boardMetrics().size;
+    archer.style.setProperty('--archer-size', archerSize + 'px');
+  }
 
   function placeArcher(x, y) {
     ax = x; ay = y;
@@ -919,20 +930,20 @@ body {
   function clampArcher() {
     var m = boardMetrics();
     placeArcher(
-      Math.max(10, Math.min(m.w - 76, ax)),
-      Math.max(10, Math.min(board.clientHeight - 76, ay))
+      Math.max(8, Math.min(m.w - archerSize - 8, ax)),
+      Math.max(8, Math.min(board.clientHeight - archerSize - 8, ay))
     );
   }
 
   function archerHome() {
     var m = boardMetrics();
-    placeArcher(m.w * 0.5, Math.max(40, board.clientHeight - 110));
+    placeArcher((m.w - archerSize) / 2, Math.max(40, board.clientHeight - archerSize - 44));
   }
 
   function wander() {
     var m = boardMetrics();
-    var tx = 30 + Math.random() * Math.max(60, m.w - 120);
-    var ty = 30 + Math.random() * Math.max(60, board.clientHeight - 120);
+    var tx = 20 + Math.random() * Math.max(20, m.w - archerSize - 40);
+    var ty = 20 + Math.random() * Math.max(20, board.clientHeight - archerSize - 40);
     var dur = Math.min(5.5, Math.max(2.2, Math.hypot(tx - ax, ty - ay) / 90));
 
     // Face the direction of travel.

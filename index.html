@@ -965,24 +965,11 @@ body {
     });
   }
 
-  function animateArcher() {
-    if (!window.gsap || reduced) return;
-    // Hover bob, fins flapping from where they meet the body, periodic blink.
-    gsap.to('#archer-torso', { y: -3, duration: 1.3, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-    gsap.to('#fin-left',  { rotation: -11, transformOrigin: '25px 52px', duration: 1.5, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-    gsap.to('#fin-right', { rotation:  11, transformOrigin: '75px 52px', duration: 1.5, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 0.3 });
-    gsap.to('#archer-eyes', {
-      scaleY: 0.12, transformOrigin: '50% 50%', duration: 0.09,
-      repeat: -1, repeatDelay: 3.6, yoyo: true
-    });
-  }
-
   /* ───────────────────────────────────────
      Boot
      ─────────────────────────────────────── */
   buildStickers();
   archerHome();
-  animateArcher();
 
   if (window.gsap && !reduced) {
     // Stickers drop onto the board.
@@ -999,5 +986,6 @@ body {
 </script>
 
 <script src="assets/archer-chat.js"></script>
+<script src="assets/archer-motion.js"></script>
 </body>
 </html>

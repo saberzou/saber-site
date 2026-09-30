@@ -29,10 +29,11 @@
     el.appendChild(document.createTextNode(text.slice(last)));
     list.appendChild(el); list.scrollTop = list.scrollHeight;
   }
+  function mood(name) { document.dispatchEvent(new CustomEvent('archer-mood', { detail: name })); }
   function sync() { send.disabled = busy || !input.value.trim(); }
   async function reply() {
     if (busy) return;
-    busy = true; sync();
+    busy = true; sync(); mood('thinking');
     list.querySelectorAll('.archer-chat-status').forEach(function (el) { el.remove(); });
     var status = document.createElement('div');
     status.className = 'archer-chat-status'; status.textContent = 'Archer is thinking…';
@@ -47,10 +48,11 @@
       if (!response.ok) throw new Error('Chat unavailable');
       var data = await response.json();
       if (typeof data.text !== 'string' || !data.text.trim()) throw new Error('Empty reply');
-      status.remove(); message(data.text, 'archer');
+      status.remove(); message(data.text, 'archer'); mood('happy');
       history.push({ sender: 'archer', text: data.text });
       history = history.slice(-20);
     } catch (error) {
+      mood('confused');
       status.textContent = 'I lost my connection. Want to try that again? ';
       var retry = document.createElement('button');
       retry.type = 'button'; retry.className = 'archer-chat-retry'; retry.textContent = 'Retry';
@@ -67,11 +69,11 @@
   }
   function open() {
     if (dialog.open) return;
-    dialog.showModal();
+    dialog.showModal(); mood('greeting');
     document.body.style.overflow = 'hidden';
     input.focus();
   }
-  dialog.addEventListener('close', function () { document.body.style.overflow = ''; });
+  dialog.addEventListener('close', function () { document.body.style.overflow = ''; mood('idle'); });
   dialog.querySelector('.archer-chat-close').addEventListener('click', function () { dialog.close(); });
   dialog.addEventListener('click', function (e) {
     var r = dialog.getBoundingClientRect();

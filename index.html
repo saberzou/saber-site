@@ -131,6 +131,7 @@ body {
   align-items: center;
   gap: 7px;
   cursor: grab;
+  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -153,19 +154,16 @@ body {
   object-fit: contain;
   display: block;
   pointer-events: none;
-  /* Die-cut white border: stacked hard drop-shadows trace the PNG alpha. */
-  filter:
-    drop-shadow(0 3px 0 var(--sticker-edge))
-    drop-shadow(0 -3px 0 var(--sticker-edge))
-    drop-shadow(3px 0 0 var(--sticker-edge))
-    drop-shadow(-3px 0 0 var(--sticker-edge))
-    drop-shadow(2.2px 2.2px 0 var(--sticker-edge))
-    drop-shadow(-2.2px 2.2px 0 var(--sticker-edge))
-    drop-shadow(2.2px -2.2px 0 var(--sticker-edge))
-    drop-shadow(-2.2px -2.2px 0 var(--sticker-edge));
+  /* A continuous alpha outline avoids the scalloped edge of stacked shadows. */
+  filter: url(#sticker-outline);
 }
 
-.sticker.ios-app .sticker-art { border-radius: 24%; }
+.sticker.ios-app .sticker-art {
+  border: 4px solid var(--sticker-edge);
+  border-radius: 26%;
+  background: var(--sticker-edge);
+  filter: none;
+}
 
 .sticker-label {
   font-family: var(--round);
@@ -405,6 +403,17 @@ body {
 <link rel="stylesheet" href="assets/archer-chat.css">
 </head>
 <body>
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;pointer-events:none">
+  <defs>
+    <filter id="sticker-outline" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="3" result="expanded"/>
+      <feGaussianBlur in="expanded" stdDeviation="0.45" result="smooth"/>
+      <feFlood flood-color="white" result="white"/>
+      <feComposite in="white" in2="smooth" operator="in" result="outline"/>
+      <feMerge><feMergeNode in="outline"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+</svg>
 
 <header class="site-header">
   <h1 class="wordmark"><span class="dot-accent" aria-hidden="true"></span>Saber Zou</h1>
@@ -585,7 +594,7 @@ body {
   function boardMetrics() {
     var w = board.clientWidth;
     var narrow = w < 700;
-    var size = narrow ? 84 : (w < 1100 ? 104 : 118);
+    var size = narrow ? 96 : (w < 1100 ? 104 : 118);
     var cols = Math.max(2, Math.min(6, Math.floor(w / (size * 1.72))));
     var rows = Math.ceil(PROJECTS.length / cols);
     var cellW = w / cols;
@@ -772,14 +781,14 @@ body {
      ─────────────────────────────────────── */
   function wireSticker(s) {
     var el = s.el;
-    var pressed = false, dragging = false, pointerId = null;
+    var pressed = false, dragging = false, pointerId = null, suppressClick = false;
     var startX = 0, startY = 0, originX = 0, originY = 0, originRot = 0;
 
-    el.addEventListener('mouseenter', function () { if (!dragging) showPopup(s); });
-    el.addEventListener('mouseleave', function () { if (!dragging) hidePopup(); });
+    el.addEventListener('mouseenter', function () { if (!touchOnly && !dragging) showPopup(s); });
+    el.addEventListener('mouseleave', function () { if (!touchOnly && !dragging) hidePopup(); });
 
     // Keyboard: focus reveals the popup, Enter/Space opens the project.
-    el.addEventListener('focus', function () { showPopup(s); });
+    el.addEventListener('focus', function () { if (!touchOnly) showPopup(s); });
     el.addEventListener('blur', function () { hidePopup(); });
     el.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -790,8 +799,11 @@ body {
 
     el.addEventListener('pointerdown', function (e) {
       if (e.button != null && e.button !== 0) return;
+      if (pressed) return;
+      suppressClick = false;
       pressed = true;
       pointerId = e.pointerId;
+      try { el.setPointerCapture(pointerId); } catch (err) { /* unsupported */ }
       startX = e.clientX; startY = e.clientY;
       originX = s.x; originY = s.y; originRot = s.rot;
     });
@@ -824,6 +836,7 @@ body {
       if (!dragging) { pointerId = null; return; }
 
       dragging = false;
+      suppressClick = true;
       el.classList.remove('dragging');
       el.classList.add('settling');
       try {
@@ -858,7 +871,8 @@ body {
 
     el.addEventListener('click', function (e) {
       // A press that turned into a drag is not a click.
-      if (el.classList.contains('dragging') || el.classList.contains('settling')) {
+      if (suppressClick || el.classList.contains('dragging') || el.classList.contains('settling')) {
+        suppressClick = false;
         e.preventDefault();
         return;
       }

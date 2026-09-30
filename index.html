@@ -534,8 +534,6 @@ body {
       tags:['Personal'], link:'https://www.saberzou.com' }
   ];
 
-  window.archerProjects = PROJECTS;
-
   var STORAGE_KEY = 'saber-stickers-v1';
   var DRAG_THRESHOLD = 4;   // px of travel before a press counts as a drag
 
@@ -946,7 +944,7 @@ body {
   }
 
   function wander() {
-    if (archer.matches(':hover, :focus') || document.getElementById('archer-chat').open) { setTimeout(wander, 1200); return; }
+    if (archer.matches(':hover, :focus') || (document.getElementById('archer-chat') && document.getElementById('archer-chat').open)) { setTimeout(wander, 1200); return; }
     var m = boardMetrics();
     var tx = 20 + Math.random() * Math.max(20, m.w - archerSize - 40);
     var ty = 20 + Math.random() * Math.max(20, board.clientHeight - archerSize - 40);

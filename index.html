@@ -689,7 +689,7 @@ body {
         rot: (valid && typeof mem.rot === 'number') ? mem.rot : base.rot,
         moved: !!valid
       };
-      clearPlacement(s, stickers);
+      if (!valid) clearPlacement(s, stickers.filter(function (other) { return !other.moved; }));
       stickers.push(s);
       applyTransform(s);
       wireSticker(s);
@@ -704,7 +704,7 @@ body {
      ─────────────────────────────────────── */
   function relayout() {
     var m = boardMetrics();
-    board.style.height = boardHeight(m) + 'px';
+    board.style.height = Math.max(boardHeight(m), Math.max.apply(null, stickers.map(function (s) { return s.moved ? s.y + m.size + 70 : 0; }))) + 'px';
     syncArcherSize();
 
     var placed = [];
@@ -718,8 +718,10 @@ body {
         s.x = Math.max(4, Math.min(m.w - m.size - 4, s.x));
         s.y = Math.max(4, Math.min(board.clientHeight - m.size - 4, s.y));
       }
-      clearPlacement(s, placed);
-      placed.push(s);
+      if (!s.moved) {
+        clearPlacement(s, placed);
+        placed.push(s);
+      }
       applyTransform(s);
     });
     hidePopup(true);
@@ -871,7 +873,6 @@ body {
       var m = boardMetrics();
       s.x = Math.max(4, Math.min(m.w - m.size - 4, s.x));
       s.y = Math.max(4, Math.min(board.clientHeight - m.size - 4, s.y));
-      clearPlacement(s, stickers.filter(function (other) { return other !== s; }));
       s.moved = true;
 
       if (window.gsap && !reduced) {
@@ -922,8 +923,11 @@ body {
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
     hidePopup(true);
 
+    var tidyPositions = [];
     stickers.forEach(function (s, i) {
       var base = defaultLayout(i, m);
+      clearPlacement(base, tidyPositions);
+      tidyPositions.push(base);
       s.moved = false;
       if (window.gsap && !reduced) {
         gsap.to(s, {

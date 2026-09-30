@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://saber-site-chat.vercel.app; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
 <meta name="description" content="Saber Zou — a sticker board of things I've made.">
@@ -294,7 +294,8 @@ body {
   width: var(--archer-size, 66px);
   height: var(--archer-size, 66px);
   z-index: 45;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
   will-change: transform;
 }
 
@@ -399,6 +400,7 @@ body {
   .wordmark .dot-accent { animation: none; }
 }
 </style>
+<link rel="stylesheet" href="assets/archer-chat.css">
 </head>
 <body>
 
@@ -413,7 +415,7 @@ body {
 
 <main class="board" id="board" aria-label="Project sticker board">
   <!-- Stickers are injected here by JS -->
-  <div class="archer" id="archer" aria-hidden="true">
+  <div class="archer" id="archer" role="button" tabindex="0" aria-label="Chat with Archer" aria-haspopup="dialog">
     <div class="archer-bubble" id="archer-bubble"></div>
     <div class="archer-shadow"></div>
     <svg class="archer-body" viewBox="0 0 100 100" id="archer-svg">
@@ -463,6 +465,7 @@ body {
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
     Tidy up
   </button>
+  <button class="ghost-btn" id="archer-chat-open" type="button">Chat with Archer</button>
   <a class="footer-link" href="os.html">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
     SaberOS
@@ -896,7 +899,7 @@ body {
   var IDLE_LINES = [
     'Peel one off!', 'Drag me a friend.', "That one's my favourite.",
     'Still building…', 'Try hovering.', 'Made with too much coffee.',
-    'Beep. Boop. Hi.', 'Sixteen and counting.'
+    'Beep. Boop. Hi.', 'Click me for a chat.'
   ];
   var DROP_LINES = ['Nice spot!', 'Ooh, sticky.', 'Looks good there.', 'Peeled clean.'];
 
@@ -941,6 +944,7 @@ body {
   }
 
   function wander() {
+    if (archer.matches(':hover, :focus') || (document.getElementById('archer-chat') && document.getElementById('archer-chat').open)) { setTimeout(wander, 1200); return; }
     var m = boardMetrics();
     var tx = 20 + Math.random() * Math.max(20, m.w - archerSize - 40);
     var ty = 20 + Math.random() * Math.max(20, board.clientHeight - archerSize - 40);
@@ -994,5 +998,6 @@ body {
 })();
 </script>
 
+<script src="assets/archer-chat.js"></script>
 </body>
 </html>

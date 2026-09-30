@@ -550,7 +550,7 @@ body {
       tags:['Personal'], link:'https://www.saberzou.com' }
   ];
 
-  var STORAGE_KEY = 'saber-stickers-v1';
+  var STORAGE_KEY = 'saber-stickers-v2';
   var DRAG_THRESHOLD = 4;   // px of travel before a press counts as a drag
 
   var board  = document.getElementById('board');
@@ -594,11 +594,11 @@ body {
   function boardMetrics() {
     var w = board.clientWidth;
     var narrow = w < 700;
-    var size = narrow ? 96 : (w < 1100 ? 104 : 118);
-    var cols = Math.max(2, Math.min(6, Math.floor(w / (size * 1.72))));
+    var size = narrow ? 72 : (w < 1100 ? 96 : 104);
+    var cols = Math.max(2, Math.min(6, Math.floor(w / (size * 2.15))));
     var rows = Math.ceil(PROJECTS.length / cols);
     var cellW = w / cols;
-    var cellH = size * (narrow ? 1.68 : 1.76);
+    var cellH = size + (narrow ? 74 : 82);
     return { w: w, size: size, cols: cols, rows: rows, cellW: cellW, cellH: cellH, narrow: narrow };
   }
 
@@ -608,9 +608,9 @@ body {
     var col = i % m.cols;
     var row = Math.floor(i / m.cols);
     // Offset alternate rows so the board reads as scattered, not gridded.
-    var stagger = (row % 2) * m.cellW * 0.2;
-    var jx = (rand(i * 2.17) - 0.5) * m.cellW * 0.24;
-    var jy = (rand(i * 3.71) - 0.5) * m.cellH * 0.22;
+    var stagger = (row % 2) * m.cellW * 0.04;
+    var jx = (rand(i * 2.17) - 0.5) * m.cellW * 0.08;
+    var jy = (rand(i * 3.71) - 0.5) * m.cellH * 0.06;
 
     var x = col * m.cellW + (m.cellW - m.size) / 2 + stagger + jx;
     var y = row * m.cellH + jy + m.cellH * 0.18;
@@ -619,12 +619,36 @@ body {
     x = Math.max(8, Math.min(m.w - m.size - 8, x));
     y = Math.max(8, y);
 
-    return { x: x, y: y, rot: (rand(i * 5.31) - 0.5) * 15 };
+    return { x: x, y: y, rot: (rand(i * 5.31) - 0.5) * 9 };
   }
 
   /* ───────────────────────────────────────
      Build
      ─────────────────────────────────────── */
+  // Reserve the artwork, rotated edges, and label together.
+  function collides(a, b, m) {
+    var width = m.size * 1.6 + 16, height = m.size + 48;
+    return Math.abs(a.x - b.x) < width && Math.abs(a.y - b.y) < height;
+  }
+
+  function clearPlacement(s, others) {
+    var m = boardMetrics();
+    if (!others.some(function (other) { return collides(s, other, m); })) return;
+    var candidates = [];
+    for (var i = 0; i < PROJECTS.length + m.cols * 3; i++) {
+      var p = defaultLayout(i, m);
+      if (!others.some(function (other) { return collides(p, other, m); })) {
+        p.distance = Math.hypot(p.x - s.x, p.y - s.y);
+        candidates.push(p);
+      }
+    }
+    candidates.sort(function (a, b) { return a.distance - b.distance; });
+    if (candidates.length) {
+      s.x = candidates[0].x; s.y = candidates[0].y; s.rot = candidates[0].rot;
+    }
+    board.style.height = Math.max(board.clientHeight, s.y + m.size + 70) + 'px';
+  }
+
   function applyTransform(s, scale) {
     var k = scale || 1;
     s.el.style.transform =
@@ -670,12 +694,13 @@ body {
         rot: (valid && typeof mem.rot === 'number') ? mem.rot : base.rot,
         moved: !!valid
       };
+      clearPlacement(s, stickers);
       stickers.push(s);
       applyTransform(s);
       wireSticker(s);
     });
 
-    board.style.height = boardHeight(m) + 'px';
+    board.style.height = Math.max(boardHeight(m), Math.max.apply(null, stickers.map(function (s) { return s.y + m.size + 70; }))) + 'px';
     syncArcherSize();
   }
 
@@ -687,6 +712,7 @@ body {
     board.style.height = boardHeight(m) + 'px';
     syncArcherSize();
 
+    var placed = [];
     stickers.forEach(function (s, i) {
       s.el.style.setProperty('--size', m.size + 'px');
       if (!s.moved) {
@@ -697,6 +723,8 @@ body {
         s.x = Math.max(4, Math.min(m.w - m.size - 4, s.x));
         s.y = Math.max(4, Math.min(board.clientHeight - m.size - 4, s.y));
       }
+      clearPlacement(s, placed);
+      placed.push(s);
       applyTransform(s);
     });
     hidePopup(true);
@@ -848,6 +876,7 @@ body {
       var m = boardMetrics();
       s.x = Math.max(4, Math.min(m.w - m.size - 4, s.x));
       s.y = Math.max(4, Math.min(board.clientHeight - m.size - 4, s.y));
+      clearPlacement(s, stickers.filter(function (other) { return other !== s; }));
       s.moved = true;
 
       if (window.gsap && !reduced) {

@@ -159,7 +159,7 @@ body {
 }
 
 .sticker.ios-app .sticker-art {
-  border: 4px solid var(--sticker-edge);
+  border: 5px solid var(--sticker-edge);
   border-radius: 26%;
   background: var(--sticker-edge);
   filter: none;
@@ -406,7 +406,7 @@ body {
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;pointer-events:none">
   <defs>
     <filter id="sticker-outline" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-      <feMorphology in="SourceAlpha" operator="dilate" radius="3" result="expanded"/>
+      <feMorphology in="SourceAlpha" operator="dilate" radius="4" result="expanded"/>
       <feGaussianBlur in="expanded" stdDeviation="0.45" result="smooth"/>
       <feFlood flood-color="white" result="white"/>
       <feComposite in="white" in2="smooth" operator="in" result="outline"/>

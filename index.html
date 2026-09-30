@@ -165,6 +165,8 @@ body {
     drop-shadow(-2.2px -2.2px 0 var(--sticker-edge));
 }
 
+.sticker.ios-app .sticker-art { border-radius: 24%; }
+
 .sticker-label {
   font-family: var(--round);
   font-weight: 600;
@@ -484,6 +486,11 @@ body {
      Project data
      ─────────────────────────────────────── */
   var PROJECTS = [
+    {"id":"movy","title":"Movy","accent":"#D77837","desc":"Daily wallpapers, curated collections, and a Studio for creating your own.","tags":["iOS","Wallpaper"],"link":"https://apps.apple.com/app/id1093345142","icon":"images/icons/ios/movy.jpg","platform":"ios"},
+    {"id":"sequence","title":"Sequence","accent":"#4B514C","desc":"Turn your photographs into considered, print-ready zines and photo books.","tags":["iOS","Photography"],"link":"https://apps.apple.com/app/id6789496773","icon":"images/icons/ios/sequence.jpg","platform":"ios"},
+    {"id":"tackie","title":"Tackie","accent":"#B07431","desc":"Visual sticky notes for everyday thoughts, with folders and home-screen widgets.","tags":["iOS","Notes"],"link":"https://apps.apple.com/app/id6806084464","icon":"images/icons/ios/tackie.jpg","platform":"ios"},
+    {"id":"bingbang","title":"BingBang","accent":"#BB523F","desc":"A little more ease each day — encouraging cards, doodles, and simple plans.","tags":["iOS","Daily"],"link":"https://apps.apple.com/app/id6797013343","icon":"images/icons/ios/bingbang.jpg","platform":"ios"},
+    {"id":"bubbly","title":"Bubbly","accent":"#6177BB","desc":"Turn your words into playful quote cards with expressive bubbles and stickers.","tags":["iOS","Creative"],"link":"https://apps.apple.com/app/id6792437107","icon":"images/icons/ios/bubbly.jpg","platform":"ios"},
     { id:'koi-pond', title:'Koi Pond', icon:'images/icons/koi-pond.png', accent:'#52A5CE',
       desc:'Interactive generative art — flowing koi that respond to your cursor.',
       tags:['Generative','Canvas'], link:'https://saberzou.github.io/koi-pond/' },
@@ -620,7 +627,7 @@ body {
 
     PROJECTS.forEach(function (p, i) {
       var el = document.createElement('div');
-      el.className = 'sticker';
+      el.className = 'sticker' + (p.platform === 'ios' ? ' ios-app' : '');
       el.style.setProperty('--size', m.size + 'px');
       el.setAttribute('tabindex', '0');
       el.setAttribute('role', 'button');
@@ -716,6 +723,7 @@ body {
 
     var openBtn = document.getElementById('popup-open');
     openBtn.href = p.link;
+    openBtn.firstChild.textContent = p.platform === 'ios' ? 'Download on App Store ' : 'Open project ';
     openBtn.style.setProperty('--accent', p.accent);
 
     // Make it measurable before positioning, then place it.

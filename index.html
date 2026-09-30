@@ -387,7 +387,7 @@ body {
 
 @media (max-width: 700px) {
   /* Only 2 columns here, so labels can run wider before risking a collision. */
-  .sticker-label { max-width: 160%; font-size: 0.69rem; padding: 4px 9px; }
+  .sticker-label { max-width: 145%; font-size: 0.65rem; padding: 4px 8px; }
 }
 
 @media (max-width: 640px) {
@@ -550,7 +550,7 @@ body {
       tags:['Personal'], link:'https://www.saberzou.com' }
   ];
 
-  var STORAGE_KEY = 'saber-stickers-v3';
+  var STORAGE_KEY = 'saber-stickers-v4';
   var DRAG_THRESHOLD = 4;   // px of travel before a press counts as a drag
 
   var board  = document.getElementById('board');
@@ -594,8 +594,8 @@ body {
   function boardMetrics() {
     var w = board.clientWidth;
     var narrow = w < 700;
-    var size = narrow ? 72 : (w < 1100 ? 96 : 104);
-    var cols = Math.max(2, Math.min(6, Math.floor(w / (size * 2.15))));
+    var size = narrow ? (w < 420 ? 64 : 72) : (w < 1100 ? 96 : 104);
+    var cols = Math.max(2, Math.min(6, Math.floor(w / (size * (narrow ? 1.8 : 2.15)))));
     var rows = Math.ceil(PROJECTS.length / cols);
     var cellW = w / cols;
     var cellH = size + (narrow ? 74 : 82);
@@ -604,34 +604,17 @@ body {
 
   function boardHeight(m) { return m.rows * m.cellH + m.size * 0.8; }
 
-  var scatterCache = {};
   function defaultLayout(i, m) {
-    var key = m.w + ':' + m.size + ':' + m.cols;
-    var positions = scatterCache[key] || (scatterCache[key] = []);
-    // Try varied positions in a loose vertical band, rejecting collisions.
-    // The stable seed keeps the board from jumping around on every reload.
-    while (positions.length <= i) {
-      var n = positions.length;
-      var row = Math.floor(n / m.cols);
-      var margin = (m.size * 1.6 + 16 - m.size) / 2 + 10;
-      var candidate;
-      for (var attempt = 0; attempt < 240; attempt++) {
-        var seed = n * 97.3 + attempt * 11.7;
-        candidate = {
-          x: margin + rand(seed + 1.8) * Math.max(0, m.w - m.size - margin * 2),
-          y: 16 + row * m.cellH + (rand(seed + 4.6) - 0.5) * m.cellH * 0.7 + Math.floor(attempt / 60) * 42,
-          rot: (rand(n * 5.31 + 8.4) - 0.5) * 22
-        };
-        candidate.y = Math.max(16, candidate.y);
-        if (!positions.some(function (p) { return collides(candidate, p, m); })) break;
-      }
-      if (positions.some(function (p) { return collides(candidate, p, m); })) {
-        candidate.y = Math.max.apply(null, positions.map(function (p) { return p.y; })) + m.size + 66;
-      }
-      positions.push(candidate);
-    }
-    var p = positions[i];
-    return { x: p.x, y: p.y, rot: p.rot };
+    var col = i % m.cols, row = Math.floor(i / m.cols);
+    // A loose stagger preserves the original compact sticker-board rhythm.
+    var stagger = (row % 2) * m.cellW * 0.10;
+    var jx = (rand(i * 2.17) - 0.5) * m.cellW * 0.16;
+    var jy = (rand(i * 3.71) - 0.5) * m.cellH * 0.22;
+    var margin = m.narrow ? 26 : 40;
+    var x = col * m.cellW + (m.cellW - m.size) / 2 + stagger + jx;
+    var y = row * m.cellH + jy + m.cellH * 0.18;
+    x = Math.max(margin, Math.min(m.w - m.size - margin, x));
+    return { x: x, y: Math.max(12, y), rot: (rand(i * 5.31) - 0.5) * 15 };
   }
 
   /* ───────────────────────────────────────
@@ -639,7 +622,7 @@ body {
      ─────────────────────────────────────── */
   // Reserve the artwork, rotated edges, and label together.
   function collides(a, b, m) {
-    var width = m.size * 1.6 + 16, height = m.size + 60;
+    var width = m.size * (m.narrow ? 1.45 : 1.6) + 14, height = m.size + 56;
     return Math.abs(a.x - b.x) < width && Math.abs(a.y - b.y) < height;
   }
 

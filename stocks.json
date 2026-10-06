@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-10-06T09:59:48.914Z",
+  "updatedAt": "2026-10-06T16:37:27.642Z",
   "quotes": {
     "AAPL": {
       "symbol": "AAPL",
-      "price": 332.89,
-      "previousClose": 338.4,
-      "changePct": -1.63,
+      "price": 331.51,
+      "previousClose": 329.4,
+      "changePct": 0.64,
       "currency": "USD",
       "source": "yahoo"
     },

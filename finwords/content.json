@@ -37,7 +37,7 @@
       ]
     ],
     "closing": "Your next word can wait for you.",
-    "closebody": "Finwords is being prepared for iPhone. Availability and pricing will be announced when ready.",
+    "closebody": "Finwords is coming soon for iPhone, with a free initial launch. Availability will be announced when ready.",
     "helplink": "Questions? Visit support",
     "supporttitle": "A little help for Finwords.",
     "supportintro": "Questions about learning, the camera, or your saved words? Start here, or write to the developer.",
@@ -75,12 +75,12 @@
     ],
     "privacytitle": "Privacy, in plain words.",
     "privacyintro": "How Finwords handles learning records, camera images and optional iCloud sync.",
-    "draft": "Draft for review · 13 October 2026 · Not yet effective",
-    "draftbody": "This draft describes the current pre-release iPhone build. It needs developer approval and release verification before publication. It is not legal certification.",
+    "draft": "Effective date · 13 October 2026",
+    "draftbody": "This policy describes the current pre-release iPhone version. We will update it if the release changes how data is handled.",
     "policy": [
       [
         "Who provides Finwords",
-        "Finwords is developed by Saber Zou (邹颂兵), an independent developer. For privacy questions or requests about support correspondence, contact saberzou@gmail.com. This policy covers the Finwords iPhone app and these Finwords web pages."
+        "Finwords is provided by Codesigner Tech Co., Ltd. and developed by Saber Zou (邹颂兵). For privacy questions or requests about support correspondence, contact saberzou@gmail.com. This policy covers the Finwords iPhone app and these Finwords web pages."
       ],
       [
         "Learning records and settings",
@@ -88,11 +88,11 @@
       ],
       [
         "Camera images and recognition",
-        "Camera access is requested when you use object recognition. Images are processed on your iPhone using Apple frameworks and the bundled TinyCLIP model. We found no transmission to a developer server or third-party inference service in the reviewed build. When you keep a recognised object, the app saves its name, date, optional catalog identifier and cutout image in app storage. Saved images can also sync through iCloud as described below. Camera permission can be changed in iPhone Settings. The camera feature recognises objects, not text."
+        "Camera access is requested when you use object recognition. Images are processed on your iPhone using Apple frameworks and the bundled TinyCLIP model. The current build does not transmit these images to a developer server or third-party inference service. When you keep a recognised object, the app saves its name, date, optional catalog identifier and cutout image in app storage. Saved images can also sync through iCloud as described below. Camera permission can be changed in iPhone Settings. The camera feature recognises objects, not text."
       ],
       [
         "Optional private iCloud sync",
-        "If your device’s iCloud configuration and the app’s entitlements allow it, SwiftData is configured for automatic CloudKit sync of words and saved scans, including cutout images, to your private iCloud database. Profile and Things progress use Apple’s iCloud key-value storage. These services are operated by Apple under your Apple Account and settings; Finwords does not ask you to create a separate account. A local storage fallback exists. Production schema and sync across two devices are not yet verified, so this draft does not guarantee sync or recovery. Apple may process this data to provide its services."
+        "If your device’s iCloud configuration and the app’s entitlements allow it, SwiftData is configured for automatic CloudKit sync of words and saved scans, including cutout images, to your private iCloud database. Profile and Things progress use Apple’s iCloud key-value storage. These services are operated by Apple under your Apple Account and settings; Finwords does not ask you to create a separate account. A local storage fallback exists. Production schema and sync across two devices are still being verified ahead of release; sync and recovery are not guaranteed. Apple may process this data to provide its services."
       ],
       [
         "Retention, deletion and export",
@@ -108,11 +108,11 @@
       ],
       [
         "Children and changes",
-        "Finwords has no public profile or communication between users. Children should use it with guidance from a parent or guardian and avoid sharing personal information in support requests. Guardians can contact us with privacy questions. If the release build changes how data is handled, this draft and its effective date must be updated before publication."
+        "Finwords has no public profile or communication between users. Children should use it with guidance from a parent or guardian and avoid sharing personal information in support requests. Guardians can contact us with privacy questions. If the release build changes how data is handled, we will update this policy and its effective date."
       ]
     ],
     "footer": "Made by Saber Zou",
-    "review": "Pre-release preview"
+    "review": "English learning for iPhone"
   },
   "zh-Hans": {
     "nav": [
@@ -152,7 +152,7 @@
       ]
     ],
     "closing": "下一个单词，等你回来。",
-    "closebody": "Finwords 正在为 iPhone 做准备。可用地区和定价将在准备就绪后公布。",
+    "closebody": "Finwords 即将面向 iPhone 推出，首发免费。可用地区将在准备就绪后公布。",
     "helplink": "有问题？查看支持",
     "supporttitle": "给 Finwords 的一点帮助。",
     "supportintro": "学习、相机或已保存单词遇到问题？先看看这里，也可以联系开发者。",
@@ -190,12 +190,12 @@
     ],
     "privacytitle": "用清楚的话说隐私。",
     "privacyintro": "Finwords 如何处理学习记录、相机图片和可选的 iCloud 同步。",
-    "draft": "审核草案 · 2026 年 10 月 13 日 · 尚未生效",
-    "draftbody": "本草案描述当前尚未发布的 iPhone 版本。发布前需由开发者批准并验证正式版本，不构成法律认证。",
+    "draft": "生效日期 · 2026 年 10 月 13 日",
+    "draftbody": "本政策描述当前尚未发布的 iPhone 版本。如果正式版本的数据处理方式改变，我们会更新本政策。",
     "policy": [
       [
         "谁提供 Finwords",
-        "Finwords 由独立开发者 Saber Zou（邹颂兵）开发。隐私问题或支持邮件相关请求，请联系 saberzou@gmail.com。本政策涵盖 Finwords iPhone 应用及这些 Finwords 网页。"
+        "Finwords 由 Codesigner Tech Co., Ltd. 提供，由 Saber Zou（邹颂兵）开发。隐私问题或支持邮件相关请求，请联系 saberzou@gmail.com。本政策涵盖 Finwords iPhone 应用及这些 Finwords 网页。"
       ],
       [
         "学习记录与设置",
@@ -203,11 +203,11 @@
       ],
       [
         "相机图片与识别",
-        "使用物体识别时，应用会请求相机权限。图片通过 Apple 框架和内置 TinyCLIP 模型在 iPhone 上处理。在审核的版本中，未发现向开发者服务器或第三方推理服务传输图片的行为。保存识别出的物体时，应用会在存储空间中保存名称、日期、可选的目录标识及抠图。保存的图片也可能通过下述 iCloud 功能同步。可在 iPhone 设置中更改相机权限。此功能识别物体，不读取文字。"
+        "使用物体识别时，应用会请求相机权限。图片通过 Apple 框架和内置 TinyCLIP 模型在 iPhone 上处理。当前版本不会将这些图片传输到开发者服务器或第三方推理服务。保存识别出的物体时，应用会在存储空间中保存名称、日期、可选的目录标识及抠图。保存的图片也可能通过下述 iCloud 功能同步。可在 iPhone 设置中更改相机权限。此功能识别物体，不读取文字。"
       ],
       [
         "可选的私有 iCloud 同步",
-        "设备的 iCloud 配置和应用授权允许时，SwiftData 配置为通过 CloudKit 自动将单词和已保存扫描记录（包括抠图）同步到你的私有 iCloud 数据库。个人资料和 Things 进度使用 Apple 的 iCloud 键值存储。这些服务由 Apple 依照你的 Apple 账户和设置提供，Finwords 不要求另建账户。应用具有本地存储回退机制。正式环境的数据库结构和双设备同步尚未验证，因此本草案不保证同步或恢复。Apple 可能为提供这些服务而处理相关数据。"
+        "设备的 iCloud 配置和应用授权允许时，SwiftData 配置为通过 CloudKit 自动将单词和已保存扫描记录（包括抠图）同步到你的私有 iCloud 数据库。个人资料和 Things 进度使用 Apple 的 iCloud 键值存储。这些服务由 Apple 依照你的 Apple 账户和设置提供，Finwords 不要求另建账户。应用具有本地存储回退机制。正式环境的数据库结构和双设备同步仍在发布前验证中，无法保证同步或恢复。Apple 可能为提供这些服务而处理相关数据。"
       ],
       [
         "保留、删除与导出",
@@ -223,11 +223,11 @@
       ],
       [
         "未成年人及变更",
-        "Finwords 没有公开个人主页或用户间通信。未成年人请在监护人指导下使用，并避免在支持请求中透露个人信息。监护人可联系我们询问隐私问题。如果正式版本的数据处理方式改变，须在发布前更新本草案和生效日期。"
+        "Finwords 没有公开个人主页或用户间通信。未成年人请在监护人指导下使用，并避免在支持请求中透露个人信息。监护人可联系我们询问隐私问题。如果正式版本的数据处理方式改变，我们会更新本政策和生效日期。"
       ]
     ],
     "footer": "Saber Zou 制作",
-    "review": "发布前预览"
+    "review": "在 iPhone 上学英语"
   },
   "zh-Hant": {
     "nav": [
@@ -267,7 +267,7 @@
       ]
     ],
     "closing": "下一個單字，等你回來。",
-    "closebody": "Finwords 正在為 iPhone 做準備。可用地區和定價將在準備就緒後公布。",
+    "closebody": "Finwords 即將面向 iPhone 推出，首發免費。可用地區將在準備就緒後公布。",
     "helplink": "有問題？查看支援",
     "supporttitle": "給 Finwords 的一點幫助。",
     "supportintro": "學習、相機或已儲存單字遇到問題？先看看這裡，也可以聯絡開發者。",
@@ -305,12 +305,12 @@
     ],
     "privacytitle": "用清楚的話說隱私。",
     "privacyintro": "Finwords 如何處理學習記錄、相機圖片和可選的 iCloud 同步。",
-    "draft": "審核草案 · 2026 年 10 月 13 日 · 尚未生效",
-    "draftbody": "本草案描述目前尚未發布的 iPhone 版本。發布前需由開發者批准並驗證正式版本，不構成法律認證。",
+    "draft": "生效日期 · 2026 年 10 月 13 日",
+    "draftbody": "本政策描述目前尚未發布的 iPhone 版本。如果正式版本的資料處理方式改變，我們會更新本政策。",
     "policy": [
       [
         "誰提供 Finwords",
-        "Finwords 由獨立開發者 Saber Zou（邹颂兵）開發。隱私問題或支援郵件相關請求，請聯絡 saberzou@gmail.com。本政策涵蓋 Finwords iPhone App 及這些 Finwords 網頁。"
+        "Finwords 由 Codesigner Tech Co., Ltd. 提供，由 Saber Zou（邹颂兵）開發。隱私問題或支援郵件相關請求，請聯絡 saberzou@gmail.com。本政策涵蓋 Finwords iPhone App 及這些 Finwords 網頁。"
       ],
       [
         "學習記錄與設定",
@@ -318,11 +318,11 @@
       ],
       [
         "相機圖片與辨識",
-        "使用物體辨識時，App 會請求相機權限。圖片透過 Apple 框架和內建 TinyCLIP 模型在 iPhone 上處理。在審核的版本中，未發現向開發者伺服器或第三方推論服務傳送圖片的行為。儲存辨識出的物體時，App 會儲存名稱、日期、可選的目錄識別碼及去背圖片。已儲存圖片也可能透過下述 iCloud 功能同步。可在 iPhone 設定中更改相機權限。此功能辨識物體，不讀取文字。"
+        "使用物體辨識時，App 會請求相機權限。圖片透過 Apple 框架和內建 TinyCLIP 模型在 iPhone 上處理。目前版本不會將這些圖片傳送到開發者伺服器或第三方推論服務。儲存辨識出的物體時，App 會儲存名稱、日期、可選的目錄識別碼及去背圖片。已儲存圖片也可能透過下述 iCloud 功能同步。可在 iPhone 設定中更改相機權限。此功能辨識物體，不讀取文字。"
       ],
       [
         "可選的私人 iCloud 同步",
-        "裝置的 iCloud 設定和 App 授權允許時，SwiftData 設定為透過 CloudKit 自動將單字和已儲存掃描記錄（包括去背圖片）同步到你的私人 iCloud 資料庫。個人資料和 Things 進度使用 Apple 的 iCloud 鍵值儲存。這些服務由 Apple 依照你的 Apple 帳號和設定提供，Finwords 不要求另建帳號。App 具有本機儲存回退機制。正式環境的資料庫結構和雙裝置同步尚未驗證，因此本草案不保證同步或恢復。Apple 可能為提供這些服務而處理相關資料。"
+        "裝置的 iCloud 設定和 App 授權允許時，SwiftData 設定為透過 CloudKit 自動將單字和已儲存掃描記錄（包括去背圖片）同步到你的私人 iCloud 資料庫。個人資料和 Things 進度使用 Apple 的 iCloud 鍵值儲存。這些服務由 Apple 依照你的 Apple 帳號和設定提供，Finwords 不要求另建帳號。App 具有本機儲存回退機制。正式環境的資料庫結構和雙裝置同步仍在發布前驗證中，無法保證同步或恢復。Apple 可能為提供這些服務而處理相關資料。"
       ],
       [
         "保留、刪除與匯出",
@@ -338,10 +338,10 @@
       ],
       [
         "未成年人及變更",
-        "Finwords 沒有公開個人檔案或使用者間通訊。未成年人請在監護人指導下使用，並避免在支援請求中透露個人資訊。監護人可聯絡我們詢問隱私問題。如果正式版本的資料處理方式改變，須在發布前更新本草案和生效日期。"
+        "Finwords 沒有公開個人檔案或使用者間通訊。未成年人請在監護人指導下使用，並避免在支援請求中透露個人資訊。監護人可聯絡我們詢問隱私問題。如果正式版本的資料處理方式改變，我們會更新本政策和生效日期。"
       ]
     ],
     "footer": "Saber Zou 製作",
-    "review": "發布前預覽"
+    "review": "在 iPhone 上學英語"
   }
 }

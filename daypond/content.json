@@ -1,0 +1,422 @@
+{
+  "en": {
+    "nav": [
+      "Overview",
+      "Support",
+      "Privacy"
+    ],
+    "soon": "In preparation · not yet available",
+    "device": "For iPhone and iPad · iOS/iPadOS 26 or later",
+    "headline": "A quiet moment.\nYour own pond.",
+    "intro": "Make time for focus, breathing and winding down beside a softly illustrated koi pond.",
+    "explore": "Explore Daypond",
+    "caption": "Approved Daypond icon",
+    "flowtitle": "Make room for yourself.",
+    "flowintro": "A small routine, with familiar koi for company.",
+    "features": [
+      [
+        "Focus",
+        "One thing at a time.",
+        "Choose a 1–60 minute timer. Review seven- and thirty-day session totals in Settings."
+      ],
+      [
+        "Breathe",
+        "Follow a gentle rhythm.",
+        "Choose your breathing session in the app, or open one minute from a widget. Breathing pauses when you leave the app."
+      ],
+      [
+        "Sleep",
+        "Settle down with sound.",
+        "Choose a 15–60 minute timer with bundled music or nature sounds. Switch sounds during the session; audio fades in the final minute."
+      ],
+      [
+        "Pond",
+        "Care for your quiet place.",
+        "Completed timers earn food. Feed koi and collect residents and plants. Widgets show saved pond images; Focus/Sleep Live Activities offer session and Sleep music controls."
+      ]
+    ],
+    "closing": "Your next quiet moment.",
+    "closebody": "No account, ads, tracking or app-managed cloud sync. Daypond is a focus and relaxation tool, not a sleep tracker or medical treatment. Availability and price will be announced when settled.",
+    "helplink": "Visit support",
+    "supporttitle": "Daypond support",
+    "supportintro": "Help with sessions, sounds and your pond.",
+    "contact": "Get in touch",
+    "contactbody": "Email saberzou@gmail.com with your device, OS version and steps. Screenshots are optional; please remove personal information.",
+    "faq": [
+      [
+        "Why does breathing pause?",
+        "Breathing needs the app in the foreground so its visual cues and haptics stay with your session."
+      ],
+      [
+        "Why is Sleep paused?",
+        "Headphone removal, audio interruption or relaunch can pause Sleep. Open the app and resume explicitly. Your music choice is retained."
+      ],
+      [
+        "Why is the widget image older?",
+        "Pond widgets show saved snapshots. Open Daypond for a new capture; iOS controls refresh delivery. Widgets do not continuously animate."
+      ],
+      [
+        "Why is there no Live Activity?",
+        "Check Daypond Live Activities in iOS settings. In-app sessions remain available if activities are denied. Widget starts may require unlocking."
+      ],
+      [
+        "Where is my history?",
+        "Session history, food, collections and preferences live in local app storage. There is no app-managed cloud account or sync. Apple manages OS backups and restores."
+      ],
+      [
+        "How can I remove local data?",
+        "This version has no dedicated erase command. Deleting the app, rather than offloading it, removes its local app container. Shared widget data and OS backups follow separate Apple retention rules. Save anything you want to keep first."
+      ]
+    ],
+    "privacytitle": "Daypond privacy",
+    "privacyintro": "How the app handles local session data and optional support messages.",
+    "draft": "Draft for review — not published",
+    "draftbody": "These local pages are release-preparation drafts. Public availability and final policy wording have not been approved for publication.",
+    "policy": [
+      [
+        "Local app data",
+        "Daypond stores session timing/history, food and collection progress, pond settings and music preferences locally. It does not send these records to the developer, require an account, or include advertising, analytics or tracking SDKs."
+      ],
+      [
+        "Widgets and Live Activities",
+        "Limited session state and saved pond images are shared with Daypond’s own widget extension on the same device. Session state and music can appear on the Lock Screen or Dynamic Island. You can control Live Activities in iOS settings."
+      ],
+      [
+        "Permissions and sound",
+        "The app plays bundled audio; it does not record your microphone or request camera, Photos, location, contacts, HealthKit or tracking access. iOS controls any Live Activity availability prompts."
+      ],
+      [
+        "Retention and deletion",
+        "Local history and settings remain until removed with the app or changed through its controls. Three recent cached pond images are retained. Shared-group data and Apple-managed backups/restores follow OS rules; there is no developer-managed cloud copy or remote deletion service."
+      ],
+      [
+        "Optional support",
+        "Emails to saberzou@gmail.com are received through Gmail and used to answer your request. Send only information you wish to share. Messages may be retained as needed to handle the request and operational or legal obligations; email the same address to ask about access or deletion. This draft retention wording needs final owner review."
+      ],
+      [
+        "Website and platform services",
+        "These drafts load no scripts, analytics or advertising. When published, hosting services may process technical connection information such as IP address, request time and browser details. Existing hosting can inject analytics scripts; the page policy blocks scripts. Actual deployed behavior still requires verification before publication. Gmail and Apple services operate under their own policies."
+      ]
+    ],
+    "footer": "Made by Saber Zou",
+    "review": "Focus, breathing and relaxation",
+    "skip": "Skip to content",
+    "language": "Language",
+    "draftbanner": "Local preview — these pages are not published."
+  },
+  "zh-Hans": {
+    "nav": [
+      "介绍",
+      "支持",
+      "隐私"
+    ],
+    "soon": "准备中 · 尚未上线",
+    "device": "适用于 iPhone 和 iPad · iOS/iPadOS 26 或更高版本",
+    "headline": "片刻安静。\n自己的池塘。",
+    "intro": "在柔和的插画锦鲤池塘旁，为专注、呼吸与睡前放松留一点时间。",
+    "explore": "了解 Daypond",
+    "caption": "已选定的 Daypond 图标",
+    "flowtitle": "留一点时间给自己。",
+    "flowintro": "小小的日常练习，有熟悉的锦鲤相伴。",
+    "features": [
+      [
+        "专注",
+        "一次专心做好一件事。",
+        "选择 1–60 分钟的计时，在设置中查看最近 7 天和 30 天的练习时长。"
+      ],
+      [
+        "呼吸",
+        "跟随轻柔的节奏。",
+        "在应用中选择呼吸时长，或从小组件开启一分钟练习。离开应用时，呼吸会暂停。"
+      ],
+      [
+        "安睡",
+        "伴着声音慢慢放松。",
+        "选择 15–60 分钟计时与内置音乐或自然声音。练习中可切换声音，最后一分钟音量逐渐降低。"
+      ],
+      [
+        "池塘",
+        "养护自己的安静角落。",
+        "完成计时获得鱼食，喂养锦鲤并收集动物与植物。小组件展示保存的池塘图像；专注与安睡实时活动提供练习及安睡音乐控件。"
+      ]
+    ],
+    "closing": "下一段安静的时间。",
+    "closebody": "无需账户，没有广告、追踪或应用管理的云端同步。Daypond 用于专注与放松，不提供睡眠追踪或医疗治疗。上线时间与价格确定后公布。",
+    "helplink": "前往支持",
+    "supporttitle": "Daypond 支持",
+    "supportintro": "关于练习、声音与池塘的帮助。",
+    "contact": "联系我们",
+    "contactbody": "请发邮件至 saberzou@gmail.com，附设备、系统版本与复现步骤。截图可选，请先去除隐私信息。",
+    "faq": [
+      [
+        "呼吸为什么暂停？",
+        "呼吸需要应用在前台运行，让画面提示与触感配合当前练习。"
+      ],
+      [
+        "安睡为什么暂停？",
+        "耳机拔出、音频中断或重新打开应用时，安睡可能暂停。请在应用中手动继续，音乐选择会保留。"
+      ],
+      [
+        "小组件图像为什么较旧？",
+        "池塘小组件展示保存的快照。打开 Daypond 可生成新快照，刷新时机由 iOS 控制，不会持续播放动画。"
+      ],
+      [
+        "为什么没有实时活动？",
+        "请查看 iOS 设置中的 Daypond 实时活动选项。关闭后仍可使用应用内练习，小组件开启练习可能需要解锁。"
+      ],
+      [
+        "记录保存在哪里？",
+        "练习、鱼食、收集进度与偏好保存在本地应用存储中，没有应用管理的云端账户或同步。系统备份与恢复由 Apple 管理。"
+      ],
+      [
+        "如何移除本地数据？",
+        "当前版本没有专用清除按钮。删除应用而非卸载保留数据，可移除本地应用容器。共享小组件数据与系统备份遵循 Apple 的独立保留规则，请先保存需要的内容。"
+      ]
+    ],
+    "privacytitle": "Daypond 隐私",
+    "privacyintro": "应用如何处理本地练习数据与可选的支持邮件。",
+    "draft": "审核草稿 · 尚未发布",
+    "draftbody": "这些本地页面用于上线准备，公开可用状态与最终政策文字尚未获准发布。",
+    "policy": [
+      [
+        "本地应用数据",
+        "Daypond 在本地保存练习计时与记录、鱼食与收集进度、池塘设置和音乐偏好，不向开发者发送这些记录，无需账户，也不包含广告、分析或追踪 SDK。"
+      ],
+      [
+        "小组件与实时活动",
+        "有限的练习状态与保存的池塘图像在同一设备上与 Daypond 自己的小组件扩展共享。练习与音乐状态可显示在锁屏或灵动岛，实时活动可在 iOS 设置中控制。"
+      ],
+      [
+        "权限与声音",
+        "应用播放内置音频，不录制麦克风，也不请求相机、照片、位置、通讯录、HealthKit 或追踪权限。实时活动相关系统提示由 iOS 管理。"
+      ],
+      [
+        "保留与删除",
+        "本地记录与设置保留至随应用移除或通过控件更改。缓存保留最近三张池塘图像。共享组数据、Apple 系统备份与恢复遵循操作系统规则，没有开发者管理的云端副本或远程删除服务。"
+      ],
+      [
+        "可选支持",
+        "发往 saberzou@gmail.com 的邮件通过 Gmail 接收，用于答复请求。请只发送愿意分享的信息。邮件可在处理请求与履行运营或法律义务所需期间保留，可发邮件咨询访问或删除。这份保留说明仍需所有者最终审核。"
+      ],
+      [
+        "网站与平台服务",
+        "草稿页面不加载脚本、分析或广告。发布后，托管服务可能处理 IP 地址、请求时间、浏览器等连接信息。现有托管可能注入分析脚本，页面策略禁止脚本，实际部署效果仍需在发布前验证。Gmail 与 Apple 服务遵循各自政策。"
+      ]
+    ],
+    "footer": "由 Saber Zou 制作",
+    "review": "专注、呼吸与放松",
+    "skip": "跳至正文",
+    "language": "语言",
+    "draftbanner": "本地预览 · 页面尚未发布。"
+  },
+  "ja": {
+    "nav": [
+      "紹介",
+      "サポート",
+      "プライバシー"
+    ],
+    "soon": "準備中 · まだ公開されていません",
+    "device": "iPhone・iPad向け · iOS/iPadOS 26以降",
+    "headline": "静かなひととき。\n自分だけの池。",
+    "intro": "やさしいタッチの鯉の池で、集中・呼吸・就寝前のくつろぎに時間をつくりましょう。",
+    "explore": "Daypondを知る",
+    "caption": "選定済みのDaypondアイコン",
+    "flowtitle": "自分のための時間を。",
+    "flowintro": "小さな習慣に、いつもの鯉が寄り添います。",
+    "features": [
+      [
+        "集中",
+        "目の前のことに取り組む。",
+        "1〜60分のタイマーを選べます。設定で過去7日間・30日間のセッション時間を確認できます。"
+      ],
+      [
+        "呼吸",
+        "穏やかなリズムに合わせて。",
+        "アプリ内で時間を選ぶほか、ウィジェットから1分の呼吸を開けます。アプリを離れると一時停止します。"
+      ],
+      [
+        "眠り",
+        "音とともにくつろぐ。",
+        "15〜60分のタイマーと内蔵の音楽・自然の音。途中で音を切り替えられ、最後の1分で音量が下がります。"
+      ],
+      [
+        "池",
+        "静かな場所を育てる。",
+        "タイマー完了で魚のえさがもらえます。鯉にえさをあげ、生き物や植物を集めましょう。ウィジェットは保存画像を表示し、集中・眠りのライブアクティビティにはセッションと眠りの音楽の操作があります。"
+      ]
+    ],
+    "closing": "次の静かなひとときへ。",
+    "closebody": "アカウント、広告、トラッキング、アプリによるクラウド同期はありません。集中とくつろぎのためのアプリで、睡眠記録や医療的な治療は行いません。公開時期と価格は決まり次第お知らせします。",
+    "helplink": "サポートへ",
+    "supporttitle": "Daypondサポート",
+    "supportintro": "セッション・音・池についてのヘルプ。",
+    "contact": "お問い合わせ",
+    "contactbody": "saberzou@gmail.comへ端末・OS・再現手順をお送りください。画像は任意です。個人情報を除いてください。",
+    "faq": [
+      [
+        "呼吸が止まるのはなぜ？",
+        "画面のガイドと触覚をセッションに合わせるため、呼吸はアプリが前面にある必要があります。"
+      ],
+      [
+        "眠りが一時停止するのはなぜ？",
+        "イヤホンの取り外し、音声の中断、再起動で一時停止する場合があります。アプリを開いて明示的に再開してください。音楽の選択は保たれます。"
+      ],
+      [
+        "ウィジェット画像が古いのはなぜ？",
+        "池は保存済みの画像です。Daypondを開くと新しく撮影できますが、更新の配信はiOSが管理します。常時アニメーションは行いません。"
+      ],
+      [
+        "ライブアクティビティが出ないときは？",
+        "iOS設定のDaypondの項目を確認してください。無効でもアプリ内のセッションは利用できます。ウィジェットの開始にはロック解除が必要な場合があります。"
+      ],
+      [
+        "履歴はどこに保存されますか？",
+        "履歴、えさ、コレクション、設定はローカルのアプリ領域に保存されます。アプリによるクラウドアカウントや同期はありません。OSのバックアップと復元はAppleが管理します。"
+      ],
+      [
+        "ローカルデータを消すには？",
+        "この版には専用の消去操作がありません。取り除くではなくアプリを削除するとローカル領域が削除されます。共有ウィジェットデータとOSバックアップはAppleの別の保持ルールに従います。残したい情報は先に保存してください。"
+      ]
+    ],
+    "privacytitle": "Daypondのプライバシー",
+    "privacyintro": "ローカルのセッションデータと任意のお問い合わせの扱いについて。",
+    "draft": "確認用の草稿 · 未公開",
+    "draftbody": "このローカルページは公開準備用です。公開状態と最終的な方針の文面は、まだ公開承認されていません。",
+    "policy": [
+      [
+        "ローカルデータ",
+        "Daypondは時間・履歴、えさと収集の進捗、池の設定、音楽の選択をローカルに保存します。開発者へこれらを送信せず、アカウントも広告・分析・追跡SDKもありません。"
+      ],
+      [
+        "ウィジェットとライブアクティビティ",
+        "限定的なセッション情報と保存画像を、同じ端末のDaypond自身の拡張と共有します。状態や音楽はロック画面・Dynamic Islandに表示されることがあります。iOS設定で操作できます。"
+      ],
+      [
+        "権限と音声",
+        "内蔵音声を再生しますが、マイクの録音やカメラ・写真・位置・連絡先・HealthKit・追跡の許可を求めません。ライブアクティビティの通知はiOSが管理します。"
+      ],
+      [
+        "保持と削除",
+        "履歴や設定はアプリとともに削除するか操作で変更するまで保持されます。池画像のキャッシュは最新3枚です。共有領域とAppleのバックアップ・復元はOSの規則に従い、開発者管理のクラウドや遠隔削除はありません。"
+      ],
+      [
+        "任意のサポート",
+        "saberzou@gmail.com宛のメールはGmailで受信し、回答に使います。共有したい情報だけを送ってください。対応や運用・法的義務に必要な期間保持する場合があります。閲覧・削除の相談も同じ宛先へ。この保持文面は所有者の最終確認が必要です。"
+      ],
+      [
+        "ウェブとプラットフォーム",
+        "草稿ページはスクリプト・分析・広告を読み込みません。公開後、ホストがIPアドレス・時刻・ブラウザなどの技術情報を処理する場合があります。既存ホストは分析スクリプトを挿入することがありますが、ページの方針はスクリプトを禁止します。実際の配信は公開前に確認が必要です。GmailとAppleにはそれぞれの方針が適用されます。"
+      ]
+    ],
+    "footer": "Saber Zou制作",
+    "review": "集中・呼吸・くつろぎ",
+    "skip": "本文へ移動",
+    "language": "言語",
+    "draftbanner": "ローカルプレビュー · ページは未公開です。"
+  },
+  "es": {
+    "nav": [
+      "Presentación",
+      "Ayuda",
+      "Privacidad"
+    ],
+    "soon": "En preparación · aún no disponible",
+    "device": "Para iPhone y iPad · iOS/iPadOS 26 o posterior",
+    "headline": "Un momento tranquilo.\nTu propio estanque.",
+    "intro": "Dedica tiempo a concentrarte, respirar y descansar junto a un estanque de koi ilustrado con tonos suaves.",
+    "explore": "Descubre Daypond",
+    "caption": "Icono aprobado de Daypond",
+    "flowtitle": "Haz espacio para ti.",
+    "flowintro": "Una pequeña rutina, con koi que te acompañan.",
+    "features": [
+      [
+        "Concentración",
+        "Una cosa a la vez.",
+        "Elige un temporizador de 1 a 60 minutos. Consulta los totales de los últimos siete y treinta días en Ajustes."
+      ],
+      [
+        "Respiración",
+        "Sigue un ritmo suave.",
+        "Elige la duración en la app o abre una sesión de un minuto desde un widget. Se pausa al salir de la app."
+      ],
+      [
+        "Sueño",
+        "Descansa con sonidos.",
+        "Elige de 15 a 60 minutos con música o sonidos de la naturaleza incluidos. Puedes cambiarlos durante la sesión; el volumen baja en el último minuto."
+      ],
+      [
+        "Estanque",
+        "Cuida tu lugar tranquilo.",
+        "Completar temporizadores te da comida. Alimenta a los koi y colecciona habitantes y plantas. Los widgets muestran imágenes guardadas; las Actividades en vivo ofrecen controles de sesión y música para dormir."
+      ]
+    ],
+    "closing": "Tu próximo momento tranquilo.",
+    "closebody": "Sin cuenta, anuncios, seguimiento ni sincronización en la nube gestionada por la app. Es una herramienta de concentración y relajación; no registra el sueño ni ofrece tratamiento médico. La disponibilidad y el precio se anunciarán cuando se decidan.",
+    "helplink": "Visita Ayuda",
+    "supporttitle": "Ayuda de Daypond",
+    "supportintro": "Ayuda con las sesiones, los sonidos y tu estanque.",
+    "contact": "Contacta",
+    "contactbody": "Escribe a saberzou@gmail.com con el dispositivo, el sistema y los pasos. Las capturas son opcionales; elimina información personal.",
+    "faq": [
+      [
+        "¿Por qué se pausa la respiración?",
+        "Necesita la app en primer plano para que las indicaciones visuales y hápticas acompañen tu sesión."
+      ],
+      [
+        "¿Por qué se pausa el sueño?",
+        "Desconectar auriculares, una interrupción de audio o reiniciar la app pueden pausarlo. Abre la app y reanuda explícitamente. La música elegida se conserva."
+      ],
+      [
+        "¿Por qué la imagen del widget es antigua?",
+        "El estanque muestra una imagen guardada. Abre Daypond para capturar otra; iOS controla cuándo se actualiza. No hay animación continua."
+      ],
+      [
+        "¿Por qué no aparece una Actividad en vivo?",
+        "Comprueba la opción de Daypond en Ajustes de iOS. Las sesiones siguen disponibles dentro de la app si se desactivan. Iniciar desde un widget puede requerir desbloquear."
+      ],
+      [
+        "¿Dónde está mi historial?",
+        "El historial, la comida, la colección y las preferencias están en el almacenamiento local. No hay cuenta ni sincronización en la nube gestionada por la app. Apple gestiona las copias y restauraciones del sistema."
+      ],
+      [
+        "¿Cómo elimino los datos locales?",
+        "Esta versión no tiene un botón de borrado. Eliminar la app, en lugar de desinstalarla conservando sus datos, elimina su contenedor local. Los datos compartidos de widgets y las copias del sistema siguen reglas de Apple distintas. Guarda primero lo que necesites."
+      ]
+    ],
+    "privacytitle": "Privacidad de Daypond",
+    "privacyintro": "Cómo se gestionan los datos locales y los mensajes opcionales de ayuda.",
+    "draft": "Borrador para revisión · no publicado",
+    "draftbody": "Estas páginas locales preparan el lanzamiento. La disponibilidad pública y el texto final de la política aún no están aprobados para publicación.",
+    "policy": [
+      [
+        "Datos locales",
+        "Daypond guarda los tiempos e historial, la comida y colección, los ajustes del estanque y la música localmente. No envía estos registros al desarrollador, ni requiere una cuenta ni incluye SDK de anuncios, analítica o seguimiento."
+      ],
+      [
+        "Widgets y Actividades en vivo",
+        "Comparte información limitada de sesión e imágenes guardadas con su propia extensión en el mismo dispositivo. El estado y la música pueden aparecer en la pantalla bloqueada o Dynamic Island. Puedes controlarlo en Ajustes de iOS."
+      ],
+      [
+        "Permisos y sonido",
+        "Reproduce audio incluido, sin grabar el micrófono ni pedir acceso a cámara, Fotos, ubicación, contactos, HealthKit o seguimiento. iOS controla los avisos de disponibilidad de Actividades en vivo."
+      ],
+      [
+        "Conservación y eliminación",
+        "Los datos se mantienen hasta eliminarlos con la app o cambiarlos mediante sus controles. Se conservan tres imágenes recientes en caché. Los datos compartidos y las copias y restauraciones de Apple siguen reglas del sistema; no hay copia en la nube del desarrollador ni servicio de borrado remoto."
+      ],
+      [
+        "Ayuda opcional",
+        "Los correos a saberzou@gmail.com se reciben mediante Gmail y se usan para responder. Envía solo lo que quieras compartir. Pueden conservarse mientras sea necesario para atender la petición y obligaciones operativas o legales. Solicita acceso o eliminación en la misma dirección. Este texto de conservación necesita revisión final del propietario."
+      ],
+      [
+        "Web y plataformas",
+        "Los borradores no cargan scripts, analítica ni anuncios. Al publicarse, el alojamiento puede procesar IP, hora y datos del navegador. El alojamiento existente puede insertar scripts de analítica; la política de la página bloquea scripts. Se debe comprobar el comportamiento publicado antes del lanzamiento. Gmail y Apple tienen sus propias políticas."
+      ]
+    ],
+    "footer": "Creado por Saber Zou",
+    "review": "Concentración, respiración y relajación",
+    "skip": "Saltar al contenido",
+    "language": "Idioma",
+    "draftbanner": "Vista previa local · páginas sin publicar."
+  }
+}

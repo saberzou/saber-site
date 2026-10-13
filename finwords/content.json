@@ -104,7 +104,7 @@
       ],
       [
         "These web pages",
-        "These Finwords pages use local assets and system fonts. They include no analytics script, chat widget, tracking cookies or embedded third-party media. The hosting provider may process connection information such as your IP address and browser details to serve and secure the website. The main Saber Zou portfolio is a separate page that loads Google Fonts and offers an optional chat service; its network behaviour is not represented by these Finwords pages. Email links open your email application."
+        "These Finwords pages use local assets and system fonts. Their source includes no analytics script, chat widget, tracking cookies or embedded third-party media. The existing website is served through GitHub Pages and Cloudflare. Cloudflare can inject a web-analytics script into the delivered page; these Finwords pages set a Content Security Policy that blocks script execution and outgoing connections, and the injected script was blocked in our publication check. Hosting providers may still process connection information such as your IP address and browser details to serve and secure the website. The main Saber Zou portfolio is a separate page that loads Google Fonts and offers an optional chat service; its network behaviour is not represented by these Finwords pages. Email links open your email application."
       ],
       [
         "Children and changes",
@@ -219,7 +219,7 @@
       ],
       [
         "这些网页",
-        "这些 Finwords 页面使用本地素材和系统字体，没有统计脚本、聊天组件、跟踪 Cookie 或嵌入的第三方媒体。托管服务商可能处理 IP 地址、浏览器信息等连接资料，用于提供和保护网站。Saber Zou 主作品集是独立页面，会加载 Google Fonts 并提供可选聊天服务；这些 Finwords 页面的说明不代表主作品集的网络行为。邮件链接会打开你的邮件应用。"
+        "这些 Finwords 页面使用本地素材和系统字体，源代码中没有统计脚本、聊天组件、跟踪 Cookie 或嵌入的第三方媒体。现有网站通过 GitHub Pages 和 Cloudflare 提供。Cloudflare 可能向返回的页面注入网站统计脚本；这些 Finwords 页面设置了内容安全策略，阻止脚本执行和向外连接，发布检查中注入的脚本已被阻止。托管服务商仍可能处理 IP 地址、浏览器信息等连接资料，用于提供和保护网站。Saber Zou 主作品集是独立页面，会加载 Google Fonts 并提供可选聊天服务；这些 Finwords 页面的说明不代表主作品集的网络行为。邮件链接会打开你的邮件应用。"
       ],
       [
         "未成年人及变更",
@@ -334,7 +334,7 @@
       ],
       [
         "這些網頁",
-        "這些 Finwords 頁面使用本機素材和系統字型，沒有統計指令碼、聊天元件、追蹤 Cookie 或嵌入的第三方媒體。託管服務商可能處理 IP 位址、瀏覽器資訊等連線資料，用於提供和保護網站。Saber Zou 主作品集是獨立頁面，會載入 Google Fonts 並提供可選聊天服務；這些 Finwords 頁面的說明不代表主作品集的網路行為。郵件連結會開啟你的郵件 App。"
+        "這些 Finwords 頁面使用本機素材和系統字型，原始碼中沒有統計指令碼、聊天元件、追蹤 Cookie 或嵌入的第三方媒體。現有網站透過 GitHub Pages 和 Cloudflare 提供。Cloudflare 可能向傳回的頁面注入網站統計指令碼；這些 Finwords 頁面設定了內容安全政策，阻止指令碼執行和向外連線，發布檢查中注入的指令碼已被阻止。託管服務商仍可能處理 IP 位址、瀏覽器資訊等連線資料，用於提供和保護網站。Saber Zou 主作品集是獨立頁面，會載入 Google Fonts 並提供可選聊天服務；這些 Finwords 頁面的說明不代表主作品集的網路行為。郵件連結會開啟你的郵件 App。"
       ],
       [
         "未成年人及變更",

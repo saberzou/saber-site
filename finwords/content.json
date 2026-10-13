@@ -66,7 +66,7 @@
       ],
       [
         "Can I delete or export my data?",
-        "You can delete an individual word from its word card, after confirmation. The current build has no complete in-app export or Delete All control, and no confirmed saved-cutout deletion control. Removing a word does not delete the separately saved cutout. Uninstalling clears local app storage, but iCloud and device backups may retain copies. Contact support for questions about those copies."
+        "In Words, open a word card, tap the trash button and confirm. This deletes the word record and its stored review history. Saved deletions are intended to sync through CloudKit, but deletion across devices has not been tested. It does not delete separately saved scans, cutout images or their cached copies, or reset your profile, fish name or Things progress. The current app has no in-app saved-scan deletion, Things progress reset, Delete All or complete export control. Replaying onboarding is not a data reset. Uninstalling does not necessarily remove iCloud records or system backups. Contact support with questions about retained copies."
       ],
       [
         "Why can’t I hear pronunciation?",
@@ -96,7 +96,7 @@
       ],
       [
         "Retention, deletion and export",
-        "Records remain available for continued use. Individual word cards have a confirmed delete action; deleting a word does not also delete a separately stored scan or cutout file. The current build has no complete export or Delete All action and no verified control for deleting saved scans. Uninstalling removes local app data, but does not necessarily remove iCloud records or system backups; these need separate management through Apple’s available controls. Reinstalling may restore synced data. We cannot read or delete device-only records through a developer server. Contact us for help understanding the available controls."
+        "In Words, opening a word card, tapping the trash button and confirming deletes that word record, including its encoded review history. Saved word deletions are intended to sync through automatic SwiftData CloudKit; actual deletion across devices has not been tested. Deleting a word does not delete the separate saved scan record, its cutout image file or cached image copies. Your profile, fish name and Things progress remain in device settings and iCloud key-value storage. The current app has no in-app saved-scan deletion, Things progress deletion or reset, Delete All or complete export control. Replaying onboarding is not a reset. Records otherwise remain available for continued use. Uninstalling does not necessarily remove iCloud records or system backups, and reinstalling may restore synced data. These copies need separate management through Apple’s available controls. We cannot read or delete device-only records through a developer server. Contact us for help understanding the available controls."
       ],
       [
         "Support email",
@@ -181,7 +181,7 @@
       ],
       [
         "可以删除或导出数据吗？",
-        "可以在单词卡片中确认删除单个单词。当前版本没有完整的应用内导出或「全部删除」功能，也未确认有删除已保存抠图的功能。删除单词不会删除独立保存的抠图。卸载会清除本地应用存储，但 iCloud 和设备备份可能保留副本。有关这些副本的问题，请联系支持。"
+        "在 Words 中打开单词卡片，点击垃圾桶按钮并确认，可删除该单词记录及其已保存的复习历史。已保存的删除操作设计为通过 CloudKit 同步，但跨设备删除尚未测试。这不会删除独立保存的扫描记录、抠图及其缓存副本，也不会重置个人资料、小鱼名字或 Things 进度。当前应用没有应用内已保存扫描记录删除、Things 进度重置、「全部删除」或完整导出功能。重播引导流程不是数据重置。卸载不一定会移除 iCloud 记录或系统备份。有关保留副本的问题，请联系支持。"
       ],
       [
         "为什么听不到发音？",
@@ -211,7 +211,7 @@
       ],
       [
         "保留、删除与导出",
-        "记录会保留供你继续使用。单词卡片有已确认的删除操作，但删除单词不会同时删除独立保存的扫描记录或抠图文件。当前版本没有完整导出或「全部删除」操作，也没有已验证的已保存扫描记录删除控件。卸载会移除本地应用数据，但不一定移除 iCloud 记录或系统备份，这些副本需通过 Apple 提供的可用控件另行管理。重新安装可能恢复已同步数据。我们不能通过开发者服务器读取或删除仅在设备上的记录。可联系我们了解可用操作。"
+        "在 Words 中打开单词卡片，点击垃圾桶按钮并确认，会删除该单词记录，包括其中编码保存的复习历史。已保存的单词删除操作设计为通过 SwiftData 的自动 CloudKit 同步传播，但跨设备删除的实际行为尚未测试。删除单词不会删除独立保存的扫描记录、抠图文件或缓存图片副本。个人资料、小鱼名字和 Things 进度仍保留在设备设置及 iCloud 键值存储中。当前应用没有应用内已保存扫描记录删除、Things 进度删除或重置、「全部删除」或完整导出功能。重播引导流程不是重置。其他记录会保留供你继续使用。卸载不一定会移除 iCloud 记录或系统备份，重新安装可能恢复已同步数据。这些副本需通过 Apple 提供的可用控件另行管理。我们不能通过开发者服务器读取或删除仅在设备上的记录。可联系我们了解可用操作。"
       ],
       [
         "支持邮件",
@@ -296,7 +296,7 @@
       ],
       [
         "可以刪除或匯出資料嗎？",
-        "可以在單字卡片中確認刪除個別單字。目前版本沒有完整的 App 內匯出或「全部刪除」功能，也未確認有刪除已儲存去背圖片的功能。刪除單字不會刪除獨立儲存的去背圖片。解除安裝會清除本機 App 儲存空間，但 iCloud 和裝置備份可能保留副本。有關這些副本的問題，請聯絡支援。"
+        "在 Words 中開啟單字卡片，點選垃圾桶按鈕並確認，可刪除該單字記錄及其已儲存的複習歷史。已儲存的刪除操作設計為透過 CloudKit 同步，但跨裝置刪除尚未測試。這不會刪除獨立儲存的掃描記錄、去背圖片及其快取副本，也不會重設個人資料、小魚名字或 Things 進度。目前 App 沒有 App 內已儲存掃描記錄刪除、Things 進度重設、「全部刪除」或完整匯出功能。重播引導流程不是資料重設。解除安裝不一定會移除 iCloud 記錄或系統備份。有關保留副本的問題，請聯絡支援。"
       ],
       [
         "為什麼聽不到發音？",
@@ -326,7 +326,7 @@
       ],
       [
         "保留、刪除與匯出",
-        "記錄會保留供你繼續使用。單字卡片有已確認的刪除操作，但刪除單字不會同時刪除獨立儲存的掃描記錄或去背圖片檔案。目前版本沒有完整匯出或「全部刪除」操作，也沒有已驗證的已儲存掃描記錄刪除控制項。解除安裝會移除本機 App 資料，但不一定移除 iCloud 記錄或系統備份，這些副本需透過 Apple 提供的可用控制項另行管理。重新安裝可能恢復已同步資料。我們不能透過開發者伺服器讀取或刪除僅在裝置上的記錄。可聯絡我們了解可用操作。"
+        "在 Words 中開啟單字卡片，點選垃圾桶按鈕並確認，會刪除該單字記錄，包括其中編碼儲存的複習歷史。已儲存的單字刪除操作設計為透過 SwiftData 的自動 CloudKit 同步傳播，但跨裝置刪除的實際行為尚未測試。刪除單字不會刪除獨立儲存的掃描記錄、去背圖片檔案或快取圖片副本。個人資料、小魚名字和 Things 進度仍保留在裝置設定及 iCloud 鍵值儲存中。目前 App 沒有 App 內已儲存掃描記錄刪除、Things 進度刪除或重設、「全部刪除」或完整匯出功能。重播引導流程不是重設。其他記錄會保留供你繼續使用。解除安裝不一定會移除 iCloud 記錄或系統備份，重新安裝可能恢復已同步資料。這些副本需透過 Apple 提供的可用控制項另行管理。我們不能透過開發者伺服器讀取或刪除僅在裝置上的記錄。可聯絡我們了解可用操作。"
       ],
       [
         "支援郵件",

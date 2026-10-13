@@ -1,0 +1,347 @@
+{
+  "en": {
+    "nav": [
+      "Overview",
+      "Support",
+      "Privacy"
+    ],
+    "back": "Saber Zou",
+    "soon": "Coming soon",
+    "device": "For iPhone · iOS 17 or later",
+    "headline": "A little fish.\nA growing vocabulary.",
+    "intro": "Learn English with a pet goldfish. Meet a few words, practise remembering them, and return at your own pace.",
+    "explore": "Meet Finwords",
+    "caption": "Current app icon · preview artwork",
+    "flowtitle": "Small sessions, familiar company.",
+    "flowintro": "From your bowl to the world around you, there’s more than one way to find a word.",
+    "features": [
+      [
+        "Bowl",
+        "Make words part of your day.",
+        "Start with up to five new words, then practise with choice and spelling quizzes. Spaced review brings words back as you learn."
+      ],
+      [
+        "Words",
+        "Keep the words you find.",
+        "Look up words manually, explore bundled definitions and examples, and listen with Apple’s speech synthesis."
+      ],
+      [
+        "Things",
+        "Name the things around you.",
+        "Explore everyday objects or use the camera to recognise an object on your iPhone. Keep a cutout in your collection."
+      ],
+      [
+        "Me & Fish",
+        "Find your own rhythm.",
+        "Choose your learning level, goals and pace. Give yourself and your fish a name, and make the experience your own."
+      ]
+    ],
+    "closing": "Your next word can wait for you.",
+    "closebody": "Finwords is being prepared for iPhone. Availability and pricing will be announced when ready.",
+    "helplink": "Questions? Visit support",
+    "supporttitle": "A little help for Finwords.",
+    "supportintro": "Questions about learning, the camera, or your saved words? Start here, or write to the developer.",
+    "contact": "Email support",
+    "contactbody": "Contact Saber Zou at saberzou@gmail.com. Include your iPhone model, iOS version, app version and the steps that led to the problem. Share only what’s needed; avoid sensitive photos or personal information.",
+    "faq": [
+      [
+        "What devices does Finwords support?",
+        "Finwords is designed for iPhone running iOS 17 or later. It is coming soon; there is no App Store download link yet."
+      ],
+      [
+        "How does a learning session work?",
+        "A session can introduce up to five new words, followed by choice and spelling practice. Spaced review revisits words over time. You can adjust your level and pace in Me & Fish settings."
+      ],
+      [
+        "Does the camera read text?",
+        "No. The camera recognises objects and creates cutouts; it is not a text scanner or OCR tool. Recognition can be wrong. Check the suggested name before keeping a thing. You can also look up a word manually."
+      ],
+      [
+        "Do I need an account or internet connection?",
+        "There is no Finwords account or sign-in. Core learning and object recognition use bundled data and run on your iPhone. Optional iCloud sync depends on your Apple Account, iCloud settings, service availability and connectivity."
+      ],
+      [
+        "Where are my words and cutouts saved?",
+        "They are stored on your device. When iCloud is available, the app is configured to sync word records and saved cutouts through your private CloudKit database, and profile and Things progress through iCloud key-value storage. Production and two-device sync are still being verified before release."
+      ],
+      [
+        "Can I delete or export my data?",
+        "You can delete an individual word from its word card, after confirmation. The current build has no complete in-app export or Delete All control, and no confirmed saved-cutout deletion control. Removing a word does not delete the separately saved cutout. Uninstalling clears local app storage, but iCloud and device backups may retain copies. Contact support for questions about those copies."
+      ],
+      [
+        "Why can’t I hear pronunciation?",
+        "Check your iPhone volume and available system speech voices. Finwords uses Apple speech synthesis. Tell support which word and language you tried if the problem continues."
+      ]
+    ],
+    "privacytitle": "Privacy, in plain words.",
+    "privacyintro": "How Finwords handles learning records, camera images and optional iCloud sync.",
+    "draft": "Draft for review · 13 October 2026 · Not yet effective",
+    "draftbody": "This draft describes the current pre-release iPhone build. It needs developer approval and release verification before publication. It is not legal certification.",
+    "policy": [
+      [
+        "Who provides Finwords",
+        "Finwords is developed by Saber Zou (邹颂兵), an independent developer. For privacy questions or requests about support correspondence, contact saberzou@gmail.com. This policy covers the Finwords iPhone app and these Finwords web pages."
+      ],
+      [
+        "Learning records and settings",
+        "The app saves your vocabulary, definitions, examples, learning and review state, and associated dates on your device. Your profile includes the names you choose for yourself and your fish, learning level, goals, pace and helper language. Things progress and device preferences are also stored to provide the app’s features. The current build has no Finwords account, developer backend, advertising, tracking, analytics SDK or third-party crash-reporting SDK."
+      ],
+      [
+        "Camera images and recognition",
+        "Camera access is requested when you use object recognition. Images are processed on your iPhone using Apple frameworks and the bundled TinyCLIP model. We found no transmission to a developer server or third-party inference service in the reviewed build. When you keep a recognised object, the app saves its name, date, optional catalog identifier and cutout image in app storage. Saved images can also sync through iCloud as described below. Camera permission can be changed in iPhone Settings. The camera feature recognises objects, not text."
+      ],
+      [
+        "Optional private iCloud sync",
+        "If your device’s iCloud configuration and the app’s entitlements allow it, SwiftData is configured for automatic CloudKit sync of words and saved scans, including cutout images, to your private iCloud database. Profile and Things progress use Apple’s iCloud key-value storage. These services are operated by Apple under your Apple Account and settings; Finwords does not ask you to create a separate account. A local storage fallback exists. Production schema and sync across two devices are not yet verified, so this draft does not guarantee sync or recovery. Apple may process this data to provide its services."
+      ],
+      [
+        "Retention, deletion and export",
+        "Records remain available for continued use. Individual word cards have a confirmed delete action; deleting a word does not also delete a separately stored scan or cutout file. The current build has no complete export or Delete All action and no verified control for deleting saved scans. Uninstalling removes local app data, but does not necessarily remove iCloud records or system backups; these need separate management through Apple’s available controls. Reinstalling may restore synced data. We cannot read or delete device-only records through a developer server. Contact us for help understanding the available controls."
+      ],
+      [
+        "Support email",
+        "If you email us, your email address and the content you choose to send are processed by our email service and the developer to respond and resolve the issue. Avoid sending unnecessary sensitive information. Ask us to access, correct or delete personal information in support correspondence; we will consider the request and applicable retention requirements. App records on your device and Apple’s services are separate from these emails."
+      ],
+      [
+        "These web pages",
+        "These Finwords pages use local assets and system fonts. They include no analytics script, chat widget, tracking cookies or embedded third-party media. The hosting provider may process connection information such as your IP address and browser details to serve and secure the website. The main Saber Zou portfolio is a separate page that loads Google Fonts and offers an optional chat service; its network behaviour is not represented by these Finwords pages. Email links open your email application."
+      ],
+      [
+        "Children and changes",
+        "Finwords has no public profile or communication between users. Children should use it with guidance from a parent or guardian and avoid sharing personal information in support requests. Guardians can contact us with privacy questions. If the release build changes how data is handled, this draft and its effective date must be updated before publication."
+      ]
+    ],
+    "footer": "Made by Saber Zou",
+    "review": "Pre-release preview"
+  },
+  "zh-Hans": {
+    "nav": [
+      "介绍",
+      "支持",
+      "隐私"
+    ],
+    "back": "Saber Zou",
+    "soon": "即将推出",
+    "device": "适用于 iPhone · iOS 17 或更高版本",
+    "headline": "一条小鱼，\n一点点积累的词汇。",
+    "intro": "和宠物金鱼一起学英语。认识几个单词，练习回忆，再按自己的节奏回来。",
+    "explore": "认识 Finwords",
+    "caption": "当前应用图标 · 预览素材",
+    "flowtitle": "短短的学习，熟悉的陪伴。",
+    "flowintro": "从鱼缸到身边的世界，发现单词不止一种方式。",
+    "features": [
+      [
+        "Bowl · 鱼缸",
+        "让单词走进日常。",
+        "每次认识最多五个新单词，再通过选择题和拼写练习巩固。间隔复习会随着学习进度带你回顾单词。"
+      ],
+      [
+        "Words · 单词",
+        "留下发现的单词。",
+        "手动查词，阅读内置释义和例句，并通过 Apple 语音合成听发音。"
+      ],
+      [
+        "Things · 事物",
+        "说出身边事物的名字。",
+        "探索日常物品，或用相机在 iPhone 上识别物体。把抠出的图片留在收藏里。"
+      ],
+      [
+        "Me & Fish · 我和鱼",
+        "找到自己的节奏。",
+        "选择学习程度、目标和节奏。为自己和小鱼取名，让学习更贴近自己。"
+      ]
+    ],
+    "closing": "下一个单词，等你回来。",
+    "closebody": "Finwords 正在为 iPhone 做准备。可用地区和定价将在准备就绪后公布。",
+    "helplink": "有问题？查看支持",
+    "supporttitle": "给 Finwords 的一点帮助。",
+    "supportintro": "学习、相机或已保存单词遇到问题？先看看这里，也可以联系开发者。",
+    "contact": "邮件联系支持",
+    "contactbody": "联系 Saber Zou：saberzou@gmail.com。请说明 iPhone 型号、iOS 版本、应用版本，以及出现问题的操作步骤。只分享解决问题所需的信息，避免发送敏感照片或个人资料。",
+    "faq": [
+      [
+        "支持哪些设备？",
+        "Finwords 为运行 iOS 17 或更高版本的 iPhone 设计。目前即将推出，尚无 App Store 下载链接。"
+      ],
+      [
+        "每次怎样学习？",
+        "每次可以认识最多五个新单词，再进行选择题和拼写练习。间隔复习帮助你逐渐回顾单词。可在「Me & Fish」设置里调整程度和节奏。"
+      ],
+      [
+        "相机会读取文字吗？",
+        "不会。相机用于识别物体并制作抠图，不是文字扫描或 OCR 工具。识别可能出错，请在保存前核对建议名称。也可以手动查词。"
+      ],
+      [
+        "需要账户或网络吗？",
+        "没有 Finwords 账户或登录。核心学习和物体识别使用内置数据，在 iPhone 上运行。可选的 iCloud 同步依赖 Apple 账户、iCloud 设置、服务可用性和网络连接。"
+      ],
+      [
+        "单词和抠图存在哪里？",
+        "保存在设备上。iCloud 可用时，应用配置为通过你的私有 CloudKit 数据库同步单词记录和已保存抠图，并通过 iCloud 键值存储同步个人资料和 Things 进度。正式环境和双设备同步仍需在发布前验证。"
+      ],
+      [
+        "可以删除或导出数据吗？",
+        "可以在单词卡片中确认删除单个单词。当前版本没有完整的应用内导出或「全部删除」功能，也未确认有删除已保存抠图的功能。删除单词不会删除独立保存的抠图。卸载会清除本地应用存储，但 iCloud 和设备备份可能保留副本。有关这些副本的问题，请联系支持。"
+      ],
+      [
+        "为什么听不到发音？",
+        "请检查 iPhone 音量和可用的系统语音。Finwords 使用 Apple 语音合成。如仍有问题，请告诉支持你尝试的单词和语言。"
+      ]
+    ],
+    "privacytitle": "用清楚的话说隐私。",
+    "privacyintro": "Finwords 如何处理学习记录、相机图片和可选的 iCloud 同步。",
+    "draft": "审核草案 · 2026 年 10 月 13 日 · 尚未生效",
+    "draftbody": "本草案描述当前尚未发布的 iPhone 版本。发布前需由开发者批准并验证正式版本，不构成法律认证。",
+    "policy": [
+      [
+        "谁提供 Finwords",
+        "Finwords 由独立开发者 Saber Zou（邹颂兵）开发。隐私问题或支持邮件相关请求，请联系 saberzou@gmail.com。本政策涵盖 Finwords iPhone 应用及这些 Finwords 网页。"
+      ],
+      [
+        "学习记录与设置",
+        "应用在设备上保存词汇、释义、例句、学习及复习状态和相关日期。个人资料包括你为自己和小鱼选择的名字、学习程度、目标、节奏及辅助语言。Things 进度和设备偏好也会被保存，以提供应用功能。当前版本没有 Finwords 账户、开发者后端、广告、跟踪、统计 SDK 或第三方崩溃上报 SDK。"
+      ],
+      [
+        "相机图片与识别",
+        "使用物体识别时，应用会请求相机权限。图片通过 Apple 框架和内置 TinyCLIP 模型在 iPhone 上处理。在审核的版本中，未发现向开发者服务器或第三方推理服务传输图片的行为。保存识别出的物体时，应用会在存储空间中保存名称、日期、可选的目录标识及抠图。保存的图片也可能通过下述 iCloud 功能同步。可在 iPhone 设置中更改相机权限。此功能识别物体，不读取文字。"
+      ],
+      [
+        "可选的私有 iCloud 同步",
+        "设备的 iCloud 配置和应用授权允许时，SwiftData 配置为通过 CloudKit 自动将单词和已保存扫描记录（包括抠图）同步到你的私有 iCloud 数据库。个人资料和 Things 进度使用 Apple 的 iCloud 键值存储。这些服务由 Apple 依照你的 Apple 账户和设置提供，Finwords 不要求另建账户。应用具有本地存储回退机制。正式环境的数据库结构和双设备同步尚未验证，因此本草案不保证同步或恢复。Apple 可能为提供这些服务而处理相关数据。"
+      ],
+      [
+        "保留、删除与导出",
+        "记录会保留供你继续使用。单词卡片有已确认的删除操作，但删除单词不会同时删除独立保存的扫描记录或抠图文件。当前版本没有完整导出或「全部删除」操作，也没有已验证的已保存扫描记录删除控件。卸载会移除本地应用数据，但不一定移除 iCloud 记录或系统备份，这些副本需通过 Apple 提供的可用控件另行管理。重新安装可能恢复已同步数据。我们不能通过开发者服务器读取或删除仅在设备上的记录。可联系我们了解可用操作。"
+      ],
+      [
+        "支持邮件",
+        "你主动发邮件时，邮箱地址和你选择发送的内容会由邮件服务及开发者处理，用于回复和解决问题。请避免发送不必要的敏感信息。你可以请求访问、更正或删除支持邮件中的个人信息；我们会结合请求和适用的保留要求处理。设备及 Apple 服务中的应用记录与这些邮件分开。"
+      ],
+      [
+        "这些网页",
+        "这些 Finwords 页面使用本地素材和系统字体，没有统计脚本、聊天组件、跟踪 Cookie 或嵌入的第三方媒体。托管服务商可能处理 IP 地址、浏览器信息等连接资料，用于提供和保护网站。Saber Zou 主作品集是独立页面，会加载 Google Fonts 并提供可选聊天服务；这些 Finwords 页面的说明不代表主作品集的网络行为。邮件链接会打开你的邮件应用。"
+      ],
+      [
+        "未成年人及变更",
+        "Finwords 没有公开个人主页或用户间通信。未成年人请在监护人指导下使用，并避免在支持请求中透露个人信息。监护人可联系我们询问隐私问题。如果正式版本的数据处理方式改变，须在发布前更新本草案和生效日期。"
+      ]
+    ],
+    "footer": "Saber Zou 制作",
+    "review": "发布前预览"
+  },
+  "zh-Hant": {
+    "nav": [
+      "介紹",
+      "支援",
+      "隱私"
+    ],
+    "back": "Saber Zou",
+    "soon": "即將推出",
+    "device": "適用於 iPhone · iOS 17 或以上版本",
+    "headline": "一條小魚，\n一點點累積的詞彙。",
+    "intro": "和寵物金魚一起學英語。認識幾個單字，練習回憶，再按自己的步調回來。",
+    "explore": "認識 Finwords",
+    "caption": "目前的 App 圖示 · 預覽素材",
+    "flowtitle": "短短的學習，熟悉的陪伴。",
+    "flowintro": "從魚缸到身邊的世界，發現單字不只一種方式。",
+    "features": [
+      [
+        "Bowl · 魚缸",
+        "讓單字走進日常。",
+        "每次認識最多五個新單字，再透過選擇題和拼字練習鞏固。間隔複習會隨著學習進度帶你回顧單字。"
+      ],
+      [
+        "Words · 單字",
+        "留下發現的單字。",
+        "手動查字，閱讀內建釋義和例句，並透過 Apple 語音合成聽發音。"
+      ],
+      [
+        "Things · 事物",
+        "說出身邊事物的名字。",
+        "探索日常物品，或用相機在 iPhone 上辨識物體。把去背圖片留在收藏裡。"
+      ],
+      [
+        "Me & Fish · 我和魚",
+        "找到自己的步調。",
+        "選擇學習程度、目標和步調。為自己和小魚取名，讓學習更貼近自己。"
+      ]
+    ],
+    "closing": "下一個單字，等你回來。",
+    "closebody": "Finwords 正在為 iPhone 做準備。可用地區和定價將在準備就緒後公布。",
+    "helplink": "有問題？查看支援",
+    "supporttitle": "給 Finwords 的一點幫助。",
+    "supportintro": "學習、相機或已儲存單字遇到問題？先看看這裡，也可以聯絡開發者。",
+    "contact": "以郵件聯絡支援",
+    "contactbody": "聯絡 Saber Zou：saberzou@gmail.com。請說明 iPhone 型號、iOS 版本、App 版本，以及出現問題的操作步驟。只分享解決問題所需的資訊，避免傳送敏感照片或個人資料。",
+    "faq": [
+      [
+        "支援哪些裝置？",
+        "Finwords 為執行 iOS 17 或以上版本的 iPhone 設計。目前即將推出，尚無 App Store 下載連結。"
+      ],
+      [
+        "每次怎樣學習？",
+        "每次可以認識最多五個新單字，再進行選擇題和拼字練習。間隔複習幫助你逐漸回顧單字。可在「Me & Fish」設定裡調整程度和步調。"
+      ],
+      [
+        "相機會讀取文字嗎？",
+        "不會。相機用於辨識物體並製作去背圖片，不是文字掃描或 OCR 工具。辨識可能出錯，請在儲存前核對建議名稱。也可以手動查字。"
+      ],
+      [
+        "需要帳號或網路嗎？",
+        "沒有 Finwords 帳號或登入。核心學習和物體辨識使用內建資料，在 iPhone 上執行。可選的 iCloud 同步依賴 Apple 帳號、iCloud 設定、服務可用性和網路連線。"
+      ],
+      [
+        "單字和去背圖片存在哪裡？",
+        "儲存在裝置上。iCloud 可用時，App 設定為透過你的私人 CloudKit 資料庫同步單字記錄和已儲存去背圖片，並透過 iCloud 鍵值儲存同步個人資料和 Things 進度。正式環境和雙裝置同步仍需在發布前驗證。"
+      ],
+      [
+        "可以刪除或匯出資料嗎？",
+        "可以在單字卡片中確認刪除個別單字。目前版本沒有完整的 App 內匯出或「全部刪除」功能，也未確認有刪除已儲存去背圖片的功能。刪除單字不會刪除獨立儲存的去背圖片。解除安裝會清除本機 App 儲存空間，但 iCloud 和裝置備份可能保留副本。有關這些副本的問題，請聯絡支援。"
+      ],
+      [
+        "為什麼聽不到發音？",
+        "請檢查 iPhone 音量和可用的系統語音。Finwords 使用 Apple 語音合成。如仍有問題，請告訴支援你嘗試的單字和語言。"
+      ]
+    ],
+    "privacytitle": "用清楚的話說隱私。",
+    "privacyintro": "Finwords 如何處理學習記錄、相機圖片和可選的 iCloud 同步。",
+    "draft": "審核草案 · 2026 年 10 月 13 日 · 尚未生效",
+    "draftbody": "本草案描述目前尚未發布的 iPhone 版本。發布前需由開發者批准並驗證正式版本，不構成法律認證。",
+    "policy": [
+      [
+        "誰提供 Finwords",
+        "Finwords 由獨立開發者 Saber Zou（邹颂兵）開發。隱私問題或支援郵件相關請求，請聯絡 saberzou@gmail.com。本政策涵蓋 Finwords iPhone App 及這些 Finwords 網頁。"
+      ],
+      [
+        "學習記錄與設定",
+        "App 在裝置上儲存詞彙、釋義、例句、學習及複習狀態和相關日期。個人資料包括你為自己和小魚選擇的名字、學習程度、目標、步調及輔助語言。Things 進度和裝置偏好也會被儲存，以提供 App 功能。目前版本沒有 Finwords 帳號、開發者後端、廣告、追蹤、統計 SDK 或第三方當機回報 SDK。"
+      ],
+      [
+        "相機圖片與辨識",
+        "使用物體辨識時，App 會請求相機權限。圖片透過 Apple 框架和內建 TinyCLIP 模型在 iPhone 上處理。在審核的版本中，未發現向開發者伺服器或第三方推論服務傳送圖片的行為。儲存辨識出的物體時，App 會儲存名稱、日期、可選的目錄識別碼及去背圖片。已儲存圖片也可能透過下述 iCloud 功能同步。可在 iPhone 設定中更改相機權限。此功能辨識物體，不讀取文字。"
+      ],
+      [
+        "可選的私人 iCloud 同步",
+        "裝置的 iCloud 設定和 App 授權允許時，SwiftData 設定為透過 CloudKit 自動將單字和已儲存掃描記錄（包括去背圖片）同步到你的私人 iCloud 資料庫。個人資料和 Things 進度使用 Apple 的 iCloud 鍵值儲存。這些服務由 Apple 依照你的 Apple 帳號和設定提供，Finwords 不要求另建帳號。App 具有本機儲存回退機制。正式環境的資料庫結構和雙裝置同步尚未驗證，因此本草案不保證同步或恢復。Apple 可能為提供這些服務而處理相關資料。"
+      ],
+      [
+        "保留、刪除與匯出",
+        "記錄會保留供你繼續使用。單字卡片有已確認的刪除操作，但刪除單字不會同時刪除獨立儲存的掃描記錄或去背圖片檔案。目前版本沒有完整匯出或「全部刪除」操作，也沒有已驗證的已儲存掃描記錄刪除控制項。解除安裝會移除本機 App 資料，但不一定移除 iCloud 記錄或系統備份，這些副本需透過 Apple 提供的可用控制項另行管理。重新安裝可能恢復已同步資料。我們不能透過開發者伺服器讀取或刪除僅在裝置上的記錄。可聯絡我們了解可用操作。"
+      ],
+      [
+        "支援郵件",
+        "你主動寄信時，電子郵件地址和你選擇傳送的內容會由郵件服務及開發者處理，用於回覆和解決問題。請避免傳送不必要的敏感資訊。你可以請求存取、更正或刪除支援郵件中的個人資訊；我們會結合請求和適用的保留要求處理。裝置及 Apple 服務中的 App 記錄與這些郵件分開。"
+      ],
+      [
+        "這些網頁",
+        "這些 Finwords 頁面使用本機素材和系統字型，沒有統計指令碼、聊天元件、追蹤 Cookie 或嵌入的第三方媒體。託管服務商可能處理 IP 位址、瀏覽器資訊等連線資料，用於提供和保護網站。Saber Zou 主作品集是獨立頁面，會載入 Google Fonts 並提供可選聊天服務；這些 Finwords 頁面的說明不代表主作品集的網路行為。郵件連結會開啟你的郵件 App。"
+      ],
+      [
+        "未成年人及變更",
+        "Finwords 沒有公開個人檔案或使用者間通訊。未成年人請在監護人指導下使用，並避免在支援請求中透露個人資訊。監護人可聯絡我們詢問隱私問題。如果正式版本的資料處理方式改變，須在發布前更新本草案和生效日期。"
+      ]
+    ],
+    "footer": "Saber Zou 製作",
+    "review": "發布前預覽"
+  }
+}

@@ -10,7 +10,7 @@
     "headline": "A quiet moment.\nYour own pond.",
     "intro": "Make time for focus, breathing and winding down beside a softly illustrated koi pond.",
     "explore": "Explore Daypond",
-    "caption": "Approved Daypond icon",
+    "caption": "Daypond · your own quiet pond",
     "flowtitle": "Make room for yourself.",
     "flowintro": "A small routine, with familiar koi for company.",
     "features": [
@@ -36,7 +36,7 @@
       ]
     ],
     "closing": "Your next quiet moment.",
-    "closebody": "No account, ads, tracking or app-managed cloud sync. Daypond is a focus and relaxation tool, not a sleep tracker or medical treatment. Availability and price will be announced when settled.",
+    "closebody": "No account, ads, tracking or app-managed cloud sync. Daypond is a focus and relaxation tool, not a sleep tracker or medical treatment. Planned launch price: US$0.99; local storefront prices may vary. Coming soon.",
     "helplink": "Visit support",
     "supporttitle": "Daypond support",
     "supportintro": "Help with sessions, sounds and your pond.",
@@ -70,8 +70,6 @@
     ],
     "privacytitle": "Daypond privacy",
     "privacyintro": "How the app handles local session data and optional support messages.",
-    "draft": "Draft for review — not published",
-    "draftbody": "These local pages are release-preparation drafts. Public availability and final policy wording have not been approved for publication.",
     "policy": [
       [
         "Local app data",
@@ -91,18 +89,18 @@
       ],
       [
         "Optional support",
-        "Emails to saberzou@gmail.com are received through Gmail and used to answer your request. Send only information you wish to share. Messages may be retained as needed to handle the request and operational or legal obligations; email the same address to ask about access or deletion. This draft retention wording needs final owner review."
+        "Emails to saberzou@gmail.com are received through Gmail and used to answer your request. Send only information you wish to share. Messages may be retained as needed to handle the request and operational or legal obligations; email the same address to ask about access or deletion."
       ],
       [
         "Website and platform services",
-        "These drafts load no scripts, analytics or advertising. When published, hosting services may process technical connection information such as IP address, request time and browser details. Existing hosting can inject analytics scripts; the page policy blocks scripts. Actual deployed behavior still requires verification before publication. Gmail and Apple services operate under their own policies."
+        "These pages load no application scripts, analytics or advertising. Hosting services may process technical connection information such as IP address, request time and browser details. Existing hosting can inject analytics scripts; the page content policy blocks scripts. Gmail and Apple services operate under their own policies."
       ]
     ],
     "footer": "Made by Saber Zou",
     "review": "Focus, breathing and relaxation",
     "skip": "Skip to content",
     "language": "Language",
-    "draftbanner": "Local preview — these pages are not published."
+    "effectiveDate": "Effective date: 14 October 2026"
   },
   "zh-Hans": {
     "nav": [
@@ -115,7 +113,7 @@
     "headline": "片刻安静。\n自己的池塘。",
     "intro": "在柔和的插画锦鲤池塘旁，为专注、呼吸与睡前放松留一点时间。",
     "explore": "了解 Daypond",
-    "caption": "已选定的 Daypond 图标",
+    "caption": "Daypond · 自己的安静池塘",
     "flowtitle": "留一点时间给自己。",
     "flowintro": "小小的日常练习，有熟悉的锦鲤相伴。",
     "features": [
@@ -141,7 +139,7 @@
       ]
     ],
     "closing": "下一段安静的时间。",
-    "closebody": "无需账户，没有广告、追踪或应用管理的云端同步。Daypond 用于专注与放松，不提供睡眠追踪或医疗治疗。上线时间与价格确定后公布。",
+    "closebody": "无需账户，没有广告、追踪或应用管理的云端同步。Daypond 用于专注与放松，不提供睡眠追踪或医疗治疗。计划上线价格为 0.99 美元，各地区商店价格可能不同。即将推出。",
     "helplink": "前往支持",
     "supporttitle": "Daypond 支持",
     "supportintro": "关于练习、声音与池塘的帮助。",
@@ -175,8 +173,6 @@
     ],
     "privacytitle": "Daypond 隐私",
     "privacyintro": "应用如何处理本地练习数据与可选的支持邮件。",
-    "draft": "审核草稿 · 尚未发布",
-    "draftbody": "这些本地页面用于上线准备，公开可用状态与最终政策文字尚未获准发布。",
     "policy": [
       [
         "本地应用数据",
@@ -196,18 +192,18 @@
       ],
       [
         "可选支持",
-        "发往 saberzou@gmail.com 的邮件通过 Gmail 接收，用于答复请求。请只发送愿意分享的信息。邮件可在处理请求与履行运营或法律义务所需期间保留，可发邮件咨询访问或删除。这份保留说明仍需所有者最终审核。"
+        "发往 saberzou@gmail.com 的邮件通过 Gmail 接收，用于答复请求。请只发送愿意分享的信息。邮件可在处理请求与履行运营或法律义务所需期间保留，可发邮件咨询访问或删除。"
       ],
       [
         "网站与平台服务",
-        "草稿页面不加载脚本、分析或广告。发布后，托管服务可能处理 IP 地址、请求时间、浏览器等连接信息。现有托管可能注入分析脚本，页面策略禁止脚本，实际部署效果仍需在发布前验证。Gmail 与 Apple 服务遵循各自政策。"
+        "这些页面不加载应用脚本、分析或广告。托管服务可能处理 IP 地址、请求时间、浏览器等连接信息。现有托管可能注入分析脚本，页面内容策略禁止脚本。Gmail 与 Apple 服务遵循各自政策。"
       ]
     ],
     "footer": "由 Saber Zou 制作",
     "review": "专注、呼吸与放松",
     "skip": "跳至正文",
     "language": "语言",
-    "draftbanner": "本地预览 · 页面尚未发布。"
+    "effectiveDate": "生效日期：2026 年 10 月 14 日"
   },
   "ja": {
     "nav": [
@@ -220,7 +216,7 @@
     "headline": "静かなひととき。\n自分だけの池。",
     "intro": "やさしいタッチの鯉の池で、集中・呼吸・就寝前のくつろぎに時間をつくりましょう。",
     "explore": "Daypondを知る",
-    "caption": "選定済みのDaypondアイコン",
+    "caption": "Daypond · 自分だけの静かな池",
     "flowtitle": "自分のための時間を。",
     "flowintro": "小さな習慣に、いつもの鯉が寄り添います。",
     "features": [
@@ -246,7 +242,7 @@
       ]
     ],
     "closing": "次の静かなひとときへ。",
-    "closebody": "アカウント、広告、トラッキング、アプリによるクラウド同期はありません。集中とくつろぎのためのアプリで、睡眠記録や医療的な治療は行いません。公開時期と価格は決まり次第お知らせします。",
+    "closebody": "アカウント、広告、トラッキング、アプリによるクラウド同期はありません。集中とくつろぎのためのアプリで、睡眠記録や医療的な治療は行いません。予定価格は0.99米ドルです。地域ごとの価格は異なる場合があります。公開準備中です。",
     "helplink": "サポートへ",
     "supporttitle": "Daypondサポート",
     "supportintro": "セッション・音・池についてのヘルプ。",
@@ -280,8 +276,6 @@
     ],
     "privacytitle": "Daypondのプライバシー",
     "privacyintro": "ローカルのセッションデータと任意のお問い合わせの扱いについて。",
-    "draft": "確認用の草稿 · 未公開",
-    "draftbody": "このローカルページは公開準備用です。公開状態と最終的な方針の文面は、まだ公開承認されていません。",
     "policy": [
       [
         "ローカルデータ",
@@ -301,18 +295,18 @@
       ],
       [
         "任意のサポート",
-        "saberzou@gmail.com宛のメールはGmailで受信し、回答に使います。共有したい情報だけを送ってください。対応や運用・法的義務に必要な期間保持する場合があります。閲覧・削除の相談も同じ宛先へ。この保持文面は所有者の最終確認が必要です。"
+        "saberzou@gmail.com宛のメールはGmailで受信し、回答に使います。共有したい情報だけを送ってください。対応や運用・法的義務に必要な期間保持する場合があります。閲覧・削除の相談も同じ宛先へ。"
       ],
       [
         "ウェブとプラットフォーム",
-        "草稿ページはスクリプト・分析・広告を読み込みません。公開後、ホストがIPアドレス・時刻・ブラウザなどの技術情報を処理する場合があります。既存ホストは分析スクリプトを挿入することがありますが、ページの方針はスクリプトを禁止します。実際の配信は公開前に確認が必要です。GmailとAppleにはそれぞれの方針が適用されます。"
+        "このページはアプリのスクリプト、分析、広告を読み込みません。ホストはIPアドレス、時刻、ブラウザなどの技術情報を処理する場合があります。既存ホストは分析スクリプトを挿入することがありますが、ページのコンテンツ方針はスクリプトを禁止します。GmailとAppleにはそれぞれの方針が適用されます。"
       ]
     ],
     "footer": "Saber Zou制作",
     "review": "集中・呼吸・くつろぎ",
     "skip": "本文へ移動",
     "language": "言語",
-    "draftbanner": "ローカルプレビュー · ページは未公開です。"
+    "effectiveDate": "適用日：2026年10月14日"
   },
   "es": {
     "nav": [
@@ -325,7 +319,7 @@
     "headline": "Un momento tranquilo.\nTu propio estanque.",
     "intro": "Dedica tiempo a concentrarte, respirar y descansar junto a un estanque de koi ilustrado con tonos suaves.",
     "explore": "Descubre Daypond",
-    "caption": "Icono aprobado de Daypond",
+    "caption": "Daypond · tu estanque tranquilo",
     "flowtitle": "Haz espacio para ti.",
     "flowintro": "Una pequeña rutina, con koi que te acompañan.",
     "features": [
@@ -351,7 +345,7 @@
       ]
     ],
     "closing": "Tu próximo momento tranquilo.",
-    "closebody": "Sin cuenta, anuncios, seguimiento ni sincronización en la nube gestionada por la app. Es una herramienta de concentración y relajación; no registra el sueño ni ofrece tratamiento médico. La disponibilidad y el precio se anunciarán cuando se decidan.",
+    "closebody": "Sin cuenta, anuncios, seguimiento ni sincronización en la nube gestionada por la app. Es una herramienta de concentración y relajación; no registra el sueño ni ofrece tratamiento médico. Precio de lanzamiento previsto: US$0.99; puede variar según la tienda local. Próximamente.",
     "helplink": "Visita Ayuda",
     "supporttitle": "Ayuda de Daypond",
     "supportintro": "Ayuda con las sesiones, los sonidos y tu estanque.",
@@ -385,8 +379,6 @@
     ],
     "privacytitle": "Privacidad de Daypond",
     "privacyintro": "Cómo se gestionan los datos locales y los mensajes opcionales de ayuda.",
-    "draft": "Borrador para revisión · no publicado",
-    "draftbody": "Estas páginas locales preparan el lanzamiento. La disponibilidad pública y el texto final de la política aún no están aprobados para publicación.",
     "policy": [
       [
         "Datos locales",
@@ -406,17 +398,17 @@
       ],
       [
         "Ayuda opcional",
-        "Los correos a saberzou@gmail.com se reciben mediante Gmail y se usan para responder. Envía solo lo que quieras compartir. Pueden conservarse mientras sea necesario para atender la petición y obligaciones operativas o legales. Solicita acceso o eliminación en la misma dirección. Este texto de conservación necesita revisión final del propietario."
+        "Los correos a saberzou@gmail.com se reciben mediante Gmail y se usan para responder. Envía solo lo que quieras compartir. Pueden conservarse mientras sea necesario para atender la petición y obligaciones operativas o legales. Solicita acceso o eliminación en la misma dirección."
       ],
       [
         "Web y plataformas",
-        "Los borradores no cargan scripts, analítica ni anuncios. Al publicarse, el alojamiento puede procesar IP, hora y datos del navegador. El alojamiento existente puede insertar scripts de analítica; la política de la página bloquea scripts. Se debe comprobar el comportamiento publicado antes del lanzamiento. Gmail y Apple tienen sus propias políticas."
+        "Estas páginas no cargan scripts de la aplicación, analítica ni anuncios. El alojamiento puede procesar la IP, la hora y datos del navegador. Puede insertar scripts de analítica; la política de contenido de la página bloquea scripts. Gmail y Apple tienen sus propias políticas."
       ]
     ],
     "footer": "Creado por Saber Zou",
     "review": "Concentración, respiración y relajación",
     "skip": "Saltar al contenido",
     "language": "Idioma",
-    "draftbanner": "Vista previa local · páginas sin publicar."
+    "effectiveDate": "Fecha de entrada en vigor: 14 de octubre de 2026"
   }
 }

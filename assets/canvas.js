@@ -40,7 +40,11 @@
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var scheduled = false;
 
-  function deviceFor(c, r) { return SPECS[mod(c * 3 + r * 2, SPECS.length)]; }
+  // A project is on the same device here as in the 3D room.
+  function deviceFor(c, r, item) {
+    var id = item && window.PROJECT_DEVICE && window.PROJECT_DEVICE[item.name];
+    return (id && window.RETRO_BY_ID && window.RETRO_BY_ID[id]) || SPECS[mod(c * 3 + r * 2, SPECS.length)];
+  }
   function itemFor(c, r) { return items[mod(c * 5 + r * 3, items.length)]; }
   function roleFor(c, r) {
     if (c === 0 && r === 0) return 'intro';
@@ -73,7 +77,8 @@
   }
 
   function shell(spec, inner) {
-    return '<div class="pop"><div class="dev ' + spec.id + '">' + spec.svg +
+    var size = spec.width ? ' style="width:' + spec.width + '%"' : '';
+    return '<div class="pop"><div class="dev dev-' + spec.id + '"' + size + '>' + spec.svg +
       '<div class="screen ' + spec.face + '" style="' + screenStyle(spec) + '">' + inner + '</div></div></div>';
   }
 
@@ -110,7 +115,7 @@
       el.innerHTML = shell(window.ARCHER_DEVICE, FISH) + '<span class="blurb">A little guide who hangs out here.</span>';
     } else {
       var item = itemFor(c, r);
-      var spec = deviceFor(c, r);
+      var spec = deviceFor(c, r, item);
       el = document.createElement(item.chat ? 'button' : 'a');
       el.className = 'cell';
       if (item.chat) {

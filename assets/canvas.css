@@ -116,20 +116,7 @@ html, body { height: 100%; overflow: hidden; }
 .device-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 .dev > svg { width: 100%; height: auto; overflow: visible; }
-/* About 72% of the previous drawing, so the same cell holds more paper. */
-.candy { width: 29.53%; }
-.flip { width: 34.66%; }
-.rotary { width: 56.54%; }
-.phone { width: 26.96%; }
-.game { width: 41.1%; }
-.pda { width: 32.11%; }
-.mac { width: 42.39%; }
-.crt { width: 55.24%; }
-.imac { width: 47.53%; }
-.term { width: 56.54%; }
-.laptop { width: 57.81%; }
-.intro { width: 53.28%; }
-.radio { width: 33.12%; }
+/* Each device sets its own width (devices.js), measured from its 3D model. */
 
 .screen {
   position: absolute;

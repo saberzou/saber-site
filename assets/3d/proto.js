@@ -20,7 +20,7 @@ const DEVICES = [
   work('pda', [-2, 0], 'mono', 'Between Floors', 'images/icons/between-floors.png', 'https://saberzou.github.io/between-floors/'),
   work('imac', [-1, 0], 'aqua', 'Movie Oracle', 'images/icons/movie-oracle.png', 'https://saberzou.github.io/movie-oracle/'),
   { file: 'assets/3d/models/camera.glb', cell: [0, 0], face: 'note' },
-  { file: 'assets/3d/models/radio.glb', cell: [1, 0], face: 'fish', name: 'Archer', href: './' },
+  { file: 'assets/3d/models/radio.glb', cell: [1, 0], face: 'fish', name: 'Archer', toy: 'archer' },
   work('crt', [2, 0], 'tube', 'Axel Art', 'images/icons/axel.png', 'https://saberzou.github.io/axel-art/'),
   work('laptop', [-1, 1], 'paper', 'Pixel Dailies', 'images/icons/pixel-dailies.png', 'https://saberzou.github.io/pixel-dailies/'),
   work('rotary', [0, 1], 'amber', 'Finwords', 'finwords/assets/app-icon.png', 'finwords/'),
@@ -353,6 +353,11 @@ function openHit(info) {
   const spec = info.device.spec;
   if (spec.toy === 'cassette') { toggleMusic(info.device); return; }
   if (spec.toy === 'lamp') { toggleLamp(info.device); return; }
+  if (spec.toy === 'archer') {
+    const open = document.getElementById('archer-chat-open');
+    if (open) open.click(); else window.location.href = 'field.html';
+    return;
+  }
   if (spec.face === 'note') {
     const uv = info.uv;
     if (!uv || uv.y > 0.28) return;

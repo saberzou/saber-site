@@ -6,7 +6,7 @@
   font-style: normal;
   font-display: swap;
 }
-:root { --cell: 248px; }
+:root { --cell: 278px; }
 
 html, body { height: 100%; overflow: hidden; }
 
@@ -88,17 +88,20 @@ a.cell, button.cell {
 .device-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 .dev svg { width: 100%; height: auto; overflow: visible; }
-.candy { width: 46%; }
-.flip { width: 54%; }
-.rotary { width: 88%; }
-.phone { width: 42%; }
-.game { width: 64%; }
-.pda { width: 50%; }
-.mac { width: 66%; }
-.crt { width: 86%; }
-.imac { width: 74%; }
-.term { width: 88%; }
-.laptop { width: 90%; }
+/* Widths are a share of the cell. The cell grew from 248 to 278; these
+   shares shrink by the same ratio so each drawing stays the same size
+   and the paper around it grows. */
+.candy { width: 41.01%; }
+.flip { width: 48.14%; }
+.rotary { width: 78.53%; }
+.phone { width: 37.44%; }
+.game { width: 57.09%; }
+.pda { width: 44.6%; }
+.mac { width: 58.88%; }
+.crt { width: 76.72%; }
+.imac { width: 66.01%; }
+.term { width: 78.53%; }
+.laptop { width: 80.29%; }
 
 .screen {
   position: absolute;
@@ -285,7 +288,7 @@ a.cell, button.cell {
   .mark { top: 12px; left: 12px; max-width: calc(100% - 24px); }
   .mark h1 { font-size: 28px; }
   .mark p { font-size: 13px; }
-  :root { --cell: 200px; }
+  :root { --cell: 224px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

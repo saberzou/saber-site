@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://saber-site-chat.vercel.app; object-src 'none'; base-uri 'self';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
+<meta name="description" content="Saber Zou — designer and builder in Beijing. I love making apps and small things to play with.">
+<meta name="theme-color" content="#e8e9ec">
+<title>Saber Zou</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e8e9ec'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia' font-size='16' fill='%23161616'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="images/icons/me.png">
+<link rel="stylesheet" href="assets/archer-chat.css">
+<link rel="stylesheet" href="assets/home.css">
+<link rel="stylesheet" href="assets/canvas.css">
+<link rel="stylesheet" href="assets/fade.css">
+<script src="vendor/gsap.min.js"></script>
+</head>
+<body>
+<a class="skip" href="#catalog">Skip to the list</a>
+<div class="view" id="view" tabindex="0" role="region" aria-label="A field of things I've made. Drag to look around, or use the arrow keys."></div>
+
+<div class="hud">
+  <a class="hud-link" href="./" data-fade>3D room</a>
+  <button id="index-open" type="button" aria-expanded="false" aria-controls="index">List</button>
+</div>
+<p class="drag-hint" id="drag-hint">Drag to look around</p>
+<div class="archer-source" id="archer" aria-hidden="true">
+  <svg class="archer-body" id="archer-svg" viewBox="0 0 100 100" aria-hidden="true">
+    <g id="fin-left"><path d="M25 48 C 17 49, 10 54, 8 62 C 15 64, 23 59, 28 55 Z" fill="#FF6A00" stroke="#FF6A00" stroke-width="2.5" stroke-linejoin="round"/></g>
+    <g id="fin-right"><path d="M75 48 C 83 49, 90 54, 92 62 C 85 64, 77 59, 72 55 Z" fill="#FF6A00" stroke="#FF6A00" stroke-width="2.5" stroke-linejoin="round"/></g>
+    <g id="archer-torso">
+      <rect x="20" y="28" width="60" height="46" rx="23" fill="#FF6A00"/>
+      <path d="M25 62 Q 50 76 75 62 Q 50 81 25 62 Z" fill="#D94B0F" opacity="0.45"/>
+      <rect x="28" y="38" width="44" height="17" rx="8.5" fill="#141414"/>
+      <g id="archer-eyes">
+        <rect x="38" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>
+        <rect x="57" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>
+      </g>
+    </g>
+  </svg>
+</div>
+<button id="archer-chat-open" type="button" class="sr">Chat with Archer</button>
+
+<div class="index" id="index" hidden>
+  <div class="index-head">
+    <h2>Everything</h2>
+    <button id="index-close" type="button">Close</button>
+  </div>
+  <ul id="catalog">
+    <li><a data-item data-icon="images/icons/ios/movy.jpg" data-desc="Daily wallpapers, curated collections, and a Studio for creating your own." href="https://apps.apple.com/app/id1093345142" target="_blank" rel="noopener noreferrer"><img src="images/icons/ios/movy.jpg" alt=""><strong>Movy</strong><span>Daily wallpapers, curated collections, and a Studio for creating your own.</span></a></li>
+    <li><a data-item data-icon="images/icons/ios/bingbang.jpg" data-desc="Encouraging cards, doodles, and simple plans." href="https://apps.apple.com/app/id6797013343" target="_blank" rel="noopener noreferrer"><img src="images/icons/ios/bingbang.jpg" alt=""><strong>BingBang</strong><span>Encouraging cards, doodles, and simple plans.</span></a></li>
+    <li><a data-item data-icon="images/icons/ios/sequence.jpg" data-desc="Photographs, turned into zines and photo books." href="https://apps.apple.com/app/id6789496773" target="_blank" rel="noopener noreferrer"><img src="images/icons/ios/sequence.jpg" alt=""><strong>Sequence</strong><span>Photographs, turned into zines and photo books.</span></a></li>
+    <li><a data-item data-icon="images/icons/ios/tackie.jpg" data-desc="Visual sticky notes, folders, and home-screen widgets." href="https://apps.apple.com/app/id6806084464" target="_blank" rel="noopener noreferrer"><img src="images/icons/ios/tackie.jpg" alt=""><strong>Tackie</strong><span>Visual sticky notes, folders, and home-screen widgets.</span></a></li>
+    <li><a data-item data-icon="images/icons/ios/bubbly.jpg" data-desc="Words, turned into playful quote cards." href="https://apps.apple.com/app/id6792437107" target="_blank" rel="noopener noreferrer"><img src="images/icons/ios/bubbly.jpg" alt=""><strong>Bubbly</strong><span>Words, turned into playful quote cards.</span></a></li>
+    <li><a data-item data-icon="daypond/assets/app-icon.png" data-desc="A hand-drawn koi pond for focus, breathing, and winding down." href="/daypond/"><img src="daypond/assets/app-icon.png" alt=""><strong>Daypond</strong><span>A hand-drawn koi pond for focus, breathing, and winding down.</span></a></li>
+    <li><a data-item data-icon="finwords/assets/app-icon.png" data-desc="Learn English with a pet goldfish, at your own pace." href="/finwords/"><img src="finwords/assets/app-icon.png" alt=""><strong>Finwords</strong><span>Learn English with a pet goldfish, at your own pace.</span></a></li>
+    <li><a data-item data-icon="images/icons/thiings/finder.png" data-desc="A little desktop I built to hold the work." href="os.html"><img src="images/icons/thiings/finder.png" alt=""><strong>SaberOS</strong><span>A little desktop I built to hold the work.</span></a></li>
+    <li><a data-item data-icon="images/icons/thiings/wallpaper.png" data-desc="Pictures for that desktop. Pick one and set it." href="os.html"><img src="images/icons/thiings/wallpaper.png" alt=""><strong>Wallpapers</strong><span>Pictures for that desktop. Pick one and set it.</span></a></li>
+    <li><button data-item data-chat data-icon="images/archer-avatar.jpg" data-desc="A little guide who hangs out here." type="button"><img src="images/archer-avatar.jpg" alt=""><strong>Chat with Archer</strong><span>A little guide who hangs out here.</span></button></li>
+    <li><a data-item data-icon="images/icons/thiings/bug-explorer.png" data-desc="A curio cabinet of 60 specimens. Drag to roam, tap to inspect." href="https://bug-explorer.vercel.app" target="_blank" rel="noopener noreferrer"><img src="images/icons/thiings/bug-explorer.png" alt=""><strong>Bug Explorer</strong><span>A curio cabinet of 60 specimens. Drag to roam, tap to inspect.</span></a></li>
+    <li><a data-item data-icon="images/icons/koi-pond.png" data-desc="Flowing koi that respond to your cursor." href="https://saberzou.github.io/koi-pond/" target="_blank" rel="noopener noreferrer"><img src="images/icons/koi-pond.png" alt=""><strong>Koi Pond</strong><span>Flowing koi that respond to your cursor.</span></a></li>
+    <li><a data-item data-icon="images/icons/thiings/archer-travel.png" data-desc="Search flights, plan trips, get smart itineraries." href="https://archer-travel.vercel.app" target="_blank" rel="noopener noreferrer"><img src="images/icons/thiings/archer-travel.png" alt=""><strong>Archer Travel</strong><span>Search flights, plan trips, get smart itineraries.</span></a></li>
+    <li><a data-item data-icon="images/icons/cards-of-answers.png" data-desc="A tarot-inspired decision tool with card animations." href="https://saberzou.github.io/cards-of-answers/" target="_blank" rel="noopener noreferrer"><img src="images/icons/cards-of-answers.png" alt=""><strong>Cards of Answers</strong><span>A tarot-inspired decision tool with card animations.</span></a></li>
+    <li><a data-item data-icon="images/icons/axiom-thoughts.png" data-desc="Philosophical queries and daily reflections." href="https://saberzou.github.io/axiom-thoughts/" target="_blank" rel="noopener noreferrer"><img src="images/icons/axiom-thoughts.png" alt=""><strong>Axiom Thoughts</strong><span>Philosophical queries and daily reflections.</span></a></li>
+    <li><a data-item data-icon="images/icons/agent-terrarium.png" data-desc="AI agents, visualized as digital creatures." href="https://saberzou.github.io/agent-terrarium/" target="_blank" rel="noopener noreferrer"><img src="images/icons/agent-terrarium.png" alt=""><strong>Agent Terrarium</strong><span>AI agents, visualized as digital creatures.</span></a></li>
+    <li><a data-item data-icon="images/icons/json-prompts.png" data-desc="A gallery of AI image prompts on an infinite canvas." href="https://saberzou.github.io/json-prompts/" target="_blank" rel="noopener noreferrer"><img src="images/icons/json-prompts.png" alt=""><strong>JSON Prompts</strong><span>A gallery of AI image prompts on an infinite canvas.</span></a></li>
+    <li><a data-item data-icon="images/icons/between-floors.png" data-desc="Vertical swipe stories for English learners." href="https://saberzou.github.io/between-floors/" target="_blank" rel="noopener noreferrer"><img src="images/icons/between-floors.png" alt=""><strong>Between Floors</strong><span>Vertical swipe stories for English learners.</span></a></li>
+    <li><a data-item data-icon="images/icons/atticus.png" data-desc="A living notebook of mistakes, humanity, and letters." href="https://saberzou.github.io/atticus/" target="_blank" rel="noopener noreferrer"><img src="images/icons/atticus.png" alt=""><strong>Atticus</strong><span>A living notebook of mistakes, humanity, and letters.</span></a></li>
+    <li><a data-item data-icon="images/icons/postcards-from-mars.png" data-desc="A 3D mission log with rover photos and field diaries." href="https://saberzou.github.io/mars_mission/" target="_blank" rel="noopener noreferrer"><img src="images/icons/postcards-from-mars.png" alt=""><strong>Postcards from Mars</strong><span>A 3D mission log with rover photos and field diaries.</span></a></li>
+    <li><a data-item data-icon="images/icons/axel.png" data-desc="A daily visual journal by a claw bot." href="https://saberzou.github.io/axel-art/" target="_blank" rel="noopener noreferrer"><img src="images/icons/axel.png" alt=""><strong>Axel Art</strong><span>A daily visual journal by a claw bot.</span></a></li>
+    <li><a data-item data-icon="images/icons/thiings/littlebook.png" data-desc="A daily reading companion, quotes and books." href="https://saberzou.github.io/Littlebook" target="_blank" rel="noopener noreferrer"><img src="images/icons/thiings/littlebook.png" alt=""><strong>Littlebook</strong><span>A daily reading companion, quotes and books.</span></a></li>
+    <li><a data-item data-icon="images/icons/movie-oracle.png" data-desc="Three absurd questions, then a film that fits." href="https://saberzou.github.io/movie-oracle/" target="_blank" rel="noopener noreferrer"><img src="images/icons/movie-oracle.png" alt=""><strong>Movie Oracle</strong><span>Three absurd questions, then a film that fits.</span></a></li>
+    <li><a data-item data-icon="images/icons/movy-reel.png" data-desc="A slow cinema journal, films reimagined as posters." href="https://saberzou.github.io/reel/" target="_blank" rel="noopener noreferrer"><img src="images/icons/movy-reel.png" alt=""><strong>Movy Reel</strong><span>A slow cinema journal, films reimagined as posters.</span></a></li>
+    <li><a data-item data-icon="images/icons/artuzzle.png" data-desc="A relaxing puzzle built from famous artworks." href="https://saberzou.github.io/artuzzle/" target="_blank" rel="noopener noreferrer"><img src="images/icons/artuzzle.png" alt=""><strong>Artuzzle</strong><span>A relaxing puzzle built from famous artworks.</span></a></li>
+    <li><a data-item data-icon="images/icons/pixel-dailies.png" data-desc="Daily pixel-art challenges and a community gallery." href="https://saberzou.github.io/pixel-dailies/" target="_blank" rel="noopener noreferrer"><img src="images/icons/pixel-dailies.png" alt=""><strong>Pixel Dailies</strong><span>Daily pixel-art challenges and a community gallery.</span></a></li>
+    <li><a data-item data-icon="images/icons/me.png" data-desc="Portfolio, thoughts, and the longer story." href="https://www.saberzou.com" target="_blank" rel="noopener noreferrer"><img src="images/icons/me.png" alt=""><strong>About Me</strong><span>Portfolio, thoughts, and the longer story.</span></a></li>
+  </ul>
+</div>
+
+<script src="assets/devices.js"></script>
+<script src="assets/canvas.js"></script>
+<script src="assets/archer-chat.js"></script>
+<script src="assets/archer-motion.js"></script>
+<div class="fade" aria-hidden="true"></div>
+<script src="assets/fade.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+/* Crossfade between the 3D room and the flat field.
+   Browsers with cross-document view transitions fade natively; the rest get
+   a quick fade to paper from fade.js before the page changes. */
+@view-transition { navigation: auto; }
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: 0.45s; animation-timing-function: ease; }
+
+.fade {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #e8e9ec;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+body.lamp-on .fade { background: #16171b; }
+.fade.on { opacity: 1; pointer-events: auto; }
+
+.hud { display: flex; gap: 8px; }
+.hud-link {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 560;
+  color: var(--ink, #161616);
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(22, 24, 28, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  .fade { transition: none; }
+}

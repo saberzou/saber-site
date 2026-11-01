@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="A 3D isometric study of three devices from Saber’s field.">
+<title>Saber — 3D study</title>
+<link rel="stylesheet" href="assets/home.css">
+<link rel="stylesheet" href="assets/3d/proto.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./assets/3d/vendor/three.module.js"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<p class="drag-hint" id="drag-hint">Drag to look around</p>
+<a class="back" href="./">SVG field</a>
+<script type="module" src="assets/3d/proto.js"></script>
+</body>
+</html>

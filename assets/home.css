@@ -462,6 +462,18 @@ button.mention {
 .list { list-style: none; margin: 0; padding: 0; }
 .list li { border-top: 1px solid var(--line); }
 .list li:last-child { border-bottom: 1px solid var(--line); }
+.lede {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 15px;
+}
+button.row {
+  width: 100%;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
 .row {
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr) auto;

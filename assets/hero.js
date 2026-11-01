@@ -13,6 +13,13 @@
     setInterval(paint, 30000);
   }
 
+  document.querySelectorAll('[data-open-chat]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var open = document.getElementById('archer-chat-open');
+      if (open) open.click();
+    });
+  });
+
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var narrow = window.matchMedia('(max-width: 860px)').matches;
   if (reduced || narrow) return;

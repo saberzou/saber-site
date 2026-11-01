@@ -23,13 +23,28 @@ function clay(name, hex, roughness = 0.58, metal = 0) {
 // ---------------------------------------------------------------- scene state
 
 let parts;      // material name -> { mat, geos: [] }
+let groups;     // named parts the page moves: [{ name, pivot, parts }]
 let screen;     // the one named screen plane
 let stack;      // transform stack
 
 function reset() {
   parts = new Map();
+  groups = [];
   screen = null;
   stack = [new THREE.Matrix4()];
+}
+
+// Parts built inside fn become one named node whose origin is `pivot`, so the
+// page can spin, press or light it on its own.
+function named(name, pivot, fn) {
+  const outer = parts;
+  const group = { name, pivot, parts: new Map() };
+  parts = group.parts;
+  stack.push(top().clone().premultiply(new THREE.Matrix4().makeTranslation(-pivot[0], -pivot[1], -pivot[2])));
+  fn();
+  stack.pop();
+  parts = outer;
+  groups.push(group);
 }
 
 function top() { return stack[stack.length - 1]; }
@@ -237,7 +252,9 @@ function writeGlb(name) {
     return json.accessors.length - 1;
   }
 
+  const madeMats = new Map();
   function material(mat) {
+    if (madeMats.has(mat.name)) return madeMats.get(mat.name);
     const c = mat.color.clone(); // three keeps colors linear; glTF wants linear factors.
     json.materials.push({
       name: mat.name,
@@ -247,10 +264,11 @@ function writeGlb(name) {
         roughnessFactor: mat.roughness
       }
     });
+    madeMats.set(mat.name, json.materials.length - 1);
     return json.materials.length - 1;
   }
 
-  function mesh(nodeName, geos, mat) {
+  function primitive(geos, mat) {
     const pos = [], nor = [], uv = [];
     for (const g of geos) {
       pos.push(...g.attributes.position.array);
@@ -291,12 +309,25 @@ function writeGlb(name) {
       indices: indices(wp.length / 3 > 65535 ? new Uint32Array(idx) : new Uint16Array(idx)),
       material: material(mat)
     };
-    json.meshes.push({ name: nodeName, primitives: [prim] });
-    json.nodes.push({ name: nodeName, mesh: json.meshes.length - 1 });
+    return prim;
+  }
+
+  function node(nodeName, prims, translation) {
+    json.meshes.push({ name: nodeName, primitives: prims });
+    const n = { name: nodeName, mesh: json.meshes.length - 1 };
+    if (translation) n.translation = translation;
+    json.nodes.push(n);
     json.scenes[0].nodes.push(json.nodes.length - 1);
   }
 
+  function mesh(nodeName, geos, mat) {
+    node(nodeName, [primitive(geos, mat)]);
+  }
+
   for (const [matName, { mat, geos }] of parts) mesh(matName, geos, mat);
+  for (const g of groups) {
+    node(g.name, [...g.parts.values()].map(({ mat, geos }) => primitive(geos, mat)), g.pivot);
+  }
   if (screen) {
     screen.computeVertexNormals();
     mesh('Screen', [screen], clay('Screen', '#ffffff', 0.35));
@@ -551,3 +582,93 @@ buildImac();
 buildTerm();
 buildLaptop();
 buildRadio();
+
+function buildCassette() {
+  reset();
+  const cream = clay('Cream', '#e9e0cd', 0.5);
+  const stripe = clay('Stripe', '#d8642c', 0.45);
+  const well = clay('Well', '#1c1c1f', 0.45);
+  const shell = clay('Shell', '#2e2e33', 0.38);
+  const hub = clay('Hub', '#f1ede4', 0.4);
+  const tape = clay('Tape', '#4a3326', 0.55);
+  const grille = clay('Grille', '#4b4740', 0.65);
+  const rim = clay('Rim', '#cdc3ae', 0.38, 0.35);
+  const key = clay('Key', '#b9b2a4', 0.45);
+  const handle = clay('Handle', '#3a3833', 0.4);
+  const w = 0.46, h = 0.25, d = 0.15;
+  slab(cream, [w, h, d], [0, 0, 0], { corner: 0.035, bevel: 0.016 });
+  box(stripe, [w * 0.96, 0.034, 0.006], [0, 0.03, d / 2], { corner: 0.01, bevel: 0.002 });
+
+  // Cassette door on the left: a dark well with the tape inside.
+  const cx = -0.095, cy = 0.145, fz = d / 2;
+  box(well, [0.23, 0.15, 0.008], [cx, cy, fz + 0.001], { corner: 0.012, bevel: 0.003 });
+  box(shell, [0.2, 0.124, 0.008], [cx, cy, fz + 0.006], { corner: 0.008, bevel: 0.002 });
+  glass(0.17, 0.042, [cx, cy + 0.036, fz + 0.0105]);
+  box(well, [0.13, 0.044, 0.004], [cx, cy - 0.018, fz + 0.0095], { corner: 0.02, bevel: 0.001 });
+  for (const [side, x] of [['ReelL', cx - 0.042], ['ReelR', cx + 0.042]]) {
+    named(side, [x, cy - 0.018, fz + 0.012], () => {
+      const r = side === 'ReelL' ? 0.024 : 0.017; // more tape on the left at the start
+      cyl(tape, r, 0.004, [x, cy - 0.018, fz + 0.011], { segs: 24 });
+      cyl(hub, 0.011, 0.006, [x, cy - 0.018, fz + 0.013], { segs: 18 });
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        box(well, [0.0035, 0.007, 0.004], [x + Math.cos(a) * 0.0065, cy - 0.018 + Math.sin(a) * 0.0065, fz + 0.0165], { bevel: 0, rot: [0, 0, a + Math.PI / 2] });
+      }
+    });
+  }
+
+  // Speaker on the right.
+  cyl(rim, 0.07, 0.01, [0.125, 0.14, fz + 0.002], { segs: 40 });
+  cyl(grille, 0.06, 0.012, [0.125, 0.14, fz + 0.004], { segs: 40 });
+  cyl(rim, 0.016, 0.014, [0.125, 0.14, fz + 0.006], { segs: 20 });
+  named('PlayLed', [0.19, 0.225, fz + 0.002], () => {
+    cyl(clay('PlayLed', '#5a1a14', 0.3), 0.0065, 0.008, [0.19, 0.225, fz + 0.002], { segs: 14 });
+  });
+
+  // Piano keys on top; play is the orange one.
+  const keyX = [-0.17, -0.115, -0.06, -0.005];
+  keyX.forEach((x, i) => {
+    const isPlay = i === 1;
+    const k = isPlay ? stripe : key;
+    const build = () => box(k, [0.046, 0.05, 0.022], [x, h + 0.006, 0.03], { corner: 0.006, bevel: 0.003, rot: [-Math.PI / 2, 0, 0] });
+    if (isPlay) named('KeyPlay', [x, h, 0.03], build);
+    else build();
+  });
+
+  // Carry handle.
+  cyl(handle, 0.012, 0.03, [-0.15, h + 0.012, -0.035], { axis: 'y', segs: 14 });
+  cyl(handle, 0.012, 0.03, [0.15, h + 0.012, -0.035], { axis: 'y', segs: 14 });
+  ring(handle, 0.15, 0.011, [0, h + 0.027, -0.035], { arc: Math.PI, segs: 30 });
+  writeGlb('cassette');
+}
+
+function buildLamp() {
+  reset();
+  const cream = clay('Cream', '#e4dac8', 0.5);
+  const brass = clay('Brass', '#c7a16a', 0.3, 0.6);
+  const cord = clay('Cord', '#3a3631', 0.5);
+  // Weighted base and a short brass stem.
+  cyl(cream, 0.1, 0.032, [0, 0.016, 0], { axis: 'y', segs: 40, r2: 0.088 });
+  cyl(brass, 0.03, 0.012, [0, 0.038, 0], { axis: 'y', segs: 24 });
+  cyl(brass, 0.014, 0.21, [0, 0.145, 0], { axis: 'y', segs: 18 });
+  // Mushroom shade, its own node so the page can light it.
+  named('Shade', [0, 0.25, 0], () => {
+    const dome = new THREE.SphereGeometry(0.17, 40, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+    dome.scale(1, 0.78, 1);
+    add(dome, clay('Shade', '#f4ead6', 0.62), [0, 0.25, 0]);
+    add(new THREE.CylinderGeometry(0.17, 0.17, 0.012, 40, 1, true), clay('Shade', '#f4ead6', 0.62), [0, 0.244, 0]);
+    // The warm underside you see when it glows.
+    add(new THREE.CircleGeometry(0.165, 40).rotateX(Math.PI / 2), clay('Bulb', '#fff4dc', 0.4), [0, 0.24, 0]);
+  });
+  // Pull chain, so the switch is visible.
+  named('Chain', [0.11, 0.24, 0.07], () => {
+    cyl(brass, 0.0025, 0.07, [0.11, 0.205, 0.07], { axis: 'y', segs: 8 });
+    ball(brass, 0.009, [0.11, 0.168, 0.07]);
+  });
+  // A little cord trailing off the back.
+  cyl(cord, 0.006, 0.12, [0, 0.01, -0.14], { axis: 'z', segs: 10 });
+  writeGlb('lamp');
+}
+
+buildCassette();
+buildLamp();

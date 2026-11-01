@@ -42,3 +42,12 @@ html, body { height: 100%; overflow: hidden; background: #e8e9ec; }
 @media (prefers-reduced-motion: reduce) {
   .drag-hint { transition: none; }
 }
+
+/* Lamp on: the room is dark, so the little controls go dark too. */
+html:has(body.lamp-on), body.lamp-on { background: #16171b; }
+body.lamp-on .drag-hint { background: rgba(30, 31, 36, 0.82); color: #c9c2b4; }
+body.lamp-on .back { background: rgba(30, 31, 36, 0.86); color: #f1ead9; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+.drag-hint, .back { transition: background 0.5s ease, color 0.5s ease, opacity 0.6s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .drag-hint, .back { transition: none; }
+}

@@ -50,6 +50,7 @@ function wrap(ctx, text, x, y, max, line) {
 export function paintScreen(ctx, w, h, spec, icon, t, k) {
   if (spec.face === 'note') return drawNote(ctx, w, h, t, k);
   if (spec.face === 'fish') return drawFish(ctx, w, h, icon, t, k);
+  if (spec.face === 'tape') return drawTape(ctx, w, h, spec.state || {}, t, k);
   drawProject(ctx, w, h, spec, icon, t, k);
 }
 
@@ -137,6 +138,47 @@ function drawNote(ctx, w, h, t, k) {
     ctx.fillRect(0, 0, w, h);
     ctx.globalAlpha = 1;
   }
+}
+
+// The cassette's paper label: a big A, a handwritten title, and a counter
+// that runs while the tape plays.
+function drawTape(ctx, w, h, state, t, k) {
+  ctx.fillStyle = '#f3ead8';
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#d8642c';
+  ctx.fillRect(0, h * 0.72, w, h * 0.16);
+  ctx.fillStyle = '#c7b89c';
+  for (let y = h * 0.2; y < h * 0.7; y += h * 0.17) ctx.fillRect(w * 0.2, y, w * 0.6, 2);
+  // Side letter in a circle.
+  const r = h * 0.3;
+  ctx.fillStyle = '#d8642c';
+  ctx.beginPath();
+  ctx.arc(w * 0.09, h * 0.42, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#f3ead8';
+  ctx.font = '700 ' + Math.round(h * 0.42) + 'px "Timeless Sans", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('A', w * 0.09, h * 0.44);
+  // Title, as if written in pen.
+  ctx.fillStyle = '#2a2622';
+  ctx.font = 'italic 360 ' + Math.round(h * 0.34) + 'px "Timeless Serif Italic", Georgia, serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('songs for wandering', w * 0.2, h * 0.4);
+  // Counter, or a nudge to press play.
+  ctx.font = '400 ' + Math.round(h * 0.26) + 'px "Screen Pixel", ui-monospace, monospace';
+  ctx.textAlign = 'right';
+  if (state.playing) {
+    const sec = Math.floor(state.elapsed || 0);
+    const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+    const ss = String(sec % 60).padStart(2, '0');
+    ctx.fillStyle = '#d8642c';
+    ctx.fillText('\u25B6 ' + mm + ':' + ss, w * 0.97, h * 0.4);
+  } else if (k > 0 && Math.floor(t * 2) % 2 === 0) {
+    ctx.fillStyle = '#8a7f6c';
+    ctx.fillText('PRESS', w * 0.97, h * 0.4);
+  }
+  ctx.textAlign = 'left';
 }
 
 function drawLink(ctx, label, x, y) {

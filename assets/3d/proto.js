@@ -7,7 +7,7 @@ const CELL_DESKTOP = 278;
 const CELL_MOBILE = 224;
 
 // Each cell is SPAN world units wide, so devices stand with room around them.
-const SPAN = 1.45;
+const SPAN = 1.2;
 
 // Every project in the page's list gets a device. Adding a project to the
 // list in index.html adds a device here; nothing else needs editing.
@@ -16,7 +16,28 @@ const MODEL_FACE = {
   imac: 'aqua', crt: 'tube', laptop: 'paper', rotary: 'amber', candy: 'lcd'
 };
 const MODEL_ORDER = ['candy', 'imac', 'flip', 'term', 'pda', 'crt', 'phone', 'laptop', 'rotary', 'macintosh', 'handheld'];
-const PREFERRED = { Daypond: 'handheld', SaberOS: 'macintosh' };
+// Each project lives on the same device everywhere, chosen to suit it:
+// phone apps on handhelds, web things on computers.
+const PROJECT_DEVICE = {
+  'Movy': 'phone', 'Bubbly': 'phone', 'Movy Reel': 'phone',
+  'Tackie': 'candy', 'Littlebook': 'candy',
+  'Sequence': 'flip', 'Cards of Answers': 'flip',
+  'BingBang': 'pda', 'Atticus': 'pda',
+  'Daypond': 'handheld', 'Pixel Dailies': 'handheld',
+  'Finwords': 'rotary', 'Between Floors': 'rotary',
+  'SaberOS': 'macintosh', 'About Me': 'macintosh',
+  'Wallpapers': 'imac', 'Movie Oracle': 'imac', 'Artuzzle': 'imac',
+  'Koi Pond': 'crt', 'Axel Art': 'crt',
+  'Axiom Thoughts': 'term', 'Agent Terrarium': 'term', 'JSON Prompts': 'term',
+  'Bug Explorer': 'laptop', 'Archer Travel': 'laptop', 'Postcards from Mars': 'laptop'
+};
+// A project added later without an entry above still gets a steady device.
+function deviceFor(name) {
+  if (PROJECT_DEVICE[name]) return PROJECT_DEVICE[name];
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return MODEL_ORDER[h % MODEL_ORDER.length];
+}
 
 function model(name) { return 'assets/3d/models/' + name + '.glb'; }
 
@@ -36,6 +57,7 @@ function readProjects() {
   return Array.prototype.slice.call(document.querySelectorAll('#projects a[href]')).map(function (a) {
     return {
       name: (a.querySelector('strong') || a).textContent.trim(),
+      desc: (a.querySelector('span') || { textContent: '' }).textContent.trim(),
       icon: a.getAttribute('data-icon') || '',
       href: a.getAttribute('href'),
       external: a.getAttribute('target') === '_blank'
@@ -54,8 +76,8 @@ function specFor(c, r) {
   // Archer turns up now and then, like in the flat field.
   if (mod(c + r * 3, 13) === 0) return { file: model('radio'), face: 'fish', name: 'Archer', toy: 'archer', cell: [c, r] };
   const p = PROJECTS[mod(c * 5 + r * 3, PROJECTS.length)];
-  const name = PREFERRED[p.name] || MODEL_ORDER[mod(c * 3 + r * 2, MODEL_ORDER.length)];
-  return { file: model(name), cell: [c, r], face: MODEL_FACE[name], name: p.name, icon: p.icon, href: p.href, external: p.external };
+  const name = deviceFor(p.name);
+  return { file: model(name), cell: [c, r], face: MODEL_FACE[name], name: p.name, desc: p.desc, icon: p.icon, href: p.href, external: p.external };
 }
 
 const MODEL_FILES = Object.keys(MODEL_FACE).concat(['camera', 'radio', 'cassette', 'lamp']).map(model);
@@ -158,15 +180,17 @@ const groundMat = new THREE.ShaderMaterial({
       float w = max(px / span, fwidth(d));
       float a = (1.0 - smoothstep(px / span * 0.15, px / span * 0.15 + w, d)) * strength;
       gl_FragColor = vec4(mix(paper, ink, a), 1.0);
+      // Same color space as the background, so floor and sky never show a seam.
+      #include <colorspace_fragment>
     }
   `
 });
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(36, 36), groundMat);
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), groundMat);
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = false;
 scene.add(ground);
 const shadowCatcher = new THREE.Mesh(
-  new THREE.PlaneGeometry(36, 36),
+  new THREE.PlaneGeometry(400, 400),
   new THREE.ShadowMaterial({ opacity: 0.32 })
 );
 shadowCatcher.rotation.x = -Math.PI / 2;
@@ -178,13 +202,20 @@ function cellPx() {
   return window.matchMedia('(max-width: 640px)').matches ? CELL_MOBILE : CELL_DESKTOP;
 }
 
+// Pinch (or ctrl-scroll) zooms the room, never the page.
+let zoom = 1;
+const ZOOM_MIN = 0.55, ZOOM_MAX = 1.8;
+let lastW = 0, lastH = 0;
+
 function resize() {
   const w = stage.clientWidth || window.innerWidth;
   const h = stage.clientHeight || window.innerHeight;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   renderer.setPixelRatio(dpr);
   renderer.setSize(w, h, false);
-  const fh = h / cellPx();
+  lastW = w;
+  lastH = h;
+  const fh = h / (cellPx() * zoom);
   const aspect = w / h;
   camera.left = -fh * aspect / 2;
   camera.right = fh * aspect / 2;
@@ -195,6 +226,16 @@ function resize() {
   groundMat.uniforms.px.value = (fh / h) * cssPx;
 }
 window.addEventListener('resize', resize);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
+// Safari can change the canvas size without telling us (toolbars, rotation).
+function checkSize() {
+  if (stage.clientWidth !== lastW || stage.clientHeight !== lastH) resize();
+}
+
+function setZoom(next) {
+  zoom = THREE.MathUtils.clamp(next, ZOOM_MIN, ZOOM_MAX);
+  resize();
+}
 
 function springAmount(seconds) {
   const zeta = 0.55;
@@ -297,6 +338,8 @@ async function spawn(c, r, born) {
   const id = c + ',' + r;
   const spec = specFor(c, r);
   const model = sources.get(spec.file).clone(true);
+  // The device's own outline, before any glow is added, for placing the card.
+  const outline = new THREE.Box3().setFromObject(model);
   let aspect = 1.33;
   let hasScreen = false;
   model.traverse(function (obj) {
@@ -334,7 +377,8 @@ async function spawn(c, r, born) {
     born: born,
     links: screen.links,
     halo: halo,
-    parts: parts
+    parts: parts,
+    outline: outline
   };
   updatePop(d, performance.now());
   devices.push(d);
@@ -354,6 +398,7 @@ function despawn(d) {
   if (d.halo) d.halo.material.dispose();
   if (d.spec.toy === 'lamp') forgetLamp();
   if (hovered === d) hovered = null;
+  if (pinned === d) pinned = null;
   devices.splice(devices.indexOf(d), 1);
   live.delete(d.id);
 }
@@ -490,13 +535,35 @@ function openHit(info) {
   else window.location.href = spec.href;
 }
 
+const touches = new Map();
+let pinch = null;
+
 stage.addEventListener('pointerdown', function (e) {
   if (e.button != null && e.button !== 0) return;
+  lastPointer = e.pointerType || 'mouse';
+  touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (touches.size === 2) {
+    const p = Array.from(touches.values());
+    pinch = { dist: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y), zoom: zoom };
+    drag = null;
+    stage.classList.remove('dragging');
+    return;
+  }
+  if (touches.size > 2) return;
   drag = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
   stage.classList.add('dragging');
   try { stage.setPointerCapture(e.pointerId); } catch (err) {}
 });
 stage.addEventListener('pointermove', function (e) {
+  lastPointer = e.pointerType || 'mouse';
+  if (touches.has(e.pointerId)) touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pinch && touches.size >= 2) {
+    const p = Array.from(touches.values());
+    const dist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+    setZoom(pinch.zoom * dist / Math.max(pinch.dist, 1));
+    suppressClick = true;
+    return;
+  }
   const info = pick(e.clientX, e.clientY);
   hovered = info && info.device;
   if (hovered && info.hit && info.hit.point) {
@@ -516,7 +583,123 @@ stage.addEventListener('pointermove', function (e) {
   target.addScaledVector(panUp, dy * worldPerPx);
   if (hint) hint.classList.add('gone');
 });
+// ------------------------------------------------------------- the peek card
+// Over a device: its live screen and a one-line note. Mouse: on hover, and a
+// click opens. Touch: the first tap shows it, a second tap (on the device or
+// the card) opens.
+
+const peekEl = document.getElementById('peek');
+const peekCanvas = peekEl ? peekEl.querySelector('.peek-screen') : null;
+const peekCtx = peekCanvas ? peekCanvas.getContext('2d') : null;
+const TIPS = {
+  cassette: ['Side A', 'Press play for a little ambient music.'],
+  lamp: ['The lamp', 'Pull the chain to turn the lights down.'],
+  archer: ['Archer', 'A little guide who hangs out here. Say hi.']
+};
+let pinned = null;
+let peekFor = null;
+let lastPointer = 'mouse';
+const peekBox = new THREE.Box3();
+const peekV = new THREE.Vector3();
+
+function peekContent(d) {
+  const spec = d.spec;
+  if (spec.toy && TIPS[spec.toy]) return { name: TIPS[spec.toy][0], desc: TIPS[spec.toy][1], screen: spec.toy === 'lamp' ? null : d.screenData.canvas };
+  if (spec.href) return { name: spec.name, desc: spec.desc || '', screen: d.screenData.canvas, href: spec.href, external: spec.external };
+  return null;
+}
+
+function hidePeek() {
+  if (!peekEl) return;
+  peekEl.classList.remove('on', 'pinned');
+  peekFor = null;
+}
+
+function updatePeek() {
+  if (!peekEl) return;
+  const d = pinned || (lastPointer === 'mouse' && !(drag && drag.moved) ? hovered : null);
+  const info = d && peekContent(d);
+  if (!info) { hidePeek(); return; }
+  if (peekFor !== d) {
+    peekFor = d;
+    peekEl.querySelector('strong').textContent = info.name;
+    peekEl.querySelector('.peek-text span').textContent = info.desc;
+    peekCanvas.hidden = !info.screen;
+    if (info.screen) {
+      peekCanvas.width = 240;
+      peekCanvas.height = Math.round(240 * info.screen.height / info.screen.width);
+    }
+    if (info.href) {
+      peekEl.href = info.href;
+      if (info.external) { peekEl.target = '_blank'; peekEl.rel = 'noopener'; } else { peekEl.removeAttribute('target'); }
+    } else {
+      peekEl.removeAttribute('href');
+    }
+  }
+  // The live screen, animation and all.
+  if (info.screen) peekCtx.drawImage(info.screen, 0, 0, peekCanvas.width, peekCanvas.height);
+  peekEl.classList.toggle('pinned', pinned === d);
+
+  // Where the device sits on screen.
+  d.group.updateMatrixWorld();
+  peekBox.copy(d.outline).applyMatrix4(d.group.matrixWorld);
+  const rect = stage.getBoundingClientRect();
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (let i = 0; i < 8; i++) {
+    peekV.set(i & 1 ? peekBox.max.x : peekBox.min.x, i & 2 ? peekBox.max.y : peekBox.min.y, i & 4 ? peekBox.max.z : peekBox.min.z).project(camera);
+    const sx = rect.left + (peekV.x + 1) / 2 * rect.width;
+    const sy = rect.top + (1 - peekV.y) / 2 * rect.height;
+    x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy);
+  }
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  const w = peekEl.offsetWidth, h = peekEl.offsetHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const m = 10, gap = 12;
+  // Above if it fits, then below, then beside, whichever side has room.
+  const options = [
+    { side: 'above', x: cx - w / 2, y: y0 - gap - h, ok: y0 - gap - h >= m },
+    { side: 'below', x: cx - w / 2, y: y1 + gap, ok: y1 + gap + h <= vh - m },
+    { side: 'right', x: x1 + gap, y: cy - h / 2, ok: x1 + gap + w <= vw - m },
+    { side: 'left', x: x0 - gap - w, y: cy - h / 2, ok: x0 - gap - w >= m }
+  ];
+  const pick1 = options.find(function (o) { return o.ok; }) || options[0];
+  const x = THREE.MathUtils.clamp(pick1.x, m, Math.max(m, vw - w - m));
+  const y = THREE.MathUtils.clamp(pick1.y, m, Math.max(m, vh - h - m));
+  peekEl.dataset.side = pick1.side;
+  peekEl.style.setProperty('--x', Math.round(x) + 'px');
+  peekEl.style.setProperty('--y', Math.round(y) + 'px');
+  peekEl.style.setProperty('--ax', THREE.MathUtils.clamp(cx - x, 18, w - 18) + 'px');
+  peekEl.style.setProperty('--ay', THREE.MathUtils.clamp(cy - y, 18, h - 18) + 'px');
+  peekEl.style.setProperty('--ox', THREE.MathUtils.clamp(cx - x, 0, w) + 'px');
+  peekEl.style.setProperty('--oy', pick1.side === 'below' ? '0%' : pick1.side === 'above' ? '100%' : '50%');
+  peekEl.classList.add('on');
+}
+
+function tap(info, pointerType) {
+  if (pointerType !== 'touch') { openHit(info); return; }
+  const d = info && info.device;
+  if (!d) { pinned = null; return; }
+  // Toys and the intro card act on the first tap.
+  if (d.spec.toy || d.spec.face === 'note') { openHit(info); pinned = peekContent(d) ? d : null; return; }
+  if (pinned === d) { openHit(info); return; }
+  pinned = d;
+}
+
+if (peekEl) {
+  peekEl.addEventListener('click', function (e) {
+    // Toy cards are notes, not links.
+    if (!peekEl.getAttribute('href')) e.preventDefault();
+  });
+}
+
 function endDrag(e) {
+  if (e) touches.delete(e.pointerId);
+  if (pinch) {
+    if (touches.size < 2) pinch = null;
+    drag = null;
+    stage.classList.remove('dragging');
+    return;
+  }
   if (!drag || (e && e.pointerId !== drag.id)) return;
   const moved = drag.moved;
   const x = e ? e.clientX : drag.x;
@@ -524,9 +707,21 @@ function endDrag(e) {
   drag = null;
   stage.classList.remove('dragging');
   if (moved) { suppressClick = true; return; }
-  openHit(pick(x, y));
+  tap(pick(x, y), e && e.pointerType);
 }
 stage.addEventListener('pointerup', endDrag);
+stage.addEventListener('pointerleave', function (e) {
+  if (e.pointerType === 'mouse' && !drag) hovered = null;
+});
+stage.addEventListener('wheel', function (e) {
+  if (!e.ctrlKey) return; // trackpad pinch arrives as ctrl + wheel
+  e.preventDefault();
+  setZoom(zoom * Math.exp(-e.deltaY * 0.01));
+}, { passive: false });
+// iOS Safari's own page pinch: keep it off the room.
+['gesturestart', 'gesturechange'].forEach(function (type) {
+  document.addEventListener(type, function (e) { e.preventDefault(); }, { passive: false });
+});
 stage.addEventListener('pointercancel', endDrag);
 stage.addEventListener('click', function (e) {
   if (!suppressClick) return;
@@ -779,12 +974,14 @@ let lastStream = -1;
 function animate() {
   requestAnimationFrame(animate);
   const now = performance.now();
+  checkSize();
   if (now - lastStream > 120) { frameCamera(); stream(now); lastStream = now; }
   const dt = Math.min(clock.getDelta(), 0.05);
   devices.forEach(function (d) { updatePop(d, now); });
   updateHover(dt);
   updateRoom(dt);
   updateCassette(dt);
+  updatePeek();
   const snapX = Math.round(target.x / SPAN) * SPAN;
   const snapZ = Math.round(target.z / SPAN) * SPAN;
   ground.position.set(snapX, 0, snapZ);

@@ -74,6 +74,11 @@
 <!-- Archer's chat, opened by the radio. -->
 <div id="archer" hidden></div>
 <button id="archer-chat-open" type="button" class="sr" tabindex="-1">Chat with Archer</button>
+<a class="peek" id="peek" aria-hidden="true" tabindex="-1">
+  <canvas class="peek-screen" width="240" height="180"></canvas>
+  <span class="peek-text"><strong></strong><span></span></span>
+  <i class="peek-arrow"></i>
+</a>
 <div class="fade" aria-hidden="true"></div>
 <script src="assets/archer-chat.js"></script>
 <script src="assets/fade.js"></script>

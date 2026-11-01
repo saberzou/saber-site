@@ -135,7 +135,7 @@ def build_handheld():
 
     sy = front_y(d, 0.008)
     box("ScreenWell", (0.20, 0.008, 0.15), (-0.012, sy, h * 0.70), bezel, bevel=0.003, segments=2)
-    screen_plane((0.176, 0.126), (-0.012, sy - 0.012, h * 0.70))
+    screen_plane((0.176, 0.126), (-0.012, sy - 0.0045, h * 0.70))
 
     # Speaker slits to the right of the glass.
     for i, zoff in enumerate((-0.045, -0.02, 0.005, 0.03)):
@@ -178,7 +178,7 @@ def build_macintosh():
 
     sy = front_y(d, 0.010)
     box("Bezel", (0.250, 0.010, 0.200), (0, sy, h * 0.64), bezel, bevel=0.004, segments=2)
-    screen_plane((0.214, 0.164), (0, sy - 0.014, h * 0.64))
+    screen_plane((0.214, 0.164), (0, sy - 0.0055, h * 0.64))
     box("Slot", (0.200, 0.012, 0.016), (0, front_y(d, 0.012), h * 0.30), slotm, bevel=0.002, segments=1)
     box("SlotLip", (0.200, 0.008, 0.006), (0, front_y(d, 0.008) - 0.002, h * 0.284), beige, bevel=0.0, segments=1)
     box("FootL", (0.078, 0.100, 0.024), (-0.09, -0.14, 0.012), foot, bevel=0.004, segments=2)
@@ -209,7 +209,7 @@ def build_camera():
     box("Mouth", (pw * 0.86, 0.008, 0.010), (0, -bd / 2 + 0.006, body_z + 0.012), slot_mat, bevel=0.001, segments=1)
 
     # Inner photo, inset so the print keeps a white border and a deeper chin.
-    screen_plane((0.320, 0.230), (0, print_y - pd / 2 - 0.006, 0.175))
+    screen_plane((0.320, 0.230), (0, print_y - pd / 2 - 0.0005, 0.175))
 
     # Lens on the front-left of the body.
     lens_y = front_y(bd, 0.018)

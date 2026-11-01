@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
+import { FISH_SVG, paintScreen } from './screens.js';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -26,28 +27,6 @@ const DEVICES = [
   work('candy', [1, 1], 'lcd', 'Movy', 'images/icons/ios/movy.jpg', 'https://apps.apple.com/app/id1093345142')
 ];
 
-const FACES = {
-  lcd: { bg: ['#d5e28a', '#c3d36e'], ink: '#1c2410', pixel: true },
-  tft: { bg: ['#eef2f6', '#cfd8e2'], ink: '#1d2633', pixel: true },
-  amber: { bg: ['#f6d995', '#e2b25a'], ink: '#3a2408', pixel: true },
-  gloss: { bg: ['#2e3138', '#0b0c0f'], ink: '#f4f4f4' },
-  mono: { bg: ['#dfe2d2', '#c4c8b3'], ink: '#22261c', pixel: true },
-  paper: { bg: ['#f6f3ec', '#f6f3ec'], ink: '#1a1a1a' },
-  tube: { bg: ['#26262a', '#060606'], ink: '#f4efe6' },
-  aqua: { bg: ['#f7fafb', '#e4eef1'], ink: '#14323a' },
-  phos: { bg: ['#06180d', '#020805'], ink: '#74f59c', pixel: true, glow: true },
-  fish: { bg: ['#1a2014', '#0b0e08'], ink: '#ffd966' }
-};
-
-const FISH_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
-  '<path d="M25 48 C 17 49, 10 54, 8 62 C 15 64, 23 59, 28 55 Z" fill="#FF6A00"/>' +
-  '<path d="M75 48 C 83 49, 90 54, 92 62 C 85 64, 77 59, 72 55 Z" fill="#FF6A00"/>' +
-  '<rect x="20" y="28" width="60" height="46" rx="23" fill="#FF6A00"/>' +
-  '<path d="M25 62 Q 50 76 75 62 Q 50 81 25 62 Z" fill="#D94B0F" opacity="0.45"/>' +
-  '<rect x="28" y="38" width="44" height="17" rx="8.5" fill="#141414"/>' +
-  '<rect x="38" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>' +
-  '<rect x="57" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>' +
-  '</svg>';
 
 const stage = document.getElementById('stage');
 const hint = document.getElementById('drag-hint');
@@ -186,24 +165,6 @@ function loadImage(src) {
   });
 }
 
-function wrap(ctx, text, x, y, max, line) {
-  const words = text.split(' ');
-  let row = '';
-  let yy = y;
-  words.forEach(function (word) {
-    const next = row ? row + ' ' + word : word;
-    if (ctx.measureText(next).width > max && row) {
-      ctx.fillText(row, x, yy);
-      row = word;
-      yy += line;
-    } else {
-      row = next;
-    }
-  });
-  if (row) ctx.fillText(row, x, yy);
-  return yy;
-}
-
 async function makeScreen(spec, aspect) {
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
@@ -211,98 +172,27 @@ async function makeScreen(spec, aspect) {
   if (spec.face === 'note') { canvas.width = 1024; canvas.height = 1280; }
   const ctx = canvas.getContext('2d');
   await document.fonts.ready;
-  if (spec.face === 'note') drawNote(ctx, canvas.width, canvas.height);
-  else if (spec.face === 'fish') drawFish(ctx, canvas.width, canvas.height, await loadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(FISH_SVG)));
-  else drawProject(ctx, canvas.width, canvas.height, spec, await loadImage(spec.icon));
+  const icon = spec.face === 'fish'
+    ? await loadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(FISH_SVG))
+    : spec.icon ? await loadImage(spec.icon) : null;
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  tex.needsUpdate = true;
   const mat = new THREE.MeshBasicMaterial({ map: tex, color: 0xffffff, side: THREE.DoubleSide });
   mat.toneMapped = false;
-  return { mat: mat, canvas: canvas, links: spec.face === 'note' };
-}
-
-function fillFace(ctx, w, h, face) {
-  const g = ctx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0, face.bg[0]);
-  g.addColorStop(1, face.bg[1]);
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, w, h);
-}
-
-function drawFish(ctx, w, h, img) {
-  fillFace(ctx, w, h, FACES.fish);
-  const size = Math.min(w, h) * 0.78;
-  if (img) ctx.drawImage(img, (w - size) / 2, (h - size) / 2, size, size);
-}
-
-function drawNote(ctx, w, h) {
-  ctx.fillStyle = '#f4f1ea';
-  ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = '#161616';
-  ctx.textBaseline = 'top';
-  ctx.font = '360 118px "Timeless Serif", Georgia, serif';
-  const im = "I\u2019m ";
-  ctx.fillText(im, 86, 150);
-  const next = ctx.measureText(im).width;
-  ctx.font = 'italic 360 118px "Timeless Serif Italic", Georgia, serif';
-  ctx.fillText('Saber.', 86 + next, 150);
-  ctx.fillStyle = '#2a2c2f';
-  ctx.font = '360 52px "Timeless Serif", Georgia, serif';
-  wrap(ctx, 'I love making things. Apps, toys, little worlds.', 86, 320, w - 172, 68);
-  ctx.fillStyle = '#161616';
-  ctx.font = '560 46px "Timeless Sans", sans-serif';
-  const y = h - 210;
-  drawLink(ctx, 'GitHub', 86, y);
-  drawLink(ctx, 'Email', 360, y);
-}
-
-function drawLink(ctx, label, x, y) {
-  ctx.fillText(label, x, y);
-  const width = ctx.measureText(label).width;
-  ctx.fillRect(x, y + 54, width, 4);
-}
-
-function drawProject(ctx, w, h, spec, icon) {
-  const face = FACES[spec.face] || FACES.paper;
-  fillFace(ctx, w, h, face);
-  const size = Math.round(Math.min(w, h) * 0.34);
-  if (icon) {
-    const ix = (w - size) / 2;
-    const iy = h * 0.42 - size * 0.62;
-    ctx.save();
-    roundClip(ctx, ix, iy, size, size, size * 0.18);
-    ctx.drawImage(icon, ix, iy, size, size);
-    ctx.restore();
-  }
-  ctx.fillStyle = face.ink;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  let px = Math.round(Math.min(w, h) * (face.pixel ? 0.085 : 0.09));
-  const label = face.pixel ? spec.name.toUpperCase() : spec.name;
-  function setFont() {
-    ctx.font = face.pixel
-      ? '400 ' + px + 'px "Screen Pixel", ui-monospace, monospace'
-      : '560 ' + px + 'px "Timeless Sans", sans-serif';
-  }
-  setFont();
-  while (ctx.measureText(label).width > w * 0.88 && px > 12) { px -= 4; setFont(); }
-  if (face.glow) { ctx.shadowColor = face.ink; ctx.shadowBlur = px * 0.5; }
-  ctx.fillText(label, w / 2, h * 0.76);
-  ctx.shadowBlur = 0;
-  ctx.textAlign = 'left';
-}
-
-function roundClip(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-  ctx.clip();
+  const screen = {
+    mat: mat,
+    canvas: canvas,
+    links: spec.face === 'note',
+    paint: function (t, k) {
+      ctx.save();
+      paintScreen(ctx, canvas.width, canvas.height, spec, icon, t, k);
+      ctx.restore();
+      tex.needsUpdate = true;
+    }
+  };
+  screen.paint(0, 0);
+  return screen;
 }
 
 const loader = new GLTFLoader();
@@ -361,6 +251,9 @@ async function loadDevices() {
       spec: spec,
       group: group,
       screen: screenMesh,
+      paint: screen.paint,
+      playT: 0,
+      playing: false,
       base: 1,
       tilt: new THREE.Vector2(),
       delay: dist * 0.09,
@@ -401,6 +294,16 @@ function updateHover(dt) {
       d.screen.material.color.setScalar(bright);
     }
     if (REDUCED) return;
+    // Run the screen's animation while hovered; settle to rest after.
+    if (on) {
+      if (!d.playing) { d.playing = true; d.playT = 0; }
+      d.playT += dt;
+      d.paint(d.playT, Math.min(1, d.base * 1.4));
+    } else if (d.playing) {
+      d.playT += dt;
+      if (d.base < 0.04) { d.playing = false; d.paint(0, 0); }
+      else d.paint(d.playT, d.base);
+    }
     const tx = on ? -d.tilt.y * 0.55 : 0;
     const tz = on ? d.tilt.x * 0.55 : 0;
     d.group.rotation.x += (tx - d.group.rotation.x) * Math.min(1, dt * 8);

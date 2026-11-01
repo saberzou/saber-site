@@ -5,29 +5,49 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
 const CELL_MOBILE = 224;
 
+// Cells sit on integer coordinates, and each device stands in the middle of
+// its own square. The layout follows the SVG field around the intro camera.
+function work(file, cell, face, name, icon, href) {
+  return { file: 'assets/3d/models/' + file + '.glb', cell: cell, face: face, name: name, icon: icon, href: href };
+}
 const DEVICES = [
-  {
-    file: 'assets/3d/models/handheld.glb',
-    cell: [-1, 0],
-    name: 'Daypond',
-    icon: 'daypond/assets/app-icon.png',
-    href: 'daypond/',
-    face: 'lcd'
-  },
-  {
-    file: 'assets/3d/models/camera.glb',
-    cell: [0, 0],
-    face: 'note'
-  },
-  {
-    file: 'assets/3d/models/macintosh.glb',
-    cell: [1, 0],
-    name: 'SaberOS',
-    icon: 'images/icons/thiings/finder.png',
-    href: 'os.html',
-    face: 'paper'
-  }
+  work('phone', [-2, -1], 'gloss', 'Axiom Thoughts', 'images/icons/axiom-thoughts.png', 'https://saberzou.github.io/axiom-thoughts/'),
+  work('macintosh', [-1, -1], 'paper', 'SaberOS', 'images/icons/thiings/finder.png', 'os.html'),
+  work('term', [0, -1], 'phos', 'Artuzzle', 'images/icons/artuzzle.png', 'https://saberzou.github.io/artuzzle/'),
+  work('flip', [1, -1], 'tft', 'Sequence', 'images/icons/ios/sequence.jpg', 'https://apps.apple.com/app/id6789496773'),
+  work('handheld', [2, -1], 'lcd', 'Daypond', 'daypond/assets/app-icon.png', 'daypond/'),
+  work('pda', [-2, 0], 'mono', 'Between Floors', 'images/icons/between-floors.png', 'https://saberzou.github.io/between-floors/'),
+  work('imac', [-1, 0], 'aqua', 'Movie Oracle', 'images/icons/movie-oracle.png', 'https://saberzou.github.io/movie-oracle/'),
+  { file: 'assets/3d/models/camera.glb', cell: [0, 0], face: 'note' },
+  { file: 'assets/3d/models/radio.glb', cell: [1, 0], face: 'fish', name: 'Archer', href: './' },
+  work('crt', [2, 0], 'tube', 'Axel Art', 'images/icons/axel.png', 'https://saberzou.github.io/axel-art/'),
+  work('laptop', [-1, 1], 'paper', 'Pixel Dailies', 'images/icons/pixel-dailies.png', 'https://saberzou.github.io/pixel-dailies/'),
+  work('rotary', [0, 1], 'amber', 'Finwords', 'finwords/assets/app-icon.png', 'finwords/'),
+  work('candy', [1, 1], 'lcd', 'Movy', 'images/icons/ios/movy.jpg', 'https://apps.apple.com/app/id1093345142')
 ];
+
+const FACES = {
+  lcd: { bg: ['#d5e28a', '#c3d36e'], ink: '#1c2410', pixel: true },
+  tft: { bg: ['#eef2f6', '#cfd8e2'], ink: '#1d2633', pixel: true },
+  amber: { bg: ['#f6d995', '#e2b25a'], ink: '#3a2408', pixel: true },
+  gloss: { bg: ['#2e3138', '#0b0c0f'], ink: '#f4f4f4' },
+  mono: { bg: ['#dfe2d2', '#c4c8b3'], ink: '#22261c', pixel: true },
+  paper: { bg: ['#f6f3ec', '#f6f3ec'], ink: '#1a1a1a' },
+  tube: { bg: ['#26262a', '#060606'], ink: '#f4efe6' },
+  aqua: { bg: ['#f7fafb', '#e4eef1'], ink: '#14323a' },
+  phos: { bg: ['#06180d', '#020805'], ink: '#74f59c', pixel: true, glow: true },
+  fish: { bg: ['#1a2014', '#0b0e08'], ink: '#ffd966' }
+};
+
+const FISH_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+  '<path d="M25 48 C 17 49, 10 54, 8 62 C 15 64, 23 59, 28 55 Z" fill="#FF6A00"/>' +
+  '<path d="M75 48 C 83 49, 90 54, 92 62 C 85 64, 77 59, 72 55 Z" fill="#FF6A00"/>' +
+  '<rect x="20" y="28" width="60" height="46" rx="23" fill="#FF6A00"/>' +
+  '<path d="M25 62 Q 50 76 75 62 Q 50 81 25 62 Z" fill="#D94B0F" opacity="0.45"/>' +
+  '<rect x="28" y="38" width="44" height="17" rx="8.5" fill="#141414"/>' +
+  '<rect x="38" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>' +
+  '<rect x="57" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>' +
+  '</svg>';
 
 const stage = document.getElementById('stage');
 const hint = document.getElementById('drag-hint');
@@ -66,10 +86,10 @@ key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048);
 key.shadow.camera.near = 0.5;
 key.shadow.camera.far = 24;
-key.shadow.camera.left = -4;
-key.shadow.camera.right = 4;
-key.shadow.camera.top = 4;
-key.shadow.camera.bottom = -4;
+key.shadow.camera.left = -5;
+key.shadow.camera.right = 5;
+key.shadow.camera.top = 5;
+key.shadow.camera.bottom = -5;
 key.shadow.bias = -0.0004;
 key.shadow.normalBias = 0.02;
 key.shadow.radius = 2.5;
@@ -103,8 +123,11 @@ const groundMat = new THREE.ShaderMaterial({
     uniform float px;
     varying vec3 vWorld;
     void main() {
-      float dx = min(fract(vWorld.x), 1.0 - fract(vWorld.x));
-      float dz = min(fract(vWorld.z), 1.0 - fract(vWorld.z));
+      // Lines fall on half cells, so a device at an integer cell sits in a square.
+      float fx = fract(vWorld.x + 0.5);
+      float fz = fract(vWorld.z + 0.5);
+      float dx = min(fx, 1.0 - fx);
+      float dz = min(fz, 1.0 - fz);
       float d = min(dx, dz);
       float w = max(px, fwidth(d));
       float a = (1.0 - smoothstep(px * 0.15, px * 0.15 + w, d)) * strength;
@@ -181,16 +204,15 @@ function wrap(ctx, text, x, y, max, line) {
   return yy;
 }
 
-async function makeScreen(spec) {
+async function makeScreen(spec, aspect) {
   const canvas = document.createElement('canvas');
-  const portrait = spec.face === 'note';
-  canvas.width = portrait ? 1024 : 1024;
-  canvas.height = portrait ? 1280 : 768;
-  if (spec.face === 'lcd') { canvas.width = 1024; canvas.height = 720; }
-  if (spec.face === 'paper') { canvas.width = 1024; canvas.height = 800; }
+  canvas.width = 1024;
+  canvas.height = Math.round(1024 / (aspect || 1.33));
+  if (spec.face === 'note') { canvas.width = 1024; canvas.height = 1280; }
   const ctx = canvas.getContext('2d');
   await document.fonts.ready;
   if (spec.face === 'note') drawNote(ctx, canvas.width, canvas.height);
+  else if (spec.face === 'fish') drawFish(ctx, canvas.width, canvas.height, await loadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(FISH_SVG)));
   else drawProject(ctx, canvas.width, canvas.height, spec, await loadImage(spec.icon));
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -199,6 +221,20 @@ async function makeScreen(spec) {
   const mat = new THREE.MeshBasicMaterial({ map: tex, color: 0xffffff, side: THREE.DoubleSide });
   mat.toneMapped = false;
   return { mat: mat, canvas: canvas, links: spec.face === 'note' };
+}
+
+function fillFace(ctx, w, h, face) {
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, face.bg[0]);
+  g.addColorStop(1, face.bg[1]);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+}
+
+function drawFish(ctx, w, h, img) {
+  fillFace(ctx, w, h, FACES.fish);
+  const size = Math.min(w, h) * 0.78;
+  if (img) ctx.drawImage(img, (w - size) / 2, (h - size) / 2, size, size);
 }
 
 function drawNote(ctx, w, h) {
@@ -229,31 +265,32 @@ function drawLink(ctx, label, x, y) {
 }
 
 function drawProject(ctx, w, h, spec, icon) {
-  if (spec.face === 'lcd') {
-    const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#d5e28a');
-    g.addColorStop(1, '#c3d36e');
-    ctx.fillStyle = g;
-  } else {
-    ctx.fillStyle = '#f6f3ec';
-  }
-  ctx.fillRect(0, 0, w, h);
+  const face = FACES[spec.face] || FACES.paper;
+  fillFace(ctx, w, h, face);
   const size = Math.round(Math.min(w, h) * 0.34);
   if (icon) {
     const ix = (w - size) / 2;
-    const iy = h * 0.16;
+    const iy = h * 0.42 - size * 0.62;
     ctx.save();
     roundClip(ctx, ix, iy, size, size, size * 0.18);
     ctx.drawImage(icon, ix, iy, size, size);
     ctx.restore();
   }
-  ctx.fillStyle = spec.face === 'lcd' ? '#1c2410' : '#1a1a1a';
+  ctx.fillStyle = face.ink;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font = spec.face === 'lcd'
-    ? '400 64px "Screen Pixel", ui-monospace, monospace'
-    : '560 68px "Timeless Sans", sans-serif';
-  ctx.fillText(spec.name, w / 2, h * 0.72);
+  let px = Math.round(Math.min(w, h) * (face.pixel ? 0.085 : 0.09));
+  const label = face.pixel ? spec.name.toUpperCase() : spec.name;
+  function setFont() {
+    ctx.font = face.pixel
+      ? '400 ' + px + 'px "Screen Pixel", ui-monospace, monospace'
+      : '560 ' + px + 'px "Timeless Sans", sans-serif';
+  }
+  setFont();
+  while (ctx.measureText(label).width > w * 0.88 && px > 12) { px -= 4; setFont(); }
+  if (face.glow) { ctx.shadowColor = face.ink; ctx.shadowBlur = px * 0.5; }
+  ctx.fillText(label, w / 2, h * 0.76);
+  ctx.shadowBlur = 0;
   ctx.textAlign = 'left';
 }
 
@@ -291,9 +328,11 @@ function attachScreen(root, screen) {
 
 async function loadDevices() {
   await document.fonts.ready;
+  // Fetch every model at once; build them in order so the layout is stable.
+  const gltfs = await Promise.all(DEVICES.map(function (spec) { return loader.loadAsync(spec.file); }));
   for (let i = 0; i < DEVICES.length; i++) {
     const spec = DEVICES[i];
-    const gltf = await loader.loadAsync(spec.file);
+    const gltf = gltfs[i];
     const model = gltf.scene;
     model.traverse(function (obj) {
       if (!obj.isMesh) return;
@@ -304,7 +343,14 @@ async function loadDevices() {
         obj.material.envMapIntensity = 0.4;
       }
     });
-    const screen = await makeScreen(spec);
+    let aspect = 1.33;
+    model.traverse(function (obj) {
+      if (!obj.isMesh || obj.name !== 'Screen') return;
+      obj.geometry.computeBoundingBox();
+      const size = obj.geometry.boundingBox.getSize(new THREE.Vector3());
+      aspect = size.x / Math.max(Math.hypot(size.y, size.z), 1e-4);
+    });
+    const screen = await makeScreen(spec, aspect);
     const screenMesh = attachScreen(model, screen);
     const group = new THREE.Group();
     group.position.set(spec.cell[0], 0, spec.cell[1]);

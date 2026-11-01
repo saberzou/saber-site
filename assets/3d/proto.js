@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
-import { FISH_SVG, paintScreen } from './screens.js';
+import { FISH_SVG, paintScreen } from './screens.js?v=15';
+
+// Bumped with each release so browsers fetch fresh files.
+const VERSION = '15';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -57,7 +60,7 @@ function deviceFor(name) {
   return MODEL_ORDER[h % MODEL_ORDER.length];
 }
 
-function model(name) { return 'assets/3d/models/' + name + '.glb'; }
+function model(name) { return 'assets/3d/models/' + name + '.glb?v=' + VERSION; }
 
 // The cassette keeps playing while it's off screen, so its state lives here.
 const TAPE = { playing: false, elapsed: 0 };
@@ -337,7 +340,12 @@ const sources = new Map();
 
 async function loadModels() {
   await document.fonts.ready;
-  const loaded = await Promise.all(MODEL_FILES.map(function (f) { return loader.loadAsync(f); }));
+  let done = 0;
+  const report = function () { if (window.roomLoader) window.roomLoader.progress(done, MODEL_FILES.length); };
+  report();
+  const loaded = await Promise.all(MODEL_FILES.map(function (f) {
+    return loader.loadAsync(f).then(function (g) { done++; report(); return g; });
+  }));
   MODEL_FILES.forEach(function (f, i) {
     const scene = loaded[i].scene;
     scene.traverse(function (obj) {
@@ -1032,9 +1040,11 @@ resize();
 frameCamera();
 const params = new URLSearchParams(location.search);
 const focusName = params.get('focus');
-const introDelay = params.has('demo') ? 1200 : 40;
+// Let the loader fade before the first devices spring up.
+const introDelay = params.has('demo') ? 1200 : (window.roomLoader ? 420 : 40);
 
 loadModels().then(function () {
+  if (window.roomLoader) window.roomLoader.done();
   if (focusName) {
     // Look for the nearest cell showing that model and centre on it.
     let best = null;

@@ -21,20 +21,51 @@
     } catch (e) { location.replace('field.html'); }
   })();
 </script>
+<script>
+  // Paint the loader in the right light before anything else arrives.
+  try { if ((localStorage.getItem('saber-3d-lamp') || (matchMedia('(prefers-color-scheme: dark)').matches ? '1' : '0')) === '1') document.documentElement.classList.add('night'); } catch (e) {}
+</script>
 <noscript><meta http-equiv="refresh" content="0; url=field.html"></noscript>
 <link rel="stylesheet" href="assets/archer-chat.css">
 <link rel="stylesheet" href="assets/home.css">
-<link rel="stylesheet" href="assets/3d/proto.css">
-<link rel="stylesheet" href="assets/fade.css">
+<link rel="stylesheet" href="assets/3d/proto.css?v=15">
+<link rel="stylesheet" href="assets/3d/loader.css?v=15">
+<link rel="stylesheet" href="assets/fade.css?v=15">
 <script type="importmap">
 {
   "imports": {
-    "three": "./assets/3d/vendor/three.module.js"
+    "three": "./assets/3d/vendor/three.module.js?v=170"
   }
 }
 </script>
+<link rel="modulepreload" href="assets/3d/vendor/three.module.js?v=170">
+<link rel="modulepreload" href="assets/3d/proto.js?v=15">
 </head>
 <body>
+<div class="loader" id="loader" role="status" aria-live="polite">
+  <div class="loader-stack">
+    <svg class="loader-box" viewBox="0 0 132 152" aria-hidden="true">
+      <defs><clipPath id="loader-clip"><rect id="loader-fill" x="0" y="124" width="132" height="2"/></clipPath></defs>
+      <path class="floor" d="M66 72 L128 106 L66 140 L4 106 Z"/>
+      <ellipse class="shadow" cx="66" cy="126" rx="40" ry="10"/>
+      <g clip-path="url(#loader-clip)">
+        <path class="face left" d="M28 52 L66 74 L66 124 L28 102 Z"/>
+        <path class="face right" d="M66 74 L104 52 L104 102 L66 124 Z"/>
+      </g>
+      <path class="edge" d="M28 52 L66 74 L66 124 L28 102 Z M66 74 L104 52 L104 102 L66 124"/>
+      <g class="lid">
+        <path class="face top" d="M66 30 L104 52 L66 74 L28 52 Z"/>
+        <path class="edge" d="M66 30 L104 52 L66 74 L28 52 Z"/>
+      </g>
+      <rect class="spark" x="52" y="34" width="4" height="4"/>
+      <rect class="spark" x="70" y="28" width="4" height="4"/>
+      <rect class="spark" x="84" y="38" width="3" height="3"/>
+    </svg>
+    <p class="loader-line">Unpacking the room…</p>
+    <p class="loader-count">0%</p>
+  </div>
+</div>
+<script src="assets/3d/loader.js?v=15"></script>
 <h1 class="sr">Saber Zou</h1>
 <canvas id="stage" aria-label="A room of old devices, each showing something I've made. Drag to look around. Press the cassette for music, and the lamp for night."></canvas>
 <p class="drag-hint" id="drag-hint">Drag to look around</p>
@@ -81,7 +112,7 @@
 </a>
 <div class="fade" aria-hidden="true"></div>
 <script src="assets/archer-chat.js"></script>
-<script src="assets/fade.js"></script>
-<script type="module" src="assets/3d/proto.js"></script>
+<script src="assets/fade.js?v=15"></script>
+<script type="module" src="assets/3d/proto.js?v=15"></script>
 </body>
 </html>

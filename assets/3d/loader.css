@@ -1,0 +1,67 @@
+/* The loader: an isometric box, drawn like the room's cells, that fills as the
+   room downloads. Device-themed lines tick by underneath. */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: #ced0d6;
+  color: #2a2d33;
+  transition: opacity 0.5s ease, visibility 0.5s;
+}
+html.night .loader { background: #16171b; color: #e9e2d2; }
+.loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.loader-stack { display: grid; justify-items: center; gap: 18px; transform: translateY(-4vh); }
+
+.loader-box { width: 156px; height: 180px; overflow: visible; }
+.loader-box .floor { fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 1; }
+.loader-box .edge { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; }
+.loader-box .face { transition: none; }
+.loader-box .top { fill: #f2efe8; }
+.loader-box .left { fill: #d8642c; }
+.loader-box .right { fill: #b9532a; }
+html.night .loader-box .top { fill: #ffd59a; }
+.loader-box .shadow { fill: currentColor; opacity: 0.12; }
+.loader-box .lid {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: lid 1.6s cubic-bezier(.5, 0, .3, 1) infinite;
+}
+.loader-box .spark { fill: #d8642c; opacity: 0; animation: spark 1.6s ease-out infinite; }
+.loader-box .spark:nth-of-type(2) { animation-delay: 0.2s; }
+.loader-box .spark:nth-of-type(3) { animation-delay: 0.4s; }
+html.night .loader-box .spark { fill: #ffd59a; }
+
+@keyframes lid {
+  0%, 55%, 100% { transform: translateY(0) rotate(0deg); }
+  70% { transform: translateY(-9px) rotate(-6deg); }
+  85% { transform: translateY(-2px) rotate(2deg); }
+}
+@keyframes spark {
+  0%, 58% { opacity: 0; transform: translateY(0); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-22px); }
+}
+
+.loader-line {
+  margin: 0;
+  min-height: 1.4em;
+  font: 400 15px/1.4 "Timeless Serif Italic", Georgia, serif;
+  font-style: italic;
+  text-align: center;
+  transition: opacity 0.25s ease;
+}
+.loader-line.swap { opacity: 0; }
+.loader-count {
+  margin: -8px 0 0;
+  font: 400 12px/1 "Screen Pixel", ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader, .loader-line { transition: none; }
+  .loader-box .lid, .loader-box .spark { animation: none; }
+}

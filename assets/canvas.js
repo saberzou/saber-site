@@ -29,6 +29,10 @@
   var world = document.createElement('div');
   world.className = 'world';
   view.insertAdjacentHTML('afterbegin', window.RETRO_DEFS);
+  var grid = document.createElement('div');
+  grid.className = 'grid';
+  grid.setAttribute('aria-hidden', 'true');
+  world.appendChild(grid);
   view.appendChild(world);
 
   var camX = 0, camY = 0;
@@ -224,6 +228,10 @@
       popIn(item.el, delay);
     });
     if (boot) boot = false;
+    grid.style.left = (c0 * CELL) + 'px';
+    grid.style.top = (r0 * CELL) + 'px';
+    grid.style.width = ((c1 - c0 + 2) * CELL) + 'px';
+    grid.style.height = ((r1 - r0 + 2) * CELL) + 'px';
     world.style.transform = 'translate3d(' + (-camX) + 'px,' + (-camY) + 'px,0)';
   }
 

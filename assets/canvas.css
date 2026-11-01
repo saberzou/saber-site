@@ -24,6 +24,25 @@ html, body { height: 100%; overflow: hidden; }
 .view:focus-visible { outline: 2px solid var(--ink); outline-offset: -3px; }
 .view.dragging, .view.dragging .cell { cursor: grabbing; }
 .world { position: absolute; left: 0; top: 0; transform: translate3d(0, 0, 0); }
+.grid {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  --rule: rgba(48, 40, 32, 0.075);
+  background-image:
+    linear-gradient(to right, var(--rule) 0 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px);
+  background-size: var(--cell) var(--cell);
+  background-repeat: repeat;
+}
+@media (min-resolution: 2dppx) {
+  .grid {
+    background-image:
+      linear-gradient(to right, var(--rule) 0 0.5px, transparent 0.5px),
+      linear-gradient(to bottom, var(--rule) 0 0.5px, transparent 0.5px);
+  }
+}
+.cell { z-index: 1; }
 
 .cell {
   position: absolute;
@@ -97,22 +116,20 @@ html, body { height: 100%; overflow: hidden; }
 .device-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 .dev > svg { width: 100%; height: auto; overflow: visible; }
-/* Widths are a share of the cell. The cell grew from 248 to 278; these
-   shares shrink by the same ratio so each drawing stays the same size
-   and the paper around it grows. */
-.candy { width: 41.01%; }
-.flip { width: 48.14%; }
-.rotary { width: 78.53%; }
-.phone { width: 37.44%; }
-.game { width: 57.09%; }
-.pda { width: 44.6%; }
-.mac { width: 58.88%; }
-.crt { width: 76.72%; }
-.imac { width: 66.01%; }
-.term { width: 78.53%; }
-.laptop { width: 80.29%; }
-.intro { width: 74%; }
-.radio { width: 46%; }
+/* About 72% of the previous drawing, so the same cell holds more paper. */
+.candy { width: 29.53%; }
+.flip { width: 34.66%; }
+.rotary { width: 56.54%; }
+.phone { width: 26.96%; }
+.game { width: 41.1%; }
+.pda { width: 32.11%; }
+.mac { width: 42.39%; }
+.crt { width: 55.24%; }
+.imac { width: 47.53%; }
+.term { width: 56.54%; }
+.laptop { width: 57.81%; }
+.intro { width: 53.28%; }
+.radio { width: 33.12%; }
 
 .screen {
   position: absolute;

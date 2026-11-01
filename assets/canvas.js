@@ -9,7 +9,7 @@
     pool.forEach(function (el) { el.remove(); });
     pool.clear();
   }
-  var DEVICES = ['candy', 'flip', 'rotary', 'slab', 'game', 'pager', 'pda', 'mac', 'crt', 'imac', 'term', 'laptop'];
+  var SPECS = window.RETRO_DEVICES;
 
   function mod(n, m) { return ((n % m) + m) % m; }
 
@@ -28,6 +28,7 @@
   var view = document.getElementById('view');
   var world = document.createElement('div');
   world.className = 'world';
+  view.insertAdjacentHTML('afterbegin', window.RETRO_DEFS);
   view.appendChild(world);
 
   var camX = 0, camY = 0;
@@ -35,32 +36,33 @@
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var scheduled = false;
 
-  function deviceFor(c, r) { return DEVICES[mod(c * 3 + r * 2, DEVICES.length)]; }
+  function deviceFor(c, r) { return SPECS[mod(c * 3 + r * 2, SPECS.length)]; }
   function itemFor(c, r) { return items[mod(c * 5 + r * 3, items.length)]; }
 
-  function screen(item, kind) {
-    return '<div class="screen ' + kind + '"><img src="' + item.icon + '" alt=""><span>' + item.name + '</span></div>';
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c];
+    });
   }
 
-  function shell(kind, item) {
-    var s = screen(item, kind === 'term' ? 'phos' : (kind === 'slab' || kind === 'crt' ? 'dark' : ''));
-    if (kind === 'candy') return '<div class="dev candy"><i class="ear"></i>' + s + '<i class="pad"></i></div>';
-    if (kind === 'flip') return '<div class="dev flip"><div class="half">' + s + '</div><i class="hinge"></i><div class="half keys"></div></div>';
-    if (kind === 'rotary') return '<div class="dev rotary"><i class="handset"></i><div class="base">' + s + '<i class="dial"></i></div></div>';
-    if (kind === 'slab') return '<div class="dev slab">' + s + '<i class="home"></i></div>';
-    if (kind === 'game') return '<div class="dev game">' + s + '<div class="controls"><i class="dpad"></i><i class="ab"></i></div></div>';
-    if (kind === 'pager') return '<div class="dev pager">' + s + '<i class="led"></i></div>';
-    if (kind === 'pda') return '<div class="dev pda">' + s + '<i class="pda-bar"></i></div>';
-    if (kind === 'mac') return '<div class="dev mac"><div class="bezel">' + s + '</div><div class="chin"><i></i></div></div>';
-    if (kind === 'crt') return '<div class="dev crt"><div class="tube">' + s + '</div><i class="neck"></i><i class="stand"></i></div>';
-    if (kind === 'imac') return '<div class="dev imac"><div class="shell">' + s + '</div><i class="foot"></i></div>';
-    if (kind === 'term') return '<div class="dev term">' + s + '<i class="board"></i></div>';
-    return '<div class="dev laptop"><div class="lid">' + s + '</div><i class="deck"></i></div>';
+  function shell(spec, item) {
+    var s = spec.screen;
+    var box = specBox(spec);
+    var style = 'left:' + (s.x / box.w * 100) + '%;top:' + (s.y / box.h * 100) +
+      '%;width:' + (s.w / box.w * 100) + '%;height:' + (s.h / box.h * 100) +
+      '%;border-radius:' + (s.r / s.w * 100) + '% / ' + (s.r / s.h * 100) + '%';
+    return '<div class="dev ' + spec.id + '">' + spec.svg +
+      '<div class="screen ' + spec.face + '" style="' + style + '"><img src="' + esc(item.icon) + '" alt=""><span>' + esc(item.name) + '</span></div></div>';
+  }
+
+  function specBox(spec) {
+    var m = spec.svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
+    return { w: parseFloat(m[1]), h: parseFloat(m[2]) };
   }
 
   function makeCell(c, r) {
     var item = itemFor(c, r);
-    var kind = deviceFor(c, r);
+    var spec = deviceFor(c, r);
     var el = document.createElement(item.chat ? 'button' : 'a');
     el.className = 'cell';
     el.style.left = (c * CELL) + 'px';
@@ -75,7 +77,7 @@
     }
     el.setAttribute('aria-label', item.name + '. ' + item.desc);
     el.tabIndex = -1;
-    el.innerHTML = shell(kind, item) + '<span class="blurb">' + item.desc + '</span>';
+    el.innerHTML = shell(spec, item) + '<span class="blurb">' + esc(item.desc) + '</span>';
     return el;
   }
 

@@ -1,4 +1,11 @@
 /* Infinite field of retro devices. */
+@font-face {
+  font-family: "Screen Pixel";
+  src: url("fonts/silkscreen.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 :root { --cell: 248px; }
 
 html, body { height: 100%; overflow: hidden; }
@@ -51,6 +58,8 @@ a.cell, button.cell {
 }
 .dev {
   position: relative;
+  flex: none;
+  min-width: 0;
   filter: drop-shadow(0 10px 14px rgba(28, 32, 40, 0.12)) drop-shadow(0 2px 3px rgba(28, 32, 40, 0.06));
   transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
@@ -76,110 +85,117 @@ a.cell, button.cell {
 }
 .cell:hover .blurb, .cell:focus-visible .blurb { opacity: 1; }
 
+.device-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.dev svg { width: 100%; height: auto; overflow: visible; }
+.candy { width: 46%; }
+.flip { width: 54%; }
+.rotary { width: 88%; }
+.phone { width: 42%; }
+.game { width: 64%; }
+.pda { width: 50%; }
+.mac { width: 66%; }
+.crt { width: 86%; }
+.imac { width: 74%; }
+.term { width: 88%; }
+.laptop { width: 90%; }
+
 .screen {
+  position: absolute;
+  box-sizing: border-box;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  background: #f3efe6;
-  overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+  gap: 4%;
+  padding: 6% 7%;
+  container-type: size;
 }
-.screen img { width: 26px; height: 26px; object-fit: cover; border-radius: 6px; }
+.screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.32), transparent 46%);
+  pointer-events: none;
+}
+.screen img {
+  position: relative;
+  z-index: 1;
+  width: auto;
+  height: auto;
+  max-width: 42%;
+  max-height: 32%;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
 .screen span {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
-  padding: 0 4px;
-  box-sizing: border-box;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: #1a1a1a;
+  margin: 0;
+  font-family: "Screen Pixel", ui-monospace, monospace;
+  font-size: 8px;
+  font-size: min(11.2cqw, 16cqh, 11px);
+  font-weight: 400;
+  line-height: 1.32;
+  letter-spacing: 0;
   text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #1a220c;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  text-rendering: optimizeSpeed;
+  overflow-wrap: break-word;
 }
-.screen.dark { background: #121316; }
-.screen.dark span { color: #f3f3f4; }
-.screen.phos { background: #102116; }
-.screen.phos span { color: #c6f7cf; }
 
-/* Candybar */
-.candy { width: 78px; height: 148px; background: linear-gradient(#3a3e46, #24262b); border-radius: 12px; padding: 16px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.candy .ear { width: 28px; height: 4px; border-radius: 4px; background: #1b1d21; }
-.candy .screen { width: 62px; height: 46px; border-radius: 4px; }
-.candy .pad { width: 54px; height: 48px; border-radius: 4px; background: repeating-linear-gradient(90deg, #2a2d33 0 8px, transparent 8px 16px), repeating-linear-gradient(#2a2d33 0 8px, #1e2024 8px 16px); }
-
-/* Flip */
-.flip { width: 86px; display: flex; flex-direction: column; align-items: center; }
-.flip .half { width: 80px; background: linear-gradient(#d5d8dc, #b7bcc2); border-radius: 10px; }
-.flip .half:first-child { padding: 8px; border-radius: 12px 12px 6px 6px; }
-.flip .screen { width: 64px; height: 40px; border-radius: 3px; }
-.flip .hinge { width: 70px; height: 5px; background: #8e939a; border-radius: 2px; }
-.flip .keys { height: 46px; border-radius: 6px 6px 12px 12px; background: repeating-linear-gradient(90deg, rgba(0,0,0,.12) 0 7px, transparent 7px 14px), repeating-linear-gradient(rgba(0,0,0,.12) 0 7px, transparent 7px 14px), #c5c9ce; }
-
-/* Rotary */
-.rotary { width: 150px; }
-.rotary .handset { display: block; height: 16px; margin: 0 8px 4px; border: 7px solid #2a2a2a; border-bottom: 0; border-radius: 16px 16px 0 0; }
-.rotary .base { background: #e6dfd2; border-radius: 16px; padding: 8px 10px 10px; display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.06); }
-.rotary .screen { width: 48px; height: 36px; border-radius: 3px; }
-.rotary .screen span { display: none; }
-.rotary .dial { width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #f7f4ee 0 8px, #2c2c2c 9px 12px, #cfc6b8 13px 100%); box-shadow: inset 0 0 0 6px #d9d1c4, inset 0 0 0 7px #b7ad9e; }
-
-/* Early slab phone */
-.slab { width: 86px; background: #16171a; border-radius: 16px; padding: 8px 7px 8px; display: flex; flex-direction: column; align-items: center; gap: 7px; }
-.slab .screen { width: 72px; height: 96px; border-radius: 4px; }
-.slab .home { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 2px #8d9096; }
-
-/* Handheld */
-.game { width: 118px; background: linear-gradient(#9aa084, #7d8468); border-radius: 10px 10px 16px 16px; padding: 10px 10px 8px; }
-.game .screen { width: 98px; height: 62px; border-radius: 4px; background: #c9d4a4; }
-.game .controls { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-.game .dpad { width: 28px; height: 28px; background: linear-gradient(#2e322c, #2e322c) center/10px 28px no-repeat, linear-gradient(#2e322c, #2e322c) center/28px 10px no-repeat; }
-.game .ab { width: 34px; height: 16px; background: radial-gradient(circle at 8px 8px, #c4493a 6px, transparent 7px), radial-gradient(circle at 26px 8px, #c4493a 6px, transparent 7px); }
-
-/* Pager */
-.pager { width: 148px; height: 58px; background: #3d424a; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; }
-.pager .screen { width: 92px; height: 34px; border-radius: 2px; }
-.pager .led { width: 8px; height: 8px; border-radius: 50%; background: #d4554a; box-shadow: 0 0 6px #d4554a; }
-
-/* PDA */
-.pda { width: 100px; background: #c2bbb0; border-radius: 8px; padding: 8px; }
-.pda .screen { width: 84px; height: 70px; border-radius: 2px; }
-.pda .pda-bar { display: block; height: 14px; margin-top: 7px; background: radial-gradient(circle at 12px 7px, #2c2c2c 3px, transparent 4px), radial-gradient(circle at 32px 7px, #2c2c2c 3px, transparent 4px), radial-gradient(circle at 52px 7px, #2c2c2c 3px, transparent 4px), radial-gradient(circle at 72px 7px, #2c2c2c 3px, transparent 4px); }
-
-/* Macintosh */
-.mac { width: 132px; background: #ddd4c4; border-radius: 8px; padding: 8px 8px 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.05); }
-.mac .bezel { background: #1c1c1c; border-radius: 4px; padding: 6px; }
-.mac .screen { width: 104px; height: 72px; border-radius: 2px; }
-.mac .chin { height: 22px; display: flex; align-items: center; justify-content: center; }
-.mac .chin i { width: 36px; height: 3px; border-radius: 2px; background: #c9bfae; box-shadow: 0 6px 0 #c9bfae; }
-
-/* CRT */
-.crt { width: 150px; display: flex; flex-direction: column; align-items: center; }
-.crt .tube { background: #cfc6b6; border-radius: 18px; padding: 12px; }
-.crt .screen { width: 112px; height: 78px; border-radius: 10px; }
-.crt .neck { width: 28px; height: 8px; background: #b7ad9c; }
-.crt .stand { width: 70px; height: 8px; background: #b7ad9c; border-radius: 0 0 6px 6px; }
-
-/* Bulbous all-in-one */
-.imac { width: 140px; display: flex; flex-direction: column; align-items: center; }
-.imac .shell { width: 132px; background: #6fafa6; border-radius: 18px 18px 22px 22px; padding: 10px; }
-.imac .screen { width: 112px; height: 78px; border-radius: 6px; }
-.imac .foot { width: 54px; height: 14px; background: #d9d4cc; border-radius: 0 0 10px 10px; margin-top: 2px; }
-
-/* Terminal */
-.term { width: 150px; background: #2c312c; border-radius: 8px; padding: 8px; }
-.term .screen { width: 134px; height: 72px; border-radius: 3px; }
-.term .board { display: block; height: 18px; margin-top: 6px; border-radius: 3px; background: repeating-linear-gradient(90deg, #3d443d 0 8px, #323832 8px 10px); }
-
-/* Laptop */
-.laptop { width: 156px; }
-.laptop .lid { background: #cfd3d8; border-radius: 8px 8px 3px 3px; padding: 7px 7px 8px; }
-.laptop .screen { width: 142px; height: 78px; border-radius: 2px; }
-.laptop .deck { display: block; height: 12px; background: linear-gradient(#e4e7eb, #b7bdc4); border-radius: 0 0 8px 8px; box-shadow: inset 0 2px 0 #f4f6f8; }
+.screen.lcd { background: linear-gradient(#d5e28a, #c3d36e); box-shadow: inset 0 0 0 1px rgba(20, 32, 8, 0.28), inset 0 6px 8px rgba(255, 255, 255, 0.28); }
+.screen.amber { background: linear-gradient(#f0d48a, #e2bc58); box-shadow: inset 0 0 0 1px rgba(60, 40, 8, 0.28); }
+.screen.amber span { color: #2a2110; }
+.screen.tft { background: linear-gradient(#f4f1ea, #e7e2d8); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35); }
+.screen.matrix { background: linear-gradient(#b7c85a, #9aaf3c); box-shadow: inset 0 0 10px rgba(30, 40, 8, 0.25); }
+.screen.mono { background: linear-gradient(#d5dcc4, #c3cbae); box-shadow: inset 0 0 0 1px rgba(30, 36, 20, 0.25); }
+.screen.paper { background: linear-gradient(#f7f4ee, #ece6da); color: #1a1a1a; box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.06); }
+.screen.paper span { font-family: var(--sans); font-weight: 560; letter-spacing: -0.03em; color: #1c1c1c; font-size: 9px; font-size: min(12cqw, 14cqh, 13px); line-height: 1.2; }
+.screen.tube {
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, 0.08), transparent 55%),
+    linear-gradient(#1a1c22, #0c0d11);
+  box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.45);
+}
+.screen.tube span { font-family: var(--sans); font-weight: 560; letter-spacing: -0.03em; color: #f3f1ea; font-size: 9px; font-size: min(11cqw, 13cqh, 14px); line-height: 1.2; }
+.screen.aqua { background: linear-gradient(#f3f6f8, #e4eaee); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35); }
+.screen.aqua span { font-family: var(--sans); font-weight: 560; letter-spacing: -0.03em; color: #1a1c1e; font-size: 9px; font-size: min(12cqw, 14cqh, 13px); }
+.screen.gloss {
+  background: radial-gradient(ellipse at 50% 30%, #1a1c22, #07080b 72%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+.screen.gloss img {
+  max-width: 48%;
+  max-height: 40%;
+  border-radius: 22%;
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.screen.gloss span {
+  font-family: var(--sans);
+  font-weight: 560;
+  letter-spacing: -0.03em;
+  color: #f5f6f8;
+  font-size: 9px;
+  font-size: min(11cqw, 7.5cqh, 13px);
+  line-height: 1.15;
+}
+.screen.phos {
+  background:
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 50% 42%, #1c4a32 0%, #07140d 78%);
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.45);
+}
+.screen.phos::before { background: radial-gradient(ellipse at 50% 40%, rgba(150, 255, 180, 0.14), transparent 68%); }
+.screen.phos span {
+  color: #c8ffb0;
+  text-shadow: 0 0 4px rgba(140, 255, 160, 0.85);
+}
 
 .mark {
   position: fixed;

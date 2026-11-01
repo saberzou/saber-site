@@ -574,7 +574,6 @@ function buildRadio() {
 
 buildCandy();
 buildFlip();
-buildRotary();
 buildPhone();
 buildPda();
 buildCrt();
@@ -672,3 +671,353 @@ function buildLamp() {
 
 buildCassette();
 buildLamp();
+
+// ------------------------------------------------------------ more devices
+// Sixteen more, so every project has a device of its own.
+
+function buildPet() {
+  reset();
+  const shell = clay('Shell', '#f2a7b8', 0.4);
+  const plate = clay('Plate', '#fbf3ea', 0.5);
+  const bezel = clay('Bezel', '#3b3236', 0.45);
+  const btn = clay('Btn', '#f7d36a', 0.4);
+  const stand = clay('Stand', '#e7e1d8', 0.35);
+  cyl(stand, 0.07, 0.02, [0, 0.01, 0], { axis: 'y', segs: 30, r2: 0.06 });
+  ball(shell, 0.14, [0, 0.165, 0], [0.9, 1.08, 0.42]);
+  ring(shell, 0.025, 0.006, [0, 0.33, 0], { segs: 18 });
+  cyl(plate, 0.075, 0.01, [0, 0.18, 0.054], { segs: 36 });
+  box(bezel, [0.085, 0.07, 0.006], [0, 0.19, 0.06], { corner: 0.01, bevel: 0.0015 });
+  glass(0.072, 0.058, [0, 0.19, 0.0635]);
+  [-0.035, 0, 0.035].forEach((x) => cyl(btn, 0.011, 0.01, [x, 0.125, 0.056], { segs: 16 }));
+  writeGlb('pet');
+}
+
+function buildDigicam() {
+  reset();
+  const body = clay('Body', '#c9ccd2', 0.32, 0.4);
+  const grip = clay('Grip', '#2c2e33', 0.6);
+  const bezel = clay('Bezel', '#0b0c0e', 0.35);
+  const lens = clay('Lens', '#1a1c20', 0.3, 0.3);
+  const red = clay('Shutter', '#c8402f', 0.4);
+  const w = 0.36, h = 0.22, d = 0.07;
+  slab(body, [w, h, d], [0, 0, 0], { corner: 0.03, bevel: 0.012 });
+  box(grip, [0.05, h * 0.8, 0.01], [w / 2 - 0.035, h * 0.5, d / 2 + 0.002], { corner: 0.012, bevel: 0.003 });
+  box(bezel, [0.23, 0.16, 0.006], [-0.03, h * 0.52, d / 2 + 0.002], { corner: 0.01, bevel: 0.002 });
+  glass(0.21, 0.14, [-0.03, h * 0.52, d / 2 + 0.0055]);
+  // The lens points away from us, out the back.
+  cyl(lens, 0.06, 0.05, [-0.02, h * 0.52, -d / 2 - 0.02], { segs: 32 });
+  cyl(body, 0.068, 0.02, [-0.02, h * 0.52, -d / 2 - 0.004], { segs: 32 });
+  cyl(red, 0.016, 0.012, [0.11, h + 0.005, 0], { axis: 'y', segs: 18 });
+  cyl(grip, 0.022, 0.014, [-0.1, h + 0.006, 0], { axis: 'y', segs: 18 });
+  writeGlb('digicam');
+}
+
+function buildPager() {
+  reset();
+  const body = clay('Body', '#2f6f78', 0.32);
+  const bezel = clay('Bezel', '#132326', 0.4);
+  const btn = clay('Btn', '#d9e4e2', 0.4);
+  const clip = clay('Clip', '#1d2c2f', 0.5);
+  const w = 0.28, h = 0.17, d = 0.07;
+  slab(body, [w, h, d], [0, 0, 0], { corner: 0.04, bevel: 0.016 });
+  box(bezel, [0.22, 0.075, 0.006], [0, h * 0.64, d / 2 + 0.002], { corner: 0.01, bevel: 0.002 });
+  glass(0.2, 0.06, [0, h * 0.64, d / 2 + 0.0055]);
+  [-0.07, -0.023, 0.023, 0.07].forEach((x) => box(btn, [0.035, 0.018, 0.008], [x, h * 0.22, d / 2 + 0.003], { corner: 0.008, bevel: 0.002 }));
+  slab(clip, [0.1, h * 0.8, 0.012], [0, h * 0.1, -d / 2 - 0.006], { corner: 0.01, bevel: 0.003 });
+  writeGlb('pager');
+}
+
+function buildLearner() {
+  reset();
+  const shell = clay('Shell', '#e2622a', 0.42);
+  const key = clay('Key', '#f2d36b', 0.45);
+  const bezel = clay('Bezel', '#2a120a', 0.4);
+  const grille = clay('Grille', '#a8451c', 0.6);
+  const foot = clay('Foot', '#b44a1c', 0.5);
+  // Propped up on its back foot like a book on a desk.
+  slab(foot, [0.34, 0.03, 0.18], [0, 0, -0.04], { corner: 0.02, bevel: 0.01 });
+  within({ pos: [0, 0.02, 0.05], rot: [-0.55, 0, 0] }, () => {
+    slab(shell, [0.44, 0.36, 0.05], [0, 0, 0], { corner: 0.05, bevel: 0.016 });
+    ring(shell, 0.08, 0.014, [0, 0.36, 0], { arc: Math.PI, segs: 24 });
+    box(bezel, [0.3, 0.07, 0.006], [-0.03, 0.29, 0.027], { corner: 0.01, bevel: 0.002 });
+    glass(0.28, 0.054, [-0.03, 0.29, 0.0305]);
+    cyl(grille, 0.032, 0.008, [0.165, 0.29, 0.027], { segs: 24 });
+    keys(key, { cols: 7, rows: 4, w: 0.04, h: 0.032, gx: 0.012, gy: 0.012, x: 0, y: 0.205, z: 0.029, corner: 0.006 });
+  });
+  writeGlb('learner');
+}
+
+function buildWideHandheld() {
+  reset();
+  const body = clay('Body', '#6b5aa8', 0.36);
+  const bezel = clay('Bezel', '#1b1a24', 0.4);
+  const pad = clay('Pad', '#24222c', 0.45);
+  const btn = clay('Btn', '#e9e4f5', 0.4);
+  const w = 0.44, h = 0.2, d = 0.06;
+  slab(body, [w, h, d], [0, 0, 0], { corner: 0.08, bevel: 0.016 });
+  box(bezel, [0.2, 0.15, 0.006], [0, h * 0.52, d / 2 + 0.002], { corner: 0.012, bevel: 0.002 });
+  glass(0.17, 0.12, [0, h * 0.52, d / 2 + 0.0055]);
+  box(pad, [0.06, 0.02, 0.008], [-0.155, h * 0.55, d / 2 + 0.003], { corner: 0.004, bevel: 0.002 });
+  box(pad, [0.02, 0.06, 0.008], [-0.155, h * 0.55, d / 2 + 0.003], { corner: 0.004, bevel: 0.002 });
+  cyl(btn, 0.014, 0.01, [0.14, h * 0.48, d / 2 + 0.003], { segs: 18 });
+  cyl(btn, 0.014, 0.01, [0.175, h * 0.6, d / 2 + 0.003], { segs: 18 });
+  slab(pad, [0.08, 0.012, 0.03], [-0.15, h - 0.004, 0], { corner: 0.006, bevel: 0.003 });
+  slab(pad, [0.08, 0.012, 0.03], [0.15, h - 0.004, 0], { corner: 0.006, bevel: 0.003 });
+  writeGlb('widehandheld');
+}
+
+function buildTv() {
+  reset();
+  const wood = clay('Wood', '#8a5a34', 0.55);
+  const trim = clay('Trim', '#d8c7a6', 0.45);
+  const bezel = clay('Bezel', '#171513', 0.35);
+  const knob = clay('Knob', '#2b2420', 0.4);
+  const chrome = clay('Chrome', '#c8c9cc', 0.25, 0.8);
+  const w = 0.44, h = 0.32, d = 0.3;
+  slab(wood, [w, h, d], [0, 0.04, 0], { corner: 0.03, bevel: 0.016 });
+  box(trim, [0.32, 0.25, 0.008], [-0.045, 0.04 + h * 0.5, d / 2 + 0.001], { corner: 0.03, bevel: 0.003 });
+  box(bezel, [0.29, 0.22, 0.006], [-0.045, 0.04 + h * 0.5, d / 2 + 0.006], { corner: 0.04, bevel: 0.002 });
+  glass(0.26, 0.195, [-0.045, 0.04 + h * 0.5, d / 2 + 0.0095]);
+  cyl(knob, 0.022, 0.018, [0.165, 0.04 + h * 0.7, d / 2 + 0.006], { segs: 20 });
+  cyl(knob, 0.018, 0.018, [0.165, 0.04 + h * 0.42, d / 2 + 0.006], { segs: 20 });
+  for (let i = 0; i < 4; i++) box(knob, [0.04, 0.004, 0.004], [0.165, 0.04 + h * 0.2 - i * 0.012, d / 2 + 0.002], { bevel: 0 });
+  [-0.16, 0.16].forEach((x) => slab(knob, [0.025, 0.045, 0.025], [x, 0, 0], { bevel: 0.006 }));
+  // Rabbit ears.
+  cyl(knob, 0.03, 0.02, [0, 0.04 + h + 0.01, -0.03], { axis: 'y', segs: 20 });
+  within({ pos: [0, 0.04 + h + 0.02, -0.03], rot: [0, 0, 0.45] }, () => cyl(chrome, 0.004, 0.24, [0, 0.12, 0], { axis: 'y', segs: 8 }));
+  within({ pos: [0, 0.04 + h + 0.02, -0.03], rot: [0, 0, -0.45] }, () => cyl(chrome, 0.004, 0.24, [0, 0.12, 0], { axis: 'y', segs: 8 }));
+  writeGlb('tv');
+}
+
+function buildArcade() {
+  reset();
+  const side = clay('Side', '#2b3a8c', 0.45);
+  const front = clay('Front', '#1a1d26', 0.5);
+  const bezel = clay('Bezel', '#06070a', 0.35);
+  const marquee = clay('Marquee', '#f3c94c', 0.4);
+  const red = clay('Red', '#d63b30', 0.35);
+  const btn = clay('Btn', '#f2efe6', 0.4);
+  const w = 0.3, d = 0.3;
+  slab(side, [w, 0.3, d], [0, 0, 0], { corner: 0.01, bevel: 0.01 });
+  // Control deck, tipped toward the player.
+  box(front, [w, 0.04, 0.12], [0, 0.31, 0.11], { corner: 0.01, bevel: 0.008, rot: [0.25, 0, 0] });
+  cyl(front, 0.006, 0.04, [-0.06, 0.35, 0.12], { axis: 'y', segs: 10 });
+  ball(red, 0.018, [-0.06, 0.375, 0.12]);
+  [0.03, 0.07, 0.11].forEach((x) => cyl(btn, 0.012, 0.012, [x, 0.335, 0.12], { axis: 'y', segs: 14 }));
+  // Upper cabinet and the screen, leaning back.
+  slab(side, [w, 0.3, 0.2], [0, 0.32, -0.05], { corner: 0.01, bevel: 0.01 });
+  within({ pos: [0, 0.47, 0.05], rot: [-0.18, 0, 0] }, () => {
+    box(bezel, [0.25, 0.2, 0.01], [0, 0, 0], { corner: 0.01, bevel: 0.003 });
+    glass(0.22, 0.17, [0, 0, 0.0055]);
+  });
+  slab(side, [w, 0.07, 0.22], [0, 0.6, -0.06], { corner: 0.01, bevel: 0.008 });
+  box(marquee, [w * 0.86, 0.05, 0.008], [0, 0.635, 0.052], { corner: 0.008, bevel: 0.002 });
+  writeGlb('arcade');
+}
+
+function buildTypewriter() {
+  reset();
+  const body = clay('Body', '#9cc9b8', 0.4);
+  const key = clay('Key', '#f4f1ea', 0.45);
+  const keyRim = clay('KeyRim', '#2c2f2e', 0.4);
+  const roller = clay('Roller', '#26292a', 0.45);
+  const chrome = clay('Chrome', '#cfd2d4', 0.25, 0.8);
+  slab(body, [0.44, 0.1, 0.3], [0, 0, 0], { corner: 0.03, bevel: 0.02 });
+  // Keys on a sloped front deck.
+  within({ pos: [0, 0.1, 0.07], rot: [0.32, 0, 0] }, () => {
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 9; c++) {
+        const x = -0.16 + c * 0.04 + (r % 2) * 0.015;
+        cyl(keyRim, 0.015, 0.006, [x, 0.008, -0.05 + r * 0.04], { axis: 'y', segs: 14 });
+        cyl(key, 0.012, 0.004, [x, 0.012, -0.05 + r * 0.04], { axis: 'y', segs: 14 });
+      }
+    }
+  });
+  // Carriage and platen with the sheet rising out of it.
+  slab(body, [0.4, 0.06, 0.1], [0, 0.09, -0.09], { corner: 0.02, bevel: 0.012 });
+  cyl(roller, 0.032, 0.42, [0, 0.17, -0.09], { axis: 'x', segs: 24 });
+  cyl(chrome, 0.012, 0.05, [-0.24, 0.17, -0.09], { axis: 'x', segs: 14 });
+  box(clay('Paper', '#fbf8f1', 0.7), [0.27, 0.23, 0.003], [0, 0.29, -0.075], { bevel: 0, rot: [-0.12, 0, 0] });
+  glass(0.24, 0.17, [0, 0.31, -0.071], [-0.12, 0, 0]);
+  writeGlb('typewriter');
+}
+
+function buildScope() {
+  reset();
+  const body = clay('Body', '#c9cfd6', 0.42);
+  const panel = clay('Panel', '#3a4250', 0.5);
+  const bezel = clay('Bezel', '#0b100d', 0.35);
+  const knob = clay('Knob', '#e9e4da', 0.4);
+  const red = clay('Red', '#c8402f', 0.4);
+  const w = 0.44, h = 0.3, d = 0.32;
+  slab(body, [w, h, d], [0, 0.02, 0], { corner: 0.02, bevel: 0.014 });
+  box(panel, [w * 0.94, h * 0.88, 0.008], [0, 0.02 + h / 2, d / 2 + 0.001], { corner: 0.012, bevel: 0.002 });
+  cyl(bezel, 0.1, 0.012, [-0.09, 0.02 + h * 0.52, d / 2 + 0.004], { segs: 40 });
+  glass(0.15, 0.15, [-0.09, 0.02 + h * 0.52, d / 2 + 0.0105]);
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) cyl(c === 2 && r === 0 ? red : knob, 0.014, 0.016, [0.07 + c * 0.045, 0.02 + h * 0.75 - r * 0.07, d / 2 + 0.008], { segs: 16 });
+  [-0.17, 0.17].forEach((x) => slab(panel, [0.04, 0.02, 0.28], [x, 0, 0], { bevel: 0.006 }));
+  cyl(panel, 0.012, 0.36, [0, 0.02 + h + 0.03, 0.02], { axis: 'x', segs: 12 });
+  [-0.18, 0.18].forEach((x) => slab(panel, [0.014, 0.04, 0.014], [x, 0.02 + h - 0.01, 0.02], { bevel: 0.003 }));
+  writeGlb('scope');
+}
+
+function buildEreader() {
+  reset();
+  const body = clay('Body', '#3a3a3c', 0.45);
+  const btn = clay('Btn', '#5a5a5e', 0.45);
+  const stand = clay('Stand', '#d8d2c6', 0.45);
+  slab(stand, [0.22, 0.03, 0.14], [0, 0, -0.02], { corner: 0.02, bevel: 0.01 });
+  within({ pos: [0, 0.02, 0.0], rot: [-0.2, 0, 0] }, () => {
+    slab(body, [0.3, 0.42, 0.025], [0, 0, 0], { corner: 0.02, bevel: 0.008 });
+    glass(0.25, 0.33, [0, 0.235, 0.0135]);
+    box(btn, [0.01, 0.06, 0.006], [0.14, 0.24, 0.012], { corner: 0.004, bevel: 0.001 });
+    box(btn, [0.01, 0.06, 0.006], [-0.14, 0.24, 0.012], { corner: 0.004, bevel: 0.001 });
+    box(btn, [0.06, 0.012, 0.004], [0, 0.04, 0.0135], { corner: 0.005, bevel: 0.001 });
+  });
+  writeGlb('ereader');
+}
+
+function buildMusicPlayer() {
+  reset();
+  const face = clay('Face', '#f4f3ef', 0.3);
+  const back = clay('Back', '#c4c7cc', 0.22, 0.85);
+  const bezel = clay('Bezel', '#111214', 0.35);
+  const wheel = clay('Wheel', '#e2e2e0', 0.35);
+  const centre = clay('Centre', '#fbfbfa', 0.3);
+  const dock = clay('Dock', '#e9e8e4', 0.4);
+  slab(dock, [0.24, 0.05, 0.12], [0, 0, 0], { corner: 0.04, bevel: 0.016 });
+  within({ pos: [0, 0.04, 0], rot: [-0.12, 0, 0] }, () => {
+    slab(back, [0.2, 0.34, 0.04], [0, 0, -0.004], { corner: 0.025, bevel: 0.01 });
+    slab(face, [0.196, 0.336, 0.012], [0, 0.002, 0.016], { corner: 0.024, bevel: 0.004 });
+    box(bezel, [0.16, 0.12, 0.004], [0, 0.255, 0.023], { corner: 0.006, bevel: 0.001 });
+    glass(0.15, 0.11, [0, 0.255, 0.0255]);
+    cyl(wheel, 0.06, 0.004, [0, 0.105, 0.023], { segs: 40 });
+    cyl(centre, 0.022, 0.006, [0, 0.105, 0.025], { segs: 28 });
+  });
+  writeGlb('musicplayer');
+}
+
+function buildCalculator() {
+  reset();
+  const body = clay('Body', '#3b3632', 0.45);
+  const plate = clay('Plate', '#bfa77a', 0.35, 0.5);
+  const bezel = clay('Bezel', '#1a1714', 0.4);
+  const key = clay('Key', '#5d5650', 0.45);
+  const op = clay('Op', '#d86a3a', 0.4);
+  const solar = clay('Solar', '#2a2018', 0.3, 0.3);
+  slab(body, [0.24, 0.05, 0.12], [0, 0, -0.04], { corner: 0.02, bevel: 0.01 });
+  within({ pos: [0, 0.02, 0.02], rot: [-0.32, 0, 0] }, () => {
+    slab(body, [0.24, 0.38, 0.03], [0, 0, 0], { corner: 0.02, bevel: 0.01 });
+    box(plate, [0.22, 0.12, 0.004], [0, 0.31, 0.016], { corner: 0.012, bevel: 0.001 });
+    box(solar, [0.1, 0.022, 0.004], [0.04, 0.355, 0.0185], { corner: 0.003, bevel: 0.001 });
+    box(bezel, [0.19, 0.06, 0.004], [0, 0.3, 0.0185], { corner: 0.005, bevel: 0.001 });
+    glass(0.17, 0.045, [0, 0.3, 0.021]);
+    keys(key, { cols: 4, rows: 5, w: 0.04, h: 0.03, gx: 0.012, gy: 0.012, x: -0.006, y: 0.22, z: 0.018, corner: 0.006 });
+    for (let r = 0; r < 4; r++) box(op, [0.03, 0.03, 0.008], [0.098, 0.22 - r * 0.042, 0.018], { corner: 0.006, bevel: 0.002 });
+  });
+  writeGlb('calculator');
+}
+
+function buildClockRadio() {
+  reset();
+  const shell = clay('Shell', '#e8dccb', 0.45);
+  const wood = clay('Wood', '#7a4e2e', 0.55);
+  const grille = clay('Grille', '#5b4b3c', 0.6);
+  const bezel = clay('Bezel', '#140b08', 0.35);
+  const bar = clay('Bar', '#c9b79a', 0.4);
+  const w = 0.42, h = 0.18, d = 0.2;
+  slab(wood, [w, h, d], [0, 0, 0], { corner: 0.03, bevel: 0.016 });
+  box(shell, [w * 0.94, h * 0.84, 0.008], [0, h * 0.5, d / 2 + 0.001], { corner: 0.02, bevel: 0.003 });
+  box(bezel, [0.2, 0.1, 0.006], [0.085, h * 0.5, d / 2 + 0.006], { corner: 0.01, bevel: 0.002 });
+  glass(0.18, 0.08, [0.085, h * 0.5, d / 2 + 0.0095]);
+  cyl(grille, 0.055, 0.008, [-0.12, h * 0.5, d / 2 + 0.005], { segs: 32 });
+  for (let i = 0; i < 4; i++) cyl(shell, 0.04 - i * 0.01, 0.009, [-0.12, h * 0.5, d / 2 + 0.006], { segs: 30 });
+  slab(bar, [0.24, 0.016, 0.06], [0, h - 0.004, 0], { corner: 0.01, bevel: 0.005 });
+  writeGlb('clockradio');
+}
+
+function buildDualScreen() {
+  reset();
+  const shell = clay('Shell', '#d23c3c', 0.36);
+  const inner = clay('Inner', '#2a2b30', 0.45);
+  const bezel = clay('Bezel', '#0c0d10', 0.35);
+  const btn = clay('Btn', '#f0ede6', 0.4);
+  const w = 0.32, dep = 0.2, t = 0.024;
+  box(shell, [w, dep, t], [0, t / 2, 0.04], { corner: 0.03, bevel: 0.008, rot: [-Math.PI / 2, 0, 0] });
+  box(bezel, [0.15, 0.11, 0.004], [0, t + 0.001, 0.04], { corner: 0.006, bevel: 0.001, rot: [-Math.PI / 2, 0, 0] });
+  box(inner, [0.13, 0.095, 0.002], [0, t + 0.003, 0.04], { bevel: 0, rot: [-Math.PI / 2, 0, 0] });
+  box(btn, [0.04, 0.012, 0.008], [-0.115, t + 0.003, 0.04], { corner: 0.003, bevel: 0.001, rot: [-Math.PI / 2, 0, 0] });
+  box(btn, [0.012, 0.04, 0.008], [-0.115, t + 0.003, 0.04], { corner: 0.003, bevel: 0.001, rot: [-Math.PI / 2, 0, 0] });
+  [[0.11, 0.025], [0.13, 0.05], [0.09, 0.05], [0.11, 0.075]].forEach(([x, z]) => cyl(btn, 0.009, 0.008, [x, t + 0.003, z], { axis: 'y', segs: 14 }));
+  cyl(inner, 0.012, w * 0.9, [0, t + 0.008, -dep / 2 + 0.05], { axis: 'x', segs: 16 });
+  within({ pos: [0, t + 0.008, -dep / 2 + 0.05], rot: [-0.3, 0, 0] }, () => {
+    slab(shell, [w, 0.2, 0.02], [0, 0, -0.01], { corner: 0.03, bevel: 0.007 });
+    box(bezel, [0.2, 0.15, 0.004], [0, 0.105, 0.001], { corner: 0.006, bevel: 0.001 });
+    glass(0.18, 0.135, [0, 0.105, 0.0035]);
+  });
+  writeGlb('dualscreen');
+}
+
+function buildWatch() {
+  reset();
+  const pillow = clay('Pillow', '#e9e2d6', 0.7);
+  const plinth = clay('Plinth', '#3b3a38', 0.5);
+  const steel = clay('Steel', '#c4c6ca', 0.22, 0.85);
+  const strap = clay('Strap', '#1f2023', 0.55);
+  const bezel = clay('Bezel', '#0c0d0f', 0.35);
+  const btn = clay('Btn', '#9fa3aa', 0.3, 0.7);
+  slab(plinth, [0.28, 0.05, 0.2], [0, 0, 0], { corner: 0.02, bevel: 0.01 });
+  ball(pillow, 0.1, [0, 0.12, 0], [1.1, 0.75, 0.75]);
+  // The strap wraps round the pillow; the case faces us.
+  ring(strap, 0.085, 0.018, [0, 0.12, 0], { segs: 36, rot: [0, Math.PI / 2, 0] });
+  slab(steel, [0.15, 0.17, 0.04], [0, 0.04, 0.115], { corner: 0.03, bevel: 0.012 });
+  box(bezel, [0.13, 0.14, 0.004], [0, 0.125, 0.1365], { corner: 0.022, bevel: 0.001 });
+  glass(0.11, 0.115, [0, 0.125, 0.139]);
+  box(btn, [0.008, 0.03, 0.02], [0.079, 0.15, 0.115], { corner: 0.003, bevel: 0.002 });
+  box(btn, [0.008, 0.03, 0.02], [0.079, 0.1, 0.115], { corner: 0.003, bevel: 0.002 });
+  writeGlb('watch');
+}
+
+function buildCamcorder() {
+  reset();
+  const body = clay('Body', '#2e3036', 0.42);
+  const accent = clay('Accent', '#8d929c', 0.3, 0.6);
+  const lens = clay('Lens', '#0f1013', 0.25, 0.3);
+  const glassMat = clay('Glass', '#2a3e5a', 0.15, 0.4);
+  const bezel = clay('Bezel', '#08090b', 0.35);
+  const red = clay('Rec', '#d33a2c', 0.35);
+  slab(body, [0.34, 0.17, 0.15], [0.02, 0, 0], { corner: 0.04, bevel: 0.018 });
+  // Lens barrel out to the left.
+  cyl(accent, 0.062, 0.05, [-0.17, 0.09, 0], { axis: 'x', segs: 30 });
+  cyl(lens, 0.055, 0.04, [-0.21, 0.09, 0], { axis: 'x', segs: 30 });
+  cyl(glassMat, 0.04, 0.004, [-0.231, 0.09, 0], { axis: 'x', segs: 30 });
+  // Viewfinder on top at the back.
+  cyl(body, 0.022, 0.12, [0.1, 0.19, -0.03], { axis: 'x', segs: 18 });
+  cyl(red, 0.012, 0.012, [0.12, 0.17, 0.05], { axis: 'y', segs: 14 });
+  // The flip-out screen, swung open to face us.
+  within({ pos: [-0.05, 0.03, 0.078], rot: [0, -0.35, 0] }, () => {
+    slab(body, [0.17, 0.12, 0.016], [0.085, 0, 0.008], { corner: 0.012, bevel: 0.005 });
+    box(bezel, [0.15, 0.1, 0.004], [0.085, 0.06, 0.0165], { corner: 0.005, bevel: 0.001 });
+    glass(0.14, 0.09, [0.085, 0.06, 0.019]);
+  });
+  // Hand strap on the right.
+  box(clay('Strap', '#171719', 0.6), [0.16, 0.03, 0.02], [0.05, 0.11, -0.085], { corner: 0.01, bevel: 0.006 });
+  writeGlb('camcorder');
+}
+
+buildPet();
+buildDigicam();
+buildPager();
+buildLearner();
+buildWideHandheld();
+buildTv();
+buildArcade();
+buildTypewriter();
+buildScope();
+buildEreader();
+buildMusicPlayer();
+buildCalculator();
+buildClockRadio();
+buildDualScreen();
+buildWatch();
+buildCamcorder();

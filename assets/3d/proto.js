@@ -13,23 +13,41 @@ const SPAN = 1.2;
 // list in index.html adds a device here; nothing else needs editing.
 const MODEL_FACE = {
   handheld: 'lcd', macintosh: 'paper', phone: 'gloss', term: 'phos', flip: 'tft', pda: 'mono',
-  imac: 'aqua', crt: 'tube', laptop: 'paper', rotary: 'amber', candy: 'lcd'
+  imac: 'aqua', crt: 'tube', laptop: 'paper', candy: 'lcd',
+  pet: 'lcd', digicam: 'gloss', pager: 'mono', learner: 'amber', widehandheld: 'tft', tv: 'tube',
+  arcade: 'phos', typewriter: 'paper', scope: 'phos', ereader: 'mono', musicplayer: 'tft',
+  calculator: 'lcd', clockradio: 'amber', dualscreen: 'lcd', watch: 'mono', camcorder: 'gloss'
 };
-const MODEL_ORDER = ['candy', 'imac', 'flip', 'term', 'pda', 'crt', 'phone', 'laptop', 'rotary', 'macintosh', 'handheld'];
-// Each project lives on the same device everywhere, chosen to suit it:
-// phone apps on handhelds, web things on computers.
+const MODEL_ORDER = Object.keys(MODEL_FACE);
+
+// Every project has a device of its own, chosen to suit it.
 const PROJECT_DEVICE = {
-  'Movy': 'phone', 'Bubbly': 'phone', 'Movy Reel': 'phone',
-  'Tackie': 'candy', 'Littlebook': 'candy',
-  'Sequence': 'flip', 'Cards of Answers': 'flip',
-  'BingBang': 'pda', 'Atticus': 'pda',
-  'Daypond': 'handheld', 'Pixel Dailies': 'handheld',
-  'Finwords': 'rotary', 'Between Floors': 'rotary',
-  'SaberOS': 'macintosh', 'About Me': 'macintosh',
-  'Wallpapers': 'imac', 'Movie Oracle': 'imac', 'Artuzzle': 'imac',
-  'Koi Pond': 'crt', 'Axel Art': 'crt',
-  'Axiom Thoughts': 'term', 'Agent Terrarium': 'term', 'JSON Prompts': 'term',
-  'Bug Explorer': 'laptop', 'Archer Travel': 'laptop', 'Postcards from Mars': 'laptop'
+  'Movy': 'phone',
+  'BingBang': 'pet',
+  'Sequence': 'digicam',
+  'Tackie': 'candy',
+  'Bubbly': 'pager',
+  'Daypond': 'handheld',
+  'Finwords': 'learner',
+  'SaberOS': 'macintosh',
+  'Wallpapers': 'imac',
+  'Bug Explorer': 'widehandheld',
+  'Koi Pond': 'watch',
+  'Archer Travel': 'laptop',
+  'Cards of Answers': 'arcade',
+  'Axiom Thoughts': 'typewriter',
+  'Agent Terrarium': 'scope',
+  'JSON Prompts': 'term',
+  'Between Floors': 'ereader',
+  'Atticus': 'pda',
+  'Postcards from Mars': 'flip',
+  'Axel Art': 'crt',
+  'Littlebook': 'dualscreen',
+  'Movie Oracle': 'camcorder',
+  'Movy Reel': 'tv',
+  'Artuzzle': 'clockradio',
+  'Pixel Dailies': 'calculator',
+  'About Me': 'musicplayer'
 };
 // A project added later without an entry above still gets a steady device.
 function deviceFor(name) {
@@ -99,12 +117,14 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#e8e9ec');
+scene.background = new THREE.Color('#ced0d6');
 
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 80);
 const iso = new THREE.Vector3(1, 1, 1).normalize();
 const DIST = 14;
 const target = new THREE.Vector3(0, 0.18, 0);
+const panMove = new THREE.Vector3();
+const panForward = new THREE.Vector3();
 const panRight = new THREE.Vector3();
 const panUp = new THREE.Vector3();
 
@@ -141,17 +161,19 @@ const fill = new THREE.DirectionalLight('#e7eef8', 0.45);
 fill.position.set(-4, 3.5, -2);
 scene.add(fill);
 
-const paper = new THREE.Color('#e8e9ec');
-const ink = new THREE.Color('#30281c');
-const DAY = { paper: new THREE.Color('#e8e9ec'), ink: new THREE.Color('#30281c'), hemi: 0.85, key: 1.85, fill: 0.45, shadow: 0.32, grid: 0.075 };
-const NIGHT = { paper: new THREE.Color('#2a2c33'), ink: new THREE.Color('#efe6d2'), hemi: 0.3, key: 0.45, fill: 0.1, shadow: 0.45, grid: 0.11 };
+const paper = new THREE.Color('#ced0d6');
+const ink = new THREE.Color('#1c1712');
+// The day floor is the soft gray from the first 3D build; the background
+// matches it exactly, so the floor never shows an edge.
+const DAY = { paper: new THREE.Color('#ced0d6'), ink: new THREE.Color('#1c1712'), hemi: 0.85, key: 1.85, fill: 0.45, shadow: 0.32, grid: 0.16 };
+const NIGHT = { paper: new THREE.Color('#2a2c33'), ink: new THREE.Color('#efe6d2'), hemi: 0.3, key: 0.45, fill: 0.1, shadow: 0.45, grid: 0.045 };
 const KEY_DAY = new THREE.Color('#fff8f0');
 const KEY_NIGHT = new THREE.Color('#9db0ff');
 const groundMat = new THREE.ShaderMaterial({
   uniforms: {
     paper: { value: paper },
     ink: { value: ink },
-    strength: { value: 0.075 },
+    strength: { value: 0.16 },
     px: { value: 0.004 },
     span: { value: SPAN }
   },
@@ -579,8 +601,14 @@ stage.addEventListener('pointermove', function (e) {
   drag.x = e.clientX;
   drag.y = e.clientY;
   const worldPerPx = (camera.top - camera.bottom) / stage.clientHeight;
-  target.addScaledVector(panRight, -dx * worldPerPx);
-  target.addScaledVector(panUp, dy * worldPerPx);
+  // Slide along the floor: take the screen-space move and drop it onto the
+  // ground plane along the view direction, so the camera's height never
+  // drifts and the floor never leaves the clipping range.
+  panMove.copy(panRight).multiplyScalar(-dx * worldPerPx).addScaledVector(panUp, dy * worldPerPx);
+  camera.getWorldDirection(panForward);
+  panMove.addScaledVector(panForward, -panMove.y / panForward.y);
+  target.x += panMove.x;
+  target.z += panMove.z;
   if (hint) hint.classList.add('gone');
 });
 // ------------------------------------------------------------- the peek card
@@ -809,13 +837,21 @@ function glowTexture() {
   const c = document.createElement('canvas');
   c.width = c.height = 128;
   const g = c.getContext('2d');
-  const grad = g.createRadialGradient(64, 64, 4, 64, 64, 64);
-  grad.addColorStop(0, 'rgba(255,255,255,0.9)');
-  grad.addColorStop(0.4, 'rgba(255,255,255,0.32)');
-  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  // Opaque: black adds nothing under additive blending. Soft alpha in a
+  // canvas texture comes out as coloured speckles on iPad Safari.
+  g.fillStyle = '#000';
+  g.fillRect(0, 0, 128, 128);
+  const grad = g.createRadialGradient(64, 64, 2, 64, 64, 62);
+  grad.addColorStop(0, '#e6e6e6');
+  grad.addColorStop(0.35, '#5c5c5c');
+  grad.addColorStop(0.7, '#141414');
+  grad.addColorStop(1, '#000');
   g.fillStyle = grad;
   g.fillRect(0, 0, 128, 128);
   glowTex = new THREE.CanvasTexture(c);
+  glowTex.colorSpace = THREE.SRGBColorSpace;
+  glowTex.generateMipmaps = false;
+  glowTex.minFilter = THREE.LinearFilter;
   return glowTex;
 }
 
@@ -840,7 +876,7 @@ function makeHalo(screenMesh, color) {
   sprite.position.applyMatrix4(screenMesh.matrix).add(TOWARD_CAMERA);
   sprite.raycast = function () {};
   const span = Math.max(size.x, Math.hypot(size.y, size.z));
-  sprite.scale.set(span * 2.2, span * 2.2, 1);
+  sprite.scale.set(span * 1.7, span * 1.7, 1);
   sprite.renderOrder = 2;
   return sprite;
 }

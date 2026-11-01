@@ -4,328 +4,130 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://saber-site-chat.vercel.app; object-src 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://saber-site-chat.vercel.app; object-src 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
-<meta name="description" content="Saber Zou — designer and builder in Beijing. Quiet iOS apps and small experiments in AI, art, and play.">
-<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Saber Zou — designer and builder in Beijing. Small experiments in AI, art, and play, and seven calm iPhone apps.">
+<meta name="theme-color" content="#e8e9ec">
 <title>Saber Zou</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='15' rx='8' ry='6' fill='%23FF7A1A'/%3E%3Cpath d='M10 15 C6 12 3 14 4 17 C7 17 10 16 12 15Z' fill='%23FF6A00'/%3E%3Crect x='12' y='12' width='10' height='4' rx='2' fill='%23161616'/%3E%3Crect x='14' y='13' width='1.6' height='2.4' rx='.8' fill='%23FFD966'/%3E%3Crect x='18.2' y='13' width='1.6' height='2.4' rx='.8' fill='%23FFD966'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e8e9ec'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia' font-size='16' fill='%23161616'%3ES%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="images/icons/me.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
-<script>
-try {
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.documentElement.classList.add('motion');
-  }
-} catch (e) {}
-</script>
-<script src="vendor/gsap.min.js"></script>
 <link rel="stylesheet" href="assets/archer-chat.css">
-<link rel="stylesheet" href="assets/journey.css">
+<link rel="stylesheet" href="assets/home.css">
+<script src="vendor/gsap.min.js"></script>
 </head>
-<body id="top">
-<a class="skip" href="#desk">Skip to the list of work</a>
+<body>
+<a class="skip" href="#apps">Skip to apps</a>
+<main class="page">
+  <header class="top">
+    <div class="archer" id="archer" role="button" tabindex="0" aria-label="Chat with Archer" aria-haspopup="dialog">
+      <svg class="archer-body" id="archer-svg" viewBox="0 0 100 100" aria-hidden="true">
+        <g id="fin-left">
+          <path d="M25 48 C 17 49, 10 54, 8 62 C 15 64, 23 59, 28 55 Z" fill="#FF6A00" stroke="#FF6A00" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M23 53 C 18 55, 14 58, 12 61" fill="none" stroke="#D94B0F" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>
+        </g>
+        <g id="fin-right">
+          <path d="M75 48 C 83 49, 90 54, 92 62 C 85 64, 77 59, 72 55 Z" fill="#FF6A00" stroke="#FF6A00" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M77 53 C 82 55, 86 58, 88 61" fill="none" stroke="#D94B0F" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>
+        </g>
+        <g id="archer-torso">
+          <rect x="20" y="28" width="60" height="46" rx="23" fill="#FF6A00"/>
+          <path d="M25 62 Q 50 76 75 62 Q 50 81 25 62 Z" fill="#D94B0F" opacity="0.45"/>
+          <rect x="28" y="38" width="44" height="17" rx="8.5" fill="#141414"/>
+          <ellipse cx="39" cy="42" rx="6" ry="2" fill="#fff" opacity="0.14"/>
+          <g id="archer-eyes">
+            <rect x="38" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>
+            <rect x="57" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <p class="where">
+      <svg class="dial" viewBox="0 0 64 40" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+          <line x1="6" y1="28" x2="10" y2="22"/>
+          <line x1="12" y1="24" x2="15" y2="16"/>
+          <line x1="18" y1="20" x2="20" y2="11"/>
+          <line x1="25" y1="17" x2="26" y2="7"/>
+          <line x1="32" y1="16" x2="32" y2="6"/>
+          <line x1="39" y1="17" x2="38" y2="7"/>
+          <line x1="46" y1="20" x2="44" y2="11"/>
+          <line x1="52" y1="24" x2="49" y2="16"/>
+          <line x1="58" y1="28" x2="54" y2="22"/>
+        </g>
+      </svg>
+      Beijing
+    </p>
+  </header>
 
-<header class="topbar">
-  <h1 class="mark"><a href="#top">Saber Zou</a></h1>
-  <nav class="topnav" aria-label="Primary">
-    <button id="archer-chat-open" type="button">Chat with Archer</button>
-    <a href="os.html">SaberOS</a>
-    <a href="https://github.com/saberzou" target="_blank" rel="noopener noreferrer">GitHub<span class="sr"> (opens in a new tab)</span></a>
-    <a href="mailto:saberzou@gmail.com">Email</a>
-  </nav>
-</header>
-
-<main>
-  <div class="journey" id="journey" style="--scenes: 9">
-    <div class="stage">
-      <div class="frame">
-        <div class="plate">
-          <div class="worlds" id="worlds">
-
-            <section class="world is-active" data-label="Beijing">
-              <div class="art art-beijing" style="background:#e6e1d8">
-                <div class="layer layer-far">
-                  <img src="assets/beijing.svg" alt="">
-                </div>
-                <div class="layer layer-near" aria-hidden="true">
-                  <i class="ripple live" style="left:46%;top:42%"></i>
-                  <i class="ripple live" style="left:52%;top:58%;animation-delay:1.6s"></i>
-                  <i class="ripple live" style="left:40%;top:30%;animation-delay:3s"></i>
-                </div>
-              </div>
-              <div class="caption">
-                <h2>Beijing</h2>
-                <p>Designer and builder. Small experiments in AI, art, and play.</p>
-                <p class="meta">39.904° N, 116.407° E</p>
-              </div>
-            </section>
-
-            <section class="world" data-label="Daypond">
-              <div class="art art-daypond">
-                <div class="layer layer-far" aria-hidden="true">
-                  <div class="pad" style="left:8%;top:12%;width:168px;transform:rotate(-12deg)"><svg viewBox="0 0 120 86"><path fill="#8fbf78" fill-rule="evenodd" d="M18 44a42 30 0 1 0 84 0a42 30 0 1 0-84 0M102 42 64 38l2 14z"/><path d="M34 46c14-10 36-12 52-2" fill="none" stroke="#6ea264" stroke-width="2" opacity=".7"/></svg></div>
-                  <div class="pad" style="right:8%;top:10%;width:140px;transform:rotate(16deg)"><svg viewBox="0 0 120 86"><path fill="#79b36e" fill-rule="evenodd" d="M18 44a42 30 0 1 0 84 0a42 30 0 1 0-84 0M102 42 64 38l2 14z"/><path d="M34 46c14-10 36-12 52-2" fill="none" stroke="#5f9860" stroke-width="2" opacity=".65"/></svg></div>
-                  <div class="pad" style="right:6%;bottom:10%;width:180px;transform:rotate(-6deg)"><svg viewBox="0 0 120 86"><path fill="#9bc888" fill-rule="evenodd" d="M18 44a42 30 0 1 0 84 0a42 30 0 1 0-84 0M102 42 64 38l2 14z"/></svg></div>
-                  <div class="pad" style="left:6%;bottom:12%;width:150px;transform:rotate(8deg)"><svg viewBox="0 0 120 86"><path fill="#86b874" fill-rule="evenodd" d="M18 44a42 30 0 1 0 84 0a42 30 0 1 0-84 0M102 42 64 38l2 14z"/></svg></div>
-                </div>
-                <div class="layer layer-near" aria-hidden="true">
-                  <div class="koi k1 live"><svg viewBox="0 0 64 36" aria-hidden="true"><ellipse cx="34" cy="18" rx="16" ry="9" fill="#fff7f2"/><path d="M20 18 C10 8 2 8 0 16 C8 18 14 18 20 18 C14 18 8 20 0 22 C2 30 10 28 20 18Z" fill="#f07848"/><ellipse cx="40" cy="16" rx="8" ry="6" fill="#f07848"/><circle cx="46" cy="15" r="1.3" fill="#2a2420"/></svg></div>
-                  <div class="koi k2 live"><svg viewBox="0 0 64 36" aria-hidden="true"><ellipse cx="34" cy="18" rx="16" ry="9" fill="#f6f1ea"/><path d="M20 18 C10 8 2 8 0 16 C8 18 14 18 20 18 C14 18 8 20 0 22 C2 30 10 28 20 18Z" fill="#2d2a28"/><ellipse cx="42" cy="17" rx="7" ry="5" fill="#2d2a28"/><circle cx="46" cy="16" r="1.2" fill="#fff"/></svg></div>
-                  <div class="koi k3 live"><svg viewBox="0 0 64 36" aria-hidden="true"><ellipse cx="34" cy="18" rx="16" ry="9" fill="#ff8a4a"/><path d="M20 18 C10 8 2 8 0 16 C8 18 14 18 20 18 C14 18 8 20 0 22 C2 30 10 28 20 18Z" fill="#e25a2a"/><circle cx="46" cy="16" r="1.3" fill="#2a2420"/></svg></div>
-                  <i class="ripple live" style="left:18%;top:40%"></i>
-                  <i class="ripple live" style="left:66%;top:28%;animation-delay:2s"></i>
-                </div>
-              </div>
-              <a class="caption" href="/daypond/">
-                <h2>Daypond</h2>
-                <p>A hand-drawn koi pond for focus, breathing, and winding down.</p>
-                <p class="meta">Coming soon · iPhone</p>
-              </a>
-            </section>
-
-            <section class="world" data-label="Finwords">
-              <div class="art art-finwords">
-                <div class="layer layer-far" aria-hidden="true">
-                  <div class="bowl"></div>
-                </div>
-                <div class="layer layer-near" aria-hidden="true">
-                  <i class="bubble live" style="left:46%;top:48%;width:10px;height:10px"></i>
-                  <i class="bubble live" style="left:58%;top:42%;width:7px;height:7px;animation-delay:2.2s"></i>
-                  <i class="bubble live" style="left:42%;top:38%;width:6px;height:6px;animation-delay:4s"></i>
-                  <span class="chip live" style="left:14%;top:30%">still</span>
-                  <span class="chip live" style="right:12%;top:26%;animation-delay:1.4s">hello</span>
-                  <span class="chip live" style="left:18%;bottom:22%;animation-delay:2.6s">ripple</span>
-                  <span class="chip live" style="right:16%;bottom:24%;animation-delay:.6s">learn</span>
-                </div>
-              </div>
-              <a class="caption" href="/finwords/">
-                <h2>Finwords</h2>
-                <p>Learn English with a pet goldfish, at your own pace.</p>
-                <p class="meta">Coming soon · iPhone</p>
-              </a>
-            </section>
-
-            <section class="world" data-label="BingBang">
-              <div class="art art-bing">
-                <div class="layer layer-near" aria-hidden="true">
-                  <div class="doodle live" style="left:7%;top:14%">
-                    <svg viewBox="0 0 80 120"><path fill="#1a1a1a" stroke="none" d="M24 14h28a8 8 0 0 1 8 8v32a22 22 0 0 1-44 0V22a8 8 0 0 1 8-8z"/><path fill="#fbf7f2" stroke="none" d="M52 12a16 14 0 0 1 12 20L48 28z"/><rect x="30" y="32" width="20" height="14" rx="2" fill="#fbf7f2" stroke="none"/><circle cx="36" cy="38" r="1.7" fill="#1a1a1a" stroke="none"/><circle cx="44" cy="38" r="1.7" fill="#1a1a1a" stroke="none"/><path d="M35 43q5 4 10 0" stroke="#1a1a1a" fill="none"/><rect x="36" y="74" width="8" height="26" rx="4" fill="#1a1a1a" stroke="none"/><path d="M58 22l7-9M64 28l9-1" stroke="#1a1a1a" fill="none"/></svg>
-                  </div>
-                  <div class="doodle live" style="right:9%;top:16%;animation-delay:.7s">
-                    <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="18" fill="#1a1a1a" stroke="none"/><circle cx="44" cy="47" r="2" fill="#fbf7f2" stroke="none"/><circle cx="56" cy="47" r="2" fill="#fbf7f2" stroke="none"/><path d="M44 55q6 5 12 0" stroke="#fbf7f2" fill="none"/><path d="M50 8v14M50 78v14M8 50h14M78 50h14M20 20l10 10M70 70l10 10M20 80l10-10M70 30l10-10" stroke="#1a1a1a" fill="none"/></svg>
-                  </div>
-                  <div class="doodle live" style="left:12%;bottom:12%;animation-delay:1.2s">
-                    <svg viewBox="0 0 90 90"><path fill="#1a1a1a" stroke="none" d="M45 8l9 20h22l-17 13 7 22-21-13-21 13 7-22L8 28h22z"/></svg>
-                  </div>
-                  <div class="doodle live" style="right:11%;bottom:12%;animation-delay:.3s">
-                    <svg viewBox="0 0 80 80"><path fill="#1a1a1a" stroke="none" d="M16 30h36a12 12 0 0 1 0 24H22a14 14 0 0 1-6-24z"/><path fill="none" stroke="#1a1a1a" stroke-width="3" d="M28 30c2-14 14-16 16-2"/><ellipse cx="34" cy="42" rx="6" ry="4" fill="#fbf7f2" stroke="none"/></svg>
-                  </div>
-                  <div class="doodle live" style="left:46%;bottom:8%;animation-delay:1s;width:78px;height:74px">
-                    <svg viewBox="0 0 70 64"><path fill="#1a1a1a" stroke="none" d="M35 58S14 44 14 28a12 12 0 0 1 22-6 12 12 0 0 1 22 6c0 16-23 30-23 30z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <a class="caption" href="https://apps.apple.com/app/id6797013343" target="_blank" rel="noopener noreferrer">
-                <h2>BingBang</h2>
-                <p>A little more ease each day — cards, doodles, and simple plans.</p>
-                <p class="meta">300 drawings · iPhone<span class="sr"> (opens in a new tab)</span></p>
-              </a>
-            </section>
-
-            <section class="world" data-label="Movy">
-              <div class="art art-movy">
-                <div class="layer layer-near">
-                  <div class="sheets" aria-hidden="true">
-                    <i style="background:linear-gradient(160deg,#b9ddf8,#6aa6e6)"></i>
-                    <i style="background:linear-gradient(160deg,#f6d5c4,#e29484)"></i>
-                    <i style="background:linear-gradient(200deg,#d5def8,#8ea4e4)"></i>
-                    <i style="background:linear-gradient(180deg,#c6efe4,#6ec4b4)"></i>
-                    <i class="live" style="background:linear-gradient(145deg,#9ec8f2,#d7e6f8 50%,#f2d2c4)"></i>
-                    <i style="background:linear-gradient(160deg,#e7d6f4,#a88ad4)"></i>
-                    <i style="background:linear-gradient(180deg,#f8d0d4,#e08aa0)"></i>
-                    <i style="background:linear-gradient(200deg,#d5e7f6,#7eb0d6)"></i>
-                    <i style="background:linear-gradient(160deg,#f6e7c4,#e2b86a)"></i>
-                    <i style="background:linear-gradient(180deg,#d8eee4,#7fb89a)"></i>
-                    <i style="background:linear-gradient(150deg,#e7eef3,#b7c8d4)"></i>
-                    <i style="background:linear-gradient(180deg,#f3e0ef,#c9a4d4)"></i>
-                  </div>
-                </div>
-              </div>
-              <a class="caption" href="https://apps.apple.com/app/id1093345142" target="_blank" rel="noopener noreferrer">
-                <h2>Movy</h2>
-                <p>Daily wallpapers, curated collections, and a studio of your own.</p>
-                <p class="meta">App Store · no ads<span class="sr"> (opens in a new tab)</span></p>
-              </a>
-            </section>
-
-            <section class="world" data-label="Sequence">
-              <div class="art art-seq">
-                <div class="layer layer-near" aria-hidden="true">
-                  <div class="print p1 live" style="left:10%;top:16%;width:34%;height:46%;transform:rotate(-7deg)">
-                    <span style="background:linear-gradient(#c9dff0 0 42%, #d7e4c8 42% 70%, #e7d3b4 70%)"></span>
-                  </div>
-                  <div class="print" style="right:12%;top:20%;width:28%;height:34%;transform:rotate(5deg)">
-                    <span style="background:linear-gradient(160deg,#f0d0c4,#e8b8c8 40%,#c9d4ee)"></span>
-                  </div>
-                  <div class="print" style="left:28%;bottom:12%;width:26%;height:30%;transform:rotate(3deg)">
-                    <span style="background:linear-gradient(#efe6d4,#d9c8a4)"></span>
-                  </div>
-                  <div class="book" style="right:18%;bottom:16%;width:18%;height:28%;background:#f07a2a"></div>
-                  <div class="book" style="right:30%;bottom:14%;width:16%;height:30%;background:#3a3a3a"></div>
-                </div>
-              </div>
-              <a class="caption" href="https://apps.apple.com/app/id6789496773" target="_blank" rel="noopener noreferrer">
-                <h2>Sequence</h2>
-                <p>Turn photographs into considered, print-ready zines and books.</p>
-                <p class="meta">App Store · no ads<span class="sr"> (opens in a new tab)</span></p>
-              </a>
-            </section>
-
-            <section class="world" data-label="Tackie">
-              <div class="art art-tack">
-                <div class="layer layer-near" aria-hidden="true">
-                  <div class="note" style="left:12%;top:16%;width:28%;height:32%;transform:rotate(-6deg)">
-                    <span></span><span style="width:58%"></span><span style="width:70%"></span>
-                  </div>
-                  <div class="note n2 live" style="right:14%;top:18%;width:30%;height:34%;transform:rotate(4deg)">
-                    <span></span><span style="width:64%"></span><span style="width:40%"></span>
-                    <i class="curl"></i>
-                  </div>
-                  <div class="note" style="left:22%;bottom:14%;width:26%;height:28%;transform:rotate(2deg)">
-                    <span></span><span style="width:50%"></span>
-                  </div>
-                  <div class="note" style="right:22%;bottom:16%;width:24%;height:26%;transform:rotate(-3deg)">
-                    <span></span><span style="width:62%"></span><span style="width:36%"></span>
-                  </div>
-                </div>
-              </div>
-              <a class="caption" href="https://apps.apple.com/app/id6806084464" target="_blank" rel="noopener noreferrer">
-                <h2>Tackie</h2>
-                <p>Visual sticky notes for everyday thoughts, folders, and widgets.</p>
-                <p class="meta">App Store · no ads<span class="sr"> (opens in a new tab)</span></p>
-              </a>
-            </section>
-
-            <section class="world" data-label="Bubbly">
-              <div class="art art-bub">
-                <div class="layer layer-near" aria-hidden="true">
-                  <div class="qcard q1 live" style="left:12%;top:18%;width:30%;height:34%"><span>“</span></div>
-                  <div class="qcard q2 live" style="right:10%;top:16%;width:26%;height:30%"><span>“</span></div>
-                  <div class="qcard" style="left:28%;bottom:12%;width:22%;height:26%"><span>“</span></div>
-                  <i class="orb live" style="left:46%;top:18%"></i>
-                  <i class="orb live" style="left:58%;bottom:22%;animation-delay:1.2s;width:12px;height:12px"></i>
-                  <i class="orb live" style="left:18%;bottom:18%;animation-delay:.5s;width:10px;height:10px"></i>
-                </div>
-              </div>
-              <a class="caption" href="https://apps.apple.com/app/id6792437107" target="_blank" rel="noopener noreferrer">
-                <h2>Bubbly</h2>
-                <p>Turn your words into playful quote cards, bubbles, and stickers.</p>
-                <p class="meta">App Store · no ads<span class="sr"> (opens in a new tab)</span></p>
-              </a>
-            </section>
-
-            <section class="world" data-label="The desk">
-              <div class="art art-desk">
-                <div class="layer layer-near" aria-hidden="true">
-                  <div class="notebook">
-                    <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-                  </div>
-                  <div class="cup" style="right:14%;top:16%"></div>
-                  <div class="pencil" style="left:12%;bottom:20%"></div>
-                </div>
-              </div>
-              <a class="caption" href="#desk">
-                <h2>The desk</h2>
-                <p>Smaller studies in AI, art, and play.</p>
-                <p class="meta">The list below</p>
-              </a>
-            </section>
-
-          </div>
-          <div class="ground-shadow" aria-hidden="true"></div>
-          <div class="veil" id="veil" aria-hidden="true"></div>
-        </div>
-        <div class="clouds" id="clouds" aria-hidden="true">
-          <i class="cloud c1"></i>
-          <i class="cloud c2"></i>
-          <i class="cloud c3"></i>
-          <i class="cloud c4"></i>
-        </div>
-        <div class="archer" id="archer" role="button" tabindex="0" aria-label="Chat with Archer" aria-haspopup="dialog">
-          <svg class="archer-body" id="archer-svg" viewBox="0 0 100 100" aria-hidden="true">
-            <g id="fin-left">
-              <path d="M34 46 C16 34, 6 30, 4 42 C16 46, 26 50, 34 52 C24 56, 12 62, 6 70 C14 74, 26 62, 36 54 Z" fill="#FF6A00"/>
-            </g>
-            <g id="fin-right">
-              <path d="M58 58 C68 72, 80 76, 76 64 C70 60, 62 58, 56 56 Z" fill="#FF8A3A"/>
-            </g>
-            <g id="archer-torso">
-              <path d="M46 32 C54 18, 70 20, 74 34 C68 36, 56 36, 48 34 Z" fill="#FF6A00"/>
-              <ellipse cx="58" cy="50" rx="26" ry="17" fill="#FF7A1A"/>
-              <ellipse cx="60" cy="54" rx="15" ry="9" fill="#FFD0A4"/>
-              <rect x="64" y="44" width="18" height="11" rx="5.5" fill="#161616"/>
-              <g id="archer-eyes">
-                <rect x="68" y="46.2" width="3.4" height="6.2" rx="1.7" fill="#FFD966"/>
-                <rect x="74.2" y="46.2" width="3.4" height="6.2" rx="1.7" fill="#FFD966"/>
-              </g>
-            </g>
-          </svg>
-        </div>
-        <div class="dots" id="dots" role="navigation" aria-label="Places in the journey"></div>
-      </div>
+  <div class="hero">
+    <h1>I'm<br><em>Saber.</em></h1>
+    <div class="still" aria-label="A few of the apps">
+      <a href="/daypond/" style="--r:-8deg"><img src="daypond/assets/app-icon.png" alt="Daypond" width="256" height="256"></a>
+      <a class="mid" href="https://apps.apple.com/app/id6797013343" target="_blank" rel="noopener noreferrer" style="--r:4deg"><img src="images/icons/ios/bingbang.jpg" alt="BingBang" width="256" height="256"></a>
+      <a href="/finwords/" style="--r:9deg"><img src="finwords/assets/app-icon.png" alt="Finwords" width="256" height="256"></a>
     </div>
   </div>
 
-  <section class="desk" id="desk" aria-labelledby="desk-title">
-    <p class="desk-lead" id="desk-title">Seven calm, ad-free apps for iPhone, and the experiments beside them.</p>
+  <div class="prose">
+    <p>I'm a designer and builder in Beijing. I make small experiments in <a class="mention" href="https://saberzou.github.io/agent-terrarium/" target="_blank" rel="noopener noreferrer"><img src="images/icons/agent-terrarium.png" alt="">AI</a>, <a class="mention" href="https://saberzou.github.io/axel-art/" target="_blank" rel="noopener noreferrer"><img src="images/icons/axel.png" alt="">art</a>, and <a class="mention" href="https://saberzou.github.io/artuzzle/" target="_blank" rel="noopener noreferrer"><img src="images/icons/artuzzle.png" alt="">play</a>, and seven calm apps for iPhone. No ads. Nothing about you leaves the phone.</p>
+    <p><a class="mention" href="https://apps.apple.com/app/id1093345142" target="_blank" rel="noopener noreferrer"><img src="images/icons/ios/movy.jpg" alt="">Movy</a> for walls, <a class="mention" href="https://apps.apple.com/app/id6797013343" target="_blank" rel="noopener noreferrer"><img src="images/icons/ios/bingbang.jpg" alt="">BingBang</a> for a little ease and a few hundred drawings, <a class="mention" href="https://apps.apple.com/app/id6789496773" target="_blank" rel="noopener noreferrer"><img src="images/icons/ios/sequence.jpg" alt="">Sequence</a> for photographs, <a class="mention" href="https://apps.apple.com/app/id6806084464" target="_blank" rel="noopener noreferrer"><img src="images/icons/ios/tackie.jpg" alt="">Tackie</a> for notes, <a class="mention" href="https://apps.apple.com/app/id6792437107" target="_blank" rel="noopener noreferrer"><img src="images/icons/ios/bubbly.jpg" alt="">Bubbly</a> for words, <a class="mention" href="/daypond/"><img src="daypond/assets/app-icon.png" alt="">Daypond</a> for a quiet pond, and <a class="mention" href="/finwords/"><img src="finwords/assets/app-icon.png" alt="">Finwords</a> for a goldfish and a vocabulary.</p>
+    <p><button class="mention" id="archer-chat-open" type="button"><img src="images/archer-avatar.jpg" alt="">Chat with Archer</button> if you'd like a guide.</p>
+  </div>
 
-    <h2>Quiet apps</h2>
-    <ul>
-      <li><a href="/daypond/"><span class="name">Daypond</span><span class="desc">Make time for focus, breathing and winding down beside a softly illustrated koi pond.</span><span class="tag">Coming soon</span></a></li>
-      <li><a href="/finwords/"><span class="name">Finwords</span><span class="desc">Learn English with a pet goldfish, at your own pace. Coming soon for iPhone.</span><span class="tag">Coming soon</span></a></li>
-      <li><a href="https://apps.apple.com/app/id6797013343" target="_blank" rel="noopener noreferrer"><span class="name">BingBang</span><span class="desc">A little more ease each day — encouraging cards, doodles, and simple plans.</span><span class="tag">iOS · Daily</span></a></li>
-      <li><a href="https://apps.apple.com/app/id1093345142" target="_blank" rel="noopener noreferrer"><span class="name">Movy</span><span class="desc">Daily wallpapers, curated collections, and a Studio for creating your own.</span><span class="tag">iOS · Wallpaper</span></a></li>
-      <li><a href="https://apps.apple.com/app/id6789496773" target="_blank" rel="noopener noreferrer"><span class="name">Sequence</span><span class="desc">Turn your photographs into considered, print-ready zines and photo books.</span><span class="tag">iOS · Photography</span></a></li>
-      <li><a href="https://apps.apple.com/app/id6806084464" target="_blank" rel="noopener noreferrer"><span class="name">Tackie</span><span class="desc">Visual sticky notes for everyday thoughts, with folders and home-screen widgets.</span><span class="tag">iOS · Notes</span></a></li>
-      <li><a href="https://apps.apple.com/app/id6792437107" target="_blank" rel="noopener noreferrer"><span class="name">Bubbly</span><span class="desc">Turn your words into playful quote cards with expressive bubbles and stickers.</span><span class="tag">iOS · Creative</span></a></li>
-    </ul>
-
-    <h2>Experiments</h2>
-    <ul>
-      <li><a href="https://saberzou.github.io/koi-pond/" target="_blank" rel="noopener noreferrer"><span class="name">Koi Pond</span><span class="desc">Interactive generative art — flowing koi that respond to your cursor.</span><span class="tag">Generative</span></a></li>
-      <li><a href="https://archer-travel.vercel.app" target="_blank" rel="noopener noreferrer"><span class="name">Archer Travel</span><span class="desc">AI-native travel agent. Search flights, plan trips, get smart itineraries.</span><span class="tag">AI · Travel</span></a></li>
-      <li><a href="https://saberzou.github.io/cards-of-answers/" target="_blank" rel="noopener noreferrer"><span class="name">Cards of Answers</span><span class="desc">A tarot-inspired decision tool with beautiful card animations.</span><span class="tag">Interactive</span></a></li>
-      <li><a href="https://saberzou.github.io/axiom-thoughts/" target="_blank" rel="noopener noreferrer"><span class="name">Axiom Thoughts</span><span class="desc">Philosophical queries and daily reflections in a minimalist interface.</span><span class="tag">Philosophy</span></a></li>
-      <li><a href="https://saberzou.github.io/agent-terrarium/" target="_blank" rel="noopener noreferrer"><span class="name">Agent Terrarium</span><span class="desc">A living ecosystem of AI agents visualized as digital creatures.</span><span class="tag">AI</span></a></li>
-      <li><a href="https://saberzou.github.io/json-prompts/" target="_blank" rel="noopener noreferrer"><span class="name">JSON Prompts</span><span class="desc">A curated gallery of 500+ AI image prompts on an infinite canvas.</span><span class="tag">Gallery</span></a></li>
-      <li><a href="https://saberzou.github.io/between-floors/" target="_blank" rel="noopener noreferrer"><span class="name">Between Floors</span><span class="desc">Vertical swipe stories for English learners, with hidden bonus floors.</span><span class="tag">Story</span></a></li>
-      <li><a href="https://saberzou.github.io/atticus/" target="_blank" rel="noopener noreferrer"><span class="name">Atticus</span><span class="desc">A living AI notebook — mistakes, humanity, and letters to the future.</span><span class="tag">Writing</span></a></li>
-      <li><a href="https://saberzou.github.io/mars_mission/" target="_blank" rel="noopener noreferrer"><span class="name">Postcards from Mars</span><span class="desc">3D mission log with AI robot field diaries and real NASA rover photos.</span><span class="tag">NASA</span></a></li>
-      <li><a href="https://saberzou.github.io/axel-art/" target="_blank" rel="noopener noreferrer"><span class="name">Axel Art</span><span class="desc">Daily visual journal — photography and reflections by a claw bot.</span><span class="tag">Art</span></a></li>
-      <li><a href="https://saberzou.github.io/Littlebook" target="_blank" rel="noopener noreferrer"><span class="name">Littlebook</span><span class="desc">A daily reading companion with quotes and book recommendations.</span><span class="tag">Reading</span></a></li>
-      <li><a href="https://saberzou.github.io/movie-oracle/" target="_blank" rel="noopener noreferrer"><span class="name">Movie Oracle</span><span class="desc">Answer three absurd questions, get a film that somehow feels right.</span><span class="tag">Movies</span></a></li>
-      <li><a href="https://saberzou.github.io/reel/" target="_blank" rel="noopener noreferrer"><span class="name">Movy Reel</span><span class="desc">A slow personal cinema journal — films, reimagined as posters.</span><span class="tag">Cinema</span></a></li>
-      <li><a href="https://saberzou.github.io/artuzzle/" target="_blank" rel="noopener noreferrer"><span class="name">Artuzzle</span><span class="desc">A relaxing puzzle game built from famous artworks.</span><span class="tag">Game</span></a></li>
-      <li><a href="https://saberzou.github.io/pixel-dailies/" target="_blank" rel="noopener noreferrer"><span class="name">Pixel Dailies</span><span class="desc">Daily pixel-art challenges and a community gallery.</span><span class="tag">Pixel art</span></a></li>
-      <li><a href="https://www.saberzou.com" target="_blank" rel="noopener noreferrer"><span class="name">About Me</span><span class="desc">Portfolio, thoughts, and the longer story behind all of this.</span><span class="tag">Personal</span></a></li>
+  <section class="block" id="apps" aria-labelledby="apps-title">
+    <h2 id="apps-title">Apps</h2>
+    <ul class="list">
+      <li><a class="row" href="https://apps.apple.com/app/id1093345142" target="_blank" rel="noopener noreferrer"><img class="tile" src="images/icons/ios/movy.jpg" alt=""><span class="what"><span class="name">Movy</span> <span class="desc">Daily wallpapers, curated collections, and a Studio for creating your own.</span></span><span class="meta">iPhone</span></a></li>
+      <li><a class="row" href="https://apps.apple.com/app/id6797013343" target="_blank" rel="noopener noreferrer"><img class="tile" src="images/icons/ios/bingbang.jpg" alt=""><span class="what"><span class="name">BingBang</span> <span class="desc">A little more ease each day — encouraging cards, doodles, and simple plans.</span></span><span class="meta">iPhone</span></a></li>
+      <li><a class="row" href="https://apps.apple.com/app/id6789496773" target="_blank" rel="noopener noreferrer"><img class="tile" src="images/icons/ios/sequence.jpg" alt=""><span class="what"><span class="name">Sequence</span> <span class="desc">Turn your photographs into considered, print-ready zines and photo books.</span></span><span class="meta">iPhone</span></a></li>
+      <li><a class="row" href="https://apps.apple.com/app/id6806084464" target="_blank" rel="noopener noreferrer"><img class="tile" src="images/icons/ios/tackie.jpg" alt=""><span class="what"><span class="name">Tackie</span> <span class="desc">Visual sticky notes for everyday thoughts, with folders and home-screen widgets.</span></span><span class="meta">iPhone</span></a></li>
+      <li><a class="row" href="https://apps.apple.com/app/id6792437107" target="_blank" rel="noopener noreferrer"><img class="tile" src="images/icons/ios/bubbly.jpg" alt=""><span class="what"><span class="name">Bubbly</span> <span class="desc">Turn your words into playful quote cards with expressive bubbles and stickers.</span></span><span class="meta">iPhone</span></a></li>
+      <li><a class="row" href="/daypond/"><img class="tile" src="daypond/assets/app-icon.png" alt=""><span class="what"><span class="name">Daypond</span> <span class="desc">Make time for focus, breathing and winding down beside a softly illustrated koi pond.</span></span><span class="meta">Coming soon</span></a></li>
+      <li><a class="row" href="/finwords/"><img class="tile" src="finwords/assets/app-icon.png" alt=""><span class="what"><span class="name">Finwords</span> <span class="desc">Learn English with a pet goldfish, at your own pace.</span></span><span class="meta">Coming soon</span></a></li>
     </ul>
   </section>
+
+  <section class="block" id="experiments" aria-labelledby="exp-title">
+    <h2 id="exp-title">Experiments</h2>
+    <ul class="list">
+      <li><a class="row" href="https://saberzou.github.io/koi-pond/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/koi-pond.png" alt=""><span class="what"><span class="name">Koi Pond</span> <span class="desc">Interactive generative art — flowing koi that respond to your cursor.</span></span><span class="meta">Generative</span></a></li>
+      <li><a class="row" href="https://archer-travel.vercel.app" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/thiings/archer-travel.png" alt=""><span class="what"><span class="name">Archer Travel</span> <span class="desc">AI-native travel agent. Search flights, plan trips, get smart itineraries.</span></span><span class="meta">AI · Travel</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/cards-of-answers/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/cards-of-answers.png" alt=""><span class="what"><span class="name">Cards of Answers</span> <span class="desc">A tarot-inspired decision tool with beautiful card animations.</span></span><span class="meta">Interactive</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/axiom-thoughts/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/axiom-thoughts.png" alt=""><span class="what"><span class="name">Axiom Thoughts</span> <span class="desc">Philosophical queries and daily reflections in a minimalist interface.</span></span><span class="meta">Philosophy</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/agent-terrarium/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/agent-terrarium.png" alt=""><span class="what"><span class="name">Agent Terrarium</span> <span class="desc">A living ecosystem of AI agents visualized as digital creatures.</span></span><span class="meta">AI</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/json-prompts/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/json-prompts.png" alt=""><span class="what"><span class="name">JSON Prompts</span> <span class="desc">A curated gallery of 500+ AI image prompts on an infinite canvas.</span></span><span class="meta">Gallery</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/between-floors/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/between-floors.png" alt=""><span class="what"><span class="name">Between Floors</span> <span class="desc">Vertical swipe stories for English learners, with hidden bonus floors.</span></span><span class="meta">Story</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/atticus/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/atticus.png" alt=""><span class="what"><span class="name">Atticus</span> <span class="desc">A living AI notebook — mistakes, humanity, and letters to the future.</span></span><span class="meta">Writing</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/mars_mission/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/postcards-from-mars.png" alt=""><span class="what"><span class="name">Postcards from Mars</span> <span class="desc">3D mission log with AI robot field diaries and real NASA rover photos.</span></span><span class="meta">NASA</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/axel-art/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/axel.png" alt=""><span class="what"><span class="name">Axel Art</span> <span class="desc">Daily visual journal — photography and reflections by a claw bot.</span></span><span class="meta">Art</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/Littlebook" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/thiings/littlebook.png" alt=""><span class="what"><span class="name">Littlebook</span> <span class="desc">A daily reading companion with quotes and book recommendations.</span></span><span class="meta">Reading</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/movie-oracle/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/movie-oracle.png" alt=""><span class="what"><span class="name">Movie Oracle</span> <span class="desc">Answer three absurd questions, get a film that somehow feels right.</span></span><span class="meta">Movies</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/reel/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/movy-reel.png" alt=""><span class="what"><span class="name">Movy Reel</span> <span class="desc">A slow personal cinema journal — films, reimagined as posters.</span></span><span class="meta">Cinema</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/artuzzle/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/artuzzle.png" alt=""><span class="what"><span class="name">Artuzzle</span> <span class="desc">A relaxing puzzle game built from famous artworks.</span></span><span class="meta">Game</span></a></li>
+      <li><a class="row" href="https://saberzou.github.io/pixel-dailies/" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/pixel-dailies.png" alt=""><span class="what"><span class="name">Pixel Dailies</span> <span class="desc">Daily pixel-art challenges and a community gallery.</span></span><span class="meta">Pixel art</span></a></li>
+      <li><a class="row" href="https://www.saberzou.com" target="_blank" rel="noopener noreferrer"><img class="tile sticker" src="images/icons/me.png" alt=""><span class="what"><span class="name">About Me</span> <span class="desc">Portfolio, thoughts, and the longer story behind all of this.</span></span><span class="meta">Personal</span></a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    <nav aria-label="Footer">
+      <a href="os.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        SaberOS
+      </a>
+      <a href="https://github.com/saberzou" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.5 2 2 6.6 2 12.2c0 4.5 2.9 8.3 6.9 9.6.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.4-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.8 1a9.4 9.4 0 0 1 5 0c2-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5 4-1.3 6.9-5.1 6.9-9.6C22 6.6 17.5 2 12 2z"/></svg>
+        GitHub
+      </a>
+      <a href="mailto:saberzou@gmail.com">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+        Email
+      </a>
+    </nav>
+    <p>Made with curiosity · Beijing</p>
+  </footer>
 </main>
-
-<footer class="colophon">
-  <nav aria-label="Footer">
-    <a href="os.html">SaberOS</a>
-    <a href="https://github.com/saberzou" target="_blank" rel="noopener noreferrer">GitHub</a>
-    <a href="mailto:saberzou@gmail.com">Email</a>
-  </nav>
-  <p>Made with curiosity · Beijing</p>
-</footer>
-
-<script src="assets/journey.js"></script>
 <script src="assets/archer-chat.js"></script>
 <script src="assets/archer-motion.js"></script>
 </body>

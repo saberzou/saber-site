@@ -28,9 +28,9 @@
 <noscript><meta http-equiv="refresh" content="0; url=field.html"></noscript>
 <link rel="stylesheet" href="assets/archer-chat.css">
 <link rel="stylesheet" href="assets/home.css">
-<link rel="stylesheet" href="assets/3d/proto.css?v=15">
-<link rel="stylesheet" href="assets/3d/loader.css?v=15">
-<link rel="stylesheet" href="assets/fade.css?v=15">
+<link rel="stylesheet" href="assets/3d/proto.css?v=16">
+<link rel="stylesheet" href="assets/3d/loader.css?v=16">
+<link rel="stylesheet" href="assets/fade.css?v=16">
 <script type="importmap">
 {
   "imports": {
@@ -39,33 +39,31 @@
 }
 </script>
 <link rel="modulepreload" href="assets/3d/vendor/three.module.js?v=170">
-<link rel="modulepreload" href="assets/3d/proto.js?v=15">
+<link rel="modulepreload" href="assets/3d/proto.js?v=16">
 </head>
 <body>
 <div class="loader" id="loader" role="status" aria-live="polite">
   <div class="loader-stack">
-    <svg class="loader-box" viewBox="0 0 132 152" aria-hidden="true">
-      <defs><clipPath id="loader-clip"><rect id="loader-fill" x="0" y="124" width="132" height="2"/></clipPath></defs>
-      <path class="floor" d="M66 72 L128 106 L66 140 L4 106 Z"/>
-      <ellipse class="shadow" cx="66" cy="126" rx="40" ry="10"/>
-      <g clip-path="url(#loader-clip)">
-        <path class="face left" d="M28 52 L66 74 L66 124 L28 102 Z"/>
-        <path class="face right" d="M66 74 L104 52 L104 102 L66 124 Z"/>
+    <!-- The room's own cassette player, rendered from its model. The reels and
+         the label are drawn live on its front face, so the tape winds across
+         as the room loads. -->
+    <svg class="loader-deck" viewBox="0 0 390 420" aria-hidden="true">
+      <image href="assets/3d/loader-cassette.webp?v=16" width="390" height="420"/>
+      <g transform="matrix(0.56569 0.3266 0 0.6532 83.29 218.69)"><circle class="tape" id="tape-l" r="24"/><g class="reel" id="reel-l"><circle class="hub" r="11"/><path class="teeth" d="M-1.75 -10 h3.5 v6 h-3.5z M-1.75 4 h3.5 v6 h-3.5z" /><path class="teeth" transform="rotate(60)" d="M-1.75 -10 h3.5 v6 h-3.5z M-1.75 4 h3.5 v6 h-3.5z"/><path class="teeth" transform="rotate(120)" d="M-1.75 -10 h3.5 v6 h-3.5z M-1.75 4 h3.5 v6 h-3.5z"/></g></g>
+      <g transform="matrix(0.56569 0.3266 0 0.6532 130.8 246.13)"><circle class="tape" id="tape-r" r="12"/><g class="reel" id="reel-r"><circle class="hub" r="11"/><path class="teeth" d="M-1.75 -10 h3.5 v6 h-3.5z M-1.75 4 h3.5 v6 h-3.5z" /><path class="teeth" transform="rotate(60)" d="M-1.75 -10 h3.5 v6 h-3.5z M-1.75 4 h3.5 v6 h-3.5z"/><path class="teeth" transform="rotate(120)" d="M-1.75 -10 h3.5 v6 h-3.5z M-1.75 4 h3.5 v6 h-3.5z"/></g></g>
+      <g transform="matrix(0.56569 0.3266 0 0.6532 107.89 196.65)">
+        <rect class="label" x="-85" y="-21" width="170" height="42"/>
+        <rect class="label-stripe" x="-85" y="9" width="170" height="7"/>
+        <circle class="label-side" cx="-70" cy="-3" r="10"/>
+        <text class="label-a" x="-70" y="1">A</text>
+        <text class="label-title" x="-54" y="0">songs for wandering</text>
+        <text class="label-count" id="loader-count" x="80" y="12.8">0%</text>
       </g>
-      <path class="edge" d="M28 52 L66 74 L66 124 L28 102 Z M66 74 L104 52 L104 102 L66 124"/>
-      <g class="lid">
-        <path class="face top" d="M66 30 L104 52 L66 74 L28 52 Z"/>
-        <path class="edge" d="M66 30 L104 52 L66 74 L28 52 Z"/>
-      </g>
-      <rect class="spark" x="52" y="34" width="4" height="4"/>
-      <rect class="spark" x="70" y="28" width="4" height="4"/>
-      <rect class="spark" x="84" y="38" width="3" height="3"/>
     </svg>
     <p class="loader-line">Unpacking the room…</p>
-    <p class="loader-count">0%</p>
   </div>
 </div>
-<script src="assets/3d/loader.js?v=15"></script>
+<script src="assets/3d/loader.js?v=16"></script>
 <h1 class="sr">Saber Zou</h1>
 <canvas id="stage" aria-label="A room of old devices, each showing something I've made. Drag to look around. Press the cassette for music, and the lamp for night."></canvas>
 <p class="drag-hint" id="drag-hint">Drag to look around</p>
@@ -112,7 +110,7 @@
 </a>
 <div class="fade" aria-hidden="true"></div>
 <script src="assets/archer-chat.js"></script>
-<script src="assets/fade.js?v=15"></script>
-<script type="module" src="assets/3d/proto.js?v=15"></script>
+<script src="assets/fade.js?v=16"></script>
+<script type="module" src="assets/3d/proto.js?v=16"></script>
 </body>
 </html>

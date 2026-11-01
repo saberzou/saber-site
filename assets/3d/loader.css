@@ -1,5 +1,5 @@
-/* The loader: an isometric box, drawn like the room's cells, that fills as the
-   room downloads. Device-themed lines tick by underneath. */
+/* The loader is the room's own cassette player, rendered from its model.
+   loader.js turns the reels and winds the tape across as the room loads. */
 .loader {
   position: fixed;
   inset: 0;
@@ -12,56 +12,46 @@
 }
 html.night .loader { background: #16171b; color: #e9e2d2; }
 .loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader.done .loader-deck { transform: translateY(-6px) scale(0.97); }
 
-.loader-stack { display: grid; justify-items: center; gap: 18px; transform: translateY(-4vh); }
+.loader-stack { display: grid; justify-items: center; gap: 6px; transform: translateY(-3vh); }
 
-.loader-box { width: 156px; height: 180px; overflow: visible; }
-.loader-box .floor { fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 1; }
-.loader-box .edge { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; }
-.loader-box .face { transition: none; }
-.loader-box .top { fill: #f2efe8; }
-.loader-box .left { fill: #d8642c; }
-.loader-box .right { fill: #b9532a; }
-html.night .loader-box .top { fill: #ffd59a; }
-.loader-box .shadow { fill: currentColor; opacity: 0.12; }
-.loader-box .lid {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: lid 1.6s cubic-bezier(.5, 0, .3, 1) infinite;
+.loader-deck {
+  width: min(260px, 62vw);
+  height: auto;
+  overflow: visible;
+  transition: transform 0.5s cubic-bezier(.3, .7, .3, 1);
+  animation: deck-in 0.7s cubic-bezier(.3, 1.4, .5, 1) both;
 }
-.loader-box .spark { fill: #d8642c; opacity: 0; animation: spark 1.6s ease-out infinite; }
-.loader-box .spark:nth-of-type(2) { animation-delay: 0.2s; }
-.loader-box .spark:nth-of-type(3) { animation-delay: 0.4s; }
-html.night .loader-box .spark { fill: #ffd59a; }
+@keyframes deck-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
 
-@keyframes lid {
-  0%, 55%, 100% { transform: translateY(0) rotate(0deg); }
-  70% { transform: translateY(-9px) rotate(-6deg); }
-  85% { transform: translateY(-2px) rotate(2deg); }
-}
-@keyframes spark {
-  0%, 58% { opacity: 0; transform: translateY(0); }
-  70% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-22px); }
-}
+/* Colours picked off the lit model so the drawn parts sit in the render. */
+.loader-deck .tape { fill: #5c4232; stroke: #7d5c45; stroke-width: 1; }
+.loader-deck .hub { fill: #ece6da; }
+.loader-deck .teeth { fill: #1f1f22; }
+.loader-deck .label { fill: #efe6d3; }
+.loader-deck .label-stripe { fill: #d8642c; }
+.loader-deck .label-side { fill: #d8642c; }
+.loader-deck text { dominant-baseline: middle; }
+.loader-deck .label-a { fill: #f3ead8; font: 700 12px "Timeless Sans", sans-serif; text-anchor: middle; }
+.loader-deck .label-title { fill: #2a2622; font: italic 360 12px "Timeless Serif Italic", Georgia, serif; }
+/* The count rides on the orange stripe. */
+.loader-deck .label-count { fill: #f3ead8; font: 400 8px "Screen Pixel", ui-monospace, monospace; text-anchor: end; }
 
 .loader-line {
   margin: 0;
   min-height: 1.4em;
-  font: 400 15px/1.4 "Timeless Serif Italic", Georgia, serif;
-  font-style: italic;
+  font: 560 14px/1.4 "Timeless Sans", system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  opacity: 0.72;
   text-align: center;
   transition: opacity 0.25s ease;
 }
 .loader-line.swap { opacity: 0; }
-.loader-count {
-  margin: -8px 0 0;
-  font: 400 12px/1 "Screen Pixel", ui-monospace, monospace;
-  letter-spacing: 0.08em;
-  opacity: 0.6;
-}
 
 @media (prefers-reduced-motion: reduce) {
-  .loader, .loader-line { transition: none; }
-  .loader-box .lid, .loader-box .spark { animation: none; }
+  .loader, .loader-line, .loader-deck { transition: none; animation: none; }
 }

@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
-import { FISH_SVG, paintScreen } from './screens.js?v=15';
+import { FISH_SVG, paintScreen } from './screens.js?v=16';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '15';
+const VERSION = '16';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -945,35 +945,65 @@ function setupCassette(parts) {
   if (deck.key) deck.key.userData.y0 = deck.key.position.y;
 }
 
+// iPhone and iPad ignore audio.volume (it is always 1), so fades run through
+// a Web Audio gain node. If that isn't available, the element is paused.
+let musicGain = null;
+let level = 0;
+let stopTimer = 0;
+
+function ensureAudio() {
+  if (audio) return;
+  audio = new Audio('assets/3d/audio/side-a.mp3?v=' + VERSION);
+  audio.loop = true;
+  audio.preload = 'auto';
+  const ctx = audioContext();
+  if (ctx) {
+    try {
+      const source = ctx.createMediaElementSource(audio);
+      musicGain = ctx.createGain();
+      musicGain.gain.value = 0;
+      source.connect(musicGain).connect(ctx.destination);
+    } catch (err) {
+      musicGain = null;
+    }
+  }
+  if (!musicGain) audio.volume = 0;
+}
+
 function toggleMusic(device) {
   const state = device.spec.state;
-  if (!audio) {
-    audio = new Audio('assets/3d/audio/side-a.mp3');
-    audio.loop = true;
-    audio.preload = 'auto';
-    audio.volume = 0;
-  }
+  ensureAudio();
+  const ctx = audioContext();
+  if (ctx && ctx.state === 'suspended') ctx.resume();
   state.playing = !state.playing;
   click(state.playing ? 700 : 520);
+  clearTimeout(stopTimer);
   if (state.playing) {
     fadeTo = 0.55;
     const p = audio.play();
     if (p && p.catch) p.catch(function () { state.playing = false; fadeTo = 0; });
   } else {
     fadeTo = 0;
+    // Whatever the fade does, the tape stops shortly after the press.
+    stopTimer = setTimeout(function () { if (!state.playing) audio.pause(); }, 900);
   }
   device.paint(device.playT, device.base);
 }
 
+function updateMusic(dt) {
+  if (!audio) return;
+  const step = dt * 0.8;
+  level += Math.sign(fadeTo - level) * Math.min(step, Math.abs(fadeTo - level));
+  if (musicGain) musicGain.gain.value = level;
+  else { try { audio.volume = level; } catch (err) {} }
+  if (fadeTo === 0 && level === 0 && !audio.paused) audio.pause();
+}
+
 function updateCassette(dt) {
+  updateMusic(dt);
   if (!deck) return;
   const device = devices.find(function (d) { return d.spec.toy === 'cassette'; });
   const state = TAPE;
-  if (audio) {
-    const step = dt * 0.6;
-    audio.volume = Math.max(0, Math.min(1, audio.volume + Math.sign(fadeTo - audio.volume) * Math.min(step, Math.abs(fadeTo - audio.volume))));
-    if (fadeTo === 0 && audio.volume === 0 && !audio.paused) audio.pause();
-  }
   // Reels speed up and slow down like a motor.
   deck.spin += ((state.playing ? 1 : 0) - deck.spin) * Math.min(1, dt * 4);
   if (!REDUCED) {
@@ -994,9 +1024,18 @@ function updateCassette(dt) {
 
 // A soft mechanical click for the switch and the keys.
 let clickCtx = null;
+function audioContext() {
+  if (clickCtx) return clickCtx;
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) clickCtx = new AC();
+  } catch (err) {}
+  return clickCtx;
+}
+
 function click(freq) {
   try {
-    clickCtx = clickCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioContext()) return;
     const n = Math.floor(clickCtx.sampleRate * 0.05);
     const buf = clickCtx.createBuffer(1, n, clickCtx.sampleRate);
     const data = buf.getChannelData(0);

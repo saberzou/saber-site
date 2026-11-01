@@ -141,3 +141,94 @@ Mobile, 390 wide. The same shells, packed tighter. The corner card covers the to
 - Nothing on a screen is styled for that device. LCDs, the terminal, and the slab phone all share one card, with a color swap.
 - Shells are flat gradients. Signature parts (navi key, finger holes, home button, D-pad, disk slot, egg shape, phosphor) are missing or reduced to a single shape.
 - Devices do not scale with the cell, so 390 and 1440 fail in the same places. At 390 the corner card also covers the top row, which is separate from the bezel clipping.
+
+## After
+
+The pager is gone. The other eleven are inline SVG, and each label sits in a screen rectangle taken from that drawing. LCDs and the terminal use Screen Pixel (Silkscreen). The handset, the compact Mac, the CRT, the all-in-one, and the laptop use the site sans. The handset icon is a glossy rounded tile.
+
+Checked every catalog name (27) on every device at 320, 390, 768, 1440, and 1920. Name and icon overflow is 0 in all 297 mobile pairings and at the other widths. Nothing spills out of its cell.
+
+![Desktop field after the redraw](qa/after-field-desktop.png)
+
+![Mobile field after the redraw](qa/after-field-mobile.png)
+
+### Candybar
+
+Rounded navy shell, earpiece slots, green LCD, call and end keys, a center navigation key, twelve raised keys, and a microphone hole. “Postcards from Mars” wraps to two pixel lines inside the glass at both widths.
+
+![Candybar after, desktop](qa/after-candy-desktop.png)
+![Candybar after, mobile](qa/after-candy-mobile.png)
+
+### Flip phone
+
+Silver clamshell, earpiece, metal hinge, flared chin, round navigation pad, and a dark keypad. The title fits on the color screen.
+
+![Flip phone after, desktop](qa/after-flip-desktop.png)
+![Flip phone after, mobile](qa/after-flip-mobile.png)
+
+### Rotary desk phone
+
+Handset with an ear and a mouth, cradle posts, amber number window, ten finger holes, a finger stop, and feet. The title is on the window, which the old drawing hid.
+
+![Rotary phone after, desktop](qa/after-rotary-desktop.png)
+![Rotary phone after, mobile](qa/after-rotary-mobile.png)
+
+### Early handset
+
+Steel band, earpiece slot, side buttons, rounded glass, a glossy icon, and a home button with a rounded square. The title is set in the site sans, in the weight of a home screen.
+
+![Handset after, desktop](qa/after-phone-desktop.png)
+![Handset after, mobile](qa/after-phone-mobile.png)
+
+### Handheld
+
+Gray-green brick, power lamp, dark screen well, speaker slots, a cross in a dish, A and B, and start and select. The glass is a green matrix and the title is pixel type.
+
+![Handheld after, desktop](qa/after-game-desktop.png)
+![Handheld after, mobile](qa/after-game-mobile.png)
+
+### PDA
+
+Silver body, green lamp, mono screen, split writing area, four marked buttons, a scroll bar, and a stylus groove. The title fits on the mono glass.
+
+![PDA after, desktop](qa/after-pda-desktop.png)
+![PDA after, mobile](qa/after-pda-mobile.png)
+
+### Compact Macintosh
+
+Beige case with a side edge, thick black bezel, landscape glass, a disk slot, a drive panel, and two feet. No logo. The title fits on the warm white screen.
+
+![Compact Mac after, desktop](qa/after-mac-desktop.png)
+![Compact Mac after, mobile](qa/after-mac-mobile.png)
+
+### Beige CRT
+
+Deep bezel, curved glass, side depth, vents, a power lamp, a neck, and an oval foot. The title fits on the dark tube.
+
+![CRT after, desktop](qa/after-crt-desktop.png)
+![CRT after, mobile](qa/after-crt-mobile.png)
+
+### Bondi all-in-one
+
+Translucent teal shell, handle slot, inset tube, pale chin with a slot, and a dome stand. The title fits on the glass, clear of the chin.
+
+![All-in-one after, desktop](qa/after-imac-desktop.png)
+![All-in-one after, mobile](qa/after-imac-mobile.png)
+
+### Terminal
+
+Dark case, curved green glass, scan lines, phosphor type, a power lamp, and two rows of keycaps. The longest title fits on one glowing line.
+
+![Terminal after, desktop](qa/after-term-desktop.png)
+![Terminal after, mobile](qa/after-term-mobile.png)
+
+### Laptop
+
+Graphite lid, black bezel, hinge, two rows of keys, and a trackpad with a button. The title fits on the panel.
+
+![Laptop after, desktop](qa/after-laptop-desktop.png)
+![Laptop after, mobile](qa/after-laptop-mobile.png)
+
+### Result
+
+Zero clipped names or icons at the viewports above. Drag, hover, click, the keyboard list, reduced motion, and touch are unchanged. The corner card on a phone still covers whatever sits under it. That is the page chrome, not the glass.

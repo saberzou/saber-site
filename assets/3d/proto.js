@@ -6,29 +6,59 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
 const CELL_MOBILE = 224;
 
-// Cells sit on integer coordinates, and each device stands in the middle of
-// its own square. The layout follows the SVG field around the intro camera.
-function work(file, cell, face, name, icon, href) {
-  return { file: 'assets/3d/models/' + file + '.glb', cell: cell, face: face, name: name, icon: icon, href: href };
+// Each cell is SPAN world units wide, so devices stand with room around them.
+const SPAN = 1.45;
+
+// Every project in the page's list gets a device. Adding a project to the
+// list in index.html adds a device here; nothing else needs editing.
+const MODEL_FACE = {
+  handheld: 'lcd', macintosh: 'paper', phone: 'gloss', term: 'phos', flip: 'tft', pda: 'mono',
+  imac: 'aqua', crt: 'tube', laptop: 'paper', rotary: 'amber', candy: 'lcd'
+};
+const MODEL_ORDER = ['candy', 'imac', 'flip', 'term', 'pda', 'crt', 'phone', 'laptop', 'rotary', 'macintosh', 'handheld'];
+const PREFERRED = { Daypond: 'handheld', SaberOS: 'macintosh' };
+
+function model(name) { return 'assets/3d/models/' + name + '.glb'; }
+
+// The cassette keeps playing while it's off screen, so its state lives here.
+const TAPE = { playing: false, elapsed: 0 };
+
+// The home cells. Everything else is worked out from the cell's position, so
+// the floor goes on forever and the same cell always shows the same thing.
+const HOME = {
+  '0,0': { file: model('camera'), face: 'note' },
+  '1,0': { file: model('radio'), face: 'fish', name: 'Archer', toy: 'archer' },
+  '-1,1': { file: model('cassette'), face: 'tape', name: 'Side A', toy: 'cassette', state: TAPE },
+  '1,1': { file: model('lamp'), toy: 'lamp' }
+};
+
+function readProjects() {
+  return Array.prototype.slice.call(document.querySelectorAll('#projects a[href]')).map(function (a) {
+    return {
+      name: (a.querySelector('strong') || a).textContent.trim(),
+      icon: a.getAttribute('data-icon') || '',
+      href: a.getAttribute('href'),
+      external: a.getAttribute('target') === '_blank'
+    };
+  });
 }
-const DEVICES = [
-  work('phone', [-2, -1], 'gloss', 'Axiom Thoughts', 'images/icons/axiom-thoughts.png', 'https://saberzou.github.io/axiom-thoughts/'),
-  work('macintosh', [-1, -1], 'paper', 'SaberOS', 'images/icons/thiings/finder.png', 'os.html'),
-  work('term', [0, -1], 'phos', 'Artuzzle', 'images/icons/artuzzle.png', 'https://saberzou.github.io/artuzzle/'),
-  work('flip', [1, -1], 'tft', 'Sequence', 'images/icons/ios/sequence.jpg', 'https://apps.apple.com/app/id6789496773'),
-  work('handheld', [2, -1], 'lcd', 'Daypond', 'daypond/assets/app-icon.png', 'daypond/'),
-  work('pda', [-2, 0], 'mono', 'Between Floors', 'images/icons/between-floors.png', 'https://saberzou.github.io/between-floors/'),
-  work('imac', [-1, 0], 'aqua', 'Movie Oracle', 'images/icons/movie-oracle.png', 'https://saberzou.github.io/movie-oracle/'),
-  { file: 'assets/3d/models/camera.glb', cell: [0, 0], face: 'note' },
-  { file: 'assets/3d/models/radio.glb', cell: [1, 0], face: 'fish', name: 'Archer', toy: 'archer' },
-  work('crt', [2, 0], 'tube', 'Axel Art', 'images/icons/axel.png', 'https://saberzou.github.io/axel-art/'),
-  work('laptop', [-1, 1], 'paper', 'Pixel Dailies', 'images/icons/pixel-dailies.png', 'https://saberzou.github.io/pixel-dailies/'),
-  work('rotary', [0, 1], 'amber', 'Finwords', 'finwords/assets/app-icon.png', 'finwords/'),
-  work('candy', [1, 1], 'lcd', 'Movy', 'images/icons/ios/movy.jpg', 'https://apps.apple.com/app/id1093345142'),
-  // Two toys in the empty corners: music, and the light switch for the room.
-  { file: 'assets/3d/models/cassette.glb', cell: [-2, 1], face: 'tape', name: 'Side A', toy: 'cassette', state: { playing: false, elapsed: 0 } },
-  { file: 'assets/3d/models/lamp.glb', cell: [2, 1], toy: 'lamp' }
-];
+
+const PROJECTS = readProjects();
+function mod(n, m) { return ((n % m) + m) % m; }
+
+// Neighbours never repeat a project or a device: stepping one cell moves the
+// project by 5 or 3 places and the device by 3 or 2.
+function specFor(c, r) {
+  const home = HOME[c + ',' + r];
+  if (home) return Object.assign({ cell: [c, r] }, home);
+  // Archer turns up now and then, like in the flat field.
+  if (mod(c + r * 3, 13) === 0) return { file: model('radio'), face: 'fish', name: 'Archer', toy: 'archer', cell: [c, r] };
+  const p = PROJECTS[mod(c * 5 + r * 3, PROJECTS.length)];
+  const name = PREFERRED[p.name] || MODEL_ORDER[mod(c * 3 + r * 2, MODEL_ORDER.length)];
+  return { file: model(name), cell: [c, r], face: MODEL_FACE[name], name: p.name, icon: p.icon, href: p.href, external: p.external };
+}
+
+const MODEL_FILES = Object.keys(MODEL_FACE).concat(['camera', 'radio', 'cassette', 'lamp']).map(model);
 
 // Halo colors for screens when the lamp is on and the room goes dark.
 const GLOW = {
@@ -62,8 +92,10 @@ function frameCamera() {
   camera.updateMatrixWorld();
   const forward = new THREE.Vector3();
   camera.getWorldDirection(forward);
-  panRight.crossVectors(camera.up, forward).normalize();
-  panUp.crossVectors(forward, panRight).normalize();
+  // Screen-right and screen-up on the camera plane. Dragging moves the floor
+  // with the finger in both directions.
+  panRight.crossVectors(forward, camera.up).normalize();
+  panUp.crossVectors(panRight, forward).normalize();
 }
 
 const hemi = new THREE.HemisphereLight('#f7f4ee', '#c9c3b8', 0.85);
@@ -98,7 +130,8 @@ const groundMat = new THREE.ShaderMaterial({
     paper: { value: paper },
     ink: { value: ink },
     strength: { value: 0.075 },
-    px: { value: 0.004 }
+    px: { value: 0.004 },
+    span: { value: SPAN }
   },
   vertexShader: `
     varying vec3 vWorld;
@@ -113,16 +146,17 @@ const groundMat = new THREE.ShaderMaterial({
     uniform vec3 ink;
     uniform float strength;
     uniform float px;
+    uniform float span;
     varying vec3 vWorld;
     void main() {
       // Lines fall on half cells, so a device at an integer cell sits in a square.
-      float fx = fract(vWorld.x + 0.5);
-      float fz = fract(vWorld.z + 0.5);
+      float fx = fract(vWorld.x / span + 0.5);
+      float fz = fract(vWorld.z / span + 0.5);
       float dx = min(fx, 1.0 - fx);
       float dz = min(fz, 1.0 - fz);
       float d = min(dx, dz);
-      float w = max(px, fwidth(d));
-      float a = (1.0 - smoothstep(px * 0.15, px * 0.15 + w, d)) * strength;
+      float w = max(px / span, fwidth(d));
+      float a = (1.0 - smoothstep(px / span * 0.15, px / span * 0.15 + w, d)) * strength;
       gl_FragColor = vec4(mix(paper, ink, a), 1.0);
     }
   `
@@ -169,7 +203,13 @@ function springAmount(seconds) {
   return 1 - Math.exp(-zeta * wn * seconds) * Math.cos(w * seconds);
 }
 
+const images = new Map();
 function loadImage(src) {
+  if (!images.has(src)) images.set(src, loadImageOnce(src));
+  return images.get(src);
+}
+
+function loadImageOnce(src) {
   return new Promise(function (resolve) {
     const img = new Image();
     img.onload = function () { resolve(img); };
@@ -180,8 +220,9 @@ function loadImage(src) {
 
 async function makeScreen(spec, aspect) {
   const canvas = document.createElement('canvas');
-  canvas.width = 1024;
-  canvas.height = Math.round(1024 / (aspect || 1.33));
+  // 640px wide is plenty for a screen this size, and keeps 26 of them light.
+  canvas.width = 640;
+  canvas.height = Math.round(640 / (aspect || 1.33));
   if (spec.face === 'note') { canvas.width = 1024; canvas.height = 1280; }
   const ctx = canvas.getContext('2d');
   await document.fonts.ready;
@@ -229,15 +270,14 @@ function attachScreen(root, screen) {
   return mesh;
 }
 
-async function loadDevices() {
+const sources = new Map();
+
+async function loadModels() {
   await document.fonts.ready;
-  // Fetch every model at once; build them in order so the layout is stable.
-  const gltfs = await Promise.all(DEVICES.map(function (spec) { return loader.loadAsync(spec.file); }));
-  for (let i = 0; i < DEVICES.length; i++) {
-    const spec = DEVICES[i];
-    const gltf = gltfs[i];
-    const model = gltf.scene;
-    model.traverse(function (obj) {
+  const loaded = await Promise.all(MODEL_FILES.map(function (f) { return loader.loadAsync(f); }));
+  MODEL_FILES.forEach(function (f, i) {
+    const scene = loaded[i].scene;
+    scene.traverse(function (obj) {
       if (!obj.isMesh) return;
       obj.castShadow = true;
       obj.receiveShadow = true;
@@ -246,46 +286,126 @@ async function loadDevices() {
         obj.material.envMapIntensity = 0.4;
       }
     });
-    let aspect = 1.33;
-    let hasScreen = false;
-    model.traverse(function (obj) {
-      if (!obj.isMesh || obj.name !== 'Screen') return;
-      hasScreen = true;
-      obj.geometry.computeBoundingBox();
-      const size = obj.geometry.boundingBox.getSize(new THREE.Vector3());
-      aspect = size.x / Math.max(Math.hypot(size.y, size.z), 1e-4);
-    });
-    const screen = hasScreen ? await makeScreen(spec, aspect) : { paint: function () {}, links: false };
-    const screenMesh = hasScreen ? attachScreen(model, screen) : null;
-    const halo = screenMesh && GLOW[spec.face] ? makeHalo(screenMesh, GLOW[spec.face]) : null;
-    if (halo) model.add(halo);
-    const parts = {};
-    model.traverse(function (obj) { if (obj.name) parts[obj.name] = parts[obj.name] || obj; });
-    if (spec.toy === 'lamp') setupLamp(model, parts);
-    if (spec.toy === 'cassette') setupCassette(parts);
-    const group = new THREE.Group();
-    group.position.set(spec.cell[0], 0, spec.cell[1]);
-    group.add(model);
-    scene.add(group);
-    const dist = Math.hypot(spec.cell[0], spec.cell[1]);
-    devices.push({
-      spec: spec,
-      group: group,
-      screen: screenMesh,
-      paint: screen.paint,
-      playT: 0,
-      playing: false,
-      base: 1,
-      tilt: new THREE.Vector2(),
-      delay: dist * 0.09,
-      age: REDUCED ? 2 : -1,
-      links: screen.links,
-      halo: halo,
-      parts: parts
-    });
+    sources.set(f, scene);
+  });
+}
+
+const live = new Map();      // "c,r" -> device, or a pending promise while it builds
+let firstWave = true;
+
+async function spawn(c, r, born) {
+  const id = c + ',' + r;
+  const spec = specFor(c, r);
+  const model = sources.get(spec.file).clone(true);
+  let aspect = 1.33;
+  let hasScreen = false;
+  model.traverse(function (obj) {
+    if (!obj.isMesh || obj.name !== 'Screen') return;
+    hasScreen = true;
+    obj.geometry.computeBoundingBox();
+    const size = obj.geometry.boundingBox.getSize(new THREE.Vector3());
+    aspect = size.x / Math.max(Math.hypot(size.y, size.z), 1e-4);
+  });
+  const screen = hasScreen ? await makeScreen(spec, aspect) : { paint: function () {}, links: false };
+  if (live.get(id) !== 'pending') { disposeScreen(screen); return; } // scrolled away while building
+  const screenMesh = hasScreen ? attachScreen(model, screen) : null;
+  const halo = screenMesh && GLOW[spec.face] ? makeHalo(screenMesh, GLOW[spec.face]) : null;
+  if (halo) model.add(halo);
+  const parts = {};
+  model.traverse(function (obj) { if (obj.name) parts[obj.name] = parts[obj.name] || obj; });
+  if (spec.toy === 'lamp') setupLamp(model, parts);
+  if (spec.toy === 'cassette') setupCassette(parts);
+  const group = new THREE.Group();
+  group.position.set(c * SPAN, 0, r * SPAN);
+  group.add(model);
+  scene.add(group);
+  const d = {
+    id: id,
+    spec: spec,
+    group: group,
+    screen: screenMesh,
+    screenData: screen,
+    paint: screen.paint,
+    playT: 0,
+    playing: false,
+    base: 1,
+    tilt: new THREE.Vector2(),
+    delay: 0,
+    born: born,
+    links: screen.links,
+    halo: halo,
+    parts: parts
+  };
+  updatePop(d, performance.now());
+  devices.push(d);
+  live.set(id, d);
+}
+
+function disposeScreen(screen) {
+  if (screen && screen.mat) {
+    if (screen.mat.map) screen.mat.map.dispose();
+    screen.mat.dispose();
   }
-  const start = performance.now();
-  devices.forEach(function (d) { d.born = start; });
+}
+
+function despawn(d) {
+  scene.remove(d.group);
+  disposeScreen(d.screenData);
+  if (d.halo) d.halo.material.dispose();
+  if (d.spec.toy === 'lamp') forgetLamp();
+  if (hovered === d) hovered = null;
+  devices.splice(devices.indexOf(d), 1);
+  live.delete(d.id);
+}
+
+// Which cells the camera can see: cast the four screen corners onto the floor.
+const corner = new THREE.Vector3();
+const floorHit = new THREE.Vector3();
+const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+const cornerRay = new THREE.Ray();
+function visibleCells(margin) {
+  let minC = Infinity, maxC = -Infinity, minR = Infinity, maxR = -Infinity;
+  const dir = new THREE.Vector3();
+  camera.getWorldDirection(dir);
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (xy) {
+    corner.set(xy[0], xy[1], -1).unproject(camera);
+    cornerRay.set(corner, dir);
+    if (!cornerRay.intersectPlane(floorPlane, floorHit)) return;
+    minC = Math.min(minC, floorHit.x / SPAN); maxC = Math.max(maxC, floorHit.x / SPAN);
+    minR = Math.min(minR, floorHit.z / SPAN); maxR = Math.max(maxR, floorHit.z / SPAN);
+  });
+  // Tall devices standing just below the bottom edge still poke into view.
+  return {
+    c0: Math.floor(minC) - margin, c1: Math.ceil(maxC) + margin,
+    r0: Math.floor(minR) - margin, r1: Math.ceil(maxR) + margin + 1
+  };
+}
+
+function inView(c, r, v) { return c >= v.c0 && c <= v.c1 && r >= v.r0 && r <= v.r1; }
+
+function stream(now) {
+  const want = visibleCells(0);
+  const keep = visibleCells(2);
+  const centerC = target.x / SPAN, centerR = target.z / SPAN;
+  const fresh = [];
+  for (let c = want.c0; c <= want.c1; c++) {
+    for (let r = want.r0; r <= want.r1; r++) {
+      if (!live.has(c + ',' + r)) fresh.push([c, r]);
+    }
+  }
+  // Pop in from the middle of the view outward.
+  fresh.sort(function (a, b) {
+    return Math.hypot(a[0] - centerC, a[1] - centerR) - Math.hypot(b[0] - centerC, b[1] - centerR);
+  });
+  fresh.forEach(function (cr, i) {
+    live.set(cr[0] + ',' + cr[1], 'pending');
+    const stagger = firstWave ? Math.hypot(cr[0] - centerC, cr[1] - centerR) * 90 + introDelay : Math.min(i, 6) * 45;
+    spawn(cr[0], cr[1], now + stagger);
+  });
+  firstWave = false;
+  devices.slice().forEach(function (d) {
+    if (!inView(d.spec.cell[0], d.spec.cell[1], keep)) despawn(d);
+  });
 }
 
 function updatePop(d, now) {
@@ -365,7 +485,9 @@ function openHit(info) {
     window.open(url, uv.x < 0.5 ? '_blank' : '_self', 'noopener');
     return;
   }
-  if (spec.href) window.location.href = spec.href;
+  if (!spec.href) return;
+  if (spec.external) window.open(spec.href, '_blank', 'noopener');
+  else window.location.href = spec.href;
 }
 
 stage.addEventListener('pointerdown', function (e) {
@@ -438,6 +560,7 @@ night = lampOn ? 1 : 0;
 document.body.classList.toggle('lamp-on', lampOn);
 
 function setupLamp(model, parts) {
+  lampMats = [];
   ['Shade', 'Bulb'].forEach(function (name) {
     model.traverse(function (obj) {
       if (!obj.isMesh || !obj.material || obj.material.name !== name) return;
@@ -466,6 +589,15 @@ function setupLamp(model, parts) {
   lampLight = new THREE.PointLight('#ffc27a', 0, 3.2, 1.6);
   lampLight.position.set(0, 0.2, 0.05);
   model.add(lampLight);
+}
+
+// The lamp scrolled out of view: its light goes with it.
+function forgetLamp() {
+  lampLight = null;
+  lampGlow = null;
+  lampPool = null;
+  lampMats = [];
+  chain = null;
 }
 
 function toggleLamp() {
@@ -597,7 +729,7 @@ function toggleMusic(device) {
 function updateCassette(dt) {
   if (!deck) return;
   const device = devices.find(function (d) { return d.spec.toy === 'cassette'; });
-  const state = device.spec.state;
+  const state = TAPE;
   if (audio) {
     const step = dt * 0.6;
     audio.volume = Math.max(0, Math.min(1, audio.volume + Math.sign(fadeTo - audio.volume) * Math.min(step, Math.abs(fadeTo - audio.volume))));
@@ -617,7 +749,7 @@ function updateCassette(dt) {
   if (state.playing) {
     state.elapsed += dt;
     // Repaint the label's counter about twice a second when not hovered.
-    if (!device.playing && Math.floor(state.elapsed * 2) !== Math.floor((state.elapsed - dt) * 2)) device.paint(0, 0);
+    if (device && !device.playing && Math.floor(state.elapsed * 2) !== Math.floor((state.elapsed - dt) * 2)) device.paint(0, 0);
   }
 }
 
@@ -643,21 +775,18 @@ function click(freq) {
   } catch (err) {}
 }
 
-let motionStarted = false;
+let lastStream = -1;
 function animate() {
   requestAnimationFrame(animate);
   const now = performance.now();
-  if (!motionStarted) {
-    devices.forEach(function (d) { d.born = now + introDelay; });
-    motionStarted = true;
-  }
+  if (now - lastStream > 120) { frameCamera(); stream(now); lastStream = now; }
   const dt = Math.min(clock.getDelta(), 0.05);
   devices.forEach(function (d) { updatePop(d, now); });
   updateHover(dt);
   updateRoom(dt);
   updateCassette(dt);
-  const snapX = Math.round(target.x);
-  const snapZ = Math.round(target.z);
+  const snapX = Math.round(target.x / SPAN) * SPAN;
+  const snapZ = Math.round(target.z / SPAN) * SPAN;
   ground.position.set(snapX, 0, snapZ);
   shadowCatcher.position.set(snapX, 0.002, snapZ);
   key.position.set(target.x + 4.2, 7.2, target.z + 2.4);
@@ -672,10 +801,16 @@ const params = new URLSearchParams(location.search);
 const focusName = params.get('focus');
 const introDelay = params.has('demo') ? 1200 : 40;
 
-loadDevices().then(function () {
+loadModels().then(function () {
   if (focusName) {
-    const found = devices.find(function (d) { return d.spec.file.indexOf(focusName) !== -1; });
-    if (found) target.copy(found.group.position).y = 0.2;
+    // Look for the nearest cell showing that model and centre on it.
+    let best = null;
+    for (let c = -6; c <= 6; c++) for (let r = -6; r <= 6; r++) {
+      const sp = specFor(c, r);
+      if (sp.file.indexOf(focusName) === -1) continue;
+      if (!best || Math.hypot(c, r) < Math.hypot(best[0], best[1])) best = [c, r];
+    }
+    if (best) target.set(best[0] * SPAN, 0.2, best[1] * SPAN);
     const fh = (stage.clientHeight / cellPx()) * 0.42;
     const aspect = stage.clientWidth / stage.clientHeight;
     camera.left = -fh * aspect / 2;

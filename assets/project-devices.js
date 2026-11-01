@@ -1,0 +1,30 @@
+/* Which device each project lives on, in the 3D room and the flat view
+   alike. A project missing here still gets a steady device of its own. */
+window.PROJECT_DEVICE = {
+  'Movy': 'phone',
+  'BingBang': 'pet',
+  'Sequence': 'digicam',
+  'Tackie': 'candy',
+  'Bubbly': 'pager',
+  'Daypond': 'handheld',
+  'Finwords': 'learner',
+  'SaberOS': 'macintosh',
+  'Wallpapers': 'imac',
+  'Bug Explorer': 'widehandheld',
+  'Koi Pond': 'watch',
+  'Archer Travel': 'laptop',
+  'Cards of Answers': 'arcade',
+  'Axiom Thoughts': 'typewriter',
+  'Agent Terrarium': 'scope',
+  'JSON Prompts': 'term',
+  'Between Floors': 'ereader',
+  'Atticus': 'pda',
+  'Postcards from Mars': 'flip',
+  'Axel Art': 'crt',
+  'Littlebook': 'dualscreen',
+  'Movie Oracle': 'camcorder',
+  'Movy Reel': 'tv',
+  'Artuzzle': 'clockradio',
+  'Pixel Dailies': 'calculator',
+  'About Me': 'musicplayer'
+};

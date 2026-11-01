@@ -1,0 +1,111 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Render the flat view's devices</title>
+<!--
+  Renders every 3D device from the front, a little from above, under the
+  room's lights, for the flat view (field.html). Open it through a local
+  server from the site root: /assets/3d/scripts/render-flat.html
+  window.result lists, per device, a PNG data URL, its size in model units,
+  and where its screen sits in the image.
+-->
+<script type="importmap">{ "imports": { "three": "../vendor/three.module.js" } }</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../vendor/loaders/GLTFLoader.js';
+
+const NAMES = ['handheld', 'macintosh', 'phone', 'term', 'flip', 'pda', 'imac', 'crt', 'laptop', 'candy',
+  'pet', 'digicam', 'pager', 'learner', 'widehandheld', 'tv', 'arcade', 'typewriter', 'scope', 'ereader',
+  'musicplayer', 'calculator', 'clockradio', 'dualscreen', 'watch', 'camcorder', 'camera', 'radio'];
+const PX = 640;           // pixels per model unit
+const SIZE = 640;         // render target, square; a device fits inside one unit
+const TILT = THREE.MathUtils.degToRad(14);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setSize(SIZE, SIZE);
+renderer.setClearColor(0x000000, 0);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.08;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight('#f7f4ee', '#c9c3b8', 0.95));
+const key = new THREE.DirectionalLight('#fff8f0', 1.75);
+key.position.set(2.5, 6, 6);
+scene.add(key);
+const fill = new THREE.DirectionalLight('#e7eef8', 0.5);
+fill.position.set(-4, 2, 3);
+scene.add(fill);
+
+// Paper screens get paper under them; glass screens get dark glass.
+const PAPER = { camera: '#f4f1ea', typewriter: '#f4f1ea', macintosh: '#ece6da', laptop: '#ece6da' };
+const loader = new GLTFLoader();
+const out = [];
+
+for (const name of NAMES) {
+  const gltf = await loader.loadAsync('../models/' + name + '.glb');
+  const model = gltf.scene;
+  let screen = null;
+  model.traverse((o) => {
+    if (!o.isMesh) return;
+    if (o.name === 'Screen') {
+      screen = o;
+      // Dark glass under the live screen, so no seam shows at its edges.
+      o.material = new THREE.MeshBasicMaterial({ color: PAPER[name] || '#141518' });
+    } else if (o.material.isMeshStandardMaterial) {
+      o.material.roughness = Math.max(o.material.roughness, 0.48);
+      o.material.envMapIntensity = 0.4;
+    }
+  });
+  scene.add(model);
+  model.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(model);
+  const center = box.getCenter(new THREE.Vector3());
+
+  const half = SIZE / 2 / PX;
+  const camera = new THREE.OrthographicCamera(-half, half, half, -half, 0.01, 40);
+  camera.position.set(center.x, center.y + Math.sin(TILT) * 10, center.z + Math.cos(TILT) * 10);
+  camera.lookAt(center);
+  camera.updateMatrixWorld();
+  renderer.render(scene, camera);
+
+  // Crop to what was drawn.
+  const gl = renderer.getContext();
+  const pixels = new Uint8Array(SIZE * SIZE * 4);
+  gl.readPixels(0, 0, SIZE, SIZE, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+  let x0 = SIZE, y0 = SIZE, x1 = 0, y1 = 0;
+  for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) {
+    if (pixels[(y * SIZE + x) * 4 + 3] > 8) {
+      const yy = SIZE - 1 - y;
+      x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, yy); y1 = Math.max(y1, yy);
+    }
+  }
+  const pad = 6;
+  x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(SIZE - 1, x1 + pad); y1 = Math.min(SIZE - 1, y1 + pad);
+  const w = x1 - x0 + 1, h = y1 - y0 + 1;
+  const crop = document.createElement('canvas');
+  crop.width = w; crop.height = h;
+  crop.getContext('2d').drawImage(renderer.domElement, x0, y0, w, h, 0, 0, w, h);
+
+  // Where the screen lands, inset a touch so it always sits on the glass.
+  let rect = null;
+  if (screen) {
+    screen.geometry.computeBoundingBox();
+    const b = screen.geometry.boundingBox;
+    let sx0 = Infinity, sy0 = Infinity, sx1 = -Infinity, sy1 = -Infinity;
+    for (let i = 0; i < 8; i++) {
+      const v = new THREE.Vector3(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z)
+        .applyMatrix4(screen.matrixWorld).project(camera);
+      const px = (v.x + 1) / 2 * SIZE - x0, py = (1 - v.y) / 2 * SIZE - y0;
+      sx0 = Math.min(sx0, px); sx1 = Math.max(sx1, px); sy0 = Math.min(sy0, py); sy1 = Math.max(sy1, py);
+    }
+    const ix = (sx1 - sx0) * 0.025, iy = (sy1 - sy0) * 0.025;
+    rect = { x: sx0 + ix, y: sy0 + iy, w: sx1 - sx0 - 2 * ix, h: sy1 - sy0 - 2 * iy };
+  }
+  out.push({ name, png: crop.toDataURL('image/png'), w, h, unitsWide: w / PX, screen: rect });
+  scene.remove(model);
+}
+
+window.result = out;
+document.title = 'done';
+</script>

@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
-import { FISH_SVG, paintScreen } from './screens.js?v=16';
+import { FISH_SVG, paintScreen } from './screens.js?v=17';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '16';
+const VERSION = '17';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -23,35 +23,8 @@ const MODEL_FACE = {
 };
 const MODEL_ORDER = Object.keys(MODEL_FACE);
 
-// Every project has a device of its own, chosen to suit it.
-const PROJECT_DEVICE = {
-  'Movy': 'phone',
-  'BingBang': 'pet',
-  'Sequence': 'digicam',
-  'Tackie': 'candy',
-  'Bubbly': 'pager',
-  'Daypond': 'handheld',
-  'Finwords': 'learner',
-  'SaberOS': 'macintosh',
-  'Wallpapers': 'imac',
-  'Bug Explorer': 'widehandheld',
-  'Koi Pond': 'watch',
-  'Archer Travel': 'laptop',
-  'Cards of Answers': 'arcade',
-  'Axiom Thoughts': 'typewriter',
-  'Agent Terrarium': 'scope',
-  'JSON Prompts': 'term',
-  'Between Floors': 'ereader',
-  'Atticus': 'pda',
-  'Postcards from Mars': 'flip',
-  'Axel Art': 'crt',
-  'Littlebook': 'dualscreen',
-  'Movie Oracle': 'camcorder',
-  'Movy Reel': 'tv',
-  'Artuzzle': 'clockradio',
-  'Pixel Dailies': 'calculator',
-  'About Me': 'musicplayer'
-};
+// Every project has a device of its own, shared with the flat view.
+const PROJECT_DEVICE = window.PROJECT_DEVICE || {};
 // A project added later without an entry above still gets a steady device.
 function deviceFor(name) {
   if (PROJECT_DEVICE[name]) return PROJECT_DEVICE[name];

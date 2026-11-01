@@ -515,6 +515,8 @@ function buildTerm() {
   box(bezel, [0.46, 0.2, 0.01], [0, 0.245, 0.0], { corner: 0.02, bevel: 0.003 });
   glass(0.43, 0.175, [0, 0.245, 0.0058]);
   cyl(led, 0.006, 0.006, [w / 2 - 0.03, 0.135, 0.002]);
+  for (let i = 0; i < 7; i++) box(key, [0.006, 0.004, 0.14], [-0.12 + i * 0.04, 0.38 + 0.0005, -0.14], { bevel: 0 });
+  box(clay('Badge', '#c8b98f', 0.35, 0.5), [0.07, 0.016, 0.004], [-0.19, 0.135, 0.002], { corner: 0.004, bevel: 0.001 });
   // Feet raise the monitor over the keyboard.
   slab(body, [0.06, 0.11, 0.18], [-0.18, 0, -0.14], { bevel: 0.01 });
   slab(body, [0.06, 0.11, 0.18], [0.18, 0, -0.14], { bevel: 0.01 });
@@ -538,11 +540,14 @@ function buildLaptop() {
   box(deck, [w, dep, t], [0, t / 2, 0.02], { corner: 0.02, bevel: 0.008, rot: [-Math.PI / 2, 0, 0] });
   deckKeys(key, { cols: 14, rows: 4, w: 0.031, dz: 0.03, gx: 0.006, gz: 0.007, x: 0, y: t + 0.002, z: -0.13 });
   box(pad, [0.13, 0.08, 0.004], [0, t + 0.001, 0.14], { corner: 0.008, bevel: 0.001, rot: [-Math.PI / 2, 0, 0] });
+  cyl(clay('Hinge', '#3a3f46', 0.35, 0.3), 0.012, w * 0.7, [0, t + 0.004, -dep / 2 + 0.02], { axis: 'x', segs: 16 });
+  cyl(clay('Status', '#7ed957', 0.3), 0.004, 0.004, [w / 2 - 0.04, t + 0.001, 0.17], { axis: 'y', segs: 10 });
   // Lid hinged at the back, opened a little past upright.
   within({ pos: [0, t, -dep / 2 + 0.02], rot: [-0.22, 0, 0] }, () => {
     slab(lid, [w, 0.34, 0.02], [0, 0, -0.01], { corner: 0.02, bevel: 0.007 });
     box(bezel, [w - 0.02, 0.32, 0.004], [0, 0.17, 0.001], { corner: 0.012, bevel: 0.001 });
     glass(0.48, 0.27, [0, 0.175, 0.0036]);
+    cyl(clay('Cam', '#16181b', 0.3), 0.004, 0.003, [0, 0.326, 0.003], { segs: 10 });
   });
   writeGlb('laptop');
 }
@@ -1021,3 +1026,107 @@ buildClockRadio();
 buildDualScreen();
 buildWatch();
 buildCamcorder();
+
+// ------------------------------------------------------- rebuilt originals
+// The first three devices came from Blender with plainer detail. These
+// versions replace them so every device in the room shares one finish.
+
+function buildMacintosh() {
+  reset();
+  const beige = clay('Beige', '#e9e0cf', 0.5);
+  const face = clay('Face', '#f1eadc', 0.48);
+  const shade = clay('Shade', '#cdbfa6', 0.55);
+  const well = clay('Well', '#2b2824', 0.45);
+  const bezel = clay('Bezel', '#0d0d0e', 0.35);
+  const slot = clay('Slot', '#1d1b18', 0.6);
+  const w = 0.34, h = 0.46, d = 0.36;
+  // Main case, with a slightly narrower back that tapers away.
+  slab(beige, [w, h, d * 0.62], [0, 0.02, d * 0.19], { corner: 0.035, bevel: 0.022 });
+  slab(shade, [w * 0.9, h * 0.9, d * 0.42], [0, 0.04, -d * 0.24], { corner: 0.04, bevel: 0.02 });
+  // Front face plate, the deep screen well, and the glass.
+  box(face, [w * 0.92, h * 0.92, 0.01], [0, 0.02 + h * 0.5, d * 0.5 + 0.001], { corner: 0.03, bevel: 0.004 });
+  box(well, [0.25, 0.2, 0.012], [0, 0.02 + h * 0.64, d * 0.5 + 0.003], { corner: 0.02, bevel: 0.004 });
+  box(bezel, [0.226, 0.176, 0.006], [0, 0.02 + h * 0.64, d * 0.5 + 0.008], { corner: 0.012, bevel: 0.002 });
+  glass(0.21, 0.16, [0, 0.02 + h * 0.64, d * 0.5 + 0.0115]);
+  // Floppy slot with its eject button, and the chin groove.
+  box(slot, [0.12, 0.012, 0.008], [0.06, 0.02 + h * 0.3, d * 0.5 + 0.004], { corner: 0.004, bevel: 0.001 });
+  box(shade, [0.012, 0.012, 0.008], [0.135, 0.02 + h * 0.3, d * 0.5 + 0.004], { corner: 0.003, bevel: 0.001 });
+  box(shade, [w * 0.86, 0.004, 0.006], [0, 0.02 + h * 0.18, d * 0.5 + 0.004], { bevel: 0 });
+  // Carry-handle recess on top, vents down the side.
+  box(well, [0.18, 0.008, 0.04], [0, 0.02 + h + 0.0005, -d * 0.05], { corner: 0.006, bevel: 0.002 });
+  for (let i = 0; i < 6; i++) box(shade, [0.004, 0.012, 0.11], [w / 2 + 0.0005, 0.02 + h * 0.75 - i * 0.03, -d * 0.02], { bevel: 0 });
+  [-0.12, 0.12].forEach((x) => slab(shade, [0.06, 0.02, 0.08], [x, 0, d * 0.32], { corner: 0.008, bevel: 0.004 }));
+  writeGlb('macintosh');
+}
+
+function buildCamera() {
+  reset();
+  const cream = clay('Cream', '#f1ebe0', 0.45);
+  const front = clay('Front', '#24252a', 0.42);
+  const silver = clay('Silver', '#cdd0d5', 0.25, 0.8);
+  const lens = clay('Lens', '#0d0f13', 0.18, 0.4);
+  const lensGlass = clay('LensGlass', '#25374d', 0.12, 0.5);
+  const flash = clay('Flash', '#f6f3ec', 0.3);
+  const ribs = clay('Ribs', '#d9d4c9', 0.4);
+  const red = clay('Shutter', '#d2452f', 0.35);
+  const print = clay('Print', '#faf7f0', 0.72);
+  const mouth = clay('Mouth', '#0c0c0e', 0.6);
+  const bw = 0.5, bh = 0.24, bd = 0.17, z0 = 0.34;
+  // A cream body with a dark front panel.
+  slab(cream, [bw, bh, bd], [0, z0, 0], { corner: 0.05, bevel: 0.02 });
+  box(front, [bw * 0.94, bh * 0.82, 0.012], [0, z0 + bh * 0.5, bd / 2 + 0.002], { corner: 0.04, bevel: 0.004 });
+  // The lens: silver rings stepping in to dark glass.
+  const lx = -0.08, ly = z0 + bh * 0.5, lz = bd / 2;
+  cyl(silver, 0.068, 0.014, [lx, ly, lz + 0.008], { segs: 40 });
+  cyl(front, 0.058, 0.02, [lx, ly, lz + 0.014], { segs: 40 });
+  cyl(silver, 0.046, 0.012, [lx, ly, lz + 0.024], { segs: 36 });
+  cyl(lens, 0.038, 0.012, [lx, ly, lz + 0.028], { segs: 36 });
+  cyl(lensGlass, 0.026, 0.004, [lx, ly, lz + 0.034], { segs: 30 });
+  ball(flash, 0.007, [lx - 0.012, ly + 0.012, lz + 0.035]);
+  // Ribbed flash window and the viewfinder.
+  box(flash, [0.12, 0.06, 0.01], [0.13, z0 + bh * 0.66, lz + 0.006], { corner: 0.008, bevel: 0.003 });
+  for (let i = 0; i < 5; i++) box(ribs, [0.11, 0.0025, 0.002], [0.13, z0 + bh * 0.66 - 0.022 + i * 0.011, lz + 0.0115], { bevel: 0 });
+  box(lens, [0.05, 0.034, 0.01], [0.13, z0 + bh * 0.3, lz + 0.006], { corner: 0.008, bevel: 0.003 });
+  cyl(red, 0.018, 0.012, [0.17, z0 + bh + 0.004, 0.02], { axis: 'y', segs: 22 });
+  [-bw / 2, bw / 2].forEach((x) => box(silver, [0.012, 0.03, 0.02], [x + Math.sign(x) * 0.004, z0 + bh * 0.8, 0], { corner: 0.004, bevel: 0.002 }));
+  // The print sliding out of the slot, nearly to the floor.
+  box(mouth, [0.36, 0.01, 0.02], [0, z0 + 0.01, bd / 2 - 0.004], { corner: 0.004, bevel: 0.001 });
+  const py = bd / 2 + 0.004;
+  slab(print, [0.3, 0.33, 0.008], [0, 0.012, py], { corner: 0.004, bevel: 0.002 });
+  glass(0.256, 0.3, [0, 0.012 + 0.33 * 0.52, py + 0.0045]);
+  writeGlb('camera');
+}
+
+function buildHandheld() {
+  reset();
+  const shell = clay('Shell', '#cbcbbf', 0.52);
+  const lower = clay('Lower', '#bdbdb0', 0.55);
+  const plate = clay('Plate', '#5f6372', 0.45);
+  const pad = clay('Pad', '#1f2124', 0.45);
+  const btn = clay('Btn', '#a8325a', 0.4);
+  const pill = clay('Pill', '#8b8d90', 0.45);
+  const led = clay('Led', '#d8402f', 0.3);
+  const w = 0.3, h = 0.5, d = 0.07;
+  slab(shell, [w, h, d], [0, 0, 0], { corner: 0.028, bevel: 0.014 });
+  box(lower, [w * 0.96, h * 0.42, 0.006], [0, h * 0.22, d / 2], { corner: 0.03, bevel: 0.002 });
+  // The dark plate round the glass, with its power light.
+  box(plate, [0.25, 0.2, 0.008], [0, h * 0.72, d / 2 + 0.002], { corner: 0.016, bevel: 0.002 });
+  glass(0.17, 0.135, [0.004, h * 0.71, d / 2 + 0.0065]);
+  cyl(led, 0.006, 0.006, [-0.105, h * 0.75, d / 2 + 0.006], { segs: 14 });
+  // D-pad, the two buttons on a slant, start and select.
+  box(pad, [0.075, 0.025, 0.012], [-0.075, h * 0.36, d / 2 + 0.004], { corner: 0.004, bevel: 0.002 });
+  box(pad, [0.025, 0.075, 0.012], [-0.075, h * 0.36, d / 2 + 0.004], { corner: 0.004, bevel: 0.002 });
+  cyl(btn, 0.019, 0.012, [0.065, h * 0.34, d / 2 + 0.004], { segs: 24 });
+  cyl(btn, 0.019, 0.012, [0.11, h * 0.38, d / 2 + 0.004], { segs: 24 });
+  box(pill, [0.036, 0.011, 0.006], [-0.02, h * 0.17, d / 2 + 0.003], { corner: 0.0055, bevel: 0.0015, rot: [0, 0, 0.45] });
+  box(pill, [0.036, 0.011, 0.006], [0.025, h * 0.17, d / 2 + 0.003], { corner: 0.0055, bevel: 0.0015, rot: [0, 0, 0.45] });
+  // Speaker slots, angled in the bottom corner.
+  for (let i = 0; i < 6; i++) box(plate, [0.005, 0.05, 0.004], [0.075 + i * 0.012, h * 0.1 + i * 0.006, d / 2 + 0.002], { bevel: 0, rot: [0, 0, 0.5] });
+  // Power switch on top.
+  box(pill, [0.03, 0.012, 0.016], [-0.08, h + 0.004, 0], { corner: 0.004, bevel: 0.002 });
+  writeGlb('handheld');
+}
+
+buildMacintosh();
+buildCamera();
+buildHandheld();

@@ -1,0 +1,100 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Render the loader cassette</title>
+<!--
+  Renders the cassette player exactly as the room lights it, on a clear
+  background, without its reels or label, for the page loader. Open it
+  through a local server from the site root:
+    /assets/3d/scripts/render-loader.html
+  It puts a PNG data URL and the overlay geometry on window.result.
+-->
+<script type="importmap">{ "imports": { "three": "../vendor/three.module.js" } }</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../vendor/loaders/GLTFLoader.js';
+
+const W = 560, H = 460, PX_PER_UNIT = 800;
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H);
+renderer.setClearColor(0x000000, 0);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.08;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight('#f7f4ee', '#c9c3b8', 0.85));
+const key = new THREE.DirectionalLight('#fff8f0', 1.85);
+key.position.set(4.2, 7.2, 2.4);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+Object.assign(key.shadow.camera, { left: -1, right: 1, top: 1, bottom: -1, near: 0.5, far: 24 });
+key.shadow.bias = -0.0004;
+key.shadow.normalBias = 0.02;
+key.shadow.radius = 2.5;
+scene.add(key);
+const fill = new THREE.DirectionalLight('#e7eef8', 0.45);
+fill.position.set(-4, 3.5, -2);
+scene.add(fill);
+const catcher = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), new THREE.ShadowMaterial({ opacity: 0.32 }));
+catcher.rotation.x = -Math.PI / 2;
+catcher.receiveShadow = true;
+scene.add(catcher);
+
+const camera = new THREE.OrthographicCamera(-W / 2 / PX_PER_UNIT, W / 2 / PX_PER_UNIT, H / 2 / PX_PER_UNIT, -H / 2 / PX_PER_UNIT, 0.01, 80);
+const target = new THREE.Vector3(0, 0.15, 0);
+camera.position.copy(target).addScaledVector(new THREE.Vector3(1, 1, 1).normalize(), 14);
+camera.lookAt(target);
+camera.updateMatrixWorld();
+
+const gltf = await new GLTFLoader().loadAsync('../models/cassette.glb');
+const model = gltf.scene;
+const parts = {};
+model.traverse((o) => {
+  if (o.name) parts[o.name] = o;
+  if (o.isMesh) {
+    o.castShadow = true;
+    o.receiveShadow = true;
+    if (o.material.isMeshStandardMaterial) {
+      o.material.roughness = Math.max(o.material.roughness, 0.48);
+      o.material.envMapIntensity = 0.4;
+    }
+  }
+});
+scene.add(model);
+model.updateMatrixWorld(true);
+
+function toPx(v) {
+  const p = v.clone().project(camera);
+  return [(p.x + 1) / 2 * W, (1 - p.y) / 2 * H];
+}
+// Screen-space axes of the front face (+X and +Y in the model), per unit.
+function frame(center) {
+  const c = toPx(center);
+  const x = toPx(center.clone().add(new THREE.Vector3(1, 0, 0)));
+  const y = toPx(center.clone().add(new THREE.Vector3(0, 1, 0)));
+  return { c, x: [x[0] - c[0], x[1] - c[1]], y: [y[0] - c[0], y[1] - c[1]] };
+}
+
+const reels = ['ReelL', 'ReelR'].map((n) => frame(parts[n].getWorldPosition(new THREE.Vector3())));
+const screen = parts.Screen;
+screen.geometry.computeBoundingBox();
+const labelCenter = screen.geometry.boundingBox.getCenter(new THREE.Vector3()).applyMatrix4(screen.matrixWorld);
+const label = frame(labelCenter);
+const labelSize = screen.geometry.boundingBox.getSize(new THREE.Vector3());
+
+// The loader draws these itself.
+parts.ReelL.visible = false;
+parts.ReelR.visible = false;
+screen.visible = false;
+
+renderer.render(scene, camera);
+window.result = {
+  png: renderer.domElement.toDataURL('image/png'),
+  width: W, height: H, unit: PX_PER_UNIT,
+  reels, label, labelSize: [labelSize.x, labelSize.y]
+};
+document.title = 'done';
+</script>

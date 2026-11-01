@@ -1,5 +1,8 @@
 """Headless Blender models for the isometric prototype.
 
+Superseded: build_more.mjs now builds the handheld, Macintosh and camera
+with more detail, so every device shares one finish. Kept for reference.
+
 Units: 1.0 = one homepage cell. Z is up. The front of each device faces -Y.
 Run: blender --background --python assets/3d/scripts/build_devices.py
 """

@@ -64,6 +64,12 @@
     '<linearGradient id="pbLid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a6e76"/><stop offset="0.35" stop-color="#3e434b"/><stop offset="1" stop-color="#2a2e34"/></linearGradient>' +
     '<linearGradient id="pbBase" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5c6168"/><stop offset="1" stop-color="#3a3f46"/></linearGradient>' +
     '<linearGradient id="pbKey" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4f57"/><stop offset="1" stop-color="#2e333a"/></linearGradient>' +
+    '<linearGradient id="camBody" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a4e56"/><stop offset="0.4" stop-color="#2c3038"/><stop offset="1" stop-color="#1a1d22"/></linearGradient>' +
+    '<radialGradient id="lens" cx="0.4" cy="0.35" r="0.7"><stop offset="0" stop-color="#3a4554"/><stop offset="0.55" stop-color="#15181e"/><stop offset="1" stop-color="#07080b"/></radialGradient>' +
+    '<linearGradient id="print" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffcf7"/><stop offset="1" stop-color="#f3eee6"/></linearGradient>' +
+    '<linearGradient id="radioBody" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8d9160"/><stop offset="0.45" stop-color="#6a6e45"/><stop offset="1" stop-color="#4a4e30"/></linearGradient>' +
+    '<linearGradient id="radioFace" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c8054"/><stop offset="1" stop-color="#5c603c"/></linearGradient>' +
+    '<radialGradient id="talk" cx="0.38" cy="0.32" r="0.75"><stop offset="0" stop-color="#5a5e42"/><stop offset="1" stop-color="#2e321c"/></radialGradient>' +
     '</defs></svg>';
 
   var candyScreen = { x: 16, y: 30, w: 68, h: 48, r: 3 };
@@ -316,6 +322,52 @@
       '<rect x="96" y="128" width="18" height="2.6" rx="1" fill="#12151a"/>' +
     '</svg>';
 
+  var introScreen = { x: 32, y: 84, w: 112, h: 100, r: 1 };
+  var radioScreen = { x: 24, y: 44, w: 64, h: 58, r: 4 };
+
+  var intro = '' +
+    '<svg viewBox="0 0 176 208" aria-hidden="true">' +
+      '<rect x="22" y="66" width="132" height="132" rx="3" fill="url(#print)"/>' +
+      '<rect x="22" y="66" width="132" height="132" rx="3" fill="url(#grain)" opacity="0.18"/>' +
+      '<rect x="34" y="186" width="108" height="2" rx="1" fill="#e4ddd2"/>' +
+      '<rect x="12" y="8" width="152" height="74" rx="18" fill="url(#camBody)"/>' +
+      '<rect x="12" y="8" width="152" height="30" rx="16" fill="url(#sheen)" opacity="0.55"/>' +
+      '<rect x="12" y="8" width="152" height="74" rx="18" fill="url(#grain)" opacity="0.16"/>' +
+      '<circle cx="72" cy="46" r="22" fill="#12141a"/>' +
+      '<circle cx="72" cy="46" r="16.5" fill="url(#lens)"/>' +
+      '<circle cx="72" cy="46" r="7" fill="#0c0e12"/>' +
+      '<circle cx="66" cy="40" r="3.2" fill="#fff" opacity="0.4"/>' +
+      '<rect x="108" y="20" width="28" height="16" rx="3" fill="#14171c"/>' +
+      '<rect x="111" y="23" width="22" height="10" rx="1.5" fill="#31404a"/>' +
+      '<rect x="110" y="42" width="24" height="16" rx="2" fill="#f4f0e8"/>' +
+      '<rect x="112" y="44" width="20" height="6" rx="1" fill="#fff" opacity="0.7"/>' +
+      '<circle cx="146" cy="24" r="7" fill="#c4473c"/>' +
+      '<circle cx="144" cy="22" r="2.2" fill="#fff" opacity="0.45"/>' +
+      '<rect x="40" y="74" width="96" height="5" rx="1.2" fill="#0e1014"/>' +
+    '</svg>';
+
+  var radio = '' +
+    '<svg viewBox="0 0 112 196" aria-hidden="true">' +
+      '<rect x="52" y="2" width="8" height="20" rx="3" fill="#3a3e28"/>' +
+      '<circle cx="56" cy="4" r="5" fill="#2a2e1c"/>' +
+      '<rect x="14" y="18" width="84" height="168" rx="18" fill="url(#radioBody)"/>' +
+      '<rect x="18" y="22" width="76" height="160" rx="15" fill="url(#radioFace)"/>' +
+      '<rect x="18" y="22" width="76" height="36" rx="14" fill="url(#sheen)" opacity="0.35"/>' +
+      '<rect x="18" y="22" width="76" height="160" rx="15" fill="url(#grain)" opacity="0.16"/>' +
+      '<g stroke="#2e321c" stroke-width="2" stroke-linecap="round">' +
+        '<path d="M30 32h36M30 37h36"/>' +
+      '</g>' +
+      lip(radioScreen, 3, '#14180e', 6) +
+      '<circle class="lamp" cx="84" cy="34" r="3.3" fill="#ffb020"/>' +
+      '<circle cx="56" cy="132" r="18" fill="#2a2e1c"/>' +
+      '<circle cx="56" cy="132" r="15" fill="url(#talk)"/>' +
+      '<circle cx="51" cy="126" r="4" fill="#fff" opacity="0.16"/>' +
+      '<rect x="46" y="158" width="20" height="8" rx="3" fill="#3e422c"/>' +
+      '<rect x="96" y="70" width="5" height="28" rx="1.5" fill="#3e422c"/>' +
+    '</svg>';
+
+  window.INTRO_DEVICE = { id: 'intro', face: 'note', screen: introScreen, svg: intro };
+  window.ARCHER_DEVICE = { id: 'radio', face: 'fish', screen: radioScreen, svg: radio };
   window.RETRO_DEFS = DEFS;
   window.RETRO_DEVICES = [
     { id: 'candy', face: 'lcd', screen: candyScreen, svg: candy },

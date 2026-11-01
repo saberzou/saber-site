@@ -21,32 +21,26 @@
 <a class="skip" href="#catalog">Skip to the list</a>
 <div class="view" id="view" tabindex="0" role="region" aria-label="A field of things I've made. Drag to look around, or use the arrow keys."></div>
 
-<aside class="mark">
-  <h1>I'm <em>Saber.</em></h1>
-  <p>I love making things. Apps, toys, little worlds.</p>
-  <p class="hint">Drag to look around</p>
-  <div class="tools">
-    <div class="archer" id="archer" role="button" tabindex="0" aria-label="Chat with Archer" aria-haspopup="dialog">
-      <svg class="archer-body" id="archer-svg" viewBox="0 0 100 100" aria-hidden="true">
-        <g id="fin-left"><path d="M25 48 C 17 49, 10 54, 8 62 C 15 64, 23 59, 28 55 Z" fill="#FF6A00" stroke="#FF6A00" stroke-width="2.5" stroke-linejoin="round"/></g>
-        <g id="fin-right"><path d="M75 48 C 83 49, 90 54, 92 62 C 85 64, 77 59, 72 55 Z" fill="#FF6A00" stroke="#FF6A00" stroke-width="2.5" stroke-linejoin="round"/></g>
-        <g id="archer-torso">
-          <rect x="20" y="28" width="60" height="46" rx="23" fill="#FF6A00"/>
-          <path d="M25 62 Q 50 76 75 62 Q 50 81 25 62 Z" fill="#D94B0F" opacity="0.45"/>
-          <rect x="28" y="38" width="44" height="17" rx="8.5" fill="#141414"/>
-          <g id="archer-eyes">
-            <rect x="38" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>
-            <rect x="57" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>
-          </g>
-        </g>
-      </svg>
-    </div>
-    <button id="archer-chat-open" type="button">Archer</button>
-    <button id="index-open" type="button" aria-expanded="false" aria-controls="index">List</button>
-    <a href="https://github.com/saberzou" target="_blank" rel="noopener noreferrer">GitHub</a>
-    <a href="mailto:saberzou@gmail.com">Email</a>
-  </div>
-</aside>
+<div class="hud">
+  <button id="index-open" type="button" aria-expanded="false" aria-controls="index">List</button>
+</div>
+<p class="drag-hint" id="drag-hint">Drag to look around</p>
+<div class="archer-source" id="archer" aria-hidden="true">
+  <svg class="archer-body" id="archer-svg" viewBox="0 0 100 100" aria-hidden="true">
+    <g id="fin-left"><path d="M25 48 C 17 49, 10 54, 8 62 C 15 64, 23 59, 28 55 Z" fill="#FF6A00" stroke="#FF6A00" stroke-width="2.5" stroke-linejoin="round"/></g>
+    <g id="fin-right"><path d="M75 48 C 83 49, 90 54, 92 62 C 85 64, 77 59, 72 55 Z" fill="#FF6A00" stroke="#FF6A00" stroke-width="2.5" stroke-linejoin="round"/></g>
+    <g id="archer-torso">
+      <rect x="20" y="28" width="60" height="46" rx="23" fill="#FF6A00"/>
+      <path d="M25 62 Q 50 76 75 62 Q 50 81 25 62 Z" fill="#D94B0F" opacity="0.45"/>
+      <rect x="28" y="38" width="44" height="17" rx="8.5" fill="#141414"/>
+      <g id="archer-eyes">
+        <rect x="38" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>
+        <rect x="57" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>
+      </g>
+    </g>
+  </svg>
+</div>
+<button id="archer-chat-open" type="button" class="sr">Chat with Archer</button>
 
 <div class="index" id="index" hidden>
   <div class="index-head">

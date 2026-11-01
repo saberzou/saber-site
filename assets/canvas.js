@@ -38,6 +38,11 @@
 
   function deviceFor(c, r) { return SPECS[mod(c * 3 + r * 2, SPECS.length)]; }
   function itemFor(c, r) { return items[mod(c * 5 + r * 3, items.length)]; }
+  function roleFor(c, r) {
+    if (c === 0 && r === 0) return 'intro';
+    if ((c === 1 && r === 0) || mod(c + r * 3, 13) === 0) return 'archer';
+    return 'work';
+  }
 
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) {
@@ -45,14 +50,38 @@
     });
   }
 
-  function shell(spec, item) {
+  var FISH = '<svg class="fish" viewBox="0 0 100 100" aria-hidden="true">' +
+    '<path d="M25 48 C 17 49, 10 54, 8 62 C 15 64, 23 59, 28 55 Z" fill="#FF6A00"/>' +
+    '<path d="M75 48 C 83 49, 90 54, 92 62 C 85 64, 77 59, 72 55 Z" fill="#FF6A00"/>' +
+    '<rect x="20" y="28" width="60" height="46" rx="23" fill="#FF6A00"/>' +
+    '<path d="M25 62 Q 50 76 75 62 Q 50 81 25 62 Z" fill="#D94B0F" opacity="0.45"/>' +
+    '<rect x="28" y="38" width="44" height="17" rx="8.5" fill="#141414"/>' +
+    '<rect x="38" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>' +
+    '<rect x="57" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/>' +
+    '</svg>';
+
+  function screenStyle(spec) {
     var s = spec.screen;
     var box = specBox(spec);
-    var style = 'left:' + (s.x / box.w * 100) + '%;top:' + (s.y / box.h * 100) +
+    return 'left:' + (s.x / box.w * 100) + '%;top:' + (s.y / box.h * 100) +
       '%;width:' + (s.w / box.w * 100) + '%;height:' + (s.h / box.h * 100) +
       '%;border-radius:' + (s.r / s.w * 100) + '% / ' + (s.r / s.h * 100) + '%';
-    return '<div class="dev ' + spec.id + '">' + spec.svg +
-      '<div class="screen ' + spec.face + '" style="' + style + '"><img src="' + esc(item.icon) + '" alt=""><span>' + esc(item.name) + '</span></div></div>';
+  }
+
+  function shell(spec, inner) {
+    return '<div class="pop"><div class="dev ' + spec.id + '">' + spec.svg +
+      '<div class="screen ' + spec.face + '" style="' + screenStyle(spec) + '">' + inner + '</div></div></div>';
+  }
+
+  function workInner(item) {
+    return '<img src="' + esc(item.icon) + '" alt=""><span>' + esc(item.name) + '</span>';
+  }
+
+  function introInner() {
+    return '<h1>I\u2019m <em>Saber.</em></h1>' +
+      '<p>I love making things. Apps, toys, little worlds.</p>' +
+      '<p class="links"><a href="https://github.com/saberzou" target="_blank" rel="noopener noreferrer">GitHub</a>' +
+      '<a href="mailto:saberzou@gmail.com">Email</a></p>';
   }
 
   function specBox(spec) {
@@ -61,24 +90,93 @@
   }
 
   function makeCell(c, r) {
-    var item = itemFor(c, r);
-    var spec = deviceFor(c, r);
-    var el = document.createElement(item.chat ? 'button' : 'a');
-    el.className = 'cell';
+    var role = roleFor(c, r);
+    var el;
+    if (role === 'intro') {
+      el = document.createElement('div');
+      el.className = 'cell';
+      el.innerHTML = shell(window.INTRO_DEVICE, introInner());
+    } else if (role === 'archer') {
+      el = document.createElement('button');
+      el.className = 'cell';
+      el.type = 'button';
+      el.setAttribute('data-chat', '');
+      el.setAttribute('aria-label', 'Chat with Archer. A little guide who hangs out here.');
+      el.tabIndex = -1;
+      el.innerHTML = shell(window.ARCHER_DEVICE, FISH) + '<span class="blurb">A little guide who hangs out here.</span>';
+    } else {
+      var item = itemFor(c, r);
+      var spec = deviceFor(c, r);
+      el = document.createElement(item.chat ? 'button' : 'a');
+      el.className = 'cell';
+      if (item.chat) {
+        el.type = 'button';
+        el.setAttribute('data-chat', '');
+      } else {
+        el.href = item.href;
+        if (item.external) { el.target = '_blank'; el.rel = 'noopener noreferrer'; }
+      }
+      el.setAttribute('aria-label', item.name + '. ' + item.desc);
+      el.tabIndex = -1;
+      el.innerHTML = shell(spec, workInner(item)) + '<span class="blurb">' + esc(item.desc) + '</span>';
+    }
     el.style.left = (c * CELL) + 'px';
     el.style.top = (r * CELL) + 'px';
     el.dataset.home = c + ',' + r;
-    if (item.chat) {
-      el.type = 'button';
-      el.setAttribute('data-chat', '');
-    } else {
-      el.href = item.href;
-      if (item.external) { el.target = '_blank'; el.rel = 'noopener noreferrer'; }
-    }
-    el.setAttribute('aria-label', item.name + '. ' + item.desc);
-    el.tabIndex = -1;
-    el.innerHTML = shell(spec, item) + '<span class="blurb">' + esc(item.desc) + '</span>';
     return el;
+  }
+
+  var seen = new Set();
+  var boot = true;
+
+  function springFrames() {
+    var frames = [];
+    var zeta = 0.55;
+    var wn = 14;
+    var steps = 14;
+    var w = wn * Math.sqrt(1 - zeta * zeta);
+    for (var i = 0; i <= steps; i++) {
+      var t = i / steps;
+      var time = t * 0.86;
+      var decay = Math.exp(-zeta * wn * time);
+      var value = 1 - decay * Math.cos(w * time);
+      var y = 18 * (1 - value);
+      var scale = 0.6 + 0.4 * value;
+      frames.push({
+        transform: 'translate3d(0,' + y.toFixed(2) + 'px,0) scale(' + scale.toFixed(3) + ')',
+        opacity: Math.max(0, Math.min(1, value * 1.7)),
+        offset: t
+      });
+    }
+    return frames;
+  }
+  var SPRING = springFrames();
+
+  function popIn(el, delay) {
+    var pop = el.querySelector('.pop');
+    if (!pop) return;
+    el.classList.remove('waiting');
+    if (reduced) {
+      pop.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: 200,
+        delay: delay,
+        easing: 'ease-out',
+        fill: 'both'
+      });
+      return;
+    }
+    pop.animate(SPRING, {
+      duration: 860,
+      delay: delay,
+      easing: 'linear',
+      fill: 'both'
+    });
+  }
+
+  function inView(c, r, vw, vh) {
+    var x = c * CELL - camX;
+    var y = r * CELL - camY;
+    return x < vw && y < vh && x + CELL > 0 && y + CELL > 0;
   }
 
   function apply() {
@@ -95,6 +193,7 @@
         need.add(key);
         if (!pool.has(key)) {
           var cell = makeCell(c, r);
+          if (!seen.has(key)) cell.classList.add('waiting');
           pool.set(key, cell);
           world.appendChild(cell);
         }
@@ -103,6 +202,28 @@
     pool.forEach(function (el, key) {
       if (!need.has(key)) { el.remove(); pool.delete(key); }
     });
+    var fresh = [];
+    pool.forEach(function (el, key) {
+      if (seen.has(key)) return;
+      var parts = key.split(',');
+      var c = +parts[0];
+      var r = +parts[1];
+      if (!inView(c, r, vw, vh)) return;
+      var cx = c * CELL + CELL / 2 - camX;
+      var cy = r * CELL + CELL / 2 - camY;
+      fresh.push({ el: el, key: key, c: c, r: r, dist: Math.hypot(cx - vw / 2, cy - vh / 2) });
+    });
+    fresh.sort(function (a, b) {
+      if (a.c === 0 && a.r === 0) return -1;
+      if (b.c === 0 && b.r === 0) return 1;
+      return a.dist - b.dist;
+    });
+    fresh.forEach(function (item, i) {
+      seen.add(item.key);
+      var delay = boot ? Math.round(item.dist / CELL * 50) : Math.min(i * 42, 420);
+      popIn(item.el, delay);
+    });
+    if (boot) boot = false;
     world.style.transform = 'translate3d(' + (-camX) + 'px,' + (-camY) + 'px,0)';
   }
 
@@ -111,8 +232,9 @@
     if (!scheduled) { scheduled = true; requestAnimationFrame(frame); }
   }
 
-  camX = CELL * 0.35 - view.clientWidth / 2 + 80;
-  camY = CELL * 0.15 - view.clientHeight / 2 + 40;
+  measure();
+  camX = CELL / 2 - view.clientWidth / 2;
+  camY = CELL / 2 - view.clientHeight / 2;
   apply();
   window.addEventListener('resize', request);
 
@@ -120,7 +242,7 @@
   var suppress = false;
   view.addEventListener('pointerdown', function (e) {
     if (e.button != null && e.button !== 0) return;
-    if (e.target.closest('.mark, .index')) return;
+    if (e.target.closest('.screen.note a, .hud, .index')) return;
     drag = { id: e.pointerId, x: e.clientX, y: e.clientY, cx: camX, cy: camY, moved: false, cell: e.target.closest('.cell') };
     view.classList.add('dragging');
     try { view.setPointerCapture(e.pointerId); } catch (err) {}
@@ -140,7 +262,12 @@
     var moved = drag.moved;
     drag = null;
     view.classList.remove('dragging');
-    if (moved) { suppress = true; return; }
+    if (moved) {
+      suppress = true;
+      var hint = document.getElementById('drag-hint');
+      if (hint) hint.classList.add('gone');
+      return;
+    }
     if (!cell) return;
     if (cell.hasAttribute('data-chat')) {
       var open = document.getElementById('archer-chat-open');

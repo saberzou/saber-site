@@ -25,7 +25,7 @@ html, body { height: 100%; overflow: hidden; }
 .view.dragging, .view.dragging .cell { cursor: grabbing; }
 .world { position: absolute; left: 0; top: 0; transform: translate3d(0, 0, 0); }
 
-a.cell, button.cell {
+.cell {
   position: absolute;
   width: var(--cell);
   height: var(--cell);
@@ -56,6 +56,15 @@ a.cell, button.cell {
   font: inherit;
   cursor: pointer;
 }
+.pop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 58%;
+}
+.cell.waiting .pop { opacity: 0; }
 .dev {
   position: relative;
   flex: none;
@@ -87,7 +96,7 @@ a.cell, button.cell {
 
 .device-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 
-.dev svg { width: 100%; height: auto; overflow: visible; }
+.dev > svg { width: 100%; height: auto; overflow: visible; }
 /* Widths are a share of the cell. The cell grew from 248 to 278; these
    shares shrink by the same ratio so each drawing stays the same size
    and the paper around it grows. */
@@ -102,6 +111,8 @@ a.cell, button.cell {
 .imac { width: 66.01%; }
 .term { width: 78.53%; }
 .laptop { width: 80.29%; }
+.intro { width: 74%; }
+.radio { width: 46%; }
 
 .screen {
   position: absolute;
@@ -199,50 +210,122 @@ a.cell, button.cell {
   color: #c8ffb0;
   text-shadow: 0 0 4px rgba(140, 255, 160, 0.85);
 }
-
-.mark {
-  position: fixed;
-  z-index: 20;
-  top: 14px;
-  left: 14px;
-  max-width: 280px;
-  padding: 12px 14px 12px;
-  border-radius: 16px;
-  background: rgba(232, 233, 236, 0.9);
-  box-shadow: 0 8px 24px rgba(22, 24, 28, 0.06);
-  pointer-events: none;
+.screen.note {
+  background: linear-gradient(#f7f4ee, #efeae2);
+  align-items: stretch;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 6%;
+  padding: 7% 8% 6%;
+  overflow: hidden;
 }
-.mark h1, .mark p, .mark a, .mark button { pointer-events: auto; }
-.mark h1 {
+.screen.note::before { background: linear-gradient(165deg, rgba(255, 255, 255, 0.45), transparent 42%); }
+.screen.note h1 {
+  position: relative;
+  z-index: 1;
   margin: 0;
   font-family: var(--serif);
   font-weight: 360;
-  font-size: 34px;
-  line-height: 0.9;
+  font-size: 16px;
+  font-size: min(14.5cqh, 13cqw, 26px);
+  line-height: 1.3;
   letter-spacing: -0.04em;
   color: var(--ink);
-  font-variation-settings: "STYL" 0;
 }
-.mark h1 em { font-family: var(--serif-i); font-style: italic; font-weight: 360; }
-.mark p { margin: 8px 0 0; font-size: 14px; color: var(--body); max-width: 28ch; }
-.mark .hint { color: var(--faint); font-size: 12px; }
-.tools { display: flex; gap: 12px; align-items: center; margin-top: 10px; pointer-events: auto; }
-.tools button, .tools a {
-  background: rgba(255,255,255,.72);
+.screen.note h1 em { font-family: var(--serif-i); font-style: italic; font-weight: 360; }
+.screen.note p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 360;
+  font-size: 11px;
+  font-size: min(9.2cqh, 8.4cqw, 15px);
+  line-height: 1.28;
+  color: var(--body);
+}
+.screen.note .links {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+.screen.note a {
+  font-family: var(--sans);
+  font-weight: 560;
+  font-size: 11px;
+  font-size: min(8.4cqh, 8cqw, 14px);
+  line-height: 1.45;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 1px;
+  cursor: pointer;
+}
+.screen.fish {
+  background: radial-gradient(ellipse at 50% 42%, #243044, #10141c 78%);
+  padding: 6%;
+}
+.screen.fish::before { background: radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.08), transparent 60%); }
+.screen.fish .fish {
+  position: relative;
+  z-index: 1;
+  width: 86%;
+  height: auto;
+  max-height: 90%;
+  overflow: visible;
+}
+.lamp { transform-box: fill-box; transform-origin: center; animation: lamp 1.8s ease-in-out infinite; }
+@keyframes lamp {
+  0%, 62%, 100% { opacity: 0.28; }
+  72%, 84% { opacity: 1; }
+}
+
+.hud {
+  position: fixed;
+  z-index: 20;
+  top: 14px;
+  right: 14px;
+  pointer-events: none;
+}
+.hud button {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.82);
   border: 0;
   border-radius: 999px;
-  padding: 6px 10px;
+  padding: 6px 12px;
   font: inherit;
   font-size: 13px;
-  font-weight: 520;
+  font-weight: 560;
   color: var(--ink);
-  text-decoration: none;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(22, 24, 28, 0.08);
 }
-.archer {
-  width: 36px; height: 36px; padding: 0; border: 0; background: transparent; cursor: pointer;
-  filter: drop-shadow(0 6px 8px rgba(28, 32, 40, 0.16));
+.drag-hint {
+  position: fixed;
+  z-index: 20;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--faint);
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+.drag-hint.gone { opacity: 0; }
+.archer-source {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  left: -200px;
+  top: 0;
+  pointer-events: none;
 }
 .archer-body { width: 100%; height: 100%; overflow: visible; }
 
@@ -285,13 +368,14 @@ a.cell, button.cell {
 .index span { color: var(--muted); font-size: 13px; }
 
 @media (max-width: 640px) {
-  .mark { top: 12px; left: 12px; max-width: calc(100% - 24px); }
-  .mark h1 { font-size: 28px; }
-  .mark p { font-size: 13px; }
+  .hud { top: 12px; right: 12px; }
+  .drag-hint { bottom: 12px; font-size: 12px; }
   :root { --cell: 224px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .dev { transition: none; }
   .cell:hover .dev, .cell:focus-visible .dev { transform: none; }
+  .lamp { animation: none; opacity: 1; }
+  .drag-hint { transition: none; }
 }

@@ -895,8 +895,8 @@ function updateRoom(dt) {
 }
 
 // ------------------------------------------------------------- the cassette
-// Pressing the deck plays a little ambient loop (composed for this page by
-// scripts/compose_ambient.py). The play key latches down, the reels turn and
+// Pressing the deck plays "Friendly Loop" (audio/friendly-loop.mp3) on
+// repeat. The play key latches down, the reels turn and
 // the red light comes on. Press again to stop.
 
 let audio = null;
@@ -926,7 +926,7 @@ let stopTimer = 0;
 
 function ensureAudio() {
   if (audio) return;
-  audio = new Audio('assets/3d/audio/side-a.mp3?v=' + VERSION);
+  audio = new Audio('assets/3d/audio/friendly-loop.mp3?v=' + VERSION);
   audio.loop = true;
   audio.preload = 'auto';
   const ctx = audioContext();

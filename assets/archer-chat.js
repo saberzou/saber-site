@@ -6,7 +6,7 @@
   dialog.id = 'archer-chat';
   dialog.className = 'archer-chat';
   dialog.setAttribute('aria-labelledby', 'archer-chat-title');
-  dialog.innerHTML = '<header class="archer-chat-header"><img class="archer-chat-avatar" src="images/archer-avatar.jpg" alt=""><div><h2 id="archer-chat-title">Hey, I’m Archer.</h2><p class="archer-chat-subtitle">Your little guide to Saber’s world</p></div><button type="button" class="archer-chat-close" aria-label="Close chat">×</button></header><div class="archer-chat-messages" role="log" aria-label="Conversation with Archer" aria-live="polite" aria-relevant="additions"></div><form class="archer-chat-form"><input class="archer-chat-input" aria-label="Message Archer" placeholder="Ask me anything…" maxlength="2000" autocomplete="off"><button class="archer-chat-send" type="submit" disabled>Send</button></form><p class="archer-chat-note">Archer is an AI guide. Messages are sent to an AI service; replies may be imperfect.</p>';
+  dialog.innerHTML = '<header class="archer-chat-header"><span class="archer-chat-avatar"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M25 48 C 17 49, 10 54, 8 62 C 15 64, 23 59, 28 55 Z" fill="#FF6A00"/><path d="M75 48 C 83 49, 90 54, 92 62 C 85 64, 77 59, 72 55 Z" fill="#FF6A00"/><rect x="20" y="28" width="60" height="46" rx="23" fill="#FF6A00"/><path d="M25 62 Q 50 76 75 62 Q 50 81 25 62 Z" fill="#D94B0F" opacity="0.45"/><rect x="28" y="38" width="44" height="17" rx="8.5" fill="#141414"/><rect class="eye" x="38" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/><rect class="eye" x="57" y="42.5" width="5" height="8" rx="2.5" fill="#FFD966"/></svg></span><div><p class="archer-chat-kicker">Archer · on air</p><h2 id="archer-chat-title">Hey, I’m <em>Archer.</em></h2><p class="archer-chat-subtitle">Your little guide to Saber’s world</p></div><button type="button" class="archer-chat-close" aria-label="Close chat"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></header><div class="archer-chat-messages" role="log" aria-label="Conversation with Archer" aria-live="polite" aria-relevant="additions"></div><form class="archer-chat-form"><input class="archer-chat-input" aria-label="Message Archer" placeholder="Ask me anything…" maxlength="2000" autocomplete="off"><button class="archer-chat-send" type="submit" disabled aria-label="Send"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button></form><p class="archer-chat-note">Archer is an AI guide. Messages are sent to an AI service; replies may be imperfect.</p>';
   document.body.appendChild(dialog);
   var list = dialog.querySelector('.archer-chat-messages');
   var input = dialog.querySelector('input');
@@ -36,7 +36,7 @@
     busy = true; sync(); mood('thinking');
     list.querySelectorAll('.archer-chat-status').forEach(function (el) { el.remove(); });
     var status = document.createElement('div');
-    status.className = 'archer-chat-status'; status.textContent = 'Archer is thinking…';
+    status.className = 'archer-chat-status thinking'; status.textContent = 'Archer is thinking';
     list.appendChild(status); list.scrollTop = list.scrollHeight;
     var controller = new AbortController();
     var timeout = setTimeout(function () { controller.abort(); }, 25000);
@@ -53,6 +53,7 @@
       history = history.slice(-20);
     } catch (error) {
       mood('confused');
+      status.classList.remove('thinking');
       status.textContent = 'I lost my connection. Want to try that again? ';
       var retry = document.createElement('button');
       retry.type = 'button'; retry.className = 'archer-chat-retry'; retry.textContent = 'Retry';

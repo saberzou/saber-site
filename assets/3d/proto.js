@@ -257,6 +257,18 @@ function loadImageOnce(src) {
   });
 }
 
+// The screens draw in the site's fonts, so load them before the first paint.
+let fontsReady = null;
+function screenFonts() {
+  if (!fontsReady) {
+    fontsReady = Promise.all([
+      '400 20px "Screen Pixel"', '560 20px "Timeless Sans"', '700 20px "Timeless Sans"',
+      '360 20px "Timeless Serif"', 'italic 360 20px "Timeless Serif Italic"'
+    ].map(function (f) { return document.fonts.load(f).catch(function () {}); })).then(function () { return document.fonts.ready; });
+  }
+  return fontsReady;
+}
+
 async function makeScreen(spec, aspect) {
   const canvas = document.createElement('canvas');
   // 640px wide is plenty for a screen this size, and keeps 26 of them light.
@@ -264,7 +276,7 @@ async function makeScreen(spec, aspect) {
   canvas.height = Math.round(640 / (aspect || 1.33));
   if (spec.face === 'note') { canvas.width = 1024; canvas.height = 1280; }
   const ctx = canvas.getContext('2d');
-  await document.fonts.ready;
+  await screenFonts();
   const icon = spec.face === 'fish'
     ? await loadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(FISH_SVG))
     : spec.icon ? await loadImage(spec.icon) : null;
@@ -554,6 +566,7 @@ stage.addEventListener('pointerdown', function (e) {
   }
   if (touches.size > 2) return;
   drag = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
+  flight = null;
   stage.classList.add('dragging');
   try { stage.setPointerCapture(e.pointerId); } catch (err) {}
 });
@@ -592,6 +605,43 @@ stage.addEventListener('pointermove', function (e) {
   target.z += panMove.z;
   if (hint) hint.classList.add('gone');
 });
+// ----------------------------------------------------------- back to the lamp
+// Wander far enough that the home cells (the Polaroid, Archer, the deck and
+// the lamp) leave the screen and a button appears to fly back to them.
+const homeBtn = document.getElementById('home-btn');
+const HOME_TARGET = new THREE.Vector3(0, 0.18, 0);
+const homeV = new THREE.Vector3();
+let flight = null;
+
+function homeOffscreen() {
+  // The middle of the home block, between the four home cells.
+  homeV.set(0.5 * SPAN, 0.2, 0.5 * SPAN).project(camera);
+  return Math.abs(homeV.x) > 1.1 || Math.abs(homeV.y) > 1.1;
+}
+
+function flyHome() {
+  const from = target.clone();
+  const dist = Math.hypot(from.x - HOME_TARGET.x, from.z - HOME_TARGET.z) / SPAN;
+  // A long way out: skip most of the trip so the flight stays short.
+  if (dist > 10) from.lerp(HOME_TARGET, 1 - 10 / dist);
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  flight = { from, start: performance.now(), dur: reduced ? 1 : 500 + Math.min(dist, 10) * 80 };
+  pinned = null;
+  click(1200);
+}
+
+function updateFlight(now) {
+  if (flight) {
+    const p = Math.min(1, (now - flight.start) / flight.dur);
+    const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+    target.lerpVectors(flight.from, HOME_TARGET, e);
+    if (p >= 1) flight = null;
+  }
+  if (homeBtn) homeBtn.classList.toggle('show', !flight && homeOffscreen());
+}
+
+if (homeBtn) homeBtn.addEventListener('click', flyHome);
+
 // ------------------------------------------------------------- the peek card
 // Over a device: its live screen and a one-line note. Mouse: on hover, and a
 // click opens. Touch: the first tap shows it, a second tap (on the device or
@@ -600,6 +650,7 @@ stage.addEventListener('pointermove', function (e) {
 const peekEl = document.getElementById('peek');
 const peekCanvas = peekEl ? peekEl.querySelector('.peek-screen') : null;
 const peekCtx = peekCanvas ? peekCanvas.getContext('2d') : null;
+const peekFace = peekEl ? peekEl.querySelector('.peek-face') : null;
 const TIPS = {
   cassette: ['Side A', 'Press play for a little ambient music.'],
   lamp: ['The lamp', 'Pull the chain to turn the lights down.'],
@@ -611,8 +662,16 @@ let lastPointer = 'mouse';
 const peekBox = new THREE.Box3();
 const peekV = new THREE.Vector3();
 
+// The Polaroid's card: a hello rather than a link.
+const INTRO = {
+  title: 'I’m <em>Saber.</em>',
+  desc: 'Designer and builder in Beijing. I love making things: apps, toys, little worlds.',
+  face: 'images/icons/me.png'
+};
+
 function peekContent(d) {
   const spec = d.spec;
+  if (spec.face === 'note') return { intro: true, desc: INTRO.desc, face: INTRO.face, screen: null };
   if (spec.toy && TIPS[spec.toy]) return { name: TIPS[spec.toy][0], desc: TIPS[spec.toy][1], screen: spec.toy === 'lamp' ? null : d.screenData.canvas };
   if (spec.href) return { name: spec.name, desc: spec.desc || '', screen: d.screenData.canvas, href: spec.href, external: spec.external };
   return null;
@@ -631,8 +690,14 @@ function updatePeek() {
   if (!info) { hidePeek(); return; }
   if (peekFor !== d) {
     peekFor = d;
-    peekEl.querySelector('strong').textContent = info.name;
+    peekEl.classList.toggle('intro', !!info.intro);
+    if (info.intro) peekEl.querySelector('strong').innerHTML = INTRO.title;
+    else peekEl.querySelector('strong').textContent = info.name;
     peekEl.querySelector('.peek-text span').textContent = info.desc;
+    if (peekFace) {
+      peekFace.hidden = !info.face;
+      if (info.face) peekFace.src = info.face;
+    }
     peekCanvas.hidden = !info.screen;
     if (info.screen) {
       peekCanvas.width = 240;
@@ -1038,6 +1103,7 @@ function animate() {
   updateRoom(dt);
   updateCassette(dt);
   updatePeek();
+  updateFlight(now);
   const snapX = Math.round(target.x / SPAN) * SPAN;
   const snapZ = Math.round(target.z / SPAN) * SPAN;
   ground.position.set(snapX, 0, snapZ);

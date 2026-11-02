@@ -26,9 +26,9 @@
   try { if ((localStorage.getItem('saber-3d-lamp') || (matchMedia('(prefers-color-scheme: dark)').matches ? '1' : '0')) === '1') document.documentElement.classList.add('night'); } catch (e) {}
 </script>
 <noscript><meta http-equiv="refresh" content="0; url=field.html"></noscript>
-<link rel="stylesheet" href="assets/archer-chat.css">
+<link rel="stylesheet" href="assets/archer-chat.css?v=18">
 <link rel="stylesheet" href="assets/home.css">
-<link rel="stylesheet" href="assets/3d/proto.css?v=17">
+<link rel="stylesheet" href="assets/3d/proto.css?v=18">
 <link rel="stylesheet" href="assets/3d/loader.css?v=17">
 <link rel="stylesheet" href="assets/fade.css?v=17">
 <script type="importmap">
@@ -38,8 +38,9 @@
   }
 }
 </script>
+<link rel="preload" href="assets/fonts/silkscreen.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="assets/3d/vendor/three.module.js?v=170">
-<link rel="modulepreload" href="assets/3d/proto.js?v=18">
+<link rel="modulepreload" href="assets/3d/proto.js?v=19">
 </head>
 <body>
 <div class="loader" id="loader" role="status" aria-live="polite">
@@ -68,6 +69,10 @@
 <canvas id="stage" aria-label="A room of old devices, each showing something I've made. Drag to look around. Press the cassette for music, and the lamp for night."></canvas>
 <p class="drag-hint" id="drag-hint">Drag to look around</p>
 <a class="back" href="field.html" data-fade>Flat view</a>
+<button class="home-btn" id="home-btn" type="button">
+  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 9.5 C5.5 5.5 7.5 3.5 10 3.5 C12.5 3.5 14.5 5.5 14.5 9.5 Z" fill="currentColor"/><path d="M10 9.5 V15.5 M7 16.5 H13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
+  Back to the lamp
+</button>
 
 <nav class="sr" aria-label="Everything I've made">
   <ul id="projects">
@@ -96,7 +101,7 @@
     <li><a data-icon="images/icons/movy-reel.png" href="https://saberzou.github.io/reel/" target="_blank" rel="noopener noreferrer"><strong>Movy Reel</strong><span>A slow cinema journal, films reimagined as posters.</span></a></li>
     <li><a data-icon="images/icons/artuzzle.png" href="https://saberzou.github.io/artuzzle/" target="_blank" rel="noopener noreferrer"><strong>Artuzzle</strong><span>A relaxing puzzle built from famous artworks.</span></a></li>
     <li><a data-icon="images/icons/pixel-dailies.png" href="https://saberzou.github.io/pixel-dailies/" target="_blank" rel="noopener noreferrer"><strong>Pixel Dailies</strong><span>Daily pixel-art challenges and a community gallery.</span></a></li>
-    <li><a data-icon="images/icons/me.png" href="https://www.saberzou.com" target="_blank" rel="noopener noreferrer"><strong>About Me</strong><span>Portfolio, thoughts, and the longer story.</span></a></li>
+    <li><a data-icon="images/icons/thiings/camera.png" href="https://www.saberzou.com" target="_blank" rel="noopener noreferrer"><strong>Photography</strong><span>My photographs, all in one place.</span></a></li>
   </ul>
 </nav>
 
@@ -104,14 +109,15 @@
 <div id="archer" hidden></div>
 <button id="archer-chat-open" type="button" class="sr" tabindex="-1">Chat with Archer</button>
 <a class="peek" id="peek" aria-hidden="true" tabindex="-1">
+  <img class="peek-face" alt="" hidden>
   <canvas class="peek-screen" width="240" height="180"></canvas>
   <span class="peek-text"><strong></strong><span></span></span>
   <i class="peek-arrow"></i>
 </a>
 <div class="fade" aria-hidden="true"></div>
-<script src="assets/project-devices.js?v=17"></script>
-<script src="assets/archer-chat.js"></script>
+<script src="assets/project-devices.js?v=18"></script>
+<script src="assets/archer-chat.js?v=18"></script>
 <script src="assets/fade.js?v=17"></script>
-<script type="module" src="assets/3d/proto.js?v=18"></script>
+<script type="module" src="assets/3d/proto.js?v=19"></script>
 </body>
 </html>

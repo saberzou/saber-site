@@ -26,5 +26,5 @@ window.PROJECT_DEVICE = {
   'Movy Reel': 'tv',
   'Artuzzle': 'clockradio',
   'Pixel Dailies': 'calculator',
-  'About Me': 'musicplayer'
+  'Photography': 'musicplayer'
 };

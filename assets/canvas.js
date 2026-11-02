@@ -78,8 +78,10 @@
 
   function shell(spec, inner) {
     var size = spec.width ? ' style="width:' + spec.width + '%"' : '';
+    // Wide screens put the icon beside the name, like the 3D room does.
+    var wide = spec.screen.w / spec.screen.h >= 1.9 ? ' wide' : '';
     return '<div class="pop"><div class="dev dev-' + spec.id + '"' + size + '>' + spec.svg +
-      '<div class="screen ' + spec.face + '" style="' + screenStyle(spec) + '">' + inner + '</div></div></div>';
+      '<div class="screen ' + spec.face + wide + '" style="' + screenStyle(spec) + '">' + inner + '</div></div></div>';
   }
 
   function workInner(item) {

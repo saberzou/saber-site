@@ -54,7 +54,8 @@ function readProjects() {
       desc: (a.querySelector('span') || { textContent: '' }).textContent.trim(),
       icon: a.getAttribute('data-icon') || '',
       href: a.getAttribute('href'),
-      external: a.getAttribute('target') === '_blank'
+      external: a.getAttribute('target') === '_blank',
+      kind: /apps\.apple\.com/.test(a.getAttribute('href')) ? 'iOS app' : 'Web'
     };
   });
 }
@@ -71,7 +72,7 @@ function specFor(c, r) {
   if (mod(c + r * 3, 13) === 0) return { file: model('radio'), face: 'fish', name: 'Archer', toy: 'archer', cell: [c, r] };
   const p = PROJECTS[mod(c * 5 + r * 3, PROJECTS.length)];
   const name = deviceFor(p.name);
-  return { file: model(name), cell: [c, r], face: MODEL_FACE[name], name: p.name, desc: p.desc, icon: p.icon, href: p.href, external: p.external };
+  return { file: model(name), cell: [c, r], face: MODEL_FACE[name], name: p.name, desc: p.desc, icon: p.icon, href: p.href, external: p.external, kind: p.kind };
 }
 
 const MODEL_FILES = Object.keys(MODEL_FACE).concat(['camera', 'radio', 'cassette', 'lamp']).map(model);
@@ -651,6 +652,7 @@ const peekEl = document.getElementById('peek');
 const peekCanvas = peekEl ? peekEl.querySelector('.peek-screen') : null;
 const peekCtx = peekCanvas ? peekCanvas.getContext('2d') : null;
 const peekFace = peekEl ? peekEl.querySelector('.peek-face') : null;
+const peekKind = peekEl ? peekEl.querySelector('.peek-kind') : null;
 const TIPS = {
   cassette: ['Side A', 'Press play for a little ambient music.'],
   lamp: ['The lamp', 'Pull the chain to turn the lights down.'],
@@ -673,7 +675,7 @@ function peekContent(d) {
   const spec = d.spec;
   if (spec.face === 'note') return { intro: true, desc: INTRO.desc, face: INTRO.face, screen: null };
   if (spec.toy && TIPS[spec.toy]) return { name: TIPS[spec.toy][0], desc: TIPS[spec.toy][1], screen: spec.toy === 'lamp' ? null : d.screenData.canvas };
-  if (spec.href) return { name: spec.name, desc: spec.desc || '', screen: d.screenData.canvas, href: spec.href, external: spec.external };
+  if (spec.href) return { name: spec.name, desc: spec.desc || '', kind: spec.kind, screen: d.screenData.canvas, href: spec.href, external: spec.external };
   return null;
 }
 
@@ -694,6 +696,11 @@ function updatePeek() {
     if (info.intro) peekEl.querySelector('strong').innerHTML = INTRO.title;
     else peekEl.querySelector('strong').textContent = info.name;
     peekEl.querySelector('.peek-text span').textContent = info.desc;
+    if (peekKind) {
+      peekKind.hidden = !info.kind;
+      peekKind.textContent = info.kind || '';
+      peekKind.dataset.kind = info.kind === 'iOS app' ? 'ios' : 'web';
+    }
     if (peekFace) {
       peekFace.hidden = !info.face;
       if (info.face) peekFace.src = info.face;

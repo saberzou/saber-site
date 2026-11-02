@@ -187,15 +187,20 @@ function drawLink(ctx, label, x, y) {
   ctx.fillRect(x, y + 54, width, 4);
 }
 
+// Screens at least this much wider than tall put the icon beside the name.
+const WIDE = 1.9;
+
 function drawProject(ctx, w, h, spec, icon, t, k) {
   const face = FACES[spec.face] || FACES.paper;
   const m = Math.min(w, h);
   fillFace(ctx, w, h, face);
+  const label = face.pixel ? spec.name.toUpperCase() : spec.name;
+  const lay = layout(ctx, w, h, face, label);
+  const size = lay.size;
 
   // Where the icon goes this frame. Each style moves it its own way.
-  const size = Math.round(m * 0.34);
-  let ix = (w - size) / 2;
-  let iy = h * 0.42 - size * 0.62;
+  let ix = lay.ix;
+  let iy = lay.iy;
   let scale = 1;
   let angle = 0;
   if (k > 0) {
@@ -228,7 +233,7 @@ function drawProject(ctx, w, h, spec, icon, t, k) {
   }
 
   // Layers behind the icon.
-  if (k > 0) behindIcon(ctx, w, h, spec.face, t, k, ix + size / 2, iy + size / 2, size);
+  if (k > 0) behindIcon(ctx, w, h, spec.face, t, k, ix + size / 2, iy + size / 2, size, lay);
 
   if (icon) {
     ctx.save();
@@ -240,44 +245,89 @@ function drawProject(ctx, w, h, spec, icon, t, k) {
     ctx.restore();
   }
 
-  // The label.
-  let px = Math.round(m * (face.pixel ? 0.085 : 0.09));
-  const label = face.pixel ? spec.name.toUpperCase() : spec.name;
-  function setFont() {
-    ctx.font = face.pixel
+  // The label, one line (or two on a wide screen), starting at lay.lx.
+  ctx.font = lay.font;
+  ctx.fillStyle = face.ink;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  const px = lay.px;
+  if (face.glow) { ctx.shadowColor = face.ink; ctx.shadowBlur = px * 0.5; }
+  let left = label.length;
+  if (k > 0 && spec.face === 'phos') left = Math.min(label.length, Math.floor(t * 14));
+  let cx = 0, cy = 0;
+  lay.lines.forEach(function (line, i) {
+    const shown = line.slice(0, Math.max(0, left));
+    left -= line.length + 1;
+    const x = lay.lineX(i);
+    const y = lay.ly + (i - (lay.lines.length - 1) / 2) * lay.lead;
+    ctx.fillText(shown, x, y);
+    if (shown.length || i === 0) { cx = x + ctx.measureText(shown).width; cy = y; }
+  });
+  if (k > 0 && spec.face === 'phos' && (Math.floor(t * 2.5) % 2 === 0 || left < 0)) {
+    // The terminal types the name out, then leaves a blinking block.
+    ctx.fillRect(cx + px * 0.1, cy - px * 0.45, px * 0.55, px * 0.9);
+  }
+  ctx.shadowBlur = 0;
+
+  if (k > 0) overScreen(ctx, w, h, spec.face, t, k, px, lay);
+}
+
+// Places the icon and the name. Squarish screens stack them; wide ones sit
+// them side by side so the icon can be much bigger.
+function layout(ctx, w, h, face, label) {
+  const m = Math.min(w, h);
+  function fontAt(px) {
+    return face.pixel
       ? '400 ' + px + 'px "Screen Pixel", ui-monospace, monospace'
       : '560 ' + px + 'px "Timeless Sans", sans-serif';
   }
-  setFont();
-  while (ctx.measureText(label).width > w * 0.88 && px > 12) { px -= 4; setFont(); }
-  ctx.fillStyle = face.ink;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  let shown = label;
-  if (k > 0 && spec.face === 'phos') {
-    // The terminal types the name out, then leaves a blinking block.
-    const n = Math.min(label.length, Math.floor(t * 14));
-    shown = label.slice(0, n);
-    const full = ctx.measureText(label).width;
-    const part = ctx.measureText(shown).width;
-    ctx.textAlign = 'left';
-    if (face.glow) { ctx.shadowColor = face.ink; ctx.shadowBlur = px * 0.5; }
-    ctx.fillText(shown, w / 2 - full / 2, h * 0.76);
-    if (Math.floor(t * 2.5) % 2 === 0 || n < label.length) {
-      ctx.fillRect(w / 2 - full / 2 + part + px * 0.1, h * 0.76 - px * 0.45, px * 0.55, px * 0.9);
-    }
-    ctx.shadowBlur = 0;
-  } else {
-    if (face.glow) { ctx.shadowColor = face.ink; ctx.shadowBlur = px * 0.5; }
-    ctx.fillText(shown, w / 2, h * 0.76);
-    ctx.shadowBlur = 0;
-  }
-  ctx.textAlign = 'left';
+  function widthAt(text, px) { ctx.font = fontAt(px); return ctx.measureText(text).width; }
 
-  if (k > 0) overScreen(ctx, w, h, spec.face, t, k, px, label);
+  if (w / h < WIDE) {
+    const size = Math.round(m * 0.34);
+    let px = Math.round(m * (face.pixel ? 0.085 : 0.09));
+    while (widthAt(label, px) > w * 0.88 && px > 12) px -= 4;
+    const tw = widthAt(label, px);
+    return {
+      wide: false, size, ix: (w - size) / 2, iy: h * 0.42 - size * 0.62,
+      px, font: fontAt(px), lines: [label], lead: px, ly: h * 0.76, tw,
+      lx: (w - tw) / 2, lineX: function () { return (w - tw) / 2; }
+    };
+  }
+
+  const size = Math.round(h * 0.62);
+  const gap = Math.round(h * 0.14);
+  const room = w * 0.9 - size - gap;
+  const big = Math.round(h * (face.pixel ? 0.2 : 0.22));
+  const small = Math.round(h * 0.17);
+  let lines = [label];
+  let px = big;
+  while (widthAt(label, px) > room && px > small) px -= 2;
+  if (widthAt(label, px) > room && label.indexOf(' ') > 0) {
+    // Too long for one line: break at the space nearest the middle.
+    const words = label.split(' ');
+    let best = null;
+    for (let i = 1; i < words.length; i++) {
+      const a = words.slice(0, i).join(' '), b = words.slice(i).join(' ');
+      const wid = Math.max(widthAt(a, 10), widthAt(b, 10));
+      if (!best || wid < best.wid) best = { lines: [a, b], wid };
+    }
+    lines = best.lines;
+    px = big;
+  }
+  while (Math.max.apply(null, lines.map(function (l) { return widthAt(l, px); })) > room && px > 12) px -= 2;
+  const tw = Math.max.apply(null, lines.map(function (l) { return widthAt(l, px); }));
+  const total = size + gap + tw;
+  const ix = (w - total) / 2;
+  const lx = ix + size + gap;
+  return {
+    wide: true, size, ix, iy: (h - size) / 2,
+    px, font: fontAt(px), lines, lead: px * 1.25, ly: h / 2, tw,
+    lx, lineX: function () { return lx; }
+  };
 }
 
-function behindIcon(ctx, w, h, faceName, t, k, cx, cy, size) {
+function behindIcon(ctx, w, h, faceName, t, k, cx, cy, size, lay) {
   const m = Math.min(w, h);
   if (faceName === 'amber') {
     // Rings spreading out from the ringing icon.
@@ -296,7 +346,7 @@ function behindIcon(ctx, w, h, faceName, t, k, cx, cy, size) {
     ctx.globalAlpha = 0.18 * k;
     ctx.fillStyle = '#000';
     ctx.beginPath();
-    ctx.ellipse(cx, h * 0.42 + size * 0.44, size * 0.36, size * 0.06, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx, lay.iy + size * 1.06, size * 0.36, size * 0.06, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
   } else if (faceName === 'tft') {
@@ -318,7 +368,7 @@ function behindIcon(ctx, w, h, faceName, t, k, cx, cy, size) {
   }
 }
 
-function overScreen(ctx, w, h, faceName, t, k, px, label) {
+function overScreen(ctx, w, h, faceName, t, k, px, lay) {
   const m = Math.min(w, h);
   switch (faceName) {
     case 'gloss': {
@@ -369,8 +419,9 @@ function overScreen(ctx, w, h, faceName, t, k, px, label) {
       const steps = Math.floor(p * 60);
       for (let i = 0; i <= steps; i++) {
         const u = i / 60;
-        const x = w * (0.22 + u * 0.56);
-        const y = h * 0.88 + Math.sin(u * 18) * m * 0.03 * (1 - u * 0.4);
+        const x = lay.wide ? lay.lx + u * lay.tw : w * (0.22 + u * 0.56);
+        const base = lay.wide ? Math.min(h * 0.9, lay.ly + lay.lead * (lay.lines.length - 1) / 2 + px * 0.95) : h * 0.88;
+        const y = base + Math.sin(u * 18) * m * 0.03 * (1 - u * 0.4);
         if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
       ctx.stroke();
@@ -406,8 +457,10 @@ function overScreen(ctx, w, h, faceName, t, k, px, label) {
       // The arrow cursor glides in and taps the icon.
       const p = Math.min(1, t * 1.3);
       const e = 1 - Math.pow(1 - p, 3);
-      const x = w * (0.86 - e * 0.3);
-      const y = h * (0.86 - e * 0.42);
+      // It ends just past the icon's middle, wherever the icon sits.
+      const tx = lay.ix + lay.size * 0.62, ty = lay.iy + lay.size * 0.62;
+      const x = w * 0.86 + (tx - w * 0.86) * e;
+      const y = h * 0.86 + (ty - h * 0.86) * e;
       ctx.globalAlpha = k;
       drawArrow(ctx, x, y, m * 0.09);
       ctx.globalAlpha = 1;
@@ -415,8 +468,9 @@ function overScreen(ctx, w, h, faceName, t, k, px, label) {
     }
     case 'aqua': {
       // An Aqua candy-stripe progress bar loading under the name.
-      const bw = w * 0.5, bh = m * 0.055;
-      const bx = (w - bw) / 2, by = h * 0.86;
+      const bw = lay.wide ? lay.tw : w * 0.5, bh = m * 0.055;
+      const bx = lay.wide ? lay.lx : (w - bw) / 2;
+      const by = lay.wide ? Math.min(h * 0.86, lay.ly + lay.lead * (lay.lines.length - 1) / 2 + px * 0.8) : h * 0.86;
       const fill = Math.min(1, (t % 2.2) / 1.6);
       ctx.globalAlpha = k;
       ctx.save();

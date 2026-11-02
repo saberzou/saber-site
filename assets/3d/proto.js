@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
-import { FISH_SVG, paintScreen } from './screens.js?v=17';
+import { FISH_SVG, paintScreen } from './screens.js?v=18';
 
 // Bumped with each release so browsers fetch fresh files.
 const VERSION = '17';

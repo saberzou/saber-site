@@ -43,11 +43,12 @@
     try {
       var response = await fetch(endpoint, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
-        body: JSON.stringify({ character: 'archer', chatId: 'archer', messages: history.slice(-10), siteContext: 'sticker-board' })
+        body: JSON.stringify({ character: 'archer', chatId: 'archer', messages: history.slice(-10), siteContext: document.getElementById('stage') ? 'room' : 'sticker-board' })
       });
       if (!response.ok) throw new Error('Chat unavailable');
       var data = await response.json();
-      if (typeof data.text !== 'string' || !data.text.trim()) throw new Error('Empty reply');
+      // The server flags its stand-in line when the AI didn't answer.
+      if (data.error || typeof data.text !== 'string' || !data.text.trim()) throw new Error('No reply');
       status.remove(); message(data.text, 'archer'); mood('happy');
       history.push({ sender: 'archer', text: data.text });
       history = history.slice(-20);

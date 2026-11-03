@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
-import { FISH_SVG, paintScreen } from './screens.js?v=22';
+import { FISH_SVG, paintScreen } from './screens.js?v=23';
 import { season, newYear } from './holiday.js?v=20';
 import { openWish } from './wish.js?v=21';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '22';
+const VERSION = '23';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -71,7 +71,12 @@ const GIFTS = {
   console: { name: 'Game console', desc: 'One controller. Sharing is caring.' },
   robotdog: { name: 'Robot dog', desc: 'Very good boy. Doesn’t need walks.' },
   vinyl: { name: 'Record player', desc: 'Tap it to play the holiday B-side.' },
-  gingerbread: { name: 'Gingerbread man', desc: 'Run, run, as fast as you can.' }
+  gingerbread: { name: 'Gingerbread man', desc: 'Run, run, as fast as you can.' },
+  foldphone: { name: 'Foldable phone', desc: 'Two screens, one pocket. Open it like a book.' },
+  headset: { name: 'Spatial headset', desc: 'For seeing the room in even more dimensions.' },
+  rangefinder: { name: 'Rangefinder camera', desc: 'For slow walks and quiet streets.' },
+  teddy: { name: 'Teddy bear', desc: 'Soft, patient, and excellent at hugs.' },
+  tablet: { name: 'Tablet and pencil', desc: 'A fresh page for sketching. Hover to doodle.' }
 };
 const GIFT_ORDER = Object.keys(GIFTS);
 const GIFTS_KEY = 'saber-3d-gifts';
@@ -86,6 +91,8 @@ function presentAt(c, r) {
 function giftSpec(gift, c, r) {
   const spec = { file: model(gift), toy: 'gift', gift: gift, name: GIFTS[gift].name, desc: GIFTS[gift].desc, cell: [c, r] };
   if (gift === 'robotdog') spec.face = 'dog';
+  if (gift === 'foldphone') spec.face = 'fold';
+  if (gift === 'tablet') spec.face = 'sketch';
   if (gift === 'vinyl') spec.state = TAPE;
   return spec;
 }
@@ -143,7 +150,7 @@ const MODEL_FILES = Object.keys(MODEL_FACE).concat(['camera', 'radio', 'cassette
 const GLOW = {
   lcd: '#cfe27a', phos: '#74f59c', amber: '#f6c66a', tube: '#fff1d6', aqua: '#cfeaff',
   tft: '#dfe8f5', gloss: '#b9c4ff', mono: '#e0e4cc', paper: '#fff3dc', fish: '#ff8a3d',
-  printer: '#f6c66a', dog: '#9fe6ff', ball: '#ffd98a'
+  printer: '#f6c66a', dog: '#9fe6ff', ball: '#ffd98a', fold: '#dfe8f5', sketch: '#fff3dc'
 };
 
 

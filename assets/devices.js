@@ -347,23 +347,24 @@
   window.RETRO_DEFS = '';
   window.INTRO_DEVICE = {"id": "intro", "face": "note", "width": 64.88, "screen": {"x": 95.2, "y": 188.6, "w": 155.6, "h": 177.0, "r": 1}, "svg": "<svg viewBox=\"0 0 346 390\" aria-hidden=\"true\"><image href=\"assets/flat/camera.webp?v=17\" width=\"346\" height=\"390\"/></svg>"};
   window.ARCHER_DEVICE = {"id": "archer", "face": "fish", "width": 27.38, "screen": {"x": 32.4, "y": 147.3, "w": 75.4, "h": 67.3, "r": 4.0}, "svg": "<svg viewBox=\"0 0 146 357\" aria-hidden=\"true\"><image href=\"assets/flat/radio.webp?v=17\" width=\"146\" height=\"357\"/></svg>"};
-  // Even out sizes the same way the 3D room does: scale each device most of
-  // the way toward the middle size (half area, half longest side), so a pager
-  // isn't tiny next to a TV. The Polaroid keeps its size.
+  // Size devices the same way the 3D room does: about as big as they are in
+  // real life, squeezed (DEVICE_REAL_CM in project-devices.js), measured as
+  // half area, half longest side. The Polaroid keeps its size.
   (function even() {
-    var KEEP = ['camera'];
+    var KEEP = { camera: 1 };
+    var factor = window.deviceSizeFactor || function () { return 1; };
     var metric = DEVICES.map(function (d) {
       var m = d.svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
       var w = d.width, h = d.width * parseFloat(m[2]) / parseFloat(m[1]);
       return { d: d, w: w, h: h, size: 0.5 * Math.sqrt(w * h) + 0.5 * Math.max(w, h) };
     });
-    var sorted = metric.map(function (x) { return x.size; }).sort(function (a, b) { return a - b; });
-    var target = sorted[Math.floor(sorted.length / 2)];
+    // A middle-sized (20 cm) device fills about this much of a cell.
+    var target = 41;
     metric.forEach(function (x) {
-      if (KEEP.indexOf(x.d.id) !== -1) return;
-      var k = Math.min(1.6, Math.max(0.65, Math.pow(target / x.size, 0.7)));
-      // Never taller than most of a cell.
-      k = Math.min(k, 72 / x.h);
+      if (KEEP[x.d.id]) return;
+      var k = Math.min(2.2, Math.max(0.5, target * factor(x.d.id) / x.size));
+      // Never taller or wider than most of a cell.
+      k = Math.min(k, 80 / x.h, 80 / x.w);
       x.d.width = Math.round(x.w * k * 100) / 100;
     });
   })();

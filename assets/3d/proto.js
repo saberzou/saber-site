@@ -5,7 +5,7 @@ import { season, newYear } from './holiday.js?v=20';
 import { openWish } from './wish.js?v=21';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '24';
+const VERSION = '25';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -394,13 +394,12 @@ function attachScreen(root, screen) {
 
 const sources = new Map();
 
-// Every model was built at its own size, so some looked tiny next to others.
-// Each is scaled toward one shared on-screen size, measured the way the room's
-// camera sees it, but only part of the way (EVEN), so a desktop computer still
-// reads a little bigger than a pager.
-const SIZE_TARGET = 0.44;
-const EVEN = 0.7;
-const KEEP_SIZE = ['camera'];   // the Polaroid stays big enough to read
+// Every model was built at its own size. Each is scaled so it looks about as
+// big as it is in real life, squeezed (see DEVICE_REAL_CM in
+// project-devices.js): a TV is clearly bigger than a pager, but not 10x.
+// Size is measured the way the room's camera sees it.
+const SIZE_TARGET = 0.44;      // a 20 cm thing, in world units on screen
+const KEEP_SIZE = { camera: 0.9 };   // the Polaroid stays big enough to read
 const sizeScale = new Map();
 const SCREEN_R = new THREE.Vector3(1, 0, -1).normalize();
 const SCREEN_U = new THREE.Vector3(-1, 2, -1).normalize();
@@ -444,8 +443,9 @@ async function loadModels() {
       }
     });
     sources.set(f, scene);
-    const keep = KEEP_SIZE.some(function (n) { return f.indexOf('/' + n + '.glb') !== -1; });
-    sizeScale.set(f, keep ? 1 : THREE.MathUtils.clamp(Math.pow(SIZE_TARGET / seenSize(scene), EVEN), 0.65, 1.6));
+    const id = (f.match(/models\/([a-z]+)\.glb/) || [])[1];
+    const factor = window.deviceSizeFactor ? window.deviceSizeFactor(id) : 1;
+    sizeScale.set(f, KEEP_SIZE[id] || THREE.MathUtils.clamp(SIZE_TARGET * factor / seenSize(scene), 0.5, 2.2));
   });
 }
 

@@ -1130,3 +1130,241 @@ function buildHandheld() {
 buildMacintosh();
 buildCamera();
 buildHandheld();
+
+// ---------------------------------------------------------------- seasonal
+// Guests for the holidays. holiday.js says when each one shows up.
+
+function buildPrinter() {
+  // Thanksgiving: a little receipt printer that prints a thank-you letter.
+  reset();
+  const body = clay('Body', '#ece4d3', 0.5);
+  const lid = clay('Lid', '#d8642c', 0.45);
+  const slot = clay('Slot', '#26231f', 0.5);
+  const bezel = clay('Bezel', '#1f1d1a', 0.4);
+  const button = clay('Button', '#f4efe4', 0.4);
+  const paper = clay('Paper', '#fbf8f1', 0.7);
+  const printMat = clay('Print', '#a39a8a', 0.7);
+  const feet = clay('Feet', '#3a3631', 0.6);
+  const w = 0.3, h = 0.17, d = 0.24;
+  slab(body, [w, h, d], [0, 0.012, 0], { corner: 0.05, bevel: 0.02 });
+  for (const x of [-0.1, 0.1]) for (const z of [-0.08, 0.08]) cyl(feet, 0.014, 0.012, [x, 0.006, z], { axis: 'y', segs: 14 });
+  // The orange lid over the paper roll, and the slot the paper comes out of.
+  within({ pos: [0, h + 0.012, -0.03], rot: [-Math.PI / 2, 0, 0] }, () => {
+    box(lid, [w * 0.92, d * 0.62, 0.014], [0, 0, 0.004], { corner: 0.04, bevel: 0.006 });
+  });
+  box(slot, [w * 0.7, 0.012, 0.01], [0, h + 0.014, d * 0.27], { corner: 0.004, bevel: 0.002, rot: [-Math.PI / 2, 0, 0] });
+  // The paper, its own node so the page can feed it out.
+  named('Paper', [0, h + 0.016, d * 0.27], () => {
+    within({ pos: [0, h + 0.016, d * 0.27], rot: [-0.32, 0, 0] }, () => {
+      slab(paper, [w * 0.62, 0.2, 0.003], [0, 0, 0], { bevel: 0.0008 });
+      for (let i = 0; i < 5; i++) {
+        const lw = i === 0 ? 0.07 : i === 4 ? 0.05 : 0.13 - (i % 2) * 0.03;
+        box(printMat, [lw, 0.006, 0.001], [i === 0 ? 0 : -0.065 + lw / 2, 0.17 - i * 0.03, 0.0022], { bevel: 0 });
+      }
+    });
+  });
+  // A small screen and a big round button on the front.
+  box(bezel, [0.11, 0.06, 0.006], [-0.06, 0.1, d / 2 + 0.001], { corner: 0.01, bevel: 0.002 });
+  glass(0.096, 0.046, [-0.06, 0.1, d / 2 + 0.0045]);
+  named('Button', [0.075, 0.1, d / 2], () => {
+    cyl(lid, 0.032, 0.014, [0.075, 0.1, d / 2 + 0.004], { segs: 30 });
+    cyl(button, 0.022, 0.006, [0.075, 0.1, d / 2 + 0.012], { segs: 24 });
+  });
+  writeGlb('printer');
+}
+
+function buildPresent() {
+  // Christmas: a wrapped box. The page tints the paper and ribbon per cell.
+  reset();
+  const wrap = clay('Wrap', '#b8432f', 0.55);
+  const ribbon = clay('Ribbon', '#f1e3c2', 0.4);
+  const s = 0.26, h = 0.2;
+  slab(wrap, [s, h, s], [0, 0, 0], { corner: 0.012, bevel: 0.008 });
+  box(ribbon, [0.04, h - 0.004, s + 0.004], [0, h / 2, 0], { bevel: 0.002 });
+  box(ribbon, [s + 0.004, h - 0.004, 0.04], [0, h / 2, 0], { bevel: 0.002 });
+  named('Lid', [0, h, 0], () => {
+    slab(wrap, [s + 0.02, 0.05, s + 0.02], [0, h - 0.012, 0], { corner: 0.014, bevel: 0.01 });
+    box(ribbon, [0.042, 0.052, s + 0.024], [0, h + 0.013, 0], { bevel: 0.002 });
+    box(ribbon, [s + 0.024, 0.052, 0.042], [0, h + 0.013, 0], { bevel: 0.002 });
+    // The bow: two loops and a knot.
+    ring(ribbon, 0.034, 0.011, [-0.032, h + 0.062, 0], { rot: [0, 0, 0.5], segs: 24 });
+    ring(ribbon, 0.034, 0.011, [0.032, h + 0.062, 0], { rot: [0, 0, -0.5], segs: 24 });
+    ball(ribbon, 0.017, [0, h + 0.046, 0]);
+  });
+  writeGlb('present');
+}
+
+function buildCdPlayer() {
+  reset();
+  const body = clay('Body', '#d9dade', 0.3, 0.5);
+  const lid = clay('Lid', '#c3c6cc', 0.28, 0.6);
+  const disc = clay('Disc', '#e8ecf4', 0.12, 0.9);
+  const hub = clay('Hub', '#9aa0aa', 0.3, 0.5);
+  const label = clay('Label', '#d8642c', 0.45);
+  const key = clay('Key', '#3a3d44', 0.4);
+  const phones = clay('Phones', '#d8642c', 0.45);
+  const pad = clay('Pad', '#2c2a28', 0.7);
+  const cord = clay('Cord', '#2c2a28', 0.5);
+  cyl(body, 0.15, 0.04, [0, 0.02, 0], { axis: 'y', segs: 48 });
+  cyl(lid, 0.146, 0.008, [0, 0.044, 0], { axis: 'y', segs: 48 });
+  named('Disc', [0, 0.05, 0], () => {
+    cyl(disc, 0.12, 0.003, [0, 0.0495, 0], { axis: 'y', segs: 48 });
+    cyl(label, 0.05, 0.0035, [0, 0.0505, 0], { axis: 'y', segs: 32 });
+    box(clay('Mark', '#f6ead6', 0.5), [0.03, 0.002, 0.008], [0.03, 0.0525, 0], { bevel: 0 });
+    cyl(hub, 0.014, 0.008, [0, 0.052, 0], { axis: 'y', segs: 18 });
+  });
+  // Keys along the front edge.
+  [-0.05, -0.017, 0.017, 0.05].forEach((x) => box(key, [0.024, 0.01, 0.01], [x, 0.022, 0.148], { corner: 0.003, bevel: 0.002 }));
+  // Headphones resting beside it.
+  within({ pos: [0.26, 0.012, 0.04], rot: [0, -0.5, 0] }, () => {
+    ring(phones, 0.085, 0.008, [0, 0.0, 0], { arc: Math.PI, rot: [-Math.PI / 2, 0, 0], segs: 30 });
+    for (const x of [-0.085, 0.085]) {
+      cyl(phones, 0.032, 0.022, [x, 0.012, 0], { axis: 'y', segs: 24 });
+      cyl(pad, 0.026, 0.006, [x, 0.025, 0], { axis: 'y', segs: 24 });
+    }
+  });
+  cyl(cord, 0.0035, 0.13, [0.15, 0.006, 0.09], { axis: 'x', segs: 8 });
+  writeGlb('cdplayer');
+}
+
+function buildConsole() {
+  reset();
+  const body = clay('Body', '#c9c8c4', 0.5);
+  const top = clay('Top', '#bdbcb8', 0.5);
+  const dark = clay('Dark', '#55565c', 0.5);
+  const led = clay('Led', '#2c6b3a', 0.35);
+  const pad = clay('Pad', '#c2c1bd', 0.5);
+  const btns = [clay('BtnA', '#5f9e5a', 0.4), clay('BtnB', '#d8642c', 0.4), clay('BtnC', '#5b7fb8', 0.4), clay('BtnD', '#d8a1c4', 0.4)];
+  const cord = clay('Cord', '#3a3a3e', 0.5);
+  slab(body, [0.36, 0.075, 0.26], [0, 0, -0.04], { corner: 0.02, bevel: 0.014 });
+  // The round disc lid and its two buttons.
+  cyl(top, 0.085, 0.008, [-0.04, 0.078, -0.05], { axis: 'y', segs: 40 });
+  ring(dark, 0.085, 0.003, [-0.04, 0.082, -0.05], { rot: [Math.PI / 2, 0, 0], segs: 40 });
+  cyl(dark, 0.016, 0.008, [0.1, 0.078, -0.09], { axis: 'y', segs: 18 });
+  cyl(top, 0.016, 0.008, [0.1, 0.078, -0.01], { axis: 'y', segs: 18 });
+  named('Led', [0.15, 0.06, 0.09], () => cyl(led, 0.006, 0.006, [0.15, 0.05, 0.091], { segs: 12 }));
+  for (const x of [-0.11, -0.06]) box(dark, [0.04, 0.02, 0.006], [x, 0.04, 0.091], { corner: 0.004, bevel: 0.001 });
+  // A controller lying in front, with its cable back to the console.
+  within({ pos: [0.02, 0.014, 0.2], rot: [0, 0.18, 0] }, () => {
+    box(pad, [0.13, 0.05, 0.026], [0, 0, 0], { corner: 0.024, bevel: 0.01, rot: [-Math.PI / 2, 0, 0] });
+    for (const x of [-0.06, 0.06]) box(pad, [0.045, 0.06, 0.026], [x, -0.004, 0.025], { corner: 0.02, bevel: 0.01, rot: [-Math.PI / 2, 0.0, x < 0 ? 0.25 : -0.25] });
+    box(dark, [0.03, 0.009, 0.004], [-0.045, 0.014, 0], { bevel: 0.001, rot: [-Math.PI / 2, 0, 0] });
+    box(dark, [0.009, 0.03, 0.004], [-0.045, 0.014, 0], { bevel: 0.001, rot: [-Math.PI / 2, 0, 0] });
+    [[0.045, -0.012], [0.06, 0], [0.045, 0.012], [0.03, 0]].forEach(([x, z], i) => cyl(btns[i], 0.0065, 0.006, [x, 0.014, z], { axis: 'y', segs: 12 }));
+  });
+  cyl(cord, 0.004, 0.07, [0.0, 0.006, 0.125], { axis: 'z', segs: 8 });
+  writeGlb('console');
+}
+
+function buildRobotDog() {
+  reset();
+  const shell = clay('Shell', '#f2f0ea', 0.38);
+  const joint = clay('Joint', '#6d6f75', 0.4, 0.3);
+  const face = clay('Face', '#16181c', 0.3);
+  const ear = clay('Ear', '#d8642c', 0.45);
+  // Body and legs.
+  ball(shell, 0.12, [0, 0.15, -0.03], [0.85, 0.62, 1.15]);
+  for (const x of [-0.06, 0.06]) for (const z of [-0.1, 0.05]) {
+    ball(joint, 0.024, [x, 0.1, z]);
+    cyl(shell, 0.022, 0.09, [x, 0.05, z], { axis: 'y', segs: 16, r2: 0.019 });
+    ball(joint, 0.022, [x, 0.008, z + 0.006], [1, 0.5, 1.3]);
+  }
+  // Head with its dark visor; the page draws the eyes on it.
+  ball(joint, 0.03, [0, 0.22, 0.09]);
+  box(shell, [0.15, 0.12, 0.12], [0, 0.27, 0.13], { corner: 0.045, bevel: 0.03 });
+  box(face, [0.12, 0.072, 0.01], [0, 0.272, 0.19], { corner: 0.03, bevel: 0.004 });
+  glass(0.104, 0.058, [0, 0.272, 0.1962]);
+  ball(joint, 0.016, [0, 0.215, 0.18], [1.3, 0.7, 1]);
+  named('EarL', [-0.055, 0.33, 0.12], () => box(ear, [0.03, 0.07, 0.04], [-0.06, 0.355, 0.12], { corner: 0.014, bevel: 0.01, rot: [0, 0, 0.35] }));
+  named('EarR', [0.055, 0.33, 0.12], () => box(ear, [0.03, 0.07, 0.04], [0.06, 0.355, 0.12], { corner: 0.014, bevel: 0.01, rot: [0, 0, -0.35] }));
+  named('Tail', [0, 0.18, -0.16], () => {
+    cyl(joint, 0.01, 0.07, [0, 0.21, -0.18], { axis: 'y', segs: 10 });
+    ball(ear, 0.016, [0, 0.25, -0.185]);
+  });
+  writeGlb('robotdog');
+}
+
+function buildVinyl() {
+  reset();
+  const wood = clay('Wood', '#a87a52', 0.55);
+  const deck = clay('Deck', '#2c2b2a', 0.5);
+  const metal = clay('Metal', '#c9ccd2', 0.25, 0.8);
+  const record = clay('Record', '#151517', 0.3);
+  const label = clay('Label', '#d8642c', 0.45);
+  const brass = clay('Brass', '#c7a16a', 0.3, 0.6);
+  const knob = clay('Knob', '#ece4d3', 0.4);
+  slab(wood, [0.44, 0.07, 0.34], [0, 0, 0], { corner: 0.018, bevel: 0.01 });
+  within({ pos: [0, 0.072, 0], rot: [-Math.PI / 2, 0, 0] }, () => box(deck, [0.41, 0.31, 0.006], [0, 0, 0], { corner: 0.01, bevel: 0.002 }));
+  cyl(metal, 0.142, 0.012, [-0.05, 0.08, 0], { axis: 'y', segs: 48 });
+  named('Platter', [-0.05, 0.09, 0], () => {
+    cyl(record, 0.136, 0.004, [-0.05, 0.088, 0], { axis: 'y', segs: 48 });
+    for (const r of [0.07, 0.1, 0.125]) ring(clay('Groove', '#2a2a2e', 0.35), r, 0.0012, [-0.05, 0.0905, 0], { rot: [Math.PI / 2, 0, 0], segs: 48 });
+    cyl(label, 0.045, 0.005, [-0.05, 0.0905, 0], { axis: 'y', segs: 32 });
+    box(knob, [0.022, 0.002, 0.008], [-0.026, 0.0935, 0], { bevel: 0 });
+    cyl(metal, 0.005, 0.014, [-0.05, 0.095, 0], { axis: 'y', segs: 10 });
+  });
+  // Tonearm resting on the record's edge.
+  cyl(metal, 0.022, 0.02, [0.15, 0.085, -0.1], { axis: 'y', segs: 20 });
+  within({ pos: [0.15, 0.1, -0.1], rot: [0, -0.62, 0] }, () => {
+    cyl(brass, 0.0045, 0.22, [0, 0, 0.11], { axis: 'z', segs: 10 });
+    box(deck, [0.02, 0.012, 0.03], [0, -0.004, 0.225], { corner: 0.003, bevel: 0.002 });
+  });
+  cyl(knob, 0.014, 0.01, [0.17, 0.08, 0.11], { axis: 'y', segs: 18 });
+  cyl(knob, 0.014, 0.01, [0.17, 0.08, 0.06], { axis: 'y', segs: 18 });
+  writeGlb('vinyl');
+}
+
+function buildGingerbread() {
+  reset();
+  const dough = clay('Dough', '#b8743f', 0.62);
+  const icing = clay('Icing', '#fbf6ec', 0.4);
+  const eye = clay('Eye', '#2a1d15', 0.4);
+  const gum = [clay('GumA', '#d8642c', 0.35), clay('GumB', '#5f9e5a', 0.35), clay('GumC', '#c23a33', 0.35)];
+  const flat = 0.36;
+  // Feet on the floor, body and head stacked, puffy like a fresh cookie.
+  for (const x of [-0.045, 0.045]) {
+    add(new THREE.CapsuleGeometry(0.034, 0.08, 6, 14), dough, [x * 1.3, 0.07, 0], [0, 0, x < 0 ? -0.22 : 0.22]);
+    ring(icing, 0.022, 0.0045, [x * 1.85, 0.052, 0.012], { arc: Math.PI, rot: [0, 0, Math.PI], segs: 14 });
+  }
+  ball(dough, 0.082, [0, 0.2, 0], [1, 1.15, flat * 1.3]);
+  ball(dough, 0.07, [0, 0.33, 0], [1, 0.95, flat * 1.4]);
+  for (const side of [-1, 1]) {
+    named(side < 0 ? 'ArmL' : 'ArmR', [side * 0.06, 0.24, 0], () => {
+      add(new THREE.CapsuleGeometry(0.03, 0.07, 6, 14), dough, [side * 0.11, 0.225, 0], [0, 0, side * 1.05]);
+      ring(icing, 0.02, 0.004, [side * 0.142, 0.205, 0.024], { arc: Math.PI, rot: [0, 0, side < 0 ? 0.5 : -0.5 + Math.PI], segs: 14 });
+    });
+  }
+  // Face: currant eyes, an icing smile, rosy cheeks.
+  for (const x of [-0.024, 0.024]) ball(eye, 0.0105, [x, 0.345, 0.034], [1, 1.15, 0.6]);
+  ring(icing, 0.022, 0.004, [0, 0.322, 0.032], { arc: Math.PI * 0.8, rot: [0, 0, Math.PI * 1.1], segs: 16 });
+  for (const x of [-0.042, 0.042]) ball(clay('Cheek', '#d98a6a', 0.6), 0.009, [x, 0.322, 0.029], [1, 1, 0.4]);
+  // Gumdrop buttons.
+  [0.235, 0.195, 0.155].forEach((y, i) => ball(gum[i], 0.0125, [0, y, 0.037], [1, 1, 0.7]));
+  writeGlb('gingerbread');
+}
+
+function buildCrystalBall() {
+  // New Year: a crystal ball on a walnut stand, with 2027 floating inside.
+  reset();
+  const walnut = clay('Walnut', '#5b3a26', 0.5);
+  const brass = clay('Brass', '#c7a16a', 0.3, 0.6);
+  const glassMat = clay('Glass', '#dfe8f5', 0.05);
+  cyl(walnut, 0.13, 0.05, [0, 0.025, 0], { axis: 'y', segs: 40, r2: 0.105 });
+  cyl(walnut, 0.098, 0.035, [0, 0.067, 0], { axis: 'y', segs: 40, r2: 0.11 });
+  ring(brass, 0.104, 0.006, [0, 0.087, 0], { rot: [Math.PI / 2, 0, 0], segs: 40 });
+  add(new THREE.SphereGeometry(0.17, 40, 26), glassMat, [0, 0.245, 0]);
+  // The number floats in the middle, turned to face the room's camera.
+  const face = new THREE.Euler().setFromRotationMatrix(new THREE.Matrix4().makeBasis(
+    new THREE.Vector3(1, 0, -1).normalize(), new THREE.Vector3(-1, 2, -1).normalize(), new THREE.Vector3(1, 1, 1).normalize()));
+  glass(0.22, 0.15, [0, 0.25, 0], [face.x, face.y, face.z]);
+  writeGlb('crystalball');
+}
+
+buildPrinter();
+buildPresent();
+buildCdPlayer();
+buildConsole();
+buildRobotDog();
+buildVinyl();
+buildGingerbread();
+buildCrystalBall();

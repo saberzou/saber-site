@@ -51,6 +51,9 @@ export function paintScreen(ctx, w, h, spec, icon, t, k) {
   if (spec.face === 'note') return drawNote(ctx, w, h, t, k);
   if (spec.face === 'fish') return drawFish(ctx, w, h, icon, t, k);
   if (spec.face === 'tape') return drawTape(ctx, w, h, spec.state || {}, t, k);
+  if (spec.face === 'printer') return drawPrinter(ctx, w, h, spec.state || {}, t, k);
+  if (spec.face === 'dog') return drawDog(ctx, w, h, t, k);
+  if (spec.face === 'ball') return drawBall(ctx, w, h, spec.state || {}, t, k);
   drawProject(ctx, w, h, spec, icon, t, k);
 }
 
@@ -159,12 +162,12 @@ function drawTape(ctx, w, h, state, t, k) {
   ctx.font = '700 ' + Math.round(h * 0.42) + 'px "Timeless Sans", sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('A', w * 0.09, h * 0.44);
+  ctx.fillText(state.side || 'A', w * 0.09, h * 0.44);
   // Title, as if written in pen.
   ctx.fillStyle = '#2a2622';
   ctx.font = 'italic 360 ' + Math.round(h * 0.34) + 'px "Timeless Serif Italic", Georgia, serif';
   ctx.textAlign = 'left';
-  ctx.fillText('songs for wandering', w * 0.2, h * 0.4);
+  ctx.fillText(state.title || 'songs for wandering', w * 0.2, h * 0.4);
   // Counter, or a nudge to press play.
   ctx.font = '400 ' + Math.round(h * 0.26) + 'px "Screen Pixel", ui-monospace, monospace';
   ctx.textAlign = 'right';
@@ -178,6 +181,89 @@ function drawTape(ctx, w, h, state, t, k) {
     ctx.fillStyle = '#8a7f6c';
     ctx.fillText('PRESS', w * 0.97, h * 0.4);
   }
+  ctx.textAlign = 'left';
+}
+
+// ------------------------------------------------------------- holidays
+
+// The printer's little amber display: a hello, then a progress bar.
+function drawPrinter(ctx, w, h, state, t, k) {
+  ctx.fillStyle = '#1b1712';
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#f6c66a';
+  ctx.font = '400 ' + Math.round(h * 0.3) + 'px "Screen Pixel", ui-monospace, monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  if (state.printing) {
+    const p = Math.min(1, state.progress || 0);
+    ctx.fillText('PRINTING', w / 2, h * 0.36);
+    ctx.globalAlpha = 0.3;
+    ctx.fillRect(w * 0.14, h * 0.66, w * 0.72, h * 0.1);
+    ctx.globalAlpha = 1;
+    ctx.fillRect(w * 0.14, h * 0.66, w * 0.72 * p, h * 0.1);
+  } else if (state.done) {
+    ctx.fillText('THANK YOU', w / 2, h * 0.5);
+  } else if (k > 0 && Math.floor(t * 2.2) % 2 === 1) {
+    ctx.fillText('PRESS \u25B6', w / 2, h * 0.5);
+  } else {
+    ctx.fillText('\u2665 HELLO', w / 2, h * 0.5);
+  }
+  ctx.textAlign = 'left';
+}
+
+// The robot dog's visor: two soft eyes that blink, and smile when you're near.
+function drawDog(ctx, w, h, t, k) {
+  ctx.fillStyle = '#0f1114';
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#9fe6ff';
+  ctx.strokeStyle = '#9fe6ff';
+  ctx.lineCap = 'round';
+  const ew = w * 0.17, eh = h * 0.42;
+  for (const x of [w * 0.32, w * 0.68]) {
+    if (k > 0.5) {
+      // Happy: upturned arcs.
+      ctx.lineWidth = h * 0.12;
+      ctx.beginPath();
+      ctx.arc(x, h * 0.6, ew * 0.55, Math.PI * 1.1, Math.PI * 1.9);
+      ctx.stroke();
+    } else {
+      const blink = (t % 3.4) > 3.25;
+      const hh = blink ? eh * 0.12 : eh;
+      ctx.beginPath();
+      ctx.roundRect(x - ew / 2, h / 2 - hh / 2, ew, hh, Math.min(ew, hh) / 2);
+      ctx.fill();
+    }
+  }
+}
+
+// Inside the crystal ball: the new year, glowing, with gold dust swirling round.
+function drawBall(ctx, w, h, state, t, k) {
+  ctx.clearRect(0, 0, w, h);
+  const swirl = 0.35 + 0.65 * Math.max(k, state.burst || 0);
+  // Dust first, so the number sits on top.
+  for (let i = 0; i < 46; i++) {
+    const a = i * 2.399 + t * (0.35 + (i % 5) * 0.08) * (0.6 + swirl);
+    const rr = (0.18 + ((i * 37) % 100) / 100 * 0.3) * w;
+    const x = w / 2 + Math.cos(a) * rr;
+    const y = h / 2 + Math.sin(a) * rr * 0.55 + Math.sin(t * 0.9 + i) * h * 0.04;
+    const tw = 0.5 + 0.5 * Math.sin(t * 3 + i * 1.7);
+    ctx.globalAlpha = (0.25 + 0.6 * tw) * (0.5 + 0.5 * swirl);
+    ctx.fillStyle = i % 3 ? (state.night > 0.5 ? '#ffd98a' : '#d9a045') : '#fff6e0';
+    const s = (i % 4 === 0 ? 7 : 4) * (0.7 + tw * 0.5);
+    ctx.fillRect(x - s / 2, y - s / 2, s, s);
+  }
+  ctx.globalAlpha = 1;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'italic 360 ' + Math.round(h * 0.5) + 'px "Timeless Serif Italic", Georgia, serif';
+  // Deep gold by day, lit up warm when the lamp is on.
+  const lit = state.night || 0;
+  ctx.shadowColor = 'rgba(255, 196, 110, ' + (0.45 + 0.45 * lit) + ')';
+  ctx.shadowBlur = h * (0.08 + 0.06 * swirl);
+  ctx.fillStyle = lit > 0.5 ? '#fff1d0' : '#b9781f';
+  const bob = Math.sin(t * 1.4) * h * 0.02;
+  ctx.fillText(String(state.year || ''), w / 2, h * 0.52 + bob);
+  ctx.shadowBlur = 0;
   ctx.textAlign = 'left';
 }
 

@@ -1356,7 +1356,8 @@ function buildCrystalBall() {
   // The number floats in the middle, turned to face the room's camera.
   const face = new THREE.Euler().setFromRotationMatrix(new THREE.Matrix4().makeBasis(
     new THREE.Vector3(1, 0, -1).normalize(), new THREE.Vector3(-1, 2, -1).normalize(), new THREE.Vector3(1, 1, 1).normalize()));
-  glass(0.22, 0.15, [0, 0.25, 0], [face.x, face.y, face.z]);
+  // Square, a hair smaller than the glass: the page paints a round scene on it.
+  glass(0.34, 0.34, [0, 0.245, 0], [face.x, face.y, face.z]);
   writeGlb('crystalball');
 }
 

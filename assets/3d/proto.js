@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
-import { FISH_SVG, paintScreen } from './screens.js?v=20';
+import { FISH_SVG, paintScreen } from './screens.js?v=21';
 import { season, newYear } from './holiday.js?v=20';
+import { openWish } from './wish.js?v=21';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '20';
+const VERSION = '21';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -338,6 +339,7 @@ async function makeScreen(spec, aspect) {
   canvas.width = 640;
   canvas.height = Math.round(640 / (aspect || 1.33));
   if (spec.face === 'note') { canvas.width = 1024; canvas.height = 1280; }
+  if (spec.face === 'ball') { canvas.width = canvas.height = 768; }
   const ctx = canvas.getContext('2d');
   await screenFonts();
   const icon = spec.face === 'fish'
@@ -429,7 +431,7 @@ async function spawn(c, r, born) {
     const size = obj.geometry.boundingBox.getSize(new THREE.Vector3());
     aspect = size.x / Math.max(Math.hypot(size.y, size.z), 1e-4);
   });
-  if (spec.face === 'ball') aspect = 0.22 / 0.15;
+  if (spec.face === 'ball') aspect = 1;
   const screen = hasScreen ? await makeScreen(spec, aspect) : { paint: function () {}, links: false };
   if (live.get(id) !== 'pending') { disposeScreen(screen); return; } // scrolled away while building
   const screenMesh = hasScreen ? attachScreen(model, screen) : null;
@@ -733,7 +735,7 @@ const TIPS = {
   archer: ['Archer', 'A little guide who hangs out here. Say hi.'],
   printer: ['A thank-you note', 'Press the button. It prints a letter from me.'],
   present: ['A present', 'There are a few hidden around the room. Open one.'],
-  ball: ['Happy New Year', 'A little crystal ball for ' + BALL.year + '. Tap it and make a wish.']
+  ball: ['Make a wish', 'Tap the crystal ball, tell it your wish for ' + BALL.year + ', and see what it says.']
 };
 if (SEASON === 'christmas') TIPS.cassette = ['Side B', 'Turned over for the holidays. Press play.'];
 let pinned = null;
@@ -1164,13 +1166,20 @@ function setupSeasonal(model, parts, spec, screenMesh) {
   if (spec.toy === 'ball') {
     model.traverse(function (obj) {
       if (!obj.isMesh || !obj.material || obj.material.name !== 'Glass') return;
-      obj.material = new THREE.MeshStandardMaterial({
-        color: '#eef3fb', roughness: 0.06, metalness: 0, transparent: true, opacity: 0.2, depthWrite: false
-      });
+      obj.material = glassMaterial();
       obj.castShadow = false;
       obj.renderOrder = 3;
     });
     if (screenMesh) screenMesh.renderOrder = 2;
+    // A warm glow from inside, for when the lamp is on.
+    const sprite = glowSprite('#ffc98a');
+    sprite.position.set(0, 0.25, 0).add(TOWARD_CAMERA);
+    sprite.scale.set(0.9, 0.9, 1);
+    sprite.raycast = function () {};
+    const light = new THREE.PointLight('#ffc98a', 0, 1.6, 1.6);
+    light.position.set(0, 0.25, 0.05);
+    model.add(sprite, light);
+    model.userData.ballGlow = { sprite: sprite, light: light };
   }
   if (spec.toy === 'printer') {
     if (parts.Paper) parts.Paper.userData.p0 = parts.Paper.position.clone();
@@ -1222,10 +1231,48 @@ function unwrap(device) {
   burst(device.group.position, ['#d8642c', '#f1e3c2', '#c7a16a', '#5f9e5a', '#b8432f']);
 }
 
-// New Year: tap the ball and the dust swirls up.
+// New Year: tap the ball, the snow whirls up, and it asks for a wish.
 function shakeBall(device) {
   BALL.burst = 1;
   chime([1047, 1319, 1568]);
+  hovered = null;
+  openWish({
+    year: BALL.year,
+    // While it thinks, and again when it answers, the globe lights up.
+    onWish: function () { BALL.burst = 1; chime([784, 1047]); },
+    onAnswer: function () { BALL.burst = 1; chime([1047, 1319, 1568, 2093]); }
+  });
+}
+
+// Glass that's clear in the middle and bright at the rim, with one highlight,
+// so the scene inside reads as sitting in a sphere.
+function glassMaterial() {
+  return new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: { night: { value: 0 } },
+    vertexShader: `
+      varying vec3 vN;
+      void main() {
+        vN = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float night;
+      varying vec3 vN;
+      void main() {
+        vec3 n = normalize(vN);
+        float rim = pow(1.0 - abs(n.z), 2.2);
+        vec3 l = normalize(vec3(-0.45, 0.6, 0.66));
+        float spec = pow(max(dot(reflect(-l, n), vec3(0.0, 0.0, 1.0)), 0.0), 48.0);
+        vec3 tint = mix(vec3(0.93, 0.95, 1.0), vec3(1.0, 0.86, 0.7), night);
+        float a = 0.04 + rim * 0.62 + spec * 0.9;
+        gl_FragColor = vec4(tint + spec, clamp(a, 0.0, 0.95));
+        #include <colorspace_fragment>
+      }
+    `
+  });
 }
 
 // A soft bell for the happy moments.
@@ -1404,6 +1451,13 @@ function updateSeason(dt, now) {
     if (spec.toy === 'ball') {
       // The dust never quite settles.
       if (!d.playing) d.paint(t, BALL.burst * 0.8);
+      const g = d.group.children[0] && d.group.children[0].userData.ballGlow;
+      if (g) {
+        g.sprite.material.opacity = night * (0.22 + 0.3 * BALL.burst) + BALL.burst * 0.2;
+        g.sprite.visible = g.sprite.material.opacity > 0.01;
+        g.light.intensity = night * (1.4 + BALL.burst * 2);
+      }
+      d.group.traverse(function (o) { if (o.material && o.material.uniforms && o.material.uniforms.night) o.material.uniforms.night.value = night; });
     }
     if (spec.toy === 'present') {
       if (parts.Lid && !REDUCED && !d.unwrap) parts.Lid.rotation.z = Math.sin(t * 9) * 0.04 * d.base;

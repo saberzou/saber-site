@@ -1439,6 +1439,142 @@ function buildCrystalBall() {
   writeGlb('crystalball');
 }
 
+function buildFoldPhone() {
+  // A foldable phone opened out flat, standing on a little stand: two halves
+  // and the hinge down the middle, with a camera bump on the back.
+  reset();
+  const frame = clay('Frame', '#3f4248', 0.3, 0.6);
+  const bezel = clay('Bezel', '#0c0d10', 0.3);
+  const hinge = clay('Hinge', '#8f939b', 0.3, 0.7);
+  const cam = clay('Cam', '#15161a', 0.25, 0.3);
+  const lensRing = clay('LensRing', '#8f939b', 0.25, 0.7);
+  const stand = clay('Stand', '#e4dccb', 0.5);
+  slab(stand, [0.12, 0.016, 0.07], [0, 0, -0.01], { corner: 0.016, bevel: 0.006 });
+  box(stand, [0.1, 0.014, 0.012], [0, 0.02, 0.018], { corner: 0.005, bevel: 0.003 });
+  const w = 0.2, h = 0.24, t = 0.012;
+  within({ pos: [0, 0.016, 0.008], rot: [-0.18, 0, 0] }, () => {
+    // Two halves meeting at the hinge, opened just shy of flat.
+    for (const side of [-1, 1]) {
+      within({ pos: [0, 0, 0], rot: [0, side * 0.08, 0] }, () => {
+        box(frame, [w / 2, h, t], [side * w / 4, h / 2, 0], { corner: 0.014, bevel: 0.004 });
+      });
+    }
+    cyl(hinge, 0.007, h - 0.012, [0, h / 2, -0.004], { axis: 'y', segs: 14 });
+    box(bezel, [w - 0.01, h - 0.01, 0.002], [0, h / 2, t / 2 + 0.002], { corner: 0.012, bevel: 0.0008 });
+    glass(w - 0.018, h - 0.018, [0, h / 2, t / 2 + 0.0035]);
+    box(cam, [0.04, 0.07, 0.006], [w / 2 - 0.03, h - 0.045, -t / 2 - 0.003], { corner: 0.012, bevel: 0.002 });
+    for (const y of [h - 0.025, h - 0.06]) cyl(lensRing, 0.011, 0.006, [w / 2 - 0.03, y, -t / 2 - 0.006], { segs: 18 });
+  });
+  writeGlb('foldphone');
+}
+
+function buildHeadset() {
+  // A spatial headset resting on the floor: a curved glass front set in a
+  // silver frame, a soft seal behind it and a knit band round the back.
+  reset();
+  const visor = clay('Visor', '#1d2230', 0.12, 0.4);
+  const frame = clay('Frame', '#d3d6db', 0.22, 0.85);
+  const seal = clay('Seal', '#9c9993', 0.85);
+  const knit = clay('Knit', '#e2ddd2', 0.95);
+  const dial = clay('Dial', '#aeb2ba', 0.3, 0.8);
+  ball(frame, 0.13, [0, 0.082, 0], [1, 0.56, 0.5]);
+  ball(visor, 0.118, [0, 0.083, 0.024], [1, 0.5, 0.44]);
+  ball(seal, 0.118, [0, 0.08, -0.03], [0.96, 0.48, 0.42]);
+  // The band: a soft strap from each side, round the back.
+  for (const x of [-0.12, 0.12]) box(knit, [0.024, 0.05, 0.1], [x, 0.074, -0.07], { corner: 0.012, bevel: 0.011 });
+  ring(knit, 0.12, 0.025, [0, 0.074, -0.12], { rot: [Math.PI / 2, 0, Math.PI], arc: Math.PI, segs: 30 });
+  cyl(dial, 0.012, 0.012, [0.095, 0.15, 0.02], { axis: 'y', segs: 18 });
+  box(dial, [0.03, 0.008, 0.012], [-0.085, 0.15, 0.02], { corner: 0.004, bevel: 0.002 });
+  writeGlb('headset');
+}
+
+function buildRangefinder() {
+  reset();
+  const top = clay('Top', '#d3d5d8', 0.25, 0.85);
+  const skin = clay('Skin', '#1e1e20', 0.85);
+  const lens = clay('Lens', '#1a1a1c', 0.3, 0.4);
+  const ringM = clay('Ring', '#c3c6ca', 0.25, 0.85);
+  const glassMat = clay('Glass', '#2a3e5a', 0.1, 0.5);
+  const win = clay('Window', '#9fb0c4', 0.1, 0.5);
+  const w = 0.3, h = 0.16, d = 0.07;
+  slab(skin, [w, h * 0.72, d], [0, 0, 0], { corner: 0.018, bevel: 0.012 });
+  slab(top, [w, h * 0.3, d], [0, h * 0.7, 0], { corner: 0.016, bevel: 0.01 });
+  slab(top, [w * 0.99, 0.012, d * 0.98], [0, 0, 0], { corner: 0.016, bevel: 0.005 });
+  // Viewfinder and rangefinder windows on the front of the top plate.
+  box(win, [0.05, 0.026, 0.004], [-0.085, h * 0.84, d / 2 + 0.001], { corner: 0.004, bevel: 0.001 });
+  box(win, [0.026, 0.026, 0.004], [0.1, h * 0.84, d / 2 + 0.001], { corner: 0.004, bevel: 0.001 });
+  box(win, [0.016, 0.022, 0.004], [0.005, h * 0.84, d / 2 + 0.001], { corner: 0.003, bevel: 0.001 });
+  // The lens.
+  cyl(ringM, 0.05, 0.03, [0, h * 0.42, d / 2 + 0.015], { segs: 32 });
+  cyl(lens, 0.046, 0.04, [0, h * 0.42, d / 2 + 0.05], { segs: 32 });
+  cyl(ringM, 0.047, 0.006, [0, h * 0.42, d / 2 + 0.04], { segs: 32 });
+  cyl(glassMat, 0.032, 0.004, [0, h * 0.42, d / 2 + 0.07], { segs: 28 });
+  // Dials on top.
+  cyl(ringM, 0.022, 0.016, [0.085, h + 0.008, 0], { axis: 'y', segs: 22 });
+  cyl(ringM, 0.012, 0.012, [0.12, h + 0.006, 0.012], { axis: 'y', segs: 16 });
+  cyl(ringM, 0.018, 0.012, [-0.09, h + 0.006, 0], { axis: 'y', segs: 20 });
+  for (const x of [-w / 2 - 0.004, w / 2 + 0.004]) box(ringM, [0.006, 0.02, 0.012], [x, h * 0.82, 0], { bevel: 0.002 });
+  writeGlb('rangefinder');
+}
+
+function buildTeddy() {
+  reset();
+  const fur = clay('Fur', '#b07b4f', 0.95);
+  const light = clay('Muzzle', '#e3c3a0', 0.9);
+  const eye = clay('Eye', '#1c1410', 0.3);
+  const bow = clay('Bow', '#c23a33', 0.5);
+  // Sitting: legs out front, round body, big head.
+  for (const x of [-0.06, 0.06]) {
+    ball(fur, 0.042, [x, 0.04, 0.06], [1, 0.9, 1.3]);
+    ball(light, 0.026, [x, 0.04, 0.112], [1, 1, 0.35]);
+  }
+  ball(fur, 0.095, [0, 0.12, 0], [1, 1.1, 0.9]);
+  ball(light, 0.055, [0, 0.11, 0.06], [1, 1.2, 0.4]);
+  ball(fur, 0.078, [0, 0.27, 0.01]);
+  for (const x of [-0.06, 0.06]) {
+    ball(fur, 0.03, [x, 0.33, 0], [1, 1, 0.6]);
+    ball(light, 0.017, [x, 0.33, 0.014], [1, 1, 0.4]);
+  }
+  ball(light, 0.034, [0, 0.255, 0.07], [1.1, 0.8, 0.7]);
+  ball(eye, 0.011, [0, 0.268, 0.096], [1.3, 0.9, 0.8]);
+  for (const x of [-0.03, 0.03]) ball(eye, 0.0095, [x, 0.293, 0.07]);
+  named('ArmL', [-0.085, 0.17, 0], () => ball(fur, 0.032, [-0.1, 0.12, 0.02], [0.8, 1.5, 0.8]));
+  named('ArmR', [0.085, 0.17, 0], () => ball(fur, 0.032, [0.1, 0.12, 0.02], [0.8, 1.5, 0.8]));
+  // A red bow at the neck.
+  ring(bow, 0.072, 0.008, [0, 0.2, 0.0], { rot: [Math.PI / 2, 0, 0], segs: 30 });
+  for (const s of [-1, 1]) ball(bow, 0.022, [s * 0.025, 0.2, 0.075], [1.3, 0.8, 0.5]);
+  ball(bow, 0.011, [0, 0.2, 0.078]);
+  writeGlb('teddy');
+}
+
+function buildTablet() {
+  // A tablet on a little stand, with its pencil leaning beside it.
+  reset();
+  const shell = clay('Shell', '#c9ccd2', 0.25, 0.8);
+  const bezel = clay('Bezel', '#0d0e11', 0.3);
+  const stand = clay('Stand', '#e4dccb', 0.5);
+  const pencil = clay('Pencil', '#f4f3ef', 0.35);
+  const tip = clay('Tip', '#8f939b', 0.3, 0.6);
+  slab(stand, [0.18, 0.02, 0.1], [0, 0, -0.02], { corner: 0.02, bevel: 0.008 });
+  box(stand, [0.16, 0.018, 0.016], [0, 0.026, 0.024], { corner: 0.006, bevel: 0.004 });
+  within({ pos: [0, 0.02, 0.012], rot: [-0.3, 0, 0] }, () => {
+    box(shell, [0.3, 0.22, 0.01], [0, 0.11, 0], { corner: 0.022, bevel: 0.004 });
+    box(bezel, [0.288, 0.208, 0.002], [0, 0.11, 0.0055], { corner: 0.017, bevel: 0.0008 });
+    glass(0.27, 0.19, [0, 0.11, 0.0072]);
+  });
+  within({ pos: [0.19, 0.0, 0.05], rot: [0, 0, 0.25] }, () => {
+    cyl(pencil, 0.006, 0.17, [0, 0.085, 0], { axis: 'y', segs: 12 });
+    cyl(tip, 0.006, 0.014, [0, 0.007, 0], { axis: 'y', segs: 12, r2: 0.002 });
+  });
+  writeGlb('tablet');
+}
+
+buildFoldPhone();
+buildHeadset();
+buildRangefinder();
+buildTeddy();
+buildTablet();
+
 buildPrinter();
 buildPresent();
 buildCdPlayer();

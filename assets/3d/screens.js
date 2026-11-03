@@ -53,6 +53,8 @@ export function paintScreen(ctx, w, h, spec, icon, t, k) {
   if (spec.face === 'tape') return drawTape(ctx, w, h, spec.state || {}, t, k);
   if (spec.face === 'printer') return drawPrinter(ctx, w, h, spec.state || {}, t, k);
   if (spec.face === 'dog') return drawDog(ctx, w, h, t, k);
+  if (spec.face === 'fold') return drawFold(ctx, w, h, t, k);
+  if (spec.face === 'sketch') return drawSketch(ctx, w, h, t, k);
   drawProject(ctx, w, h, spec, icon, t, k);
 }
 
@@ -233,6 +235,87 @@ function drawDog(ctx, w, h, t, k) {
       ctx.fill();
     }
   }
+}
+
+// The foldable phone: two panes either side of the crease. A photo on the
+// left, a little list on the right; hovering scrolls the list.
+function drawFold(ctx, w, h, t, k) {
+  const g = ctx.createLinearGradient(0, 0, w / 2, h);
+  g.addColorStop(0, '#f2b880');
+  g.addColorStop(0.55, '#b77a8c');
+  g.addColorStop(1, '#4a3f78');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w / 2, h);
+  // A sun and a hill, so the photo reads as one.
+  ctx.fillStyle = '#fff1d6';
+  ctx.beginPath();
+  ctx.arc(w * 0.3, h * 0.42, w * 0.07, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#2f4a3f';
+  ctx.beginPath();
+  ctx.moveTo(0, h * 0.8);
+  ctx.quadraticCurveTo(w * 0.2, h * 0.58, w * 0.5, h * 0.78);
+  ctx.lineTo(w * 0.5, h); ctx.lineTo(0, h);
+  ctx.fill();
+  ctx.fillStyle = '#f6f3ec';
+  ctx.fillRect(w / 2, 0, w / 2, h);
+  const scroll = k > 0 ? (t * 40) % (h * 0.2) : 0;
+  for (let i = -1; i < 7; i++) {
+    const y = h * 0.08 + i * h * 0.2 - scroll;
+    ctx.fillStyle = ['#d8642c', '#5f9e5a', '#5b7fb8', '#c7a16a'][(i + 4) % 4];
+    ctx.beginPath();
+    ctx.arc(w * 0.58, y + h * 0.06, h * 0.05, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#2a2622';
+    ctx.fillRect(w * 0.65, y + h * 0.03, w * 0.22, h * 0.03);
+    ctx.fillStyle = '#b9b2a4';
+    ctx.fillRect(w * 0.65, y + h * 0.08, w * 0.15, h * 0.025);
+  }
+  // The crease.
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+  ctx.fillRect(w / 2 - 2, 0, 4, h);
+}
+
+// The tablet: a sketch page. Hovering draws a little tree, stroke by stroke.
+function drawSketch(ctx, w, h, t, k) {
+  ctx.fillStyle = '#fbf8f1';
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#ece6da';
+  ctx.fillRect(0, 0, w * 0.08, h);
+  ['#2a2622', '#d8642c', '#5f9e5a', '#5b7fb8'].forEach(function (c, i) {
+    ctx.fillStyle = c;
+    ctx.beginPath();
+    ctx.arc(w * 0.04, h * (0.2 + i * 0.16), w * 0.018, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  const p = k > 0 ? Math.min(1, t / 2.4) : 1;
+  const cx = w * 0.55, base = h * 0.82;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = h * 0.025;
+  const strokes = [
+    ['#5f9e5a', [[cx - w * 0.2, base - h * 0.08], [cx, base - h * 0.62], [cx + w * 0.2, base - h * 0.08], [cx - w * 0.2, base - h * 0.08]]],
+    ['#6d4a33', [[cx, base - h * 0.08], [cx, base]]],
+    ['#d8642c', [[cx - w * 0.06, base - h * 0.3], [cx - w * 0.06, base - h * 0.3]]],
+    ['#5b7fb8', [[cx + w * 0.07, base - h * 0.22], [cx + w * 0.07, base - h * 0.22]]],
+    ['#c7a16a', [[cx, base - h * 0.7], [cx, base - h * 0.7]]]
+  ];
+  strokes.forEach(function (st, i) {
+    const local = Math.min(1, Math.max(0, p * strokes.length - i));
+    if (local <= 0) return;
+    const pts = st[1];
+    ctx.strokeStyle = st[0];
+    ctx.lineWidth = i >= 2 ? h * 0.06 : h * 0.025;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    const segs = pts.length - 1;
+    for (let j = 1; j <= segs; j++) {
+      const f = Math.min(1, Math.max(0, local * segs - (j - 1)));
+      if (f <= 0) break;
+      ctx.lineTo(pts[j - 1][0] + (pts[j][0] - pts[j - 1][0]) * f + 0.01, pts[j - 1][1] + (pts[j][1] - pts[j - 1][1]) * f);
+    }
+    ctx.stroke();
+  });
 }
 
 function drawLink(ctx, label, x, y) {

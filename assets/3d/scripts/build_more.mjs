@@ -1527,6 +1527,17 @@ function heartShape(s) {
   return h;
 }
 
+// A capsule from point a to point b, radius r.
+function limb(mat, r, a, b) {
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b);
+  const dir = B.clone().sub(A);
+  const len = dir.length();
+  const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+  const e = new THREE.Euler().setFromQuaternion(q);
+  const mid = A.clone().add(B).multiplyScalar(0.5);
+  add(new THREE.CapsuleGeometry(r, Math.max(0.001, len), 6, 14), mat, [mid.x, mid.y, mid.z], [e.x, e.y, e.z]);
+}
+
 function buildTeddy() {
   // A sitting teddy bear hugging a red heart: caramel fur, cream muzzle,
   // round ears, shiny black eyes and tan pads on its feet.
@@ -1566,16 +1577,14 @@ function buildTeddy() {
     geo.translate(0, 0, -0.009);
     add(creased(geo, 1.2), heart, [0, 0.145, 0.088], [-0.08, 0, 0]);
   });
-  for (const side of [-1, 1]) {
-    add(new THREE.CapsuleGeometry(0.03, 0.07, 6, 14), fur, [side * 0.075, 0.17, 0.06], [0.9, 0, side * 0.55]);
-    ball(fur, 0.032, [side * 0.052, 0.13, 0.1], [1, 1, 0.9]);
-  }
+  // One arm a side: a single limb from the shoulder round to its paw on the heart.
+  for (const side of [-1, 1]) limb(fur, 0.028, [side * 0.09, 0.205, 0.0], [side * 0.062, 0.145, 0.122]);
   writeGlb('teddy');
 }
 
 function buildSnowman() {
-  // A snowman in a red knit beanie and scarf, with coal eyes and buttons,
-  // a carrot nose and twig arms.
+  // A short snowman: one round body and a head, in a red knit beanie and
+  // scarf, with coal eyes and buttons, a carrot nose and twig arms.
   reset();
   const snow = clay('Snow', '#f6f5f2', 0.85);
   const knit = clay('Knit', '#c8352f', 0.95);
@@ -1584,39 +1593,39 @@ function buildSnowman() {
   const carrot = clay('Carrot', '#f07a2a', 0.6);
   const twig = clay('Twig', '#6b4a33', 0.8);
   const cheek = clay('Cheek', '#f2b8b0', 0.9);
-  ball(snow, 0.12, [0, 0.11, 0], [1, 0.92, 1]);
-  ball(snow, 0.09, [0, 0.27, 0]);
-  ball(snow, 0.072, [0, 0.4, 0.004]);
-  // Coal buttons down the front.
-  [0.32, 0.27, 0.2, 0.13].forEach((y, i) => ball(coal, 0.011, [0, y, (i < 2 ? 0.088 : 0.115)], [1, 1, 0.6]));
+  const H = 0.262; // head centre
+  ball(snow, 0.125, [0, 0.115, 0], [1, 0.92, 1]);
+  ball(snow, 0.078, [0, H, 0.004]);
+  // Coal buttons down the front of the body.
+  [0.15, 0.1, 0.05].forEach((y) => ball(coal, 0.011, [0, y, Math.sqrt(0.125 * 0.125 - Math.pow((y - 0.115) / 0.92, 2)) + 0.002], [1, 1, 0.6]));
   // Face.
-  for (const x of [-0.026, 0.026]) ball(coal, 0.009, [x, 0.418, 0.066]);
-  for (const x of [-0.045, 0.045]) ball(cheek, 0.011, [x, 0.395, 0.058], [1, 0.8, 0.4]);
-  add(new THREE.ConeGeometry(0.011, 0.05, 14).rotateX(Math.PI / 2), carrot, [0, 0.4, 0.096]);
-  ring(coal, 0.026, 0.0028, [0, 0.39, 0.064], { arc: Math.PI * 0.75, rot: [0.25, 0, Math.PI * 1.125], segs: 18 });
+  for (const x of [-0.028, 0.028]) ball(coal, 0.0095, [x, H + 0.02, 0.07]);
+  for (const x of [-0.048, 0.048]) ball(cheek, 0.011, [x, H - 0.004, 0.062], [1, 0.8, 0.4]);
+  add(new THREE.ConeGeometry(0.012, 0.052, 14).rotateX(Math.PI / 2), carrot, [0, H, 0.104]);
+  ring(coal, 0.028, 0.003, [0, H - 0.012, 0.068], { arc: Math.PI * 0.75, rot: [0.25, 0, Math.PI * 1.125], segs: 18 });
   // Beanie: a ribbed cuff, the crown and a pompom.
-  named('Hat', [0, 0.45, 0], () => {
-    cyl(rib, 0.07, 0.03, [0, 0.452, 0], { axis: 'y', segs: 32 });
-    ball(knit, 0.066, [0, 0.47, 0], [1, 0.95, 1]);
+  named('Hat', [0, H + 0.05, 0], () => {
+    cyl(rib, 0.074, 0.03, [0, H + 0.053, 0], { axis: 'y', segs: 32 });
     for (let i = 0; i < 16; i++) {
       const a = (i / 16) * Math.PI * 2;
-      box(knit, [0.006, 0.028, 0.006], [Math.cos(a) * 0.071, 0.452, Math.sin(a) * 0.071], { bevel: 0.002 });
+      box(knit, [0.006, 0.028, 0.006], [Math.cos(a) * 0.075, H + 0.053, Math.sin(a) * 0.075], { bevel: 0.002 });
     }
-    ball(knit, 0.028, [0, 0.545, 0]);
+    ball(knit, 0.069, [0, H + 0.072, 0], [1, 0.95, 1]);
+    ball(knit, 0.029, [0, H + 0.15, 0]);
   });
-  // Scarf: wrapped round the neck, one end hanging down the front.
-  ring(knit, 0.078, 0.018, [0, 0.335, 0], { rot: [Math.PI / 2, 0, 0], segs: 32 });
-  within({ pos: [0.036, 0.328, 0.086], rot: [-0.38, 0, -0.14] }, () => {
-    box(knit, [0.036, 0.11, 0.014], [0, -0.055, 0], { corner: 0.006, bevel: 0.004 });
-    for (let i = 0; i < 5; i++) box(rib, [0.004, 0.018, 0.004], [-0.014 + i * 0.007, -0.118, 0], { bevel: 0 });
+  // Scarf round the neck, one fringed end hanging over the body.
+  ring(knit, 0.074, 0.018, [0, 0.198, 0], { rot: [Math.PI / 2, 0, 0], segs: 32 });
+  within({ pos: [0.038, 0.192, 0.088], rot: [-0.55, 0, -0.14] }, () => {
+    box(knit, [0.036, 0.085, 0.014], [0, -0.042, 0], { corner: 0.006, bevel: 0.004 });
+    for (let i = 0; i < 5; i++) box(rib, [0.004, 0.016, 0.004], [-0.014 + i * 0.007, -0.092, 0], { bevel: 0 });
   });
-  // Twig arms, waving.
+  // Twig arms from the sides of the body, waving.
   for (const side of [-1, 1]) {
-    named(side < 0 ? 'ArmL' : 'ArmR', [side * 0.08, 0.29, 0], () => {
-      within({ pos: [side * 0.08, 0.29, 0], rot: [0, 0, side * -0.75] }, () => {
-        cyl(twig, 0.005, 0.15, [0, 0.075, 0], { axis: 'y', segs: 8, r2: 0.003 });
-        within({ pos: [0, 0.11, 0], rot: [0, 0, side * 0.7] }, () => cyl(twig, 0.003, 0.04, [0, 0.02, 0], { axis: 'y', segs: 6, r2: 0.002 }));
-        within({ pos: [0, 0.13, 0], rot: [0, 0, side * -0.6] }, () => cyl(twig, 0.003, 0.03, [0, 0.015, 0], { axis: 'y', segs: 6, r2: 0.002 }));
+    named(side < 0 ? 'ArmL' : 'ArmR', [side * 0.11, 0.16, 0], () => {
+      within({ pos: [side * 0.11, 0.16, 0], rot: [0, 0, side * -0.85] }, () => {
+        cyl(twig, 0.005, 0.14, [0, 0.07, 0], { axis: 'y', segs: 8, r2: 0.003 });
+        within({ pos: [0, 0.1, 0], rot: [0, 0, side * 0.7] }, () => cyl(twig, 0.003, 0.04, [0, 0.02, 0], { axis: 'y', segs: 6, r2: 0.002 }));
+        within({ pos: [0, 0.12, 0], rot: [0, 0, side * -0.6] }, () => cyl(twig, 0.003, 0.03, [0, 0.015, 0], { axis: 'y', segs: 6, r2: 0.002 }));
       });
     });
   }

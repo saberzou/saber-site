@@ -38,7 +38,7 @@ window.DEVICE_REAL_CM = {
   dualscreen: 14, widehandheld: 14, cdplayer: 14, rangefinder: 14,
   handheld: 15, phone: 15, calculator: 15, camera: 15, printer: 15, gingerbread: 15, crystalball: 15, foldphone: 15,
   ereader: 17, camcorder: 20, radio: 20, headset: 20, clockradio: 25, console: 27, tablet: 28,
-  learner: 30, present: 30, robotdog: 30, teddy: 30, laptop: 33, macintosh: 35, scope: 35,
+  learner: 30, present: 30, robotdog: 30, teddy: 30, snowman: 32, laptop: 33, macintosh: 35, scope: 35,
   crt: 40, imac: 40, lamp: 40, vinyl: 42, typewriter: 45, cassette: 45, term: 50, tv: 50, arcade: 170
 };
 window.DEVICE_SIZE = { MID_CM: 20, SQUEEZE: 0.28 };

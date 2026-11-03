@@ -5,7 +5,7 @@ import { season, newYear } from './holiday.js?v=20';
 import { openWish } from './wish.js?v=21';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '25';
+const VERSION = '26';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -75,7 +75,8 @@ const GIFTS = {
   foldphone: { name: 'Foldable phone', desc: 'Two screens, one pocket. Open it like a book.' },
   headset: { name: 'Spatial headset', desc: 'For seeing the room in even more dimensions.' },
   rangefinder: { name: 'Rangefinder camera', desc: 'For slow walks and quiet streets.' },
-  teddy: { name: 'Teddy bear', desc: 'Soft, patient, and excellent at hugs.' },
+  teddy: { name: 'Teddy bear', desc: 'Soft, patient, and holding on to a heart for you.' },
+  snowman: { name: 'Snowman', desc: 'Knitted hat, warm scarf, cold hands.' },
   tablet: { name: 'Tablet and pencil', desc: 'A fresh page for sketching. Hover to doodle.' }
 };
 const GIFT_ORDER = Object.keys(GIFTS);
@@ -1584,6 +1585,8 @@ function updateSeason(dt, now) {
       if (parts.EarR) parts.EarR.rotation.z = -Math.sin(t * 7) * 0.18 * on;
       if (parts.ArmR) parts.ArmR.rotation.z = Math.sin(t * 8) * 0.45 * on;
       if (parts.ArmL) parts.ArmL.rotation.z = -Math.sin(t * 8 + 1) * 0.12 * on;
+      if (parts.Heart) parts.Heart.scale.setScalar(1 + on * 0.08 * Math.max(0, Math.sin(t * 7)));
+      if (parts.Hat) parts.Hat.rotation.z = Math.sin(t * 5) * 0.08 * on;
       if (parts.Led) parts.Led.traverse(function (o) { if (o.isMesh) o.material.emissiveIntensity = 0.6 + on * (0.8 + 0.6 * Math.sin(t * 6)); });
     }
   });

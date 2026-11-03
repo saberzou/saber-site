@@ -1343,21 +1343,99 @@ function buildGingerbread() {
   writeGlb('gingerbread');
 }
 
+// A clay tube along a polyline, with round ends: for the numbers in the ball.
+class Polyline extends THREE.Curve {
+  constructor(points) {
+    super();
+    this.pts = points;
+    this.len = [0];
+    for (let i = 1; i < points.length; i++) this.len.push(this.len[i - 1] + points[i].distanceTo(points[i - 1]));
+  }
+  getPoint(t, out = new THREE.Vector3()) {
+    const d = t * this.len[this.len.length - 1];
+    let i = 1;
+    while (i < this.len.length - 1 && this.len[i] < d) i++;
+    const a = this.len[i - 1], b = this.len[i];
+    return out.copy(this.pts[i - 1]).lerp(this.pts[i], b > a ? (d - a) / (b - a) : 0);
+  }
+}
+
+function stroke(mat, pts, r) {
+  const v = pts.map(([x, y]) => new THREE.Vector3(x, y, 0));
+  add(new THREE.TubeGeometry(new Polyline(v), Math.max(8, pts.length * 3), r, 10, false), mat, [0, 0, 0]);
+  ball(mat, r, [pts[0][0], pts[0][1], 0]);
+  ball(mat, r, [pts[pts.length - 1][0], pts[pts.length - 1][1], 0]);
+}
+
+// Digits drawn with one stroke each, w wide and h tall, from the bottom left.
+function digit(n, x0, w, h) {
+  const arc = (cx, cy, rx, ry, a0, a1, steps) => {
+    const out = [];
+    for (let i = 0; i <= steps; i++) {
+      const a = a0 + (a1 - a0) * (i / steps);
+      out.push([x0 + cx + Math.cos(a) * rx, cy + Math.sin(a) * ry]);
+    }
+    return out;
+  };
+  if (n === 0) return arc(w / 2, h / 2, w / 2, h / 2, Math.PI / 2, Math.PI / 2 + Math.PI * 2, 40);
+  if (n === 2) {
+    const top = arc(w / 2, h * 0.7, w / 2, h * 0.3, Math.PI * 0.95, -Math.PI * 0.2, 18);
+    return top.concat([[x0 + w * 0.02, 0], [x0 + w, 0]]);
+  }
+  if (n === 7) return [[x0, h], [x0 + w, h], [x0 + w * 0.32, 0]];
+  return [[x0, 0], [x0, h]];
+}
+
 function buildCrystalBall() {
-  // New Year: a crystal ball on a walnut stand, with 2027 floating inside.
+  // New Year: a snow globe on a walnut stand. Inside, a little snowy hill
+  // with a cottage and two pines, and the new year floating above in gold.
   reset();
   const walnut = clay('Walnut', '#5b3a26', 0.5);
   const brass = clay('Brass', '#c7a16a', 0.3, 0.6);
   const glassMat = clay('Glass', '#dfe8f5', 0.05);
+  const snow = clay('Snow', '#f6f2ea', 0.7);
+  const wall = clay('Wall', '#ece4d3', 0.55);
+  const roof = clay('Roof', '#d8642c', 0.5);
+  const lit = clay('Window', '#ffcf7a', 0.4);
+  const pine = clay('Pine', '#5f8a6a', 0.6);
+  const trunk = clay('Trunk', '#6d4a33', 0.6);
+  const gold = clay('Gold', '#e2b45f', 0.32, 0.45);
   cyl(walnut, 0.13, 0.05, [0, 0.025, 0], { axis: 'y', segs: 40, r2: 0.105 });
   cyl(walnut, 0.098, 0.035, [0, 0.067, 0], { axis: 'y', segs: 40, r2: 0.11 });
   ring(brass, 0.104, 0.006, [0, 0.087, 0], { rot: [Math.PI / 2, 0, 0], segs: 40 });
+
+  // The snowy hill fills the bottom of the globe.
+  ball(snow, 0.122, [0, 0.128, 0], [1, 0.42, 1]);
+  // Cottage, turned to face the room, with a lit window and snow on the roof.
+  within({ pos: [0.03, 0.168, 0.025], rot: [0, Math.PI / 4, 0] }, () => {
+    slab(wall, [0.05, 0.036, 0.042], [0, 0, 0], { corner: 0.004, bevel: 0.003 });
+    add(new THREE.ConeGeometry(0.043, 0.032, 4, 1).rotateY(Math.PI / 4), roof, [0, 0.052, 0]);
+    add(new THREE.ConeGeometry(0.03, 0.014, 4, 1).rotateY(Math.PI / 4), snow, [0, 0.063, 0]);
+    box(lit, [0.014, 0.013, 0.003], [-0.01, 0.018, 0.0215], { bevel: 0.0008 });
+    box(lit, [0.014, 0.013, 0.003], [0.012, 0.018, 0.0215], { bevel: 0.0008 });
+    slab(trunk, [0.008, 0.016, 0.008], [0.014, 0.05, -0.008], { bevel: 0.001 });
+  });
+  // Two pines.
+  [[-0.055, 0.162, 0.0, 1], [-0.025, 0.166, -0.055, 0.8]].forEach(([x, y, z, k]) => {
+    cyl(trunk, 0.006 * k, 0.014 * k, [x, y + 0.007 * k, z], { axis: 'y', segs: 8 });
+    add(new THREE.ConeGeometry(0.03 * k, 0.045 * k, 14), pine, [x, y + 0.035 * k, z]);
+    add(new THREE.ConeGeometry(0.022 * k, 0.036 * k, 14), pine, [x, y + 0.058 * k, z]);
+    add(new THREE.ConeGeometry(0.009 * k, 0.013 * k, 12), snow, [x, y + 0.074 * k, z]);
+  });
+
+  // The year, in gold clay, floating above the hill and facing the room.
+  const year = String(new Date().getMonth() === 0 ? new Date().getFullYear() : new Date().getFullYear() + 1);
+  const dw = 0.034, dh = 0.052, gap = 0.014, r = 0.0062;
+  const total = year.length * dw + (year.length - 1) * gap;
+  named('Year', [0, 0.302, 0], () => {
+    const face = new THREE.Euler().setFromRotationMatrix(new THREE.Matrix4().makeBasis(
+      new THREE.Vector3(1, 0, -1).normalize(), new THREE.Vector3(-1, 2, -1).normalize(), new THREE.Vector3(1, 1, 1).normalize()));
+    within({ pos: [0, 0.302, 0], rot: [face.x, face.y, face.z] }, () => {
+      [...year].forEach((ch, i) => stroke(gold, digit(+ch, -total / 2 + i * (dw + gap), dw, dh).map(([x, y]) => [x, y - dh / 2]), r));
+    });
+  });
+
   add(new THREE.SphereGeometry(0.17, 40, 26), glassMat, [0, 0.245, 0]);
-  // The number floats in the middle, turned to face the room's camera.
-  const face = new THREE.Euler().setFromRotationMatrix(new THREE.Matrix4().makeBasis(
-    new THREE.Vector3(1, 0, -1).normalize(), new THREE.Vector3(-1, 2, -1).normalize(), new THREE.Vector3(1, 1, 1).normalize()));
-  // Square, a hair smaller than the glass: the page paints a round scene on it.
-  glass(0.34, 0.34, [0, 0.245, 0], [face.x, face.y, face.z]);
   writeGlb('crystalball');
 }
 

@@ -5,7 +5,7 @@ import { season, newYear } from './holiday.js?v=20';
 import { openWish } from './wish.js?v=21';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '23';
+const VERSION = '24';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -394,6 +394,36 @@ function attachScreen(root, screen) {
 
 const sources = new Map();
 
+// Every model was built at its own size, so some looked tiny next to others.
+// Each is scaled toward one shared on-screen size, measured the way the room's
+// camera sees it, but only part of the way (EVEN), so a desktop computer still
+// reads a little bigger than a pager.
+const SIZE_TARGET = 0.44;
+const EVEN = 0.7;
+const KEEP_SIZE = ['camera'];   // the Polaroid stays big enough to read
+const sizeScale = new Map();
+const SCREEN_R = new THREE.Vector3(1, 0, -1).normalize();
+const SCREEN_U = new THREE.Vector3(-1, 2, -1).normalize();
+
+function seenSize(root) {
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  const v = new THREE.Vector3();
+  root.updateMatrixWorld(true);
+  root.traverse(function (obj) {
+    if (!obj.isMesh) return;
+    const p = obj.geometry.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      v.fromBufferAttribute(p, i).applyMatrix4(obj.matrixWorld);
+      const a = v.dot(SCREEN_R), b = v.dot(SCREEN_U);
+      if (a < x0) x0 = a; if (a > x1) x1 = a;
+      if (b < y0) y0 = b; if (b > y1) y1 = b;
+    }
+  });
+  // Half area, half longest side: tall, thin things shouldn't grow too tall.
+  const w = x1 - x0, h = y1 - y0;
+  return Math.max(1e-3, 0.5 * Math.sqrt(w * h) + 0.5 * Math.max(w, h));
+}
+
 async function loadModels() {
   await document.fonts.ready;
   let done = 0;
@@ -414,6 +444,8 @@ async function loadModels() {
       }
     });
     sources.set(f, scene);
+    const keep = KEEP_SIZE.some(function (n) { return f.indexOf('/' + n + '.glb') !== -1; });
+    sizeScale.set(f, keep ? 1 : THREE.MathUtils.clamp(Math.pow(SIZE_TARGET / seenSize(scene), EVEN), 0.65, 1.6));
   });
 }
 
@@ -424,6 +456,8 @@ async function spawn(c, r, born) {
   const id = c + ',' + r;
   const spec = specFor(c, r);
   const model = sources.get(spec.file).clone(true);
+  model.scale.setScalar(sizeScale.get(spec.file) || 1);
+  model.updateMatrixWorld(true);
   // The device's own outline, before any glow is added, for placing the card.
   const outline = new THREE.Box3().setFromObject(model);
   let aspect = 1.33;

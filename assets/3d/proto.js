@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
-import { FISH_SVG, paintScreen } from './screens.js?v=21';
+import { FISH_SVG, paintScreen } from './screens.js?v=22';
 import { season, newYear } from './holiday.js?v=20';
 import { openWish } from './wish.js?v=21';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '21';
+const VERSION = '22';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -62,7 +62,7 @@ const PRINT = { printing: false, progress: 0, done: false };
 const BALL = { year: newYear(), burst: 0 };
 if (SEASON === 'thanksgiving') HOME['0,1'] = { file: model('printer'), face: 'printer', toy: 'printer', state: PRINT };
 if (SEASON === 'christmas') HOME['0,1'] = { file: model('present'), toy: 'present' };
-if (SEASON === 'newyear') HOME['0,1'] = { file: model('crystalball'), face: 'ball', toy: 'ball', state: BALL };
+if (SEASON === 'newyear') HOME['0,1'] = { file: model('crystalball'), toy: 'ball' };
 
 // What can come out of a present. Each opened present gives one you haven't
 // found yet, until you've found them all.
@@ -339,7 +339,6 @@ async function makeScreen(spec, aspect) {
   canvas.width = 640;
   canvas.height = Math.round(640 / (aspect || 1.33));
   if (spec.face === 'note') { canvas.width = 1024; canvas.height = 1280; }
-  if (spec.face === 'ball') { canvas.width = canvas.height = 768; }
   const ctx = canvas.getContext('2d');
   await screenFonts();
   const icon = spec.face === 'fish'
@@ -350,8 +349,6 @@ async function makeScreen(spec, aspect) {
   tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const mat = new THREE.MeshBasicMaterial({ map: tex, color: 0xffffff, side: THREE.DoubleSide });
   mat.toneMapped = false;
-  // The number in the crystal ball floats: no backing, drawn before the glass.
-  if (spec.face === 'ball') { mat.transparent = true; mat.depthWrite = false; }
   const screen = {
     mat: mat,
     canvas: canvas,
@@ -431,7 +428,6 @@ async function spawn(c, r, born) {
     const size = obj.geometry.boundingBox.getSize(new THREE.Vector3());
     aspect = size.x / Math.max(Math.hypot(size.y, size.z), 1e-4);
   });
-  if (spec.face === 'ball') aspect = 1;
   const screen = hasScreen ? await makeScreen(spec, aspect) : { paint: function () {}, links: false };
   if (live.get(id) !== 'pending') { disposeScreen(screen); return; } // scrolled away while building
   const screenMesh = hasScreen ? attachScreen(model, screen) : null;
@@ -1170,7 +1166,34 @@ function setupSeasonal(model, parts, spec, screenMesh) {
       obj.castShadow = false;
       obj.renderOrder = 3;
     });
-    if (screenMesh) screenMesh.renderOrder = 2;
+    // The cottage window and the gold year catch the light at night.
+    model.traverse(function (obj) {
+      if (!obj.isMesh || !obj.material) return;
+      const name = obj.material.name;
+      if (name !== 'Window' && name !== 'Gold') return;
+      obj.material = obj.material.clone();
+      obj.material.emissive = new THREE.Color(name === 'Window' ? '#ffb347' : '#c98a2e');
+      obj.material.userData.glow = name === 'Window' ? 2.2 : 0.55;
+      obj.material.emissiveIntensity = 0;
+      (model.userData.glowMats = model.userData.glowMats || []).push(obj.material);
+    });
+    // Snow inside the globe: little flakes that drift down and swirl when shaken.
+    const flakes = 70;
+    const pos = new Float32Array(flakes * 3);
+    const seed = [];
+    for (let i = 0; i < flakes; i++) {
+      seed.push({ a: Math.random() * Math.PI * 2, r: Math.sqrt(Math.random()) * 0.13, y: Math.random(), s: 0.05 + Math.random() * 0.05 });
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const flakesPts = new THREE.Points(geo, new THREE.PointsMaterial({
+      size: 2.6, sizeAttenuation: false, color: '#ffffff', map: dotTexture(), transparent: true, opacity: 0.95, depthWrite: false
+    }));
+    flakesPts.raycast = function () {};
+    flakesPts.frustumCulled = false;
+    flakesPts.renderOrder = 2;
+    model.add(flakesPts);
+    model.userData.globeSnow = { pts: flakesPts, seed: seed };
     // A warm glow from inside, for when the lamp is on.
     const sprite = glowSprite('#ffc98a');
     sprite.position.set(0, 0.25, 0).add(TOWARD_CAMERA);
@@ -1450,12 +1473,40 @@ function updateSeason(dt, now) {
     }
     if (spec.toy === 'ball') {
       // The dust never quite settles.
-      if (!d.playing) d.paint(t, BALL.burst * 0.8);
-      const g = d.group.children[0] && d.group.children[0].userData.ballGlow;
+      const root = d.group.children[0];
+      const g = root && root.userData.ballGlow;
+      // The year floats and turns a little; a tap sets it spinning once.
+      if (parts.Year && !REDUCED) {
+        if (parts.Year.userData.y0 == null) parts.Year.userData.y0 = parts.Year.position.y;
+        parts.Year.position.y = parts.Year.userData.y0 + Math.sin(t * 1.4) * 0.008;
+        parts.Year.rotation.y = Math.sin(t * 0.7) * 0.12 * (1 + d.base) + BALL.burst * BALL.burst * Math.PI * 2;
+      }
+      const snowIn = root && root.userData.globeSnow;
+      if (snowIn) {
+        const p = snowIn.pts.geometry.attributes.position.array;
+        const whirl = BALL.burst;
+        snowIn.seed.forEach(function (f, i) {
+          if (!REDUCED) {
+            f.y -= dt * f.s * (1 - whirl * 1.8);
+            f.a += dt * (0.2 + whirl * 4);
+            if (f.y < 0) f.y += 1;
+            if (f.y > 1) f.y -= 1;
+          }
+          // Keep each flake inside the glass: the sphere is 0.17 across from y 0.245.
+          const y = 0.16 + f.y * 0.22;
+          const room = Math.sqrt(Math.max(0, 0.15 * 0.15 - (y - 0.245) * (y - 0.245)));
+          const r = Math.min(f.r, room);
+          p[i * 3] = Math.cos(f.a) * r;
+          p[i * 3 + 1] = y;
+          p[i * 3 + 2] = Math.sin(f.a) * r;
+        });
+        snowIn.pts.geometry.attributes.position.needsUpdate = true;
+      }
+      if (root && root.userData.glowMats) root.userData.glowMats.forEach(function (m) { m.emissiveIntensity = (night * 0.85 + 0.15 + BALL.burst * 0.4) * m.userData.glow; });
       if (g) {
-        g.sprite.material.opacity = night * (0.22 + 0.3 * BALL.burst) + BALL.burst * 0.2;
+        g.sprite.material.opacity = night * (0.16 + 0.25 * BALL.burst) + BALL.burst * 0.15;
         g.sprite.visible = g.sprite.material.opacity > 0.01;
-        g.light.intensity = night * (1.4 + BALL.burst * 2);
+        g.light.intensity = night * (0.25 + BALL.burst * 0.5);
       }
       d.group.traverse(function (o) { if (o.material && o.material.uniforms && o.material.uniforms.night) o.material.uniforms.night.value = night; });
     }

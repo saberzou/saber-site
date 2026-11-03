@@ -1517,34 +1517,110 @@ function buildRangefinder() {
   writeGlb('rangefinder');
 }
 
+function heartShape(s) {
+  const h = new THREE.Shape();
+  h.moveTo(0, -0.5 * s);
+  h.bezierCurveTo(-0.15 * s, -0.33 * s, -0.55 * s, -0.12 * s, -0.55 * s, 0.14 * s);
+  h.bezierCurveTo(-0.55 * s, 0.4 * s, -0.27 * s, 0.5 * s, 0, 0.3 * s);
+  h.bezierCurveTo(0.27 * s, 0.5 * s, 0.55 * s, 0.4 * s, 0.55 * s, 0.14 * s);
+  h.bezierCurveTo(0.55 * s, -0.12 * s, 0.15 * s, -0.33 * s, 0, -0.5 * s);
+  return h;
+}
+
 function buildTeddy() {
+  // A sitting teddy bear hugging a red heart: caramel fur, cream muzzle,
+  // round ears, shiny black eyes and tan pads on its feet.
   reset();
-  const fur = clay('Fur', '#b07b4f', 0.95);
-  const light = clay('Muzzle', '#e3c3a0', 0.9);
-  const eye = clay('Eye', '#1c1410', 0.3);
-  const bow = clay('Bow', '#c23a33', 0.5);
-  // Sitting: legs out front, round body, big head.
-  for (const x of [-0.06, 0.06]) {
-    ball(fur, 0.042, [x, 0.04, 0.06], [1, 0.9, 1.3]);
-    ball(light, 0.026, [x, 0.04, 0.112], [1, 1, 0.35]);
+  const fur = clay('Fur', '#b5865a', 0.95);
+  const cream = clay('Cream', '#efdfc4', 0.92);
+  const pad = clay('Pad', '#d8b88e', 0.9);
+  const eye = clay('Eye', '#120d0a', 0.15, 0.2);
+  const nose = clay('Nose', '#4a2c20', 0.45);
+  const heart = clay('Heart', '#cf2f2b', 0.85);
+  // Legs out in front, with pads facing us.
+  for (const x of [-0.068, 0.068]) {
+    ball(fur, 0.05, [x, 0.045, 0.055], [1, 0.9, 1.25]);
+    ball(pad, 0.035, [x, 0.047, 0.115], [1, 1.05, 0.32]);
   }
-  ball(fur, 0.095, [0, 0.12, 0], [1, 1.1, 0.9]);
-  ball(light, 0.055, [0, 0.11, 0.06], [1, 1.2, 0.4]);
-  ball(fur, 0.078, [0, 0.27, 0.01]);
-  for (const x of [-0.06, 0.06]) {
-    ball(fur, 0.03, [x, 0.33, 0], [1, 1, 0.6]);
-    ball(light, 0.017, [x, 0.33, 0.014], [1, 1, 0.4]);
+  // Round body and a big head.
+  ball(fur, 0.1, [0, 0.13, 0], [1, 1.05, 0.88]);
+  ball(fur, 0.088, [0, 0.29, 0.01], [1.05, 0.98, 0.95]);
+  // Ears: fur outside, a cream dip inside.
+  for (const x of [-0.07, 0.07]) {
+    ball(fur, 0.036, [x, 0.36, -0.005], [1, 1, 0.62]);
+    ball(cream, 0.022, [x * 1.02, 0.358, 0.014], [1, 1, 0.4]);
   }
-  ball(light, 0.034, [0, 0.255, 0.07], [1.1, 0.8, 0.7]);
-  ball(eye, 0.011, [0, 0.268, 0.096], [1.3, 0.9, 0.8]);
-  for (const x of [-0.03, 0.03]) ball(eye, 0.0095, [x, 0.293, 0.07]);
-  named('ArmL', [-0.085, 0.17, 0], () => ball(fur, 0.032, [-0.1, 0.12, 0.02], [0.8, 1.5, 0.8]));
-  named('ArmR', [0.085, 0.17, 0], () => ball(fur, 0.032, [0.1, 0.12, 0.02], [0.8, 1.5, 0.8]));
-  // A red bow at the neck.
-  ring(bow, 0.072, 0.008, [0, 0.2, 0.0], { rot: [Math.PI / 2, 0, 0], segs: 30 });
-  for (const s of [-1, 1]) ball(bow, 0.022, [s * 0.025, 0.2, 0.075], [1.3, 0.8, 0.5]);
-  ball(bow, 0.011, [0, 0.2, 0.078]);
+  // Face.
+  ball(cream, 0.042, [0, 0.27, 0.074], [1.2, 0.92, 0.72]);
+  ball(nose, 0.016, [0, 0.283, 0.104], [1.35, 0.95, 0.8]);
+  ring(nose, 0.011, 0.0022, [-0.0105, 0.262, 0.101], { arc: Math.PI, rot: [0, 0, Math.PI], segs: 14 });
+  ring(nose, 0.011, 0.0022, [0.0105, 0.262, 0.101], { arc: Math.PI, rot: [0, 0, Math.PI], segs: 14 });
+  box(nose, [0.0024, 0.012, 0.0024], [0, 0.27, 0.104], { bevel: 0 });
+  for (const x of [-0.036, 0.036]) {
+    ball(eye, 0.012, [x, 0.31, 0.078], [1, 1.08, 0.75]);
+    ball(clay('Glint', '#ffffff', 0.2), 0.0032, [x + 0.004, 0.315, 0.087]);
+  }
+  // The heart, held to its chest, and two arms wrapped round it.
+  named('Heart', [0, 0.14, 0.09], () => {
+    const geo = new THREE.ExtrudeGeometry(heartShape(0.13), { depth: 0.018, bevelEnabled: true, bevelThickness: 0.014, bevelSize: 0.012, bevelSegments: 4, curveSegments: 18 });
+    geo.translate(0, 0, -0.009);
+    add(creased(geo, 1.2), heart, [0, 0.145, 0.088], [-0.08, 0, 0]);
+  });
+  for (const side of [-1, 1]) {
+    add(new THREE.CapsuleGeometry(0.03, 0.07, 6, 14), fur, [side * 0.075, 0.17, 0.06], [0.9, 0, side * 0.55]);
+    ball(fur, 0.032, [side * 0.052, 0.13, 0.1], [1, 1, 0.9]);
+  }
   writeGlb('teddy');
+}
+
+function buildSnowman() {
+  // A snowman in a red knit beanie and scarf, with coal eyes and buttons,
+  // a carrot nose and twig arms.
+  reset();
+  const snow = clay('Snow', '#f6f5f2', 0.85);
+  const knit = clay('Knit', '#c8352f', 0.95);
+  const rib = clay('Rib', '#b52e29', 0.95);
+  const coal = clay('Coal', '#141414', 0.5);
+  const carrot = clay('Carrot', '#f07a2a', 0.6);
+  const twig = clay('Twig', '#6b4a33', 0.8);
+  const cheek = clay('Cheek', '#f2b8b0', 0.9);
+  ball(snow, 0.12, [0, 0.11, 0], [1, 0.92, 1]);
+  ball(snow, 0.09, [0, 0.27, 0]);
+  ball(snow, 0.072, [0, 0.4, 0.004]);
+  // Coal buttons down the front.
+  [0.32, 0.27, 0.2, 0.13].forEach((y, i) => ball(coal, 0.011, [0, y, (i < 2 ? 0.088 : 0.115)], [1, 1, 0.6]));
+  // Face.
+  for (const x of [-0.026, 0.026]) ball(coal, 0.009, [x, 0.418, 0.066]);
+  for (const x of [-0.045, 0.045]) ball(cheek, 0.011, [x, 0.395, 0.058], [1, 0.8, 0.4]);
+  add(new THREE.ConeGeometry(0.011, 0.05, 14).rotateX(Math.PI / 2), carrot, [0, 0.4, 0.096]);
+  ring(coal, 0.026, 0.0028, [0, 0.39, 0.064], { arc: Math.PI * 0.75, rot: [0.25, 0, Math.PI * 1.125], segs: 18 });
+  // Beanie: a ribbed cuff, the crown and a pompom.
+  named('Hat', [0, 0.45, 0], () => {
+    cyl(rib, 0.07, 0.03, [0, 0.452, 0], { axis: 'y', segs: 32 });
+    ball(knit, 0.066, [0, 0.47, 0], [1, 0.95, 1]);
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2;
+      box(knit, [0.006, 0.028, 0.006], [Math.cos(a) * 0.071, 0.452, Math.sin(a) * 0.071], { bevel: 0.002 });
+    }
+    ball(knit, 0.028, [0, 0.545, 0]);
+  });
+  // Scarf: wrapped round the neck, one end hanging down the front.
+  ring(knit, 0.078, 0.018, [0, 0.335, 0], { rot: [Math.PI / 2, 0, 0], segs: 32 });
+  within({ pos: [0.036, 0.328, 0.086], rot: [-0.38, 0, -0.14] }, () => {
+    box(knit, [0.036, 0.11, 0.014], [0, -0.055, 0], { corner: 0.006, bevel: 0.004 });
+    for (let i = 0; i < 5; i++) box(rib, [0.004, 0.018, 0.004], [-0.014 + i * 0.007, -0.118, 0], { bevel: 0 });
+  });
+  // Twig arms, waving.
+  for (const side of [-1, 1]) {
+    named(side < 0 ? 'ArmL' : 'ArmR', [side * 0.08, 0.29, 0], () => {
+      within({ pos: [side * 0.08, 0.29, 0], rot: [0, 0, side * -0.75] }, () => {
+        cyl(twig, 0.005, 0.15, [0, 0.075, 0], { axis: 'y', segs: 8, r2: 0.003 });
+        within({ pos: [0, 0.11, 0], rot: [0, 0, side * 0.7] }, () => cyl(twig, 0.003, 0.04, [0, 0.02, 0], { axis: 'y', segs: 6, r2: 0.002 }));
+        within({ pos: [0, 0.13, 0], rot: [0, 0, side * -0.6] }, () => cyl(twig, 0.003, 0.03, [0, 0.015, 0], { axis: 'y', segs: 6, r2: 0.002 }));
+      });
+    });
+  }
+  writeGlb('snowman');
 }
 
 function buildTablet() {
@@ -1573,6 +1649,7 @@ buildFoldPhone();
 buildHeadset();
 buildRangefinder();
 buildTeddy();
+buildSnowman();
 buildTablet();
 
 buildPrinter();

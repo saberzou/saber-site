@@ -28,7 +28,7 @@
 <noscript><meta http-equiv="refresh" content="0; url=field.html"></noscript>
 <link rel="stylesheet" href="assets/archer-chat.css?v=18">
 <link rel="stylesheet" href="assets/home.css">
-<link rel="stylesheet" href="assets/3d/proto.css?v=19">
+<link rel="stylesheet" href="assets/3d/proto.css?v=20">
 <link rel="stylesheet" href="assets/3d/loader.css?v=17">
 <link rel="stylesheet" href="assets/fade.css?v=17">
 <script type="importmap">
@@ -40,7 +40,7 @@
 </script>
 <link rel="preload" href="assets/fonts/silkscreen.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="assets/3d/vendor/three.module.js?v=170">
-<link rel="modulepreload" href="assets/3d/proto.js?v=20">
+<link rel="modulepreload" href="assets/3d/proto.js?v=21">
 </head>
 <body>
 <div class="loader" id="loader" role="status" aria-live="polite">
@@ -114,10 +114,22 @@
   <span class="peek-text"><small class="peek-kind" hidden></small><strong></strong><span></span></span>
   <i class="peek-arrow"></i>
 </a>
+<!-- Thanksgiving: the letter the little printer prints. Edit the words freely. -->
+<dialog class="letter" id="thanks-letter" aria-labelledby="letter-title">
+  <article class="letter-paper" tabindex="-1" autofocus>
+    <p class="letter-kicker">Printed for you &middot; Thanksgiving</p>
+    <h2 id="letter-title">Thank <em>you.</em></h2>
+    <p>For wandering in. This room started as a place to keep my work, and somewhere along the way it filled up with toys, a cassette deck and a fish named Archer.</p>
+    <p>Thank you to everyone who downloaded an app, tried a strange little experiment, wrote to me, or just pressed play on the tape. You keep me making things.</p>
+    <p>Here&rsquo;s to more small, odd, joyful things.</p>
+    <p class="letter-sign">Saber</p>
+    <button class="letter-close" type="button" data-close>Close</button>
+  </article>
+</dialog>
 <div class="fade" aria-hidden="true"></div>
 <script src="assets/project-devices.js?v=18"></script>
 <script src="assets/archer-chat.js?v=19"></script>
 <script src="assets/fade.js?v=17"></script>
-<script type="module" src="assets/3d/proto.js?v=20"></script>
+<script type="module" src="assets/3d/proto.js?v=21"></script>
 </body>
 </html>

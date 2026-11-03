@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
-import { FISH_SVG, paintScreen } from './screens.js?v=18';
+import { FISH_SVG, paintScreen } from './screens.js?v=20';
+import { season, newYear } from './holiday.js?v=20';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '17';
+const VERSION = '20';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -35,17 +36,75 @@ function deviceFor(name) {
 
 function model(name) { return 'assets/3d/models/' + name + '.glb?v=' + VERSION; }
 
+// The holiday the room is dressed for today, if any (see holiday.js).
+const SEASON = season();
+
 // The cassette keeps playing while it's off screen, so its state lives here.
-const TAPE = { playing: false, elapsed: 0 };
+// At Christmas it's turned over to Side B.
+const TAPE = SEASON === 'christmas'
+  ? { playing: false, elapsed: 0, side: 'B', title: 'songs for the snow', song: 'side-b' }
+  : { playing: false, elapsed: 0, side: 'A', title: 'songs for wandering', song: 'friendly-loop' };
 
 // The home cells. Everything else is worked out from the cell's position, so
 // the floor goes on forever and the same cell always shows the same thing.
 const HOME = {
   '0,0': { file: model('camera'), face: 'note' },
   '1,0': { file: model('radio'), face: 'fish', name: 'Archer', toy: 'archer' },
-  '-1,1': { file: model('cassette'), face: 'tape', name: 'Side A', toy: 'cassette', state: TAPE },
+  '-1,1': { file: model('cassette'), face: 'tape', name: 'Side ' + TAPE.side, toy: 'cassette', state: TAPE },
   '1,1': { file: model('lamp'), toy: 'lamp' }
 };
+
+// ------------------------------------------------------------- the holidays
+// Thanksgiving puts a printer in the front row, Christmas a present (and more
+// hidden across the floor), New Year a crystal ball.
+const PRINT = { printing: false, progress: 0, done: false };
+const BALL = { year: newYear(), burst: 0 };
+if (SEASON === 'thanksgiving') HOME['0,1'] = { file: model('printer'), face: 'printer', toy: 'printer', state: PRINT };
+if (SEASON === 'christmas') HOME['0,1'] = { file: model('present'), toy: 'present' };
+if (SEASON === 'newyear') HOME['0,1'] = { file: model('crystalball'), face: 'ball', toy: 'ball', state: BALL };
+
+// What can come out of a present. Each opened present gives one you haven't
+// found yet, until you've found them all.
+const GIFTS = {
+  cdplayer: { name: 'CD player', desc: 'Anti-skip, mostly. Hover to spin the disc.' },
+  console: { name: 'Game console', desc: 'One controller. Sharing is caring.' },
+  robotdog: { name: 'Robot dog', desc: 'Very good boy. Doesn’t need walks.' },
+  vinyl: { name: 'Record player', desc: 'Tap it to play the holiday B-side.' },
+  gingerbread: { name: 'Gingerbread man', desc: 'Run, run, as fast as you can.' }
+};
+const GIFT_ORDER = Object.keys(GIFTS);
+const GIFTS_KEY = 'saber-3d-gifts';
+const opened = new Map();   // "c,r" -> gift, for presents opened this visit
+let found = [];
+try { found = JSON.parse(localStorage.getItem(GIFTS_KEY) || '[]').filter(function (g) { return GIFTS[g]; }); } catch (err) {}
+
+function presentAt(c, r) {
+  return SEASON === 'christmas' && mod(c * 7 + r * 13, 11) === 3;
+}
+
+function giftSpec(gift, c, r) {
+  const spec = { file: model(gift), toy: 'gift', gift: gift, name: GIFTS[gift].name, desc: GIFTS[gift].desc, cell: [c, r] };
+  if (gift === 'robotdog') spec.face = 'dog';
+  if (gift === 'vinyl') spec.state = TAPE;
+  return spec;
+}
+
+function nextGift() {
+  const left = GIFT_ORDER.filter(function (g) { return found.indexOf(g) === -1; });
+  const pool = left.length ? left : GIFT_ORDER;
+  const gift = pool[Math.floor(Math.random() * pool.length)];
+  if (found.indexOf(gift) === -1) {
+    found.push(gift);
+    try { localStorage.setItem(GIFTS_KEY, JSON.stringify(found)); } catch (err) {}
+  }
+  return gift;
+}
+
+const SEASON_MODELS = {
+  thanksgiving: ['printer'],
+  christmas: ['present'].concat(GIFT_ORDER),
+  newyear: ['crystalball']
+}[SEASON] || [];
 
 function readProjects() {
   return Array.prototype.slice.call(document.querySelectorAll('#projects a[href]')).map(function (a) {
@@ -67,20 +126,23 @@ function mod(n, m) { return ((n % m) + m) % m; }
 // project by 5 or 3 places and the device by 3 or 2.
 function specFor(c, r) {
   const home = HOME[c + ',' + r];
+  if (opened.has(c + ',' + r)) return giftSpec(opened.get(c + ',' + r), c, r);
   if (home) return Object.assign({ cell: [c, r] }, home);
   // Archer turns up now and then, like in the flat field.
   if (mod(c + r * 3, 13) === 0) return { file: model('radio'), face: 'fish', name: 'Archer', toy: 'archer', cell: [c, r] };
+  if (presentAt(c, r)) return { file: model('present'), toy: 'present', cell: [c, r] };
   const p = PROJECTS[mod(c * 5 + r * 3, PROJECTS.length)];
   const name = deviceFor(p.name);
   return { file: model(name), cell: [c, r], face: MODEL_FACE[name], name: p.name, desc: p.desc, icon: p.icon, href: p.href, external: p.external, kind: p.kind };
 }
 
-const MODEL_FILES = Object.keys(MODEL_FACE).concat(['camera', 'radio', 'cassette', 'lamp']).map(model);
+const MODEL_FILES = Object.keys(MODEL_FACE).concat(['camera', 'radio', 'cassette', 'lamp'], SEASON_MODELS).map(model);
 
 // Halo colors for screens when the lamp is on and the room goes dark.
 const GLOW = {
   lcd: '#cfe27a', phos: '#74f59c', amber: '#f6c66a', tube: '#fff1d6', aqua: '#cfeaff',
-  tft: '#dfe8f5', gloss: '#b9c4ff', mono: '#e0e4cc', paper: '#fff3dc', fish: '#ff8a3d'
+  tft: '#dfe8f5', gloss: '#b9c4ff', mono: '#e0e4cc', paper: '#fff3dc', fish: '#ff8a3d',
+  printer: '#f6c66a', dog: '#9fe6ff', ball: '#ffd98a'
 };
 
 
@@ -286,6 +348,8 @@ async function makeScreen(spec, aspect) {
   tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const mat = new THREE.MeshBasicMaterial({ map: tex, color: 0xffffff, side: THREE.DoubleSide });
   mat.toneMapped = false;
+  // The number in the crystal ball floats: no backing, drawn before the glass.
+  if (spec.face === 'ball') { mat.transparent = true; mat.depthWrite = false; }
   const screen = {
     mat: mat,
     canvas: canvas,
@@ -365,6 +429,7 @@ async function spawn(c, r, born) {
     const size = obj.geometry.boundingBox.getSize(new THREE.Vector3());
     aspect = size.x / Math.max(Math.hypot(size.y, size.z), 1e-4);
   });
+  if (spec.face === 'ball') aspect = 0.22 / 0.15;
   const screen = hasScreen ? await makeScreen(spec, aspect) : { paint: function () {}, links: false };
   if (live.get(id) !== 'pending') { disposeScreen(screen); return; } // scrolled away while building
   const screenMesh = hasScreen ? attachScreen(model, screen) : null;
@@ -374,6 +439,7 @@ async function spawn(c, r, born) {
   model.traverse(function (obj) { if (obj.name) parts[obj.name] = parts[obj.name] || obj; });
   if (spec.toy === 'lamp') setupLamp(model, parts);
   if (spec.toy === 'cassette') setupCassette(parts);
+  setupSeasonal(model, parts, spec, screenMesh);
   const group = new THREE.Group();
   group.position.set(c * SPAN, 0, r * SPAN);
   group.add(model);
@@ -534,6 +600,14 @@ function openHit(info) {
   const spec = info.device.spec;
   if (spec.toy === 'cassette') { toggleMusic(info.device); return; }
   if (spec.toy === 'lamp') { toggleLamp(info.device); return; }
+  if (spec.toy === 'printer') { printLetter(info.device); return; }
+  if (spec.toy === 'present') { unwrap(info.device); return; }
+  if (spec.toy === 'ball') { shakeBall(info.device); return; }
+  if (spec.toy === 'gift') {
+    if (spec.gift === 'vinyl') toggleMusic(info.device);
+    else { info.device.hop = performance.now(); click(spec.gift === 'robotdog' ? 1800 : 900); }
+    return;
+  }
   if (spec.toy === 'archer') {
     const open = document.getElementById('archer-chat-open');
     if (open) open.click(); else window.location.href = 'field.html';
@@ -656,8 +730,12 @@ const peekKind = peekEl ? peekEl.querySelector('.peek-kind') : null;
 const TIPS = {
   cassette: ['Side A', 'Press play for a little ambient music.'],
   lamp: ['The lamp', 'Pull the chain to turn the lights down.'],
-  archer: ['Archer', 'A little guide who hangs out here. Say hi.']
+  archer: ['Archer', 'A little guide who hangs out here. Say hi.'],
+  printer: ['A thank-you note', 'Press the button. It prints a letter from me.'],
+  present: ['A present', 'There are a few hidden around the room. Open one.'],
+  ball: ['Happy New Year', 'A little crystal ball for ' + BALL.year + '. Tap it and make a wish.']
 };
+if (SEASON === 'christmas') TIPS.cassette = ['Side B', 'Turned over for the holidays. Press play.'];
 let pinned = null;
 let peekFor = null;
 let lastPointer = 'mouse';
@@ -674,6 +752,7 @@ const INTRO = {
 function peekContent(d) {
   const spec = d.spec;
   if (spec.face === 'note') return { intro: true, desc: INTRO.desc, face: INTRO.face, screen: null };
+  if (spec.toy === 'gift') return { name: spec.name, desc: spec.desc, kind: 'Gift ' + (found.indexOf(spec.gift) + 1) + ' of ' + GIFT_ORDER.length, kindId: 'gift', screen: null };
   if (spec.toy && TIPS[spec.toy]) return { name: TIPS[spec.toy][0], desc: TIPS[spec.toy][1], screen: spec.toy === 'lamp' ? null : d.screenData.canvas };
   if (spec.href) return { name: spec.name, desc: spec.desc || '', kind: spec.kind, screen: d.screenData.canvas, href: spec.href, external: spec.external };
   return null;
@@ -699,7 +778,7 @@ function updatePeek() {
     if (peekKind) {
       peekKind.hidden = !info.kind;
       peekKind.textContent = info.kind || '';
-      peekKind.dataset.kind = info.kind === 'iOS app' ? 'ios' : 'web';
+      peekKind.dataset.kind = info.kindId || (info.kind === 'iOS app' ? 'ios' : 'web');
     }
     if (peekFace) {
       peekFace.hidden = !info.face;
@@ -968,7 +1047,7 @@ function updateRoom(dt) {
 
 // ------------------------------------------------------------- the cassette
 // Pressing the deck plays "Friendly Loop" (audio/friendly-loop.mp3) on
-// repeat. The play key latches down, the reels turn and
+// repeat, or at Christmas the B-side (audio/side-b.mp3). The play key latches down, the reels turn and
 // the red light comes on. Press again to stop.
 
 let audio = null;
@@ -998,7 +1077,7 @@ let stopTimer = 0;
 
 function ensureAudio() {
   if (audio) return;
-  audio = new Audio('assets/3d/audio/friendly-loop.mp3?v=' + VERSION);
+  audio = new Audio('assets/3d/audio/' + TAPE.song + '.mp3?v=' + VERSION);
   audio.loop = true;
   audio.preload = 'auto';
   const ctx = audioContext();
@@ -1067,6 +1146,303 @@ function updateCassette(dt) {
   }
 }
 
+// ------------------------------------------------------------ the holidays
+
+const PRESENT_PAPER = ['#b8432f', '#3f6b4f', '#2f4a6d', '#e9e0cd', '#c98a3a'];
+const PRESENT_RIBBON = ['#f1e3c2', '#c7a16a', '#d8642c', '#f1e3c2', '#3f6b4f'];
+
+function setupSeasonal(model, parts, spec, screenMesh) {
+  if (spec.toy === 'present') {
+    // Each present gets its own wrapping paper.
+    const i = mod(spec.cell[0] * 3 + spec.cell[1] * 5, PRESENT_PAPER.length);
+    model.traverse(function (obj) {
+      if (!obj.isMesh || !obj.material) return;
+      if (obj.material.name === 'Wrap') { obj.material = obj.material.clone(); obj.material.color.set(PRESENT_PAPER[i]).convertSRGBToLinear(); }
+      if (obj.material.name === 'Ribbon') { obj.material = obj.material.clone(); obj.material.color.set(PRESENT_RIBBON[i]).convertSRGBToLinear(); }
+    });
+  }
+  if (spec.toy === 'ball') {
+    model.traverse(function (obj) {
+      if (!obj.isMesh || !obj.material || obj.material.name !== 'Glass') return;
+      obj.material = new THREE.MeshStandardMaterial({
+        color: '#eef3fb', roughness: 0.06, metalness: 0, transparent: true, opacity: 0.2, depthWrite: false
+      });
+      obj.castShadow = false;
+      obj.renderOrder = 3;
+    });
+    if (screenMesh) screenMesh.renderOrder = 2;
+  }
+  if (spec.toy === 'printer') {
+    if (parts.Paper) parts.Paper.userData.p0 = parts.Paper.position.clone();
+    if (parts.Button) parts.Button.userData.z0 = parts.Button.position.z;
+  }
+  if (parts.Lid) parts.Lid.userData.y0 = parts.Lid.position.y;
+  if (parts.Led) {
+    parts.Led.traverse(function (obj) {
+      if (!obj.isMesh) return;
+      obj.material = obj.material.clone();
+      obj.material.emissive = new THREE.Color('#5cff7a');
+      obj.material.emissiveIntensity = 0.8;
+    });
+  }
+}
+
+// Thanksgiving: the printer feeds out its paper, then the letter opens.
+const PAPER_RUN = 0.17;
+const PAPER_DIR = new THREE.Vector3(0, Math.cos(0.32), -Math.sin(0.32));
+const letter = document.getElementById('thanks-letter');
+let printStart = 0;
+
+function printLetter(device) {
+  if (PRINT.printing) return;
+  if (PRINT.done) { openLetter(); return; }
+  PRINT.printing = true;
+  PRINT.progress = 0;
+  printStart = performance.now();
+  click(1600);
+  const ctx = audioContext();
+  if (ctx && ctx.state === 'suspended') ctx.resume();
+}
+
+function openLetter() {
+  if (!letter) return;
+  if (typeof letter.showModal === 'function') { if (!letter.open) letter.showModal(); } else letter.setAttribute('open', '');
+}
+if (letter) {
+  letter.addEventListener('click', function (e) {
+    if (e.target === letter || e.target.closest('[data-close]')) letter.close();
+  });
+}
+
+// Christmas: a present pops its lid, and something new springs up in its place.
+function unwrap(device) {
+  if (device.unwrap) return;
+  device.unwrap = performance.now();
+  chime([784, 988, 1319]);
+  burst(device.group.position, ['#d8642c', '#f1e3c2', '#c7a16a', '#5f9e5a', '#b8432f']);
+}
+
+// New Year: tap the ball and the dust swirls up.
+function shakeBall(device) {
+  BALL.burst = 1;
+  chime([1047, 1319, 1568]);
+}
+
+// A soft bell for the happy moments.
+function chime(notes) {
+  const ctx = audioContext();
+  if (!ctx) return;
+  try {
+    if (ctx.state === 'suspended') ctx.resume();
+    notes.forEach(function (f, i) {
+      const t = ctx.currentTime + i * 0.09;
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.12, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+      osc.connect(g).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 1.2);
+    });
+  } catch (err) {}
+}
+
+// Little round sprites for snow and confetti. Hard edges, so iPad Safari
+// draws them clean.
+let dotTex = null;
+function dotTexture() {
+  if (dotTex) return dotTex;
+  const c = document.createElement('canvas');
+  c.width = c.height = 32;
+  const g = c.getContext('2d');
+  g.fillStyle = '#fff';
+  g.beginPath();
+  g.arc(16, 16, 14, 0, Math.PI * 2);
+  g.fill();
+  dotTex = new THREE.CanvasTexture(c);
+  return dotTex;
+}
+
+// Confetti from an opened present.
+const bursts = [];
+function burst(at, colors) {
+  if (REDUCED) return;
+  const n = 36;
+  const pos = new Float32Array(n * 3);
+  const col = new Float32Array(n * 3);
+  const vel = [];
+  const c = new THREE.Color();
+  for (let i = 0; i < n; i++) {
+    pos.set([at.x, 0.3, at.z], i * 3);
+    c.set(colors[i % colors.length]);
+    col.set([c.r, c.g, c.b], i * 3);
+    const a = Math.random() * Math.PI * 2;
+    const sp = 0.4 + Math.random() * 0.7;
+    vel.push(new THREE.Vector3(Math.cos(a) * sp, 1.4 + Math.random() * 1.1, Math.sin(a) * sp));
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({
+    size: 7, sizeAttenuation: false, vertexColors: true, map: dotTexture(), alphaTest: 0.5, transparent: false
+  }));
+  pts.raycast = function () {};
+  scene.add(pts);
+  bursts.push({ pts: pts, vel: vel, life: 0 });
+}
+
+function updateBursts(dt) {
+  for (let b = bursts.length - 1; b >= 0; b--) {
+    const it = bursts[b];
+    it.life += dt;
+    const p = it.pts.geometry.attributes.position;
+    for (let i = 0; i < it.vel.length; i++) {
+      it.vel[i].y -= 4.2 * dt;
+      p.array[i * 3] += it.vel[i].x * dt;
+      p.array[i * 3 + 1] = Math.max(0.01, p.array[i * 3 + 1] + it.vel[i].y * dt);
+      p.array[i * 3 + 2] += it.vel[i].z * dt;
+      if (p.array[i * 3 + 1] <= 0.01) it.vel[i].multiplyScalar(0.6);
+    }
+    p.needsUpdate = true;
+    if (it.life > 1.6) {
+      scene.remove(it.pts);
+      it.pts.geometry.dispose();
+      it.pts.material.dispose();
+      bursts.splice(b, 1);
+    }
+  }
+}
+
+// Snow, all December. Flakes are tied to the world, not the camera, and wrap
+// round a box that follows the view, so it snows wherever you wander.
+let snow = null;
+const SNOW_BOX = 7;
+const SNOW_TOP = 4.2;
+function makeSnow() {
+  const layers = [{ n: 560, size: 4, speed: 0.32 }, { n: 200, size: 6.5, speed: 0.48 }];
+  snow = layers.map(function (l) {
+    const pos = new Float32Array(l.n * 3);
+    const seed = [];
+    for (let i = 0; i < l.n; i++) {
+      pos.set([(Math.random() - 0.5) * 2 * SNOW_BOX, Math.random() * SNOW_TOP, (Math.random() - 0.5) * 2 * SNOW_BOX], i * 3);
+      seed.push(Math.random() * Math.PI * 2);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const mat = new THREE.PointsMaterial({
+      size: l.size, sizeAttenuation: false, color: '#ffffff', map: dotTexture(),
+      transparent: true, opacity: 0.85, depthWrite: false
+    });
+    const pts = new THREE.Points(geo, mat);
+    pts.raycast = function () {};
+    pts.frustumCulled = false;
+    pts.renderOrder = 4;
+    scene.add(pts);
+    return { pts: pts, seed: seed, speed: l.speed, base: pos.slice() };
+  });
+}
+
+function wrapAround(v, centre, half) {
+  return centre + mod(v - centre + half, half * 2) - half;
+}
+
+function updateSnow(dt, now) {
+  if (!snow) return;
+  const t = now / 1000;
+  snow.forEach(function (layer) {
+    const p = layer.pts.geometry.attributes.position.array;
+    for (let i = 0; i < layer.seed.length; i++) {
+      const k = i * 3;
+      p[k + 1] -= layer.speed * dt * (REDUCED ? 0.4 : 1);
+      if (p[k + 1] < 0) p[k + 1] += SNOW_TOP;
+      p[k] = wrapAround(p[k] + Math.sin(t * 0.6 + layer.seed[i]) * 0.08 * dt, target.x, SNOW_BOX);
+      p[k + 2] = wrapAround(p[k + 2] + Math.cos(t * 0.5 + layer.seed[i]) * 0.06 * dt, target.z, SNOW_BOX);
+    }
+    layer.pts.geometry.attributes.position.needsUpdate = true;
+    // A touch brighter against the dark room.
+    layer.pts.material.opacity = 0.92 - 0.1 * night;
+  });
+}
+if (SEASON === 'christmas') makeSnow();
+
+function updateSeason(dt, now) {
+  updateBursts(dt);
+  updateSnow(dt, now);
+  const t = now / 1000;
+  if (BALL.burst > 0) BALL.burst = Math.max(0, BALL.burst - dt * 0.45);
+  BALL.night = night;
+  if (PRINT.printing) {
+    PRINT.progress = Math.min(1, (now - printStart) / 1900);
+    // The motor ticks as the paper feeds.
+    if (Math.floor(PRINT.progress * 26) !== Math.floor((PRINT.progress - dt / 1.9) * 26)) click(2400 + Math.random() * 600);
+    if (PRINT.progress >= 1) {
+      PRINT.printing = false;
+      PRINT.done = true;
+      chime([659, 784, 1047]);
+      setTimeout(openLetter, 380);
+    }
+  }
+  devices.slice().forEach(function (d) {
+    const spec = d.spec;
+    const parts = d.parts;
+    if (spec.toy === 'printer') {
+      const paper = parts.Paper;
+      if (paper && paper.userData.p0) {
+        // A stub shows at rest; printing feeds it out in little steps.
+        const p = PRINT.done ? 1 : PRINT.printing ? Math.floor(PRINT.progress * 26) / 26 : 0;
+        paper.position.copy(paper.userData.p0).addScaledVector(PAPER_DIR, -PAPER_RUN * (1 - p));
+      }
+      if (parts.Button) {
+        const goal = parts.Button.userData.z0 - (PRINT.printing ? 0.008 : 0);
+        parts.Button.position.z += (goal - parts.Button.position.z) * Math.min(1, dt * 18);
+      }
+      if (PRINT.printing || d.printShown !== PRINT.done) { d.printShown = PRINT.done; d.paint(d.playT, d.base); }
+    }
+    if (spec.toy === 'ball') {
+      // The dust never quite settles.
+      if (!d.playing) d.paint(t, BALL.burst * 0.8);
+    }
+    if (spec.toy === 'present') {
+      if (parts.Lid && !REDUCED && !d.unwrap) parts.Lid.rotation.z = Math.sin(t * 9) * 0.04 * d.base;
+      if (d.unwrap) {
+        const p = Math.min(1, (now - d.unwrap) / 420);
+        if (parts.Lid) {
+          parts.Lid.position.y = parts.Lid.userData.y0 + p * 0.35;
+          parts.Lid.rotation.z = p * 0.9;
+        }
+        d.group.scale.multiplyScalar(1 - p * 0.85);
+        if (p >= 1) {
+          const c = spec.cell[0], r = spec.cell[1];
+          opened.set(d.id, nextGift());
+          despawn(d);
+          live.set(c + ',' + r, 'pending');
+          spawn(c, r, performance.now());
+        }
+      }
+    }
+    if (spec.toy === 'gift') {
+      const on = d.base;
+      if (d.hop) {
+        const s = (now - d.hop) / 1000;
+        if (s > 0.6) d.hop = 0;
+        else d.group.position.y += Math.sin(s / 0.6 * Math.PI) * 0.12;
+      }
+      if (REDUCED) return;
+      if (parts.Platter) parts.Platter.rotation.y -= dt * (TAPE.playing ? 3.5 : on * 2.2);
+      if (parts.Disc) parts.Disc.rotation.y -= dt * on * 9;
+      if (parts.Tail) parts.Tail.rotation.z = Math.sin(t * 16) * 0.5 * Math.max(on, d.hop ? 1 : 0);
+      if (parts.EarL) parts.EarL.rotation.z = Math.sin(t * 7) * 0.18 * on;
+      if (parts.EarR) parts.EarR.rotation.z = -Math.sin(t * 7) * 0.18 * on;
+      if (parts.ArmR) parts.ArmR.rotation.z = Math.sin(t * 8) * 0.45 * on;
+      if (parts.ArmL) parts.ArmL.rotation.z = -Math.sin(t * 8 + 1) * 0.12 * on;
+      if (parts.Led) parts.Led.traverse(function (o) { if (o.isMesh) o.material.emissiveIntensity = 0.6 + on * (0.8 + 0.6 * Math.sin(t * 6)); });
+    }
+  });
+}
+
 // A soft mechanical click for the switch and the keys.
 let clickCtx = null;
 function audioContext() {
@@ -1109,6 +1485,7 @@ function animate() {
   updateHover(dt);
   updateRoom(dt);
   updateCassette(dt);
+  updateSeason(dt, now);
   updatePeek();
   updateFlight(now);
   const snapX = Math.round(target.x / SPAN) * SPAN;

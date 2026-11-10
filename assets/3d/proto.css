@@ -530,6 +530,73 @@ body.lamp-on .peek-links button { text-decoration-color: #ffb36b; }
   .peek[data-layout="side"] .peek-text { width: auto; max-width: 190px; }
 }
 
+/* The cassette's card: a little player. Label on top, then the side and
+   track, then play/stop, a progress line and the time on one row. */
+.peek[data-layout="player"] {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  width: min(328px, calc(100vw - 24px));
+  max-width: none;
+  padding: 12px 12px 14px;
+  border-radius: 20px;
+}
+.peek[data-layout="player"] .peek-screen { width: 100%; border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(22, 24, 28, 0.08); }
+.peek[data-layout="player"] .peek-text { gap: 4px; padding: 0 6px; }
+.peek[data-layout="player"] .peek-text strong { font-size: 16px; letter-spacing: -0.01em; }
+.peek[data-layout="player"] .peek-text span { font-size: 13.5px; line-height: 1.4; }
+.peek-kind[data-kind="tape"]::before { background: #d8642c; box-shadow: 0 0 0 2px rgba(216, 100, 44, 0.16); }
+.peek-text .peek-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-weight: 400;
+}
+.peek-text .peek-player[hidden] { display: none; }
+.pp-btn {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: #1c1712;
+  color: #f6f3ec;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.pp-btn:hover { background: #d8642c; }
+.pp-btn:active { transform: scale(0.94); }
+.pp-btn:focus-visible { outline: 2px solid #d8642c; outline-offset: 3px; }
+.pp-btn svg { width: 14px; height: 14px; grid-area: 1 / 1; }
+.pp-play { margin-left: 2px; }
+.pp-stop, .peek-player.playing .pp-play { display: none; }
+.peek-player.playing .pp-stop { display: block; }
+.pp-track {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(22, 24, 28, 0.12);
+  overflow: hidden;
+}
+.pp-fill { display: block; height: 100%; background: #d8642c; transform-origin: 0 50%; transform: scaleX(0); }
+.pp-time {
+  flex: none;
+  font: 400 9px/1 "Screen Pixel", ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  color: var(--faint, #5e6166);
+  font-variant-numeric: tabular-nums;
+}
+body.lamp-on .pp-btn { background: #f1ead9; color: #1c1712; }
+body.lamp-on .pp-btn:hover { background: #ffb36b; }
+body.lamp-on .pp-track { background: rgba(255, 255, 255, 0.14); }
+body.lamp-on .pp-fill { background: #ffb36b; }
+body.lamp-on .pp-time { color: #b9b2a3; }
+body.lamp-on .peek-kind[data-kind="tape"]::before { background: #ffb36b; box-shadow: 0 0 6px rgba(255, 179, 107, 0.6); }
+
 /* Keyboard focus lands on the card: give it a ring so it's unmistakable. */
 .peek.kb { outline: 2px solid #d8642c; outline-offset: 3px; }
 body.lamp-on .peek.kb { outline-color: #ffb36b; }

@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
 import { RoomEnvironment } from './vendor/environments/RoomEnvironment.js';
-import { FISH_SVG, paintScreen } from './screens.js?v=25';
+import { FISH_SVG, paintScreen } from './screens.js?v=26';
 import { season, newYear } from './holiday.js?v=20';
 import { openWish } from './wish.js?v=21';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '30';
+const VERSION = '31';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -47,8 +47,8 @@ const SEASON = season();
 // The cassette keeps playing while it's off screen, so its state lives here.
 // At Christmas it's turned over to Side B.
 const TAPE = SEASON === 'christmas'
-  ? { playing: false, elapsed: 0, side: 'B', title: 'songs for the snow', song: 'side-b' }
-  : { playing: false, elapsed: 0, side: 'A', title: 'songs for wandering', song: 'friendly-loop' };
+  ? { playing: false, elapsed: 0, side: 'B', title: 'songs for the snow', song: 'side-b', track: 'Jingle Bells, on a music box', note: 'Turned over for the holidays. Loops quietly.' }
+  : { playing: false, elapsed: 0, side: 'A', title: 'songs for wandering', song: 'friendly-loop', track: 'Friendly Loop', note: 'A slow, warm loop to wander the room to.' };
 
 // The home cells. Everything else is worked out from the cell's position, so
 // the floor goes on forever and the same cell always shows the same thing.
@@ -998,6 +998,7 @@ function peekContent(d) {
   const spec = d.spec;
   if (spec.face === 'note') return { intro: true, desc: INTRO.desc, face: INTRO.face, links: INTRO.links, screen: null };
   if (spec.toy === 'gift') return { name: spec.name, desc: spec.desc, kind: 'Gift ' + (found.indexOf(spec.gift) + 1) + ' of ' + GIFT_ORDER.length, kindId: 'gift', screen: null };
+  if (spec.toy === 'cassette') return { player: true, name: TAPE.track, desc: TAPE.note, kind: 'Side ' + TAPE.side + ' \u00B7 on repeat', kindId: 'tape', screen: d.screenData.canvas, toy: true };
   if (spec.toy && TIPS[spec.toy]) return { name: TIPS[spec.toy][0], desc: TIPS[spec.toy][1], screen: spec.toy === 'lamp' ? null : d.screenData.canvas, action: TOY_ACTION[spec.toy] ? TOY_ACTION[spec.toy]() : '', toy: true };
   if (spec.href) return { name: spec.name, desc: spec.desc || '', kind: spec.kind, screen: d.screenData.canvas, href: spec.href, external: spec.external, action: actionFor(spec), arrow: spec.external ? '\u2197' : '\u2192' };
   return null;
@@ -1012,7 +1013,25 @@ function hidePeek() {
 // The card stays for a moment after the pointer leaves its device, and for as
 // long as the pointer is on the card, so you can reach it and press it.
 let held = null, heldAt = 0, onCard = false;
+let pointerX = -1, pointerY = -1;
+document.addEventListener('pointermove', function (e) { pointerX = e.clientX; pointerY = e.clientY; }, { passive: true });
+
+// Is the pointer on the card, or in the gap between it and its device?
+// The card and the device together cover the whole way between them.
+let devRect = null;
+function nearCard() {
+  if (!peekEl.classList.contains('on') || !devRect) return false;
+  const r = peekEl.getBoundingClientRect();
+  const pad = 12;
+  const x0 = Math.min(r.left, devRect.x0) - pad, x1 = Math.max(r.right, devRect.x1) + pad;
+  const y0 = Math.min(r.top, devRect.y0) - pad, y1 = Math.max(r.bottom, devRect.y1) + pad;
+  return pointerX > x0 && pointerX < x1 && pointerY > y0 && pointerY < y1;
+}
 const peekGo = peekEl ? peekEl.querySelector('.peek-go') : null;
+const peekPlayer = peekEl ? peekEl.querySelector('.peek-player') : null;
+const ppBtn = peekPlayer ? peekPlayer.querySelector('.pp-btn') : null;
+const ppFill = peekPlayer ? peekPlayer.querySelector('.pp-fill') : null;
+const ppTime = peekPlayer ? peekPlayer.querySelector('.pp-time') : null;
 const peekLinks = peekEl ? peekEl.querySelector('.peek-links') : null;
 
 function updatePeek() {
@@ -1022,7 +1041,7 @@ function updatePeek() {
   if (!d && lastPointer === 'mouse' && !(drag && drag.moved)) {
     if (hovered && peekContent(hovered)) { held = hovered; heldAt = nowMs; }
     if (held && devices.indexOf(held) === -1) held = null;
-    d = hovered || (held && (onCard || nowMs - heldAt < 260) ? held : null);
+    d = hovered || (held && (onCard || nearCard() || nowMs - heldAt < 450) ? held : null);
     if (onCard && held) hovered = held;
   }
   const info = d && peekContent(d);
@@ -1049,8 +1068,8 @@ function updatePeek() {
     let layout = '';
     if (info.screen) {
       const aspect = info.screen.width / info.screen.height;
-      layout = info.intro ? '' : aspect >= 1.9 ? 'stack' : 'side';
-      const px = layout === 'stack' ? 600 : 300;
+      layout = info.intro ? '' : info.player ? 'player' : aspect >= 1.9 ? 'stack' : 'side';
+      const px = layout === 'side' ? 300 : 600;
       peekCanvas.width = px;
       peekCanvas.height = Math.round(px / aspect);
     }
@@ -1078,8 +1097,21 @@ function updatePeek() {
     }
   }
   // The action line can change while the card is up (play / stop).
+  if (peekPlayer) {
+    peekPlayer.hidden = !info.player;
+    if (info.player) {
+      const dur = audio && isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 30;
+      const at = (TAPE.elapsed || 0) % dur;
+      peekPlayer.classList.toggle('playing', TAPE.playing);
+      ppBtn.setAttribute('aria-label', TAPE.playing ? 'Stop the tape' : 'Play the tape');
+      ppFill.style.transform = 'scaleX(' + (at / dur).toFixed(4) + ')';
+      const sec = Math.floor(at), total = Math.round(dur);
+      const text = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0') + ' / ' + Math.floor(total / 60) + ':' + String(total % 60).padStart(2, '0');
+      if (ppTime.textContent !== text) ppTime.textContent = text;
+    }
+  }
   if (peekGo) {
-    const text = info.toy && TOY_ACTION[d.spec.toy] ? TOY_ACTION[d.spec.toy]() : (info.action || '');
+    const text = info.player ? '' : info.toy && TOY_ACTION[d.spec.toy] ? TOY_ACTION[d.spec.toy]() : (info.action || '');
     if (peekGo.dataset.text !== text + (info.arrow || '')) {
       peekGo.dataset.text = text + (info.arrow || '');
       peekGo.hidden = !text;
@@ -1104,6 +1136,7 @@ function updatePeek() {
     const sy = rect.top + (1 - peekV.y) / 2 * rect.height;
     x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy);
   }
+  devRect = { x0, y0, x1, y1 };
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
   const w = peekEl.offsetWidth, h = peekEl.offsetHeight;
   const vw = window.innerWidth, vh = window.innerHeight;
@@ -1151,7 +1184,7 @@ if (peekEl) {
     e.preventDefault();
     // A toy's card does what the toy does.
     const d = pinned || held;
-    if (d && d.spec.toy && e.target.closest('.peek-go')) openHit({ device: d });
+    if (d && d.spec.toy && (e.target.closest('.peek-go') || e.target.closest('.pp-btn'))) openHit({ device: d });
   });
 }
 

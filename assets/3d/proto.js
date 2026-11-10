@@ -1,15 +1,18 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
-import { FISH_SVG, paintScreen } from './screens.js?v=23';
+import { RoomEnvironment } from './vendor/environments/RoomEnvironment.js';
+import { FISH_SVG, paintScreen } from './screens.js?v=24';
 import { season, newYear } from './holiday.js?v=20';
 import { openWish } from './wish.js?v=21';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '27';
+const VERSION = '28';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
 const CELL_MOBILE = 224;
+// Phones get a tighter home: the four home things in a diamond that fits.
+const NARROW = window.matchMedia('(max-width: 640px)').matches;
 
 // Each cell is SPAN world units wide, so devices stand with room around them.
 const SPAN = 1.2;
@@ -60,9 +63,13 @@ const HOME = {
 // hidden across the floor), New Year a crystal ball.
 const PRINT = { printing: false, progress: 0, done: false };
 const BALL = { year: newYear(), burst: 0 };
-if (SEASON === 'thanksgiving') HOME['0,1'] = { file: model('printer'), face: 'printer', toy: 'printer', state: PRINT };
-if (SEASON === 'christmas') HOME['0,1'] = { file: model('present'), toy: 'present' };
-if (SEASON === 'newyear') HOME['0,1'] = { file: model('crystalball'), toy: 'ball' };
+// On a phone the cassette moves in beside the Polaroid, so the Polaroid, the
+// deck, Archer and the lamp make a diamond; the holiday guest sits above.
+if (NARROW) { HOME['0,1'] = HOME['-1,1']; delete HOME['-1,1']; }
+const GUEST = NARROW ? '-1,0' : '0,1';
+if (SEASON === 'thanksgiving') HOME[GUEST] = { file: model('printer'), face: 'printer', toy: 'printer', state: PRINT };
+if (SEASON === 'christmas') HOME[GUEST] = { file: model('present'), toy: 'present' };
+if (SEASON === 'newyear') HOME[GUEST] = { file: model('crystalball'), toy: 'ball' };
 
 // What can come out of a present. Each opened present gives one you haven't
 // found yet, until you've found them all.
@@ -157,6 +164,8 @@ const GLOW = {
 
 const stage = document.getElementById('stage');
 const hint = document.getElementById('drag-hint');
+// The hint bows out by itself after a while, even if nobody drags.
+if (hint) setTimeout(function () { hint.classList.add('gone'); }, 9000);
 const renderer = new THREE.WebGLRenderer({ canvas: stage, antialias: true, alpha: false });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -166,11 +175,23 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#ced0d6');
+// A soft studio to reflect, so lenses, glass and metal catch a little light.
+// The clay stays matte; only the shinier materials show it.
+const ENV_DAY = 0.9, ENV_NIGHT = 0.22;
+let envTex = null;
+const shinyMats = [];
+try {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  pmrem.dispose();
+} catch (err) {}
 
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 80);
 const iso = new THREE.Vector3(1, 1, 1).normalize();
 const DIST = 14;
-const target = new THREE.Vector3(0, 0.18, 0);
+// Where "home" is: the Polaroid on a big screen, the middle of the diamond on a phone.
+const HOME_TARGET = NARROW ? new THREE.Vector3(0.42 * SPAN, 0.18, 0.42 * SPAN) : new THREE.Vector3(0, 0.18, 0);
+const target = HOME_TARGET.clone();
 const panMove = new THREE.Vector3();
 const panForward = new THREE.Vector3();
 const panRight = new THREE.Vector3();
@@ -202,7 +223,7 @@ key.shadow.camera.top = 5;
 key.shadow.camera.bottom = -5;
 key.shadow.bias = -0.0004;
 key.shadow.normalBias = 0.02;
-key.shadow.radius = 2.5;
+key.shadow.radius = 3.6;
 scene.add(key);
 scene.add(key.target);
 const fill = new THREE.DirectionalLight('#e7eef8', 0.45);
@@ -213,8 +234,12 @@ const paper = new THREE.Color('#ced0d6');
 const ink = new THREE.Color('#1c1712');
 // The day floor is the soft gray from the first 3D build; the background
 // matches it exactly, so the floor never shows an edge.
-const DAY = { paper: new THREE.Color('#ced0d6'), ink: new THREE.Color('#1c1712'), hemi: 0.85, key: 1.85, fill: 0.45, shadow: 0.32, grid: 0.16 };
-const NIGHT = { paper: new THREE.Color('#2a2c33'), ink: new THREE.Color('#efe6d2'), hemi: 0.3, key: 0.45, fill: 0.1, shadow: 0.45, grid: 0.045 };
+const DAY = { paper: new THREE.Color('#ced0d6'), ink: new THREE.Color('#1c1712'), hemi: 0.85, key: 1.85, fill: 0.45, shadow: 0.3, grid: 0.16 };
+// Night keeps a little cool fill, so dark devices far from the lamp keep their shape.
+const NIGHT = { paper: new THREE.Color('#2a2c33'), ink: new THREE.Color('#efe6d2'), hemi: 0.4, key: 0.5, fill: 0.3, shadow: 0.45, grid: 0.045 };
+// How much each kind of screen dims when the lamp is on, so white pages
+// don't glare in the dark.
+const NIGHT_DIM = { paper: 0.4, note: 0.34, aqua: 0.3, tube: 0.26, sketch: 0.36, fold: 0.22, tft: 0.2, mono: 0.2, gloss: 0.12, lcd: 0.14, tape: 0.3 };
 const KEY_DAY = new THREE.Color('#fff8f0');
 const KEY_NIGHT = new THREE.Color('#9db0ff');
 const groundMat = new THREE.ShaderMaterial({
@@ -273,7 +298,7 @@ function cellPx() {
 }
 
 // Pinch (or ctrl-scroll) zooms the room, never the page.
-let zoom = 1;
+let zoom = NARROW ? THREE.MathUtils.clamp(window.innerWidth / 545, 0.68, 1) : 1;
 const ZOOM_MIN = 0.55, ZOOM_MAX = 1.8;
 let lastW = 0, lastH = 0;
 
@@ -424,30 +449,146 @@ function seenSize(root) {
   return Math.max(1e-3, 0.5 * Math.sqrt(w * h) + 0.5 * Math.max(w, h));
 }
 
+// Shinier parts keep their own finish; everything else is matte clay.
+const SHINY = /Glass|Lens|Visor|Disc|Metal|Brass|Ring|Frame|Accent|Rim|Gold|Back|Top|Hinge|Dial|Eye/;
+
+function prepare(f, gltf) {
+  const root = gltf.scene;
+  root.traverse(function (obj) {
+    if (!obj.isMesh) return;
+    obj.castShadow = true;
+    obj.receiveShadow = true;
+    const m = obj.material;
+    if (m && m.isMeshStandardMaterial) {
+      if (!SHINY.test(m.name)) m.roughness = Math.max(m.roughness, 0.48);
+      else if (envTex && shinyMats.indexOf(m) === -1) {
+        m.roughness = Math.max(m.roughness, 0.14);
+        m.envMap = envTex;
+        m.envMapIntensity = ENV_DAY;
+        shinyMats.push(m);
+      }
+    }
+  });
+  sources.set(f, root);
+  const id = (f.match(/models\/([a-z]+)\.glb/) || [])[1];
+  const factor = window.deviceSizeFactor ? window.deviceSizeFactor(id) : 1;
+  sizeScale.set(f, KEEP_SIZE[id] || THREE.MathUtils.clamp(SIZE_TARGET * factor / seenSize(root), 0.5, 2.2));
+}
+
+// Each model is fetched once, the first time something needs it.
+const fetching = new Map();
+function sourceFor(f) {
+  if (!fetching.has(f)) fetching.set(f, loader.loadAsync(f).then(function (g) { prepare(f, g); }));
+  return fetching.get(f);
+}
+
+// Only the models in the first view hold up the loader. The rest come in
+// quietly afterwards, nearest first, so wandering never waits long.
 async function loadModels() {
   await document.fonts.ready;
+  const v = visibleCells(0);
+  const first = [];
+  for (let c = v.c0; c <= v.c1; c++) for (let r = v.r0; r <= v.r1; r++) {
+    const f = specFor(c, r).file;
+    if (first.indexOf(f) === -1) first.push(f);
+  }
   let done = 0;
-  const report = function () { if (window.roomLoader) window.roomLoader.progress(done, MODEL_FILES.length); };
+  const report = function () { if (window.roomLoader) window.roomLoader.progress(done, first.length); };
   report();
-  const loaded = await Promise.all(MODEL_FILES.map(function (f) {
-    return loader.loadAsync(f).then(function (g) { done++; report(); return g; });
-  }));
-  MODEL_FILES.forEach(function (f, i) {
-    const scene = loaded[i].scene;
-    scene.traverse(function (obj) {
-      if (!obj.isMesh) return;
-      obj.castShadow = true;
-      obj.receiveShadow = true;
-      if (obj.material && obj.material.isMeshStandardMaterial) {
-        obj.material.roughness = Math.max(obj.material.roughness, 0.48);
-        obj.material.envMapIntensity = 0.4;
-      }
-    });
-    sources.set(f, scene);
-    const id = (f.match(/models\/([a-z]+)\.glb/) || [])[1];
-    const factor = window.deviceSizeFactor ? window.deviceSizeFactor(id) : 1;
-    sizeScale.set(f, KEEP_SIZE[id] || THREE.MathUtils.clamp(SIZE_TARGET * factor / seenSize(scene), 0.5, 2.2));
-  });
+  await Promise.all(first.map(function (f) { return sourceFor(f).then(function () { done++; report(); }); }));
+  setTimeout(async function () {
+    for (const f of MODEL_FILES) { try { await sourceFor(f); } catch (err) {} }
+  }, 1200);
+}
+
+// A soft dark patch where each thing meets the floor, so it sits rather than
+// floats. Opaque texture, multiplied onto the floor: no soft alpha involved.
+let contactTex = null;
+function contactTexture() {
+  if (contactTex) return contactTex;
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#fff';
+  g.fillRect(0, 0, 128, 128);
+  const grad = g.createRadialGradient(64, 64, 6, 64, 64, 62);
+  grad.addColorStop(0, '#a3a3a8');
+  grad.addColorStop(0.4, '#c6c6ca');
+  grad.addColorStop(0.75, '#f0f0f1');
+  grad.addColorStop(1, '#ffffff');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 128, 128);
+  contactTex = new THREE.CanvasTexture(c);
+  contactTex.colorSpace = THREE.SRGBColorSpace;
+  return contactTex;
+}
+
+function makeContact(outline) {
+  const sx = Math.max(0.12, outline.max.x - outline.min.x);
+  const sz = Math.max(0.12, outline.max.z - outline.min.z);
+  const mesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(sx * 1.32 + 0.05, sz * 1.32 + 0.05),
+    new THREE.MeshBasicMaterial({ map: contactTexture(), blending: THREE.MultiplyBlending, transparent: true, depthWrite: false, toneMapped: false })
+  );
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.set((outline.max.x + outline.min.x) / 2, 0.006, (outline.max.z + outline.min.z) / 2);
+  mesh.renderOrder = 1;
+  mesh.raycast = function () {};
+  return mesh;
+}
+
+// A name on the floor in front of each project, like a placard in a museum.
+// The texture is white type on black, used as a mask: by day it darkens the
+// floor, by night it lightens it, so there's no soft alpha to go wrong.
+function labelText(spec) {
+  if (spec.toy === 'archer') return 'Archer';
+  if (spec.toy === 'cassette') return 'Side ' + TAPE.side;
+  if (spec.toy === 'gift') return spec.name;
+  if (spec.href && spec.name) return spec.name;
+  return '';
+}
+
+function makeLabel(spec, outline) {
+  const text = labelText(spec);
+  if (!text) return null;
+  const c = document.createElement('canvas');
+  c.width = 1024;
+  c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#000';
+  g.fillRect(0, 0, c.width, c.height);
+  g.fillStyle = '#fff';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  let size = 72;
+  g.font = '520 ' + size + 'px "Timeless Sans", sans-serif';
+  const wide = g.measureText(text).width;
+  if (wide > c.width - 40) { size = Math.floor(size * (c.width - 40) / wide); g.font = '520 ' + size + 'px "Timeless Sans", sans-serif'; }
+  g.fillText(text, c.width / 2, c.height / 2 + 4);
+  const tex = new THREE.CanvasTexture(c);
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false, color: 0x000000 });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), mat);
+  mesh.rotation.x = -Math.PI / 2;
+  // Just in front of the device, never past the edge of its square.
+  mesh.position.set(0, 0.007, Math.min(0.5, Math.max(0.34, outline.max.z + 0.12)));
+  mesh.renderOrder = 1;
+  mesh.raycast = function () {};
+  return mesh;
+}
+
+function updateLabel(d) {
+  if (!d.label) return;
+  const m = d.label.material;
+  const strength = 0.4 + d.base * 0.4;
+  if (night < 0.5) {
+    // Darken the floor where the letters are.
+    if (m.blending !== THREE.SubtractiveBlending) { m.blending = THREE.SubtractiveBlending; m.needsUpdate = true; }
+    m.color.setScalar((1 - night * 2) * strength);
+  } else {
+    if (m.blending !== THREE.AdditiveBlending) { m.blending = THREE.AdditiveBlending; m.needsUpdate = true; }
+    m.color.setScalar((night * 2 - 1) * strength * 0.8);
+  }
 }
 
 const live = new Map();      // "c,r" -> device, or a pending promise while it builds
@@ -456,6 +597,11 @@ let firstWave = true;
 async function spawn(c, r, born) {
   const id = c + ',' + r;
   const spec = specFor(c, r);
+  if (!sources.has(spec.file)) {
+    try { await sourceFor(spec.file); } catch (err) { live.delete(id); return; }
+    if (live.get(id) !== 'pending') return;
+    born = Math.max(born, performance.now());
+  }
   const model = sources.get(spec.file).clone(true);
   model.scale.setScalar(sizeScale.get(spec.file) || 1);
   model.updateMatrixWorld(true);
@@ -483,6 +629,10 @@ async function spawn(c, r, born) {
   const group = new THREE.Group();
   group.position.set(c * SPAN, 0, r * SPAN);
   group.add(model);
+  const contact = makeContact(outline);
+  group.add(contact);
+  const label = makeLabel(spec, outline);
+  if (label) group.add(label);
   scene.add(group);
   const d = {
     id: id,
@@ -500,7 +650,9 @@ async function spawn(c, r, born) {
     links: screen.links,
     halo: halo,
     parts: parts,
-    outline: outline
+    outline: outline,
+    contact: contact,
+    label: label
   };
   updatePop(d, performance.now());
   devices.push(d);
@@ -518,6 +670,8 @@ function despawn(d) {
   scene.remove(d.group);
   disposeScreen(d.screenData);
   if (d.halo) d.halo.material.dispose();
+  if (d.contact) d.contact.material.dispose();
+  if (d.label) { d.label.material.map.dispose(); d.label.material.dispose(); }
   if (d.spec.toy === 'lamp') forgetLamp();
   if (hovered === d) hovered = null;
   if (pinned === d) pinned = null;
@@ -600,9 +754,12 @@ function updateHover(dt) {
     const goal = on ? 1 : 0;
     d.base += (goal - d.base) * (REDUCED ? 1 : Math.min(1, dt * 8));
     if (d.screen && d.screen.material) {
-      const bright = 1 + d.base * 0.45;
-      d.screen.material.color.setScalar(bright);
+      const dim = 1 - night * (NIGHT_DIM[d.spec.face] || 0) * (1 - d.base * 0.6);
+      d.screen.material.color.setScalar((1 + d.base * 0.45) * dim);
     }
+    updateLabel(d);
+    // The floor shadow stays on the floor while the device lifts.
+    if (d.contact) d.contact.position.y = (0.006 - d.group.position.y) / Math.max(d.group.scale.y, 0.01);
     if (REDUCED) return;
     // Run the screen's animation while hovered; settle to rest after.
     if (on) {
@@ -682,6 +839,7 @@ stage.addEventListener('pointerdown', function (e) {
   if (touches.size > 2) return;
   drag = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
   flight = null;
+  kbWant = null;
   stage.classList.add('dragging');
   try { stage.setPointerCapture(e.pointerId); } catch (err) {}
 });
@@ -724,7 +882,6 @@ stage.addEventListener('pointermove', function (e) {
 // Wander far enough that the home cells (the Polaroid, Archer, the deck and
 // the lamp) leave the screen and a button appears to fly back to them.
 const homeBtn = document.getElementById('home-btn');
-const HOME_TARGET = new THREE.Vector3(0, 0.18, 0);
 const homeV = new THREE.Vector3();
 let flight = null;
 
@@ -740,22 +897,98 @@ function flyHome() {
   // A long way out: skip most of the trip so the flight stays short.
   if (dist > 10) from.lerp(HOME_TARGET, 1 - 10 / dist);
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  flight = { from, start: performance.now(), dur: reduced ? 1 : 500 + Math.min(dist, 10) * 80 };
+  flight = { from, to: HOME_TARGET.clone(), start: performance.now(), dur: reduced ? 1 : 500 + Math.min(dist, 10) * 80 };
   pinned = null;
   click(1200);
+}
+
+function flyTo(x, z) {
+  const from = target.clone();
+  const to = new THREE.Vector3(x, target.y, z);
+  const dist = from.distanceTo(to) / SPAN;
+  if (dist < 0.05) return;
+  if (dist > 10) from.lerp(to, 1 - 10 / dist);
+  flight = { from, to, start: performance.now(), dur: REDUCED ? 1 : 420 + Math.min(dist, 10) * 70 };
 }
 
 function updateFlight(now) {
   if (flight) {
     const p = Math.min(1, (now - flight.start) / flight.dur);
     const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-    target.lerpVectors(flight.from, HOME_TARGET, e);
+    target.lerpVectors(flight.from, flight.to, e);
     if (p >= 1) flight = null;
   }
-  if (homeBtn) homeBtn.classList.toggle('show', !flight && homeOffscreen());
+  if (homeBtn) {
+    const show = !flight && homeOffscreen();
+    homeBtn.classList.toggle('show', show);
+    // Hidden means out of the tab order too.
+    if (homeBtn.tabIndex !== (show ? 0 : -1)) homeBtn.tabIndex = show ? 0 : -1;
+  }
+  updateKeyboard();
 }
 
 if (homeBtn) homeBtn.addEventListener('click', flyHome);
+
+// ------------------------------------------------------------- the keyboard
+// Tab walks the list of projects (and the three toys). The room flies to
+// each one and shows its card, so focus is always something you can see.
+let kbWant = null;       // a test for the device focus is on
+const projectList = document.getElementById('projects');
+
+function nearestCell(test) {
+  const c0 = Math.round(target.x / SPAN), r0 = Math.round(target.z / SPAN);
+  let best = null;
+  for (let c = c0 - 9; c <= c0 + 9; c++) for (let r = r0 - 9; r <= r0 + 9; r++) {
+    if (!test(specFor(c, r))) continue;
+    const far = Math.hypot(c - c0, r - r0);
+    if (!best || far < best.far) best = { c, r, far };
+  }
+  return best;
+}
+
+function focusOn(test) {
+  kbWant = test;
+  lastPointer = 'keyboard';
+  hovered = null;
+  pinned = null;
+  const cell = nearestCell(test);
+  if (cell) flyTo(cell.c * SPAN, cell.r * SPAN);
+}
+
+function updateKeyboard() {
+  if (!kbWant || (pinned && kbWant(pinned.spec))) return;
+  let best = null;
+  devices.forEach(function (d) {
+    if (!kbWant(d.spec)) return;
+    const far = Math.hypot(d.group.position.x - target.x, d.group.position.z - target.z);
+    if (!best || far < best.far) best = { d, far };
+  });
+  if (best && !flight) pinned = best.d;
+}
+
+document.addEventListener('focusin', function (e) {
+  const a = e.target.closest && e.target.closest('#projects a');
+  const toy = e.target.closest && e.target.closest('[data-toy]');
+  if (a) {
+    const name = (a.querySelector('strong') || a).textContent.trim();
+    focusOn(function (spec) { return spec.name === name && !!spec.href; });
+  } else if (toy) {
+    const which = toy.getAttribute('data-toy');
+    focusOn(function (spec) { return spec.toy === which; });
+  } else if (kbWant) {
+    kbWant = null;
+    pinned = null;
+  }
+});
+document.querySelectorAll('[data-toy]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    const which = btn.getAttribute('data-toy');
+    const d = devices.find(function (x) { return x.spec.toy === which; });
+    if (which === 'lamp') toggleLamp();
+    else if (which === 'cassette') toggleMusic(d || { spec: { state: TAPE }, paint: function () {}, playT: 0, base: 0 });
+    else if (which === 'archer') { const open = document.getElementById('archer-chat-open'); if (open) open.click(); }
+  });
+});
 
 // ------------------------------------------------------------- the peek card
 // Over a device: its live screen and a one-line note. Mouse: on hover, and a
@@ -839,6 +1072,7 @@ function updatePeek() {
   // The live screen, animation and all.
   if (info.screen) peekCtx.drawImage(info.screen, 0, 0, peekCanvas.width, peekCanvas.height);
   peekEl.classList.toggle('pinned', pinned === d);
+  peekEl.classList.toggle('kb', !!kbWant && pinned === d);
 
   // Where the device sits on screen.
   d.group.updateMatrixWorld();
@@ -1062,6 +1296,8 @@ function updateRoom(dt) {
   scene.background.copy(paper);
   groundMat.uniforms.strength.value = DAY.grid + (NIGHT.grid - DAY.grid) * night;
   hemi.intensity = DAY.hemi + (NIGHT.hemi - DAY.hemi) * night;
+  const env = ENV_DAY + (ENV_NIGHT - ENV_DAY) * night;
+  shinyMats.forEach(function (m) { m.envMapIntensity = env; });
   key.intensity = DAY.key + (NIGHT.key - DAY.key) * night;
   fill.intensity = DAY.fill + (NIGHT.fill - DAY.fill) * night;
   shadowCatcher.material.opacity = DAY.shadow + (NIGHT.shadow - DAY.shadow) * night;

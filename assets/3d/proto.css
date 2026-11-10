@@ -449,54 +449,51 @@ body.lamp-on .wish-actions .wish-again { background: #f1ead9; color: #1c1712; }
   .wish[open], .wish-card, .wish-thinking::after { animation: none; }
 }
 
-/* The name plate: who this is and how to reach him, always in the corner.
-   A frosted card like the other little controls. */
-.plate {
-  position: fixed;
-  z-index: 2;
-  top: 14px;
-  left: 14px;
-  padding: 12px 16px 13px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.8);
+.back:focus-visible { outline: 2px solid #d8642c; outline-offset: 3px; }
+@media (max-width: 640px) { .back { top: 10px; right: 10px; } }
+
+/* What a card does when pressed: a quiet line under the note, with an arrow
+   that leans forward when the card is hovered. */
+.peek.on { pointer-events: auto; }
+.peek[href] { cursor: pointer; }
+.peek-text .peek-go {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 560;
+  line-height: 1.2;
   color: var(--ink, #161616);
-  box-shadow: 0 4px 14px rgba(22, 24, 28, 0.08);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  transition: background 0.5s ease, color 0.5s ease;
 }
-.plate-name {
-  margin: 0;
-  color: inherit;
-  font-family: var(--serif, Georgia, serif);
-  font-weight: 360;
-  font-size: 25px;
-  line-height: 1.05;
-  letter-spacing: -0.012em;
+.peek-text .peek-go i {
+  font-style: normal;
+  color: #d8642c;
+  transition: transform 0.2s cubic-bezier(.3, 1.4, .5, 1);
 }
-.plate-name em { font-family: var(--serif-i, Georgia, serif); font-style: italic; }
-.plate-role { margin: 5px 0 0; font-size: 12.5px; line-height: 1.3; color: var(--faint, #5e6166); }
-.plate-links { margin: 9px 0 0; display: flex; gap: 14px; font-size: 12.5px; font-weight: 560; line-height: 1.2; }
-.plate-links a {
-  color: inherit;
+.peek:hover .peek-go i { transform: translate(2px, -1px); }
+.peek-text .peek-go.quiet { font-weight: 460; color: var(--faint, #5e6166); cursor: pointer; }
+.peek-text .peek-go[hidden], .peek-text .peek-links[hidden] { display: none; }
+/* The intro card's links. */
+.peek-text .peek-links { display: flex; gap: 14px; margin-top: 7px; font-weight: 400; }
+.peek-links button {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--ink, #161616);
+  font: 560 12.5px/1.2 var(--sans);
+  cursor: pointer;
   text-decoration: underline;
   text-decoration-color: #d8642c;
   text-decoration-thickness: 1.5px;
   text-underline-offset: 3px;
 }
-.plate-links a:hover { text-decoration-thickness: 2.5px; }
-.plate-links a:focus-visible, .back:focus-visible { outline: 2px solid #d8642c; outline-offset: 3px; border-radius: 4px; }
-body.lamp-on .plate { background: rgba(30, 31, 36, 0.84); color: #f1ead9; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3); }
-body.lamp-on .plate-role { color: #a8a294; }
-body.lamp-on .plate-links a { text-decoration-color: #ffb36b; }
-@media (max-width: 640px) {
-  .plate { top: 10px; left: 10px; padding: 10px 13px 11px; border-radius: 14px; }
-  .plate-name { font-size: 21px; }
-  .plate-role { font-size: 11.5px; margin-top: 4px; }
-  .plate-links { margin-top: 7px; gap: 12px; font-size: 12px; }
-  .back { top: 10px; right: 10px; }
-}
-@media (prefers-reduced-motion: reduce) { .plate { transition: none; } }
+.peek-links button:hover { text-decoration-thickness: 2.5px; }
+.peek-links button:focus-visible { outline: 2px solid #d8642c; outline-offset: 3px; border-radius: 3px; }
+body.lamp-on .peek-text .peek-go, body.lamp-on .peek-links button { color: #f1ead9; }
+body.lamp-on .peek-text .peek-go.quiet { color: #b9b2a3; }
+body.lamp-on .peek-text .peek-go i { color: #ffb36b; }
+body.lamp-on .peek-links button { text-decoration-color: #ffb36b; }
 
 /* Keyboard focus lands on the card: give it a ring so it's unmistakable. */
 .peek.kb { outline: 2px solid #d8642c; outline-offset: 3px; }

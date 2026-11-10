@@ -56,6 +56,34 @@ export function paintScreen(ctx, w, h, spec, icon, t, k) {
   if (spec.face === 'fold') return drawFold(ctx, w, h, t, k);
   if (spec.face === 'sketch') return drawSketch(ctx, w, h, t, k);
   drawProject(ctx, w, h, spec, icon, t, k);
+  glassOver(ctx, w, h, spec.face);
+}
+
+// The last coat on every glass screen: a soft reflection across the top
+// corner, and on tubes a little darkening toward the edges where the glass
+// curves away.
+const CURVED = { tube: 0.34, phos: 0.4, amber: 0.26, lcd: 0.14, mono: 0.12 };
+function glassOver(ctx, w, h, face) {
+  ctx.save();
+  ctx.globalAlpha = 1;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const edge = CURVED[face];
+  if (edge) {
+    const v = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.hypot(w, h) * 0.6);
+    v.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    v.addColorStop(1, 'rgba(0, 0, 0, ' + edge + ')');
+    ctx.fillStyle = v;
+    ctx.fillRect(0, 0, w, h);
+  }
+  // The reflection: a pale band from the top-left corner, cut on a slant.
+  const shine = face === 'paper' || face === 'sketch' ? 0.05 : 0.13;
+  const g = ctx.createLinearGradient(0, 0, w * 0.55, h * 0.9);
+  g.addColorStop(0, 'rgba(255, 255, 255, ' + shine + ')');
+  g.addColorStop(0.42, 'rgba(255, 255, 255, ' + shine * 0.35 + ')');
+  g.addColorStop(0.43, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  ctx.restore();
 }
 
 function fillFace(ctx, w, h, face) {

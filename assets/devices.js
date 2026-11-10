@@ -6,6 +6,19 @@
   'use strict';
   var DEVICES = [
   {
+    "id": "bloomcam",
+    "face": "paper",
+    "width": 34.13,
+    "screen": {
+      "x": 47.2,
+      "y": 111.7,
+      "w": 87.6,
+      "h": 53.1,
+      "r": 4.4
+    },
+    "svg": "<svg viewBox=\"0 0 182 301\" aria-hidden=\"true\"><image href=\"assets/flat/bloomcam.webp?v=27\" width=\"182\" height=\"301\"/></svg>"
+  },
+  {
     "id": "handheld",
     "face": "lcd",
     "width": 38.25,

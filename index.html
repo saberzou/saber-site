@@ -42,7 +42,7 @@
 <noscript><meta http-equiv="refresh" content="0; url=field.html"></noscript>
 <link rel="stylesheet" href="assets/archer-chat.css?v=19">
 <link rel="stylesheet" href="assets/home.css?v=28">
-<link rel="stylesheet" href="assets/3d/proto.css?v=23">
+<link rel="stylesheet" href="assets/3d/proto.css?v=24">
 <link rel="stylesheet" href="assets/3d/loader.css?v=17">
 <link rel="stylesheet" href="assets/fade.css?v=17">
 <script type="importmap">
@@ -54,7 +54,7 @@
 </script>
 <link rel="preload" href="assets/fonts/silkscreen.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="assets/3d/vendor/three.module.min.js?v=170">
-<link rel="modulepreload" href="assets/3d/proto.js?v=29">
+<link rel="modulepreload" href="assets/3d/proto.js?v=30">
 </head>
 <body>
 <div class="loader" id="loader" role="status" aria-live="polite">
@@ -79,11 +79,7 @@
   </div>
 </div>
 <script src="assets/3d/loader.js?v=17"></script>
-<header class="plate" id="plate">
-  <h1 class="plate-name">Saber <em>Zou</em></h1>
-  <p class="plate-role">Designer and builder in Beijing</p>
-  <p class="plate-links"><a href="https://github.com/saberzou" target="_blank" rel="noopener noreferrer">GitHub</a><a href="mailto:saberzou@gmail.com">Email</a><a href="https://www.saberzou.com" target="_blank" rel="noopener noreferrer">Photos</a></p>
-</header>
+<h1 class="sr">Saber Zou</h1>
 <canvas id="stage" aria-label="A room of old devices, each showing something I've made. Drag to look around. Press the cassette for music, and the lamp for night."></canvas>
 <p class="drag-hint" id="drag-hint">Drag to look around</p>
 <a class="back" href="field.html" data-fade>Flat view</a>
@@ -92,6 +88,11 @@
   Back to the lamp
 </button>
 
+<div class="sr" role="group" aria-label="Saber Zou, designer and builder in Beijing">
+  <a data-spot="note" href="https://github.com/saberzou" target="_blank" rel="noopener noreferrer">Saber on GitHub</a>
+  <a data-spot="note" href="mailto:saberzou@gmail.com">Email Saber</a>
+  <a data-spot="note" href="https://www.saberzou.com" target="_blank" rel="noopener noreferrer">Saber's photographs</a>
+</div>
 <div class="sr" role="group" aria-label="Things in the room">
   <button type="button" data-toy="archer">Chat with Archer, the guide</button>
   <button type="button" data-toy="cassette">Play or stop the music</button>
@@ -101,6 +102,7 @@
   <ul id="projects">
     <li><a data-icon="images/icons/sm/movy.webp" href="https://apps.apple.com/app/id1093345142" target="_blank" rel="noopener noreferrer"><strong>Movy</strong><span>Daily wallpapers, curated collections, and a Studio for creating your own.</span></a></li>
     <li><a data-icon="images/icons/sm/bingbang.webp" href="https://apps.apple.com/app/id6797013343" target="_blank" rel="noopener noreferrer"><strong>BingBang</strong><span>Encouraging cards, doodles, and simple plans.</span></a></li>
+    <li><a data-icon="images/icons/sm/bloomprint.webp" data-kind="iOS app" href="/bloomprint/"><strong>Bloomprint</strong><span>Flowers and little moments, turned into illustrated prints.</span></a></li>
     <li><a data-icon="images/icons/sm/sequence.webp" href="https://apps.apple.com/app/id6789496773" target="_blank" rel="noopener noreferrer"><strong>Sequence</strong><span>Photographs, turned into zines and photo books.</span></a></li>
     <li><a data-icon="images/icons/sm/tackie.webp" href="https://apps.apple.com/app/id6806084464" target="_blank" rel="noopener noreferrer"><strong>Tackie</strong><span>Visual sticky notes, folders, and home-screen widgets.</span></a></li>
     <li><a data-icon="images/icons/sm/bubbly.webp" href="https://apps.apple.com/app/id6792437107" target="_blank" rel="noopener noreferrer"><strong>Bubbly</strong><span>Words, turned into playful quote cards.</span></a></li>
@@ -134,7 +136,7 @@
 <a class="peek" id="peek" aria-hidden="true" tabindex="-1">
   <img class="peek-face" alt="" hidden>
   <canvas class="peek-screen" width="240" height="180"></canvas>
-  <span class="peek-text"><small class="peek-kind" hidden></small><strong></strong><span></span></span>
+  <span class="peek-text"><small class="peek-kind" hidden></small><strong></strong><span></span><b class="peek-links" hidden></b><b class="peek-go" hidden></b></span>
   <i class="peek-arrow"></i>
 </a>
 <!-- Thanksgiving: the letter the little printer prints. Edit the words freely. -->
@@ -150,9 +152,9 @@
   </article>
 </dialog>
 <div class="fade" aria-hidden="true"></div>
-<script src="assets/project-devices.js?v=27"></script>
+<script src="assets/project-devices.js?v=28"></script>
 <script src="assets/archer-chat.js?v=19"></script>
 <script src="assets/fade.js?v=17"></script>
-<script type="module" src="assets/3d/proto.js?v=29"></script>
+<script type="module" src="assets/3d/proto.js?v=30"></script>
 </body>
 </html>

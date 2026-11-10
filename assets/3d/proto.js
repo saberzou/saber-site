@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
 import { RoomEnvironment } from './vendor/environments/RoomEnvironment.js';
-import { FISH_SVG, paintScreen } from './screens.js?v=24';
+import { FISH_SVG, paintScreen } from './screens.js?v=25';
 import { season, newYear } from './holiday.js?v=20';
 import { openWish } from './wish.js?v=21';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '28';
+const VERSION = '29';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -24,7 +24,8 @@ const MODEL_FACE = {
   imac: 'aqua', crt: 'tube', laptop: 'paper', candy: 'lcd',
   pet: 'lcd', digicam: 'gloss', pager: 'mono', learner: 'amber', widehandheld: 'tft', tv: 'tube',
   arcade: 'phos', typewriter: 'paper', scope: 'phos', ereader: 'mono', musicplayer: 'tft',
-  calculator: 'lcd', clockradio: 'amber', dualscreen: 'lcd', watch: 'mono', camcorder: 'gloss'
+  calculator: 'lcd', clockradio: 'amber', dualscreen: 'lcd', watch: 'mono', camcorder: 'gloss',
+  bloomcam: 'paper'
 };
 const MODEL_ORDER = Object.keys(MODEL_FACE);
 
@@ -130,7 +131,7 @@ function readProjects() {
       icon: a.getAttribute('data-icon') || '',
       href: a.getAttribute('href'),
       external: a.getAttribute('target') === '_blank',
-      kind: /apps\.apple\.com/.test(a.getAttribute('href')) ? 'iOS app' : 'Web'
+      kind: a.getAttribute('data-kind') || (/apps\.apple\.com/.test(a.getAttribute('href')) ? 'iOS app' : 'Web')
     };
   });
 }
@@ -537,60 +538,6 @@ function makeContact(outline) {
   return mesh;
 }
 
-// A name on the floor in front of each project, like a placard in a museum.
-// The texture is white type on black, used as a mask: by day it darkens the
-// floor, by night it lightens it, so there's no soft alpha to go wrong.
-function labelText(spec) {
-  if (spec.toy === 'archer') return 'Archer';
-  if (spec.toy === 'cassette') return 'Side ' + TAPE.side;
-  if (spec.toy === 'gift') return spec.name;
-  if (spec.href && spec.name) return spec.name;
-  return '';
-}
-
-function makeLabel(spec, outline) {
-  const text = labelText(spec);
-  if (!text) return null;
-  const c = document.createElement('canvas');
-  c.width = 1024;
-  c.height = 128;
-  const g = c.getContext('2d');
-  g.fillStyle = '#000';
-  g.fillRect(0, 0, c.width, c.height);
-  g.fillStyle = '#fff';
-  g.textAlign = 'center';
-  g.textBaseline = 'middle';
-  let size = 72;
-  g.font = '520 ' + size + 'px "Timeless Sans", sans-serif';
-  const wide = g.measureText(text).width;
-  if (wide > c.width - 40) { size = Math.floor(size * (c.width - 40) / wide); g.font = '520 ' + size + 'px "Timeless Sans", sans-serif'; }
-  g.fillText(text, c.width / 2, c.height / 2 + 4);
-  const tex = new THREE.CanvasTexture(c);
-  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false, color: 0x000000 });
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), mat);
-  mesh.rotation.x = -Math.PI / 2;
-  // Just in front of the device, never past the edge of its square.
-  mesh.position.set(0, 0.007, Math.min(0.5, Math.max(0.34, outline.max.z + 0.12)));
-  mesh.renderOrder = 1;
-  mesh.raycast = function () {};
-  return mesh;
-}
-
-function updateLabel(d) {
-  if (!d.label) return;
-  const m = d.label.material;
-  const strength = 0.4 + d.base * 0.4;
-  if (night < 0.5) {
-    // Darken the floor where the letters are.
-    if (m.blending !== THREE.SubtractiveBlending) { m.blending = THREE.SubtractiveBlending; m.needsUpdate = true; }
-    m.color.setScalar((1 - night * 2) * strength);
-  } else {
-    if (m.blending !== THREE.AdditiveBlending) { m.blending = THREE.AdditiveBlending; m.needsUpdate = true; }
-    m.color.setScalar((night * 2 - 1) * strength * 0.8);
-  }
-}
-
 const live = new Map();      // "c,r" -> device, or a pending promise while it builds
 let firstWave = true;
 
@@ -631,8 +578,6 @@ async function spawn(c, r, born) {
   group.add(model);
   const contact = makeContact(outline);
   group.add(contact);
-  const label = makeLabel(spec, outline);
-  if (label) group.add(label);
   scene.add(group);
   const d = {
     id: id,
@@ -651,8 +596,7 @@ async function spawn(c, r, born) {
     halo: halo,
     parts: parts,
     outline: outline,
-    contact: contact,
-    label: label
+    contact: contact
   };
   updatePop(d, performance.now());
   devices.push(d);
@@ -671,7 +615,6 @@ function despawn(d) {
   disposeScreen(d.screenData);
   if (d.halo) d.halo.material.dispose();
   if (d.contact) d.contact.material.dispose();
-  if (d.label) { d.label.material.map.dispose(); d.label.material.dispose(); }
   if (d.spec.toy === 'lamp') forgetLamp();
   if (hovered === d) hovered = null;
   if (pinned === d) pinned = null;
@@ -757,7 +700,6 @@ function updateHover(dt) {
       const dim = 1 - night * (NIGHT_DIM[d.spec.face] || 0) * (1 - d.base * 0.6);
       d.screen.material.color.setScalar((1 + d.base * 0.45) * dim);
     }
-    updateLabel(d);
     // The floor shadow stays on the floor while the device lifts.
     if (d.contact) d.contact.position.y = (0.006 - d.group.position.y) / Math.max(d.group.scale.y, 0.01);
     if (REDUCED) return;
@@ -776,6 +718,15 @@ function updateHover(dt) {
     d.group.rotation.x += (tx - d.group.rotation.x) * Math.min(1, dt * 8);
     d.group.rotation.z += (tz - d.group.rotation.z) * Math.min(1, dt * 8);
     if (d.popY != null) d.group.position.y = d.popY + d.base * 0.04;
+    // Bloomprint's camera: the dial turns, the flower spins, the print rises.
+    if (d.parts.Bloom) {
+      d.parts.Bloom.rotation.z += dt * d.base * 2.4;
+      if (d.parts.Dial) d.parts.Dial.rotation.y += dt * d.base * 1.6;
+      if (d.parts.Print) {
+        if (d.parts.Print.userData.y0 == null) d.parts.Print.userData.y0 = d.parts.Print.position.y;
+        d.parts.Print.position.y = d.parts.Print.userData.y0 + d.base * 0.035;
+      }
+    }
   });
 }
 
@@ -969,12 +920,15 @@ function updateKeyboard() {
 document.addEventListener('focusin', function (e) {
   const a = e.target.closest && e.target.closest('#projects a');
   const toy = e.target.closest && e.target.closest('[data-toy]');
+  const spot = e.target.closest && e.target.closest('[data-spot]');
   if (a) {
     const name = (a.querySelector('strong') || a).textContent.trim();
     focusOn(function (spec) { return spec.name === name && !!spec.href; });
   } else if (toy) {
     const which = toy.getAttribute('data-toy');
     focusOn(function (spec) { return spec.toy === which; });
+  } else if (spot) {
+    focusOn(function (spec) { return spec.face === 'note'; });
   } else if (kbWant) {
     kbWant = null;
     pinned = null;
@@ -1019,15 +973,33 @@ const peekV = new THREE.Vector3();
 const INTRO = {
   title: 'I’m <em>Saber.</em>',
   desc: 'Designer and builder in Beijing. I love making things: apps, toys, little worlds.',
-  face: 'images/icons/me.png'
+  face: 'images/icons/me.png',
+  links: [['GitHub', 'https://github.com/saberzou'], ['Email', 'mailto:saberzou@gmail.com'], ['Photos', 'https://www.saberzou.com']]
+};
+
+// What pressing a card does, said in a few words.
+function actionFor(spec) {
+  if (spec.kind === 'iOS app' && /apps\.apple\.com/.test(spec.href)) return 'Get it on the App Store';
+  if (spec.kind === 'iOS app') return 'See the app';
+  if (/saberzou\.com/.test(spec.href)) return 'See the photos';
+  if (/os\.html/.test(spec.href)) return 'Open the desktop';
+  return spec.external ? 'Open the site' : 'Open';
+}
+const TOY_ACTION = {
+  cassette: function () { return TAPE.playing ? 'Press to stop' : 'Press to play'; },
+  lamp: function () { return lampOn ? 'Pull to turn the lights up' : 'Pull to turn the lights down'; },
+  archer: function () { return 'Start a chat'; },
+  printer: function () { return PRINT.done ? 'Read the letter' : 'Press to print'; },
+  present: function () { return 'Open it'; },
+  ball: function () { return 'Make a wish'; }
 };
 
 function peekContent(d) {
   const spec = d.spec;
-  if (spec.face === 'note') return { intro: true, desc: INTRO.desc, face: INTRO.face, screen: null };
+  if (spec.face === 'note') return { intro: true, desc: INTRO.desc, face: INTRO.face, links: INTRO.links, screen: null };
   if (spec.toy === 'gift') return { name: spec.name, desc: spec.desc, kind: 'Gift ' + (found.indexOf(spec.gift) + 1) + ' of ' + GIFT_ORDER.length, kindId: 'gift', screen: null };
-  if (spec.toy && TIPS[spec.toy]) return { name: TIPS[spec.toy][0], desc: TIPS[spec.toy][1], screen: spec.toy === 'lamp' ? null : d.screenData.canvas };
-  if (spec.href) return { name: spec.name, desc: spec.desc || '', kind: spec.kind, screen: d.screenData.canvas, href: spec.href, external: spec.external };
+  if (spec.toy && TIPS[spec.toy]) return { name: TIPS[spec.toy][0], desc: TIPS[spec.toy][1], screen: spec.toy === 'lamp' ? null : d.screenData.canvas, action: TOY_ACTION[spec.toy] ? TOY_ACTION[spec.toy]() : '', toy: true };
+  if (spec.href) return { name: spec.name, desc: spec.desc || '', kind: spec.kind, screen: d.screenData.canvas, href: spec.href, external: spec.external, action: actionFor(spec), arrow: spec.external ? '\u2197' : '\u2192' };
   return null;
 }
 
@@ -1037,9 +1009,22 @@ function hidePeek() {
   peekFor = null;
 }
 
+// The card stays for a moment after the pointer leaves its device, and for as
+// long as the pointer is on the card, so you can reach it and press it.
+let held = null, heldAt = 0, onCard = false;
+const peekGo = peekEl ? peekEl.querySelector('.peek-go') : null;
+const peekLinks = peekEl ? peekEl.querySelector('.peek-links') : null;
+
 function updatePeek() {
   if (!peekEl) return;
-  const d = pinned || (lastPointer === 'mouse' && !(drag && drag.moved) ? hovered : null);
+  const nowMs = performance.now();
+  let d = pinned;
+  if (!d && lastPointer === 'mouse' && !(drag && drag.moved)) {
+    if (hovered && peekContent(hovered)) { held = hovered; heldAt = nowMs; }
+    if (held && devices.indexOf(held) === -1) held = null;
+    d = hovered || (held && (onCard || nowMs - heldAt < 260) ? held : null);
+    if (onCard && held) hovered = held;
+  }
   const info = d && peekContent(d);
   if (!info) { hidePeek(); return; }
   if (peekFor !== d) {
@@ -1062,11 +1047,37 @@ function updatePeek() {
       peekCanvas.width = 240;
       peekCanvas.height = Math.round(240 * info.screen.height / info.screen.width);
     }
+    if (peekLinks) {
+      peekLinks.hidden = !info.links;
+      peekLinks.innerHTML = '';
+      (info.links || []).forEach(function (l) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = l[0];
+        b.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (/^mailto:/.test(l[1])) window.location.href = l[1]; else window.open(l[1], '_blank', 'noopener');
+        });
+        peekLinks.appendChild(b);
+      });
+    }
     if (info.href) {
       peekEl.href = info.href;
       if (info.external) { peekEl.target = '_blank'; peekEl.rel = 'noopener'; } else { peekEl.removeAttribute('target'); }
     } else {
       peekEl.removeAttribute('href');
+    }
+  }
+  // The action line can change while the card is up (play / stop).
+  if (peekGo) {
+    const text = info.toy && TOY_ACTION[d.spec.toy] ? TOY_ACTION[d.spec.toy]() : (info.action || '');
+    if (peekGo.dataset.text !== text + (info.arrow || '')) {
+      peekGo.dataset.text = text + (info.arrow || '');
+      peekGo.hidden = !text;
+      peekGo.textContent = text;
+      if (info.arrow) { const i = document.createElement('i'); i.textContent = info.arrow; peekGo.appendChild(i); }
+      peekGo.classList.toggle('quiet', !!info.toy);
     }
   }
   // The live screen, animation and all.
@@ -1099,6 +1110,10 @@ function updatePeek() {
   const pick1 = options.find(function (o) { return o.ok; }) || options[0];
   const x = THREE.MathUtils.clamp(pick1.x, m, Math.max(m, vw - w - m));
   const y = THREE.MathUtils.clamp(pick1.y, m, Math.max(m, vh - h - m));
+  // A card that's just appearing starts in place; it doesn't fly in from
+  // wherever the last one was.
+  const fresh = !peekEl.classList.contains('on');
+  if (fresh) peekEl.style.transition = 'none';
   peekEl.dataset.side = pick1.side;
   peekEl.style.setProperty('--x', Math.round(x) + 'px');
   peekEl.style.setProperty('--y', Math.round(y) + 'px');
@@ -1106,6 +1121,7 @@ function updatePeek() {
   peekEl.style.setProperty('--ay', THREE.MathUtils.clamp(cy - y, 18, h - 18) + 'px');
   peekEl.style.setProperty('--ox', THREE.MathUtils.clamp(cx - x, 0, w) + 'px');
   peekEl.style.setProperty('--oy', pick1.side === 'below' ? '0%' : pick1.side === 'above' ? '100%' : '50%');
+  if (fresh) { void peekEl.offsetWidth; peekEl.style.transition = ''; }
   peekEl.classList.add('on');
 }
 
@@ -1120,9 +1136,14 @@ function tap(info, pointerType) {
 }
 
 if (peekEl) {
+  peekEl.addEventListener('mouseenter', function () { onCard = true; if (held) hovered = held; });
+  peekEl.addEventListener('mouseleave', function () { onCard = false; heldAt = performance.now(); hovered = null; });
   peekEl.addEventListener('click', function (e) {
-    // Toy cards are notes, not links.
-    if (!peekEl.getAttribute('href')) e.preventDefault();
+    if (peekEl.getAttribute('href')) return;
+    e.preventDefault();
+    // A toy's card does what the toy does.
+    const d = pinned || held;
+    if (d && d.spec.toy && e.target.closest('.peek-go')) openHit({ device: d });
   });
 }
 

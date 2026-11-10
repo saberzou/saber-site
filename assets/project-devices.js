@@ -3,6 +3,7 @@
 window.PROJECT_DEVICE = {
   'Movy': 'phone',
   'BingBang': 'pet',
+  'Bloomprint': 'bloomcam',
   'Sequence': 'digicam',
   'Tackie': 'candy',
   'Bubbly': 'pager',
@@ -35,7 +36,7 @@ window.PROJECT_DEVICE = {
    A device missing here is treated as MID_CM. */
 window.DEVICE_REAL_CM = {
   watch: 4, pet: 5, pager: 6, flip: 10, digicam: 10, pda: 12, candy: 12, musicplayer: 12,
-  dualscreen: 14, widehandheld: 14, cdplayer: 14, rangefinder: 14,
+  dualscreen: 14, widehandheld: 14, cdplayer: 14, rangefinder: 14, bloomcam: 16,
   handheld: 15, phone: 15, calculator: 15, camera: 15, printer: 15, gingerbread: 15, crystalball: 15, foldphone: 15,
   ereader: 17, camcorder: 20, radio: 20, headset: 20, clockradio: 25, console: 27, tablet: 28,
   learner: 30, present: 30, robotdog: 30, teddy: 30, snowman: 26, laptop: 33, macintosh: 35, scope: 35,

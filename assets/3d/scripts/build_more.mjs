@@ -162,7 +162,8 @@ function cyl(mat, r, len, pos, { axis = 'z', segs = 28, r2 } = {}) {
 }
 
 function ball(mat, r, pos, scale = [1, 1, 1]) {
-  const geo = new THREE.SphereGeometry(r, 20, 12);
+  // Enough segments that round things have a clean outline up close.
+  const geo = new THREE.SphereGeometry(r, r < 0.02 ? 16 : 30, r < 0.02 ? 10 : 18);
   geo.scale(...scale);
   add(geo, mat, pos);
 }
@@ -1654,6 +1655,67 @@ function buildTablet() {
   writeGlb('tablet');
 }
 
+function buildBloomCam() {
+  // Bloomprint's camera: a cream box camera with a flower in its lens, a
+  // style dial on top and a little print coming out.
+  reset();
+  const body = clay('Body', '#f1e9da', 0.5);
+  const band = clay('Band', '#e3d8c4', 0.55);
+  const bezel = clay('Bezel', '#1d1b19', 0.4);
+  const barrel = clay('Barrel', '#1d1b19', 0.35);
+  const rim = clay('Rim', '#f6f0e4', 0.3);
+  const petal = clay('Petal', '#e8641f', 0.5);
+  const heart = clay('Heart', '#f6ecd6', 0.5);
+  const orange = clay('Orange', '#e8641f', 0.45);
+  const brass = clay('Brass', '#c7a16a', 0.3, 0.6);
+  const paper = clay('Paper', '#fbf8f1', 0.7);
+  const w = 0.25, h = 0.34, d = 0.17;
+  slab(body, [w, h, d], [0, 0, 0], { corner: 0.034, bevel: 0.018 });
+  box(band, [w * 0.86, h * 0.9, 0.006], [0, h * 0.5, d / 2], { corner: 0.026, bevel: 0.002 });
+  // The finder screen up top.
+  box(bezel, [0.16, 0.105, 0.008], [0, h * 0.76, d / 2 + 0.003], { corner: 0.014, bevel: 0.002 });
+  glass(0.144, 0.09, [0, h * 0.76, d / 2 + 0.0075]);
+  // The lens, with a flower blooming in it.
+  const ly = h * 0.33, lz = d / 2;
+  cyl(rim, 0.078, 0.022, [0, ly, lz + 0.008], { segs: 44 });
+  cyl(barrel, 0.064, 0.03, [0, ly, lz + 0.014], { segs: 44 });
+  named('Bloom', [0, ly, lz + 0.03], () => {
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2 + Math.PI / 2;
+      ball(petal, 0.023, [Math.cos(a) * 0.03, ly + Math.sin(a) * 0.03, lz + 0.03], [1, 1, 0.3]);
+    }
+    ball(heart, 0.012, [0, ly, lz + 0.034], [1, 1, 0.5]);
+  });
+  cyl(orange, 0.011, 0.008, [w * 0.33, h * 0.1, lz + 0.003], { segs: 18 });
+  // On top: the style dial, the shutter, and a print on its way out.
+  named('Dial', [-0.07, h + 0.012, 0.02], () => {
+    cyl(rim, 0.03, 0.02, [-0.07, h + 0.01, 0.02], { axis: 'y', segs: 28 });
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      box(band, [0.004, 0.018, 0.004], [-0.07 + Math.cos(a) * 0.03, h + 0.01, 0.02 + Math.sin(a) * 0.03], { bevel: 0.001 });
+    }
+    box(orange, [0.006, 0.003, 0.02], [-0.07, h + 0.021, 0.02], { bevel: 0.001 });
+  });
+  cyl(brass, 0.018, 0.006, [0.075, h + 0.003, 0.03], { axis: 'y', segs: 22 });
+  cyl(orange, 0.013, 0.012, [0.075, h + 0.008, 0.03], { axis: 'y', segs: 20 });
+  box(bezel, [0.15, 0.01, 0.012], [0.0, h + 0.001, -0.045], { corner: 0.003, bevel: 0.002, rot: [-Math.PI / 2, 0, 0] });
+  named('Print', [0, h, -0.045], () => {
+    within({ pos: [0, h - 0.03, -0.045], rot: [0.1, 0, 0] }, () => {
+      slab(paper, [0.13, 0.13, 0.004], [0, 0, 0], { bevel: 0.001 });
+      // A little flower, drawn on the print.
+      for (let i = 0; i < 5; i++) {
+        const a = (i / 5) * Math.PI * 2 + Math.PI / 2;
+        ball(petal, 0.012, [Math.cos(a) * 0.016, 0.085 + Math.sin(a) * 0.016, 0.0028], [1, 1, 0.12]);
+      }
+      ball(heart, 0.006, [0, 0.085, 0.004], [1, 1, 0.3]);
+    });
+  });
+  // Strap lugs.
+  for (const x of [-w / 2 - 0.004, w / 2 + 0.004]) ring(brass, 0.011, 0.003, [x, h * 0.86, 0], { rot: [0, Math.PI / 2, 0], segs: 16 });
+  writeGlb('bloomcam');
+}
+
+buildBloomCam();
 buildFoldPhone();
 buildHeadset();
 buildRangefinder();

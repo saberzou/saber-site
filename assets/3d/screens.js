@@ -117,21 +117,23 @@ function drawNote(ctx, w, h, t, k) {
   ctx.globalAlpha = develop;
   ctx.fillStyle = '#161616';
   ctx.textBaseline = 'top';
-  ctx.font = '360 118px "Timeless Serif", Georgia, serif';
-  const im = "I’m ";
-  ctx.fillText(im, 86, 150);
-  const next = ctx.measureText(im).width;
-  ctx.font = 'italic 360 118px "Timeless Serif Italic", Georgia, serif';
-  ctx.fillText('Saber.', 86 + next, 150);
-  ctx.fillStyle = '#2a2c2f';
-  ctx.font = '360 52px "Timeless Serif", Georgia, serif';
-  wrap(ctx, 'I love making things. Apps, toys, little worlds.', 86, 320, w - 172, 68);
+  // Big enough to read from across the room.
+  ctx.font = '360 190px "Timeless Serif", Georgia, serif';
+  const im = "I\u2019m ";
+  ctx.fillText(im, 84, 120);
+  ctx.font = 'italic 360 190px "Timeless Serif Italic", Georgia, serif';
+  ctx.fillText('Saber.', 84, 320);
+  ctx.fillStyle = '#3a3c40';
+  ctx.font = '460 62px "Timeless Sans", sans-serif';
+  wrap(ctx, 'Designer and builder in Beijing.', 88, 600, w - 176, 84);
   ctx.globalAlpha = 1;
   ctx.fillStyle = '#161616';
-  ctx.font = '560 46px "Timeless Sans", sans-serif';
-  const y = h - 210;
-  drawLink(ctx, 'GitHub', 86, y);
-  drawLink(ctx, 'Email', 360, y);
+  ctx.font = '560 60px "Timeless Sans", sans-serif';
+  const y = h - 230;
+  // GitHub on the left half, Email on the right: proto.js opens whichever
+  // half of the bottom strip is pressed.
+  drawLink(ctx, 'GitHub', 88, y);
+  drawLink(ctx, 'Email', w / 2 + 40, y);
   if (k > 0) {
     // Warm sepia haze while it develops, then a white flash on top.
     ctx.globalAlpha = (1 - develop) * 0.55;
@@ -321,7 +323,7 @@ function drawSketch(ctx, w, h, t, k) {
 function drawLink(ctx, label, x, y) {
   ctx.fillText(label, x, y);
   const width = ctx.measureText(label).width;
-  ctx.fillRect(x, y + 54, width, 4);
+  ctx.fillRect(x, y + 72, width, 5);
 }
 
 // Screens at least this much wider than tall put the icon beside the name.

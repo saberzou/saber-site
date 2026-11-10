@@ -114,7 +114,7 @@
       el.setAttribute('data-chat', '');
       el.setAttribute('aria-label', 'Chat with Archer. A little guide who hangs out here.');
       el.tabIndex = -1;
-      el.innerHTML = shell(window.ARCHER_DEVICE, FISH) + '<span class="blurb">A little guide who hangs out here.</span>';
+      el.innerHTML = shell(window.ARCHER_DEVICE, FISH) + '<span class="cap">Archer</span><span class="blurb">A little guide who hangs out here.</span>';
     } else {
       var item = itemFor(c, r);
       var spec = deviceFor(c, r, item);
@@ -129,7 +129,7 @@
       }
       el.setAttribute('aria-label', item.name + '. ' + item.desc);
       el.tabIndex = -1;
-      el.innerHTML = shell(spec, workInner(item)) + '<span class="blurb">' + esc(item.desc) + '</span>';
+      el.innerHTML = shell(spec, workInner(item)) + '<span class="cap">' + esc(item.name) + '</span><span class="blurb">' + esc(item.desc) + '</span>';
     }
     el.style.left = (c * CELL) + 'px';
     el.style.top = (r * CELL) + 'px';

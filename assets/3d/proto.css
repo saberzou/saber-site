@@ -495,6 +495,41 @@ body.lamp-on .peek-text .peek-go.quiet { color: #b9b2a3; }
 body.lamp-on .peek-text .peek-go i { color: #ffb36b; }
 body.lamp-on .peek-links button { text-decoration-color: #ffb36b; }
 
+/* Project cards, sized to show the screen properly.
+   Side: a squarer screen at the left, the words beside it.
+   Stack: a wide screen across the top, the words beneath. */
+.peek[data-layout] { gap: 14px; }
+.peek[data-layout] .peek-screen { border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(22, 24, 28, 0.08); }
+.peek[data-layout] .peek-text { gap: 4px; }
+.peek[data-layout] .peek-text strong { font-size: 16px; letter-spacing: -0.01em; }
+.peek[data-layout] .peek-text span { font-size: 13.5px; line-height: 1.4; }
+.peek[data-layout] .peek-text .peek-go { margin-top: 8px; font-size: 12.5px; }
+
+.peek[data-layout="side"] {
+  align-items: stretch;
+  max-width: min(400px, calc(100vw - 24px));
+  padding: 12px 18px 12px 12px;
+  border-radius: 20px;
+}
+.peek[data-layout="side"] .peek-screen { width: 140px; align-self: center; }
+.peek[data-layout="side"] .peek-text { width: 196px; align-content: center; padding: 2px 0; }
+
+.peek[data-layout="stack"] {
+  flex-direction: column;
+  align-items: stretch;
+  width: min(328px, calc(100vw - 24px));
+  max-width: none;
+  padding: 12px 12px 16px;
+  border-radius: 20px;
+}
+.peek[data-layout="stack"] .peek-screen { width: 100%; }
+.peek[data-layout="stack"] .peek-text { padding: 0 6px; }
+
+@media (max-width: 640px) {
+  .peek[data-layout="side"] .peek-screen { width: 112px; }
+  .peek[data-layout="side"] .peek-text { width: auto; max-width: 190px; }
+}
+
 /* Keyboard focus lands on the card: give it a ring so it's unmistakable. */
 .peek.kb { outline: 2px solid #d8642c; outline-offset: 3px; }
 body.lamp-on .peek.kb { outline-color: #ffb36b; }

@@ -6,7 +6,7 @@ import { season, newYear } from './holiday.js?v=20';
 import { openWish } from './wish.js?v=21';
 
 // Bumped with each release so browsers fetch fresh files.
-const VERSION = '29';
+const VERSION = '30';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CELL_DESKTOP = 278;
@@ -983,7 +983,7 @@ function actionFor(spec) {
   if (spec.kind === 'iOS app') return 'See the app';
   if (/saberzou\.com/.test(spec.href)) return 'See the photos';
   if (/os\.html/.test(spec.href)) return 'Open the desktop';
-  return spec.external ? 'Open the site' : 'Open';
+  return 'Open the site';
 }
 const TOY_ACTION = {
   cassette: function () { return TAPE.playing ? 'Press to stop' : 'Press to play'; },
@@ -1043,10 +1043,18 @@ function updatePeek() {
       if (info.face) peekFace.src = info.face;
     }
     peekCanvas.hidden = !info.screen;
+    // Wide, thin screens sit across the top of the card with the words
+    // beneath; squarer ones sit beside the words. Either way, big enough
+    // to see what's on them.
+    let layout = '';
     if (info.screen) {
-      peekCanvas.width = 240;
-      peekCanvas.height = Math.round(240 * info.screen.height / info.screen.width);
+      const aspect = info.screen.width / info.screen.height;
+      layout = info.intro ? '' : aspect >= 1.9 ? 'stack' : 'side';
+      const px = layout === 'stack' ? 600 : 300;
+      peekCanvas.width = px;
+      peekCanvas.height = Math.round(px / aspect);
     }
+    if (layout) peekEl.dataset.layout = layout; else delete peekEl.dataset.layout;
     if (peekLinks) {
       peekLinks.hidden = !info.links;
       peekLinks.innerHTML = '';

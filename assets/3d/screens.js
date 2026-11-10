@@ -194,23 +194,30 @@ function drawTape(ctx, w, h, state, t, k) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(state.side || 'A', w * 0.09, h * 0.44);
-  // Title, as if written in pen.
+  // The counter always has its own corner, so the title never runs into it.
+  const counterFont = '400 ' + Math.round(h * 0.22) + 'px "Screen Pixel", ui-monospace, monospace';
+  ctx.font = counterFont;
+  const room = w * 0.95 - ctx.measureText('\u25B6 00:00').width - w * 0.04 - w * 0.2;
+  // Title, as if written in pen, shrunk to fit if it has to.
   ctx.fillStyle = '#2a2622';
-  ctx.font = 'italic 360 ' + Math.round(h * 0.34) + 'px "Timeless Serif Italic", Georgia, serif';
+  let size = Math.round(h * 0.32);
+  ctx.font = 'italic 360 ' + size + 'px "Timeless Serif Italic", Georgia, serif';
+  const tw = ctx.measureText(state.title || 'songs for wandering').width;
+  if (tw > room) { size = Math.floor(size * room / tw); ctx.font = 'italic 360 ' + size + 'px "Timeless Serif Italic", Georgia, serif'; }
   ctx.textAlign = 'left';
   ctx.fillText(state.title || 'songs for wandering', w * 0.2, h * 0.4);
   // Counter, or a nudge to press play.
-  ctx.font = '400 ' + Math.round(h * 0.26) + 'px "Screen Pixel", ui-monospace, monospace';
+  ctx.font = counterFont;
   ctx.textAlign = 'right';
   if (state.playing) {
     const sec = Math.floor(state.elapsed || 0);
     const mm = String(Math.floor(sec / 60)).padStart(2, '0');
     const ss = String(sec % 60).padStart(2, '0');
     ctx.fillStyle = '#d8642c';
-    ctx.fillText('\u25B6 ' + mm + ':' + ss, w * 0.97, h * 0.4);
+    ctx.fillText('\u25B6 ' + mm + ':' + ss, w * 0.95, h * 0.41);
   } else if (k > 0 && Math.floor(t * 2) % 2 === 0) {
     ctx.fillStyle = '#8a7f6c';
-    ctx.fillText('PRESS', w * 0.97, h * 0.4);
+    ctx.fillText('PRESS', w * 0.95, h * 0.41);
   }
   ctx.textAlign = 'left';
 }

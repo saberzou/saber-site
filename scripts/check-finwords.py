@@ -19,4 +19,4 @@ for p in root.glob('finwords/**/index.html'):
   if target.is_dir():target/= 'index.html'
   assert target.exists(),(p,link)
   if u.fragment and target==p:assert u.fragment in c.ids,(p,link)
-print('PASS: 9 static pages; local links, images, styles, language tags, unique anchors and one h1 per page')
+print('PASS: static pages; local links, images, styles, language tags, unique anchors and one h1 per page')

@@ -31,10 +31,8 @@ p{margin:0}
 .site nav a:hover{background:rgba(31,27,23,.06)}
 .site nav a[aria-current]{background:var(--ink);color:#fff}
 
-/* wordmark: the app's logo, the o is a marker dot */
-.wordmark{font:700 1em/1 var(--display);letter-spacing:-.045em;display:inline-flex;align-items:baseline}
-.wordmark i{display:inline-block;width:.46em;height:.46em;margin:0 .035em;border-radius:50%;background:var(--tomato);position:relative;align-self:baseline;top:.005em}
-.wordmark i::after{content:"";position:absolute;inset:34%;border-radius:50%;background:#fff}
+/* wordmark: the app's logo (geometric strokes; a and o in tomato) */
+svg.wordmark{display:block;height:1em;width:auto;overflow:visible}
 
 /* ---------- hero ---------- */
 .hero{position:relative;padding:120px 0 0;overflow:hidden;isolation:isolate}
@@ -181,9 +179,7 @@ section{position:relative}
 
 /* finale */
 .finale{background:var(--tomato);color:#fff;text-align:center;padding:clamp(90px,12vw,160px) 0;overflow:hidden}
-.finale .wordmark{font-size:clamp(80px,16vw,220px)}
-.finale .wordmark i{background:#fff}
-.finale .wordmark i::after{background:var(--tomato)}
+.finale h2{font-size:clamp(80px,16vw,200px);color:#fff;display:flex;justify-content:center}
 .finale p{font:600 clamp(18px,2vw,24px) var(--display);margin:18px auto 34px;max-width:28em}
 .finale .pill{background:#fff;color:var(--ink)}
 footer{padding:34px 0 46px;font-size:14px;color:var(--soft)}

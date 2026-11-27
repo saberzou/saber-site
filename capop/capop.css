@@ -36,7 +36,8 @@ p{margin:0}
 .home{min-height:100svh;display:flex;flex-direction:column;background:#fff;--wrap:min(1110px,calc(100vw - 48px))}
 .home-header{padding-block:28px}
 .home-header a{display:inline-block}
-.wordmark{width:132px}
+.wordmark{font:700 30px/1.15 var(--display);letter-spacing:-.045em;text-decoration:none}
+.wordmark span{color:#ff5a3c}
 .home main{flex:1}
 .intro,.desk-story{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(24px,5vw,74px)}
 .intro{padding-block:clamp(14px,3vh,40px) 0}

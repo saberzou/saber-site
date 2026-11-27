@@ -1,3 +1,4 @@
+@font-face{font-family:Unbounded;font-style:normal;font-weight:200 900;font-display:swap;src:url(assets/fonts/Unbounded-VariableFont_wght.ttf) format('truetype')}
 /* Capop — product page. Same materials as the app: warm paper, acrylic markers, bold printed books. */
 @font-face{font-family:Outfit;font-style:normal;font-weight:500 700;font-display:swap;src:url(assets/fonts/outfit-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:Outfit;font-style:normal;font-weight:500 700;font-display:swap;src:url(assets/fonts/outfit-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+20A0-20AB,U+20AD-20C4,U+2C60-2C7F,U+A720-A7FF}
@@ -5,13 +6,13 @@
 @font-face{font-family:'DM Sans';font-style:normal;font-weight:500 700;font-display:swap;src:url(assets/fonts/dm-sans-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+20A0-20AB,U+20AD-20C4,U+2C60-2C7F,U+A720-A7FF}
 
 :root{--paper:#f4efe6;--paper2:#ebe4d6;--ink:#1f1b17;--soft:#6d645a;--tomato:#f2442e;--night:#151318;--card:#fffdf8;
-  --display:Outfit,ui-rounded,system-ui,sans-serif;--body:'DM Sans',system-ui,sans-serif;--wrap:min(1180px,calc(100vw - 40px));color-scheme:light}
+  --display:Unbounded,Outfit,ui-rounded,system-ui,sans-serif;--body:'DM Sans',system-ui,sans-serif;--wrap:min(1180px,calc(100vw - 40px));color-scheme:light}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
 body{margin:0;background:var(--paper) url(assets/paper-grain.webp) 0 0/320px;color:var(--ink);font:500 17px/1.55 var(--body);overflow-x:clip}
 img{display:block;max-width:100%;height:auto}
 a{color:inherit}
-h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.025em;line-height:1.02;margin:0}
+h1,h2,h3{overflow-wrap:break-word;font-family:var(--display);font-weight:700;letter-spacing:-.025em;line-height:1.02;margin:0}
 p{margin:0}
 .skip{position:absolute;left:-999px;top:8px;background:var(--ink);color:#fff;padding:8px 14px;border-radius:99px;z-index:50}
 .skip:focus{left:12px}
@@ -31,15 +32,15 @@ p{margin:0}
 .site nav a:hover{background:rgba(31,27,23,.06)}
 .site nav a[aria-current]{background:var(--ink);color:#fff}
 
-/* wordmark: the app's logo (geometric strokes; a and o in tomato) */
-svg.wordmark{display:block;height:1em;width:auto;overflow:visible}
+/* The same geometric wordmark as the app, with only the o in tomato. */
+.wordmark{display:block;height:auto;width:min(3.5em,100%)}
 
 /* ---------- hero ---------- */
 .hero{position:relative;padding:120px 0 0;overflow:hidden;isolation:isolate}
 .hero::before{content:"";position:absolute;inset:0;z-index:-2;background:radial-gradient(60% 50% at 78% 38%,#ffe9c9 0,transparent 70%),radial-gradient(50% 40% at 10% 80%,#fde3dc 0,transparent 70%)}
-.hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px;align-items:center}
 .hero .brand{font-size:clamp(44px,6vw,72px);margin-bottom:26px}
-.hero h1{font-size:clamp(48px,7.2vw,104px);margin-bottom:24px}
+.hero h1{font-size:clamp(32px,5.3vw,76px);margin-bottom:24px}
 .hero h1 em{font-style:normal;color:var(--tomato)}
 .hero .lede{margin-bottom:30px}
 .cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
@@ -91,7 +92,7 @@ svg.wordmark{display:block;height:1em;width:auto;overflow:visible}
 section{position:relative}
 .band{padding:clamp(80px,11vw,150px) 0}
 .head{max-width:760px;margin-bottom:56px}
-.head h2{font-size:clamp(40px,5.4vw,76px);margin:14px 0 18px}
+.head h2{font-size:clamp(31px,4.6vw,64px);margin:14px 0 18px}
 
 /* line to colour */
 .paint .wrap{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,90px);align-items:center}
@@ -111,7 +112,7 @@ section{position:relative}
 
 /* sound */
 .sound{padding:clamp(60px,8vw,110px) 0;text-align:center}
-.sound h2{font-size:clamp(64px,12vw,180px);letter-spacing:-.05em;margin-bottom:30px;line-height:1.05}
+.sound h2{font-size:clamp(39px,9vw,142px);letter-spacing:-.05em;margin-bottom:30px;line-height:1.05}
 .sound h2 span{display:inline-block;color:var(--tomato);rotate:-4deg}
 .wave{display:flex;justify-content:center;align-items:center;gap:6px;height:110px;margin:34px auto 28px}
 .wave i{width:9px;height:30%;border-radius:9px;background:var(--c);animation:wv 1.6s ease-in-out infinite;animation-delay:calc(var(--i) * -90ms)}
@@ -141,7 +142,7 @@ section{position:relative}
 .cover{position:relative;aspect-ratio:1;border-radius:5px 12px 12px 5px;overflow:hidden;box-shadow:14px 22px 30px -14px rgba(60,30,10,.4),inset 6px 0 0 rgba(0,0,0,.1);transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
 .cover::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.2),rgba(255,255,255,.22) 3%,transparent 8%)}
 .vol:hover .cover{transform:translateY(-8px) rotate(-1.5deg)}
-.cover h3{position:absolute;inset:auto 0 50%;translate:0 50%;text-align:center;font-size:clamp(22px,2.2vw,28px);color:var(--ink);z-index:1;padding:0 12%}
+.cover h3{position:absolute;inset:auto 0 50%;translate:0 50%;text-align:center;font-size:clamp(17px,1.8vw,23px);color:var(--ink);z-index:1;padding:0 12%}
 .cover.dark h3{color:#fff2cf}
 .badge{position:absolute;right:-8px;top:-10px;z-index:2;width:64px;height:64px;display:grid;place-items:center;font:700 14px var(--display);color:#1f1b17;rotate:12deg}
 .badge::before{content:"";position:absolute;inset:0;background:#ffd93d;clip-path:polygon(50% 0,61% 12%,77% 7%,80% 23%,95% 27%,89% 42%,100% 55%,87% 64%,90% 80%,74% 81%,66% 96%,52% 88%,38% 98%,30% 84%,14% 85%,15% 69%,1% 60%,10% 46%,3% 31%,18% 25%,22% 9%,37% 13%);filter:drop-shadow(0 3px 3px rgba(0,0,0,.2))}
@@ -179,7 +180,8 @@ section{position:relative}
 
 /* finale */
 .finale{background:var(--tomato);color:#fff;text-align:center;padding:clamp(90px,12vw,160px) 0;overflow:hidden}
-.finale h2{font-size:clamp(80px,16vw,200px);color:#fff;display:flex;justify-content:center}
+.finale h2{display:flex;justify-content:center}
+.finale .wordmark{width:min(72vw,510px);padding:clamp(9px,1.5vw,22px) clamp(12px,2vw,30px);background:#fff2df;border-radius:clamp(16px,3vw,36px)}
 .finale p{font:600 clamp(18px,2vw,24px) var(--display);margin:18px auto 34px;max-width:28em}
 .finale .pill{background:#fff;color:var(--ink)}
 footer{padding:34px 0 46px;font-size:14px;color:var(--soft)}
@@ -187,7 +189,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 footer nav{display:flex;gap:18px}
 
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.paint h2,.records h2,.devices h2{font-size:clamp(38px,4.8vw,66px);margin:14px 0 18px}
+.paint h2,.records h2,.devices h2{font-size:clamp(30px,4vw,56px);margin:14px 0 18px}
 
 /* ---------- small screens ---------- */
 @media (max-width:860px){
@@ -210,7 +212,7 @@ footer nav{display:flex;gap:18px}
 /* ---------- support & privacy pages ---------- */
 .doc{padding:130px 0 80px}
 .doc .wrap{max-width:720px}
-.doc h1{font-size:clamp(42px,6vw,64px);margin:14px 0 22px}
+.doc h1{font-size:clamp(33px,5vw,57px);margin:14px 0 22px}
 .doc h2{font-size:24px;margin:38px 0 10px}
 .doc p{margin:0 0 14px;color:#3d3630}
 .doc a{color:#b3301d;text-underline-offset:.16em}
